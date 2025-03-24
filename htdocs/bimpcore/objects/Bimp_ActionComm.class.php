@@ -144,6 +144,11 @@ class Bimp_ActionComm extends BimpObject
 		return '';
 	}
 
+	public function getStatusProperty()
+	{
+		return '';
+	}
+
 	public function getCustomFilterValueLabel($field_name, $value)
 	{
 		switch ($field_name) {
@@ -212,7 +217,7 @@ class Bimp_ActionComm extends BimpObject
 	{
 		global $conf;
 		if ($this->isLoaded()) {
-			return $conf->agenda->multidir_output[$this->dol_object->entity].'/'.dol_sanitizeFileName($this->dol_object->ref);
+			return $conf->agenda->multidir_output[$this->dol_object->entity] . '/' . dol_sanitizeFileName($this->dol_object->ref);
 		} else {
 			echo 'NOT LOADED';
 			exit;
@@ -394,6 +399,29 @@ class Bimp_ActionComm extends BimpObject
 	}
 
 	// Rendus HTML:
+
+	public function renderHeaderStatusExtra()
+	{
+		return $this->displayState(true);
+	}
+
+	public function renderHeaderExtraLeft()
+	{
+		$html = '';
+
+		$html .= '<div>';
+		$html .= '<psan class="info" style="font-size: 14px">' . $this->displayDates(true) . '</span>';
+		$html .= '</div>';
+
+		$loc = $this->getData('location');
+		if ($loc) {
+			$html .= '<div>';
+			$html .= BimpRender::renderIcon('fas_map-marker-alt', 'iconLeft') . $loc;
+			$html .= '</div>';
+		}
+
+		return $html;
+	}
 
 	public function renderDateInput($field_name)
 	{

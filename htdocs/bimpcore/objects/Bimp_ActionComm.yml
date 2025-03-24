@@ -2,74 +2,75 @@ table: actioncomm
 primary: id
 icon: fas_calendar-check
 common_fields: 0
+controller: actioncomm
+entity_name: agenda
 
 header_btn:
     callback: getActionsButtons
-    
-entity_name: agenda
 
-controller: actioncomm
+header_edit_form: edit
 
-dol_object: 
-    instance: 
-        dol_object: 
+dol_object:
+    instance:
+        dol_object:
             module: comm/action
             file: actioncomm
             class: ActionComm
 
-nom_url: 
+nom_url:
     syntaxe: <label>
-    
-labels: 
+    modal_view: full
+
+labels:
     name: événement
 
-objects: 
-    user_action: 
+objects:
+    user_action:
         extends: user
-        instance: 
-            id_object: 
+        instance:
+            id_object:
                 field_value: fk_user_action
-                
-    user_create: 
+    
+    user_create:
         extends: user
-        instance: 
-            id_object: 
+        instance:
+            id_object:
                 field_value: fk_user_author
-                
-    user_update: 
+    
+    user_update:
         extends: user
-        instance: 
-            id_object: 
+        instance:
+            id_object:
                 field_value: fk_user_mod
                 
-#    user_done: 
-#        extends: user
-#        instance: 
-#            id_object: 
-#                field_value: fk_user_done
-                
-    societe: 
-        instance: 
-            id_object: 
+                #    user_done: 
+                #        extends: user
+                #        instance: 
+                #            id_object: 
+                #                field_value: fk_user_done
+    
+    societe:
+        instance:
+            id_object:
                 field_value: fk_soc
-                
-    contact: 
-        instance: 
-            id_object: 
+    
+    contact:
+        instance:
+            id_object:
                 field_value: fk_contact
-                
+    
     
     projet:
         relation: hasOne
         delete: 0
-        instance: 
-            dol_object: 
+        instance:
+            dol_object:
                 module: projet
                 file: project
                 class: Project
-            id_object: 
+            id_object:
                 field_value: fk_project
-                
+    
     files:
         relation: hasMany
         delete: 1
@@ -88,437 +89,455 @@ objects:
                 fields:
                     parent_module: bimpcore
                     parent_object_name: Bimp_ActionComm
-                    
+
 fields:
-    label: 
+    label:
         label: Libellé
         required: 1
-        
-    ref: 
+    
+    ref:
         label: Reférence
-        
-    ref_ext: 
+    
+    ref_ext:
         label: Ref. ext.
-        
-    code: 
+    
+    code:
         label: Code
-        
-    status: 
+    
+    status:
         label: Statut
         type: int
         default_value: 0
-        
-    fk_action: 
+    
+    fk_action:
         label: Type
         type: int
-        values: 
+        values:
             array: types
-            
-    datep: 
+    
+    datep:
         label: Date de début
         type: datetime
         depends_on: fulldayevent
         keep_new_value: 1
-        input: 
+        input:
             type: custom
-            content: 
-                callback: 
+            content:
+                callback:
                     method: renderDateInput
-                    params: 
+                    params:
                         - datep
-                        
+    
     durationp:
         label: Durée
         type: timer
-        input: 
+        input:
             type: timer
-        
-    datep2: 
+    
+    datep2:
         label: Date de fin
         type: datetime
         dol_prop: datef
         depends_on: fulldayevent
         keep_new_value: 1
-        input: 
+        input:
             type: custom
-            content: 
-                callback: 
+            content:
+                callback:
                     method: renderDateInput
-                    params: 
+                    params:
                         - datep2
-                        
-    datec: 
+    
+    datec:
         label: Créé le
         type: datetime
-        
-    fk_user_author: 
+    
+    fk_user_author:
         label: Créé par
         type: id_object
         dol_prop: authorid
         object: user_create
-        search: 
-            input: 
+        search:
+            input:
                 type: search_user
-                
-    fk_user_mod: 
+    
+    fk_user_mod:
         label: Modifié par
         type: id_object
         dol_prop: usermodid
         object: user_update
-        search: 
-            input: 
+        search:
+            input:
                 type: search_user
-    fk_user_action: 
+    fk_user_action:
         label: Assigné à
         type: id_object
         object: user_action
         dol_prop: userownerid
-        input: 
+        input:
             type: search_user
-    fk_soc: 
+    fk_soc:
         label: Tiers
         dol_prop: socid
         type: id_object
         object: societe
-        
-    fk_contact: 
+    
+    fk_contact:
         label: Contact(s)
         type: id_object
         object: contact
         dol_prop: contact_id
         depends_on: fk_soc
-        display_if: 
+        display_if:
             field_name: fk_soc
             hide_values: 0,''
-        input: 
+        input:
             type: select
-            options: 
-                callback: 
+            options:
+                callback:
                     method: getSocieteContactsArray
-                    params: 
-                        - field_value: fk_soc
+                    params:
+                        -   field_value: fk_soc
                         - 1
                         - ''
                         - 1
-        
-    fk_project: 
+    
+    fk_project:
         label: Projet
         type: id_object
         default_value: 0
         object: projet
-        input: 
+        input:
             type: search_projet
             include_empty: 1
-    fk_element: 
+    fk_element:
         label: ID élément
         type: id
         default_value: 0
         dol_prop: elementid
-        
-    elementtype: 
+    
+    elementtype:
         label: Type élément
-        
-    percent: 
+    
+    percent:
         label: Progression
         default_value: -1
         dol_prop: percentage
-        values: 
+        values:
             array: progressions
-        
-    priority: 
+    
+    priority:
         label: Priorité
         type: int
         default_value: 0
-        
-    fulldayevent: 
+    
+    fulldayevent:
         label: Evénement sur la(les) journée(s)
         type: bool
         default_value: 0
-        
-    location: 
+    
+    location:
         label: Lieu
-        
-    transparency: 
+    
+    transparency:
         label: Transparence
         type: int
         default_value: 0
         values:
             array: transparencies
-            
-    note: 
+    
+    note:
         label: Note
         type: html
         dol_prop: note_private
-            
-    email_msgid: 
+    
+    email_msgid:
         label: E-mail MSGID
-        
-    email_from: 
+    
+    email_from:
         label: Adresse e-mail envoyeur
-        
-    email_sender: 
+    
+    email_sender:
         label: Envoyeur e-mail
-        
-    email_to: 
+    
+    email_to:
         label: Adresse e-mail destinataire
-        
-    email_tocc: 
+    
+    email_tocc:
         label: E-mail cc
-        
-    email_tobcc: 
+    
+    email_tobcc:
         label: E-mail bcc
-        
-    email_subject: 
+    
+    email_subject:
         label: Sujet e-mail
-        
-    ef_conf: 
+    
+    ef_conf:
         label: Confidentiel
         dol_extra_field: 1
         type: bool
         default_value: 0
-        
-    resgsx: 
+    
+    resgsx:
         label: Réservation GSX
         dol_extra_field: 1
-                  
-forms: 
-    default: 
-        before_content: 
+
+forms:
+    default:
+        before_content:
             callback: renderDeleteButton
-        rows: 
-            type: 
+        rows:
+            type:
                 field: fk_action
                 required: 1
             link:
                 custom: 1
                 input_name: link
-                content: 
+                content:
                     callback: displayElement
                 label: Objet liée
                 edit: 0
-            label: 
+            label:
                 field: label
-            fullday: 
+            fullday:
                 field: fulldayevent
-            from: 
+            from:
                 field: datep
                 required: 1
-            to: 
+            to:
                 field: datep2
                 required: 1
-            users_assigned: 
+            users_assigned:
                 custom: 1
                 label: Evénement assigné à
                 input_name: users_assigned
-                input: 
+                input:
                     multiple: 1
                     type: search_user
-                    help: 
+                    help:
                         callback: displayExternalUsers
                 value:
                     callback: getUsersAssigned
-            usergroups_assigned: 
+            usergroups_assigned:
                 custom: 1
                 label: Assigner aux utilisateurs d'un ou plusieurs groupes
                 input_name: usergroups_assigned
-                input: 
+                input:
                     multiple: 1
                     type: select
-                    options: 
+                    options:
                         array: userGroups
                     help: Après enregistrement, tous les utilisateurs du groupe seront ajoutés au champ "Evénement assigné à"
-            occupied: 
+            occupied:
                 label: Disponibilité
                 field: transparency
-            location: 
+            location:
                 field: location
-            percent: 
+            percent:
                 field: percent
-            societe: 
+            societe:
                 label: Tiers concerné
                 field: fk_soc
             contacts_assigned:
                 custom: 1
                 label: Contact(s) tiers
                 input_name: contacts_assigned
-                input: 
+                input:
                     type: select
                     multiple: 1
-                    options: 
-                        callback: 
+                    options:
+                        callback:
                             method: getSocieteContactsArray
-                            params: 
-                                - field_value: fk_soc
+                            params:
+                                -   field_value: fk_soc
                                 - 1
                                 - ''
                                 - 1
                 depends_on: fk_soc
-                display_if: 
+                display_if:
                     field_name: fk_soc
                     hide_values: 0,
                 value:
                     callback: getContactsAssigned
             fk_project:
                 field: fk_project
-            note: 
+            note:
                 label: Description
                 field: note
-            confidentiel: 
+            confidentiel:
                 field: ef_conf
-                
     add:
         extends: default
     
-fields_tables: 
-    infos: 
+    edit:
+        extends: default
+        before_content: unset
+
+fields_tables:
+    infos:
         title: Infos
         icon: fas_info-circle
-        rows: 
-            - field: code
-            - field: label
-            - field: fk_action
-            - field: datep
-            - field: datep2
-            - label: Etat
-              value: 
-                  callback: displayState
-            - field: percent
-            - field: note
-            
-                
-    elements: 
+        rows:
+            -   field: fk_user_author
+                display: nom_url
+            -   field: fk_user_action
+                display: nom_url
+            -   field: code
+            -   field: label
+            -   field: fk_action
+            -   field: datep
+            -   field: datep2
+            -   label: Etat
+                value:
+                    callback: displayState
+            -   field: percent
+            -   field: note
+    
+    elements:
         title: Objets liés
         icon: fas_link
-        rows: 
-            - label: Elément
-              value: 
-                  callback: displayElement
-            - field: fk_soc
-              show: 
-                  field_value: fk_soc
-              display: card
-            - field: fk_contact
-              display: card
-              show: 
-                  field_value: fk_contact
-            - field: fk_user_author
-              display: nom_url
-            - field: fk_user_action
-              display: nom_url
-#            - field: fk_user_done
-#              display: nom_url
-              
-views: 
-    default: 
+        rows:
+            -   label: Objet lié
+                value:
+                    callback: displayElement
+            -   field: fk_soc
+                display: card
+            -   field: fk_contact
+                display: card
+
+views:
+    default:
+        rows:
+            -   cols:
+                    -   type: fields_table
+                        fields_table:
+                            name: infos
+                        col_lg: 6
+                        col_md: 6
+                    
+                    -   type: fields_table
+                        fields_table:
+                            name: elements
+                        col_lg: 6
+                        col_md: 6
+            -   cols:
+                    -   type: list
+                        list:
+                            name: default
+                            children: files
+    
+    full:
         rows:
             - cols: 
-                - type: fields_table
-                  fields_table: 
-                      name: infos
-                  col_lg: 6
-                  col_md: 6
-                  
-                - type: fields_table
-                  fields_table: 
-                      name: elements
-                  col_lg: 6
-                  col_md: 6
-            - cols: 
-                  - type: list
-                    list: 
-                        name: default
-                        children: files
-    
-filters: 
-    fk_user_author: 
+                  - type: object_header
+            -   cols:
+                    -   type: fields_table
+                        fields_table:
+                            name: infos
+                        col_lg: 6
+                        col_md: 6
+                    
+                    -   type: fields_table
+                        fields_table:
+                            name: elements
+                        col_lg: 6
+                        col_md: 6
+            -   cols:
+                    -   type: list
+                        list:
+                            name: default
+                            children: files
+
+filters:
+    fk_user_author:
         type: user
-    fk_user_action: 
+    fk_user_action:
         type: user
-#    fk_user_done: 
-#        type: user
-    propal: 
+    #    fk_user_done: 
+    #        type: user
+    propal:
         label: Proposition commerciale
         type: value
-        input: 
+        input:
             type: search_object
             object: propal
-    commande: 
+    commande:
         label: Commande
         type: value
-        input: 
+        input:
             type: search_object
             object: commande
-    facture: 
+    facture:
         label: Facture
         type: value
-        input: 
+        input:
             type: search_object
             object: facture
-                    
-filters_panels: 
-    default: 
-        filters: 
-            fk_action: 
-            propal: 
-            commande: 
-            facture: 
-            fk_soc: 
-            fk_contact: 
+
+filters_panels:
+    default:
+        filters:
+            fk_action:
+            propal:
+            commande:
+            facture:
+            fk_soc:
+            fk_contact:
             datep:
-            datep2: 
-            fk_user_author: 
+            datep2:
+            fk_user_author:
             fk_user_action:
-                
-    soc: 
+    
+    soc:
         extends: default
-        filters: 
+        filters:
             soc: unset
-           
-lists_cols: 
-    ref: 
+
+lists_cols:
+    ref:
         label: Réf
-        value: 
+        value:
             callback: getLink
     element:
         label: Elément lié
-        value: 
+        value:
             callback: displayElement
     link:
         label: Lien
-        value: 
-            callback: 
+        value:
+            callback:
                 method: getLinkedUrl
                 params:
                     - 1
-    state: 
+    state:
         label: Etat
-        value: 
+        value:
             callback: displayState
-            
-lists: 
-    default: 
+
+lists:
+    default:
         configurable: 1
         filters_panel: default
         sort_field: datep
         sort_way: desc
         n: 20
-        modal_view: default
+        modal_view: full
         page_btn: 1
         add_btn: 1
         add_form_name: add
         edit_btn: 1
-        cols: 
-            type: 
-            label: 
+        cols:
+            type:
+            label:
             datep:
-            datep2: 
-            fk_user_action: 
-            element: 
-            fk_soc: 
+            datep2:
+            fk_user_action:
+            element:
+            fk_soc:
             fk_contact:
-            state: 
-                
-    global: 
+            state:
+    
+    global:
         extends: default
         add_form_name: add
         add_btn: 1
@@ -534,30 +553,30 @@ lists:
             fk_soc:
             element:
             state:
-            
-        
-    soc: 
+    
+    
+    soc:
         extends: default
         filters_panel: soc
-        cols: 
+        cols:
             fk_soc: unset
-            
-    client: 
+    
+    client:
         extends: soc
         title: Evénements du client
-        
-    fourn: 
+    
+    fourn:
         extends: soc
         title: Evénements du fournisseur
     
     ficheInter:
         extends: default
-        list_filters: 
+        list_filters:
             callback:
                 method: getListFilters
                 params:
                     - ficheInter
         cols:
             element: unset
-    
+
 header_list_name: default

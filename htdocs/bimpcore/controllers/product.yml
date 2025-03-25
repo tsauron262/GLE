@@ -64,16 +64,14 @@ sections:
           - id: stock
             title: Stocks
             show: 
-                dol_conf: stock->enabled
+                callback: 
+                    object: product
+                    method: hasStock
             struct:
                 type: view
                 view:
                     object: product
                     name: stock
-            show: 
-                callback: 
-                    object: product
-                    method: isNotBundle
           - id: commercial
             title: Commercial
             show: 

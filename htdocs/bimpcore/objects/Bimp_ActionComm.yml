@@ -59,7 +59,6 @@ objects:
             id_object:
                 field_value: fk_contact
     
-    
     projet:
         relation: hasOne
         delete: 0
@@ -313,6 +312,7 @@ forms:
                 input_name: users_assigned
                 input:
                     multiple: 1
+                    sortable: 1
                     type: search_user
                     help:
                         callback: displayExternalUsers
@@ -368,7 +368,6 @@ forms:
                 field: ef_conf
     add:
         extends: default
-    
     edit:
         extends: default
         before_content: unset
@@ -382,6 +381,9 @@ fields_tables:
                 display: nom_url
             -   field: fk_user_action
                 display: nom_url
+            -   label: Assigné à
+                value:
+                    callback: displayUsersAssigned
             -   field: code
             -   field: label
             -   field: fk_action
@@ -554,7 +556,6 @@ lists:
             element:
             state:
     
-    
     soc:
         extends: default
         filters_panel: soc
@@ -578,5 +579,8 @@ lists:
                     - ficheInter
         cols:
             element: unset
+            
+    user: 
+        extends: default
 
 header_list_name: default

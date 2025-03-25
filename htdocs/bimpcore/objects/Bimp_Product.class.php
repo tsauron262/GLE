@@ -650,6 +650,18 @@ class Bimp_Product extends BimpObject
         return (int) (isset($conf->variants->enabled) && $conf->variants->enabled);
     }
 
+	public function hasStock()
+	{
+		global $conf;
+
+		if (!$conf->stock->enabled) {
+			return 0;
+		}
+
+		if ($this->isBundle()) {
+			return 0;
+		}
+	}
     // Getters array:
 
     public function getProductsArrayByType2($type2, $include_empty = true, $with_price = true)

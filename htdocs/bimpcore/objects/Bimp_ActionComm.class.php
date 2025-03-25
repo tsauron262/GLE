@@ -18,45 +18,6 @@ class Bimp_ActionComm extends BimpObject
 
 	// Droits users:
 
-	public function getRight($code)
-	{
-		global $user;
-
-		if ($user->rights->agenda->allactions->$code) {
-			return 1;
-		}
-
-		$usersAssigned = BimpTools::getPostFieldValue('users_assigned', $this->getUsersAssigned(), 'array');
-
-		if (!$this->isLoaded()) {
-			$idUserCreate = $user->id;
-			if (count($usersAssigned) != 1 || !in_array($user->id, $usersAssigned))//n'est pas l'utilisateur assignée, et na pas le droit de créer des action pour d'autres.
-			{
-				return false;
-			}
-		} else {
-			$idUserCreate = $this->getData('fk_user_author');
-		}
-
-		if ((($idUserCreate == $user->id) || (!$this->isLoaded() && count($usersAssigned) && in_array($user->id, $usersAssigned))) &&
-			$user->rights->agenda->myactions->$code) {
-			return 1;
-		}
-
-		return 0;
-	}
-
-	public function renderDolTabs()
-	{
-		global $langs;
-		require_once DOL_DOCUMENT_ROOT . '/core/lib/agenda.lib.php';
-
-		$paramnoaction = '';
-		$head = calendars_prepare_head($paramnoaction);
-
-		dol_fiche_head($head, "list", $langs->trans('Agenda'), 0, 'action');
-	}
-
 	public function canView()
 	{
 		//ne fonctionne pas
@@ -72,6 +33,20 @@ class Bimp_ActionComm extends BimpObject
 	public function canEdit()
 	{
 		return $this->getRight('create');
+	}
+
+	public function canSetAction($action)
+	{
+		global $user;
+		switch ($action) {
+			case 'done':
+				if ($this->isUserAssigned()) {
+					return 1;
+				}
+
+				return $this->canEdit();
+		}
+		return parent::canSetAction($action);
 	}
 
 	// Getters booléens:
@@ -91,6 +66,37 @@ class Bimp_ActionComm extends BimpObject
 	{
 //        return $this->getRight('delete');// pas de droits user ici
 		return 1;
+	}
+
+	public function isUserAssigned()
+	{
+		global $user;
+
+		if ($user->id == $this->getData('fk_user_action')) {
+			return 1;
+		}
+
+		foreach ($this->dol_object->userassigned as $userassigned) {
+			if ($user->id == $userassigned['id']) {
+				return 1;
+			}
+		}
+		return 0;
+	}
+
+	public function isActionAllowed($action, &$errors = array())
+	{
+		switch ($action) {
+			case 'done':
+				$percent = (int)$this->getData('percent');
+				if ($percent < 0 || $percent >= 100) {
+					$errors[] = 'Cet événement n\'est pas en attente d\'être terminé';
+					return 0;
+				}
+				return 1;
+		}
+
+		return parent::isActionAllowed($action, $errors);
 	}
 
 	// Getters array:
@@ -138,6 +144,34 @@ class Bimp_ActionComm extends BimpObject
 	}
 
 	// Getters params:
+
+	public function getRight($code)
+	{
+		global $user;
+
+		if ($user->rights->agenda->allactions->$code) {
+			return 1;
+		}
+
+		$usersAssigned = BimpTools::getPostFieldValue('users_assigned', $this->getUsersAssigned(), 'array');
+
+		if (!$this->isLoaded()) {
+			$idUserCreate = $user->id;
+			if (count($usersAssigned) != 1 || !in_array($user->id, $usersAssigned)) //n'est pas l'utilisateur assignée, et n'a pas le droit de créer des action pour d'autres.
+			{
+				return 0;
+			}
+		} else {
+			$idUserCreate = $this->getData('fk_user_author');
+		}
+
+		if ((($idUserCreate == $user->id) || (!$this->isLoaded() && count($usersAssigned) && in_array($user->id, $usersAssigned))) &&
+			$user->rights->agenda->myactions->$code) {
+			return 1;
+		}
+
+		return 0;
+	}
 
 	public function getRefProperty()
 	{
@@ -237,6 +271,23 @@ class Bimp_ActionComm extends BimpObject
 		$file = $this->id . '/' . $file_name;
 
 		return DOL_URL_ROOT . '/' . $page . '.php?modulepart=actions&entity=' . $this->dol_object->entity . '&file=' . urlencode($file);
+	}
+
+	public function getActionsButtons()
+	{
+		$buttons = array();
+
+		if ($this->isActionAllowed('done') && $this->canSetAction('done')) {
+			$buttons[] = array(
+				'label'   => 'Terminé',
+				'icon'    => 'fas_check',
+				'onclick' => $this->getJsActionOnclick('done', array(), array(
+					'confirm_msg' => 'Veuillez confirmer'
+				))
+			);
+		}
+
+		return $buttons;
 	}
 
 	// Getters données:
@@ -398,6 +449,43 @@ class Bimp_ActionComm extends BimpObject
 		return $html;
 	}
 
+	public function displayUsersAssigned()
+	{
+		$html = '';
+
+		if ($this->isLoaded()) {
+			$main_user = $this->getChildObject('user_action');
+			$users = $this->dol_object->userassigned;
+
+			if (BimpObject::objectLoaded($main_user)) {
+				if (!empty($users)) {
+					foreach ($users as $key => $u) {
+						if ($u['id'] == $main_user->id) {
+							unset($users[$key]);
+						}
+					}
+				}
+
+				$html .= (!empty($users) ? 'Principal : ' : '') . $main_user->getLink();
+
+				if (!empty($users)) {
+					$html .= '<br/><br/>' . 'Autres utilisateurs:<br/>';
+				}
+			}
+
+			if (!empty($users)) {
+				$html .= '<ul>';
+				foreach ($users as $user) {
+					$user_instance = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $user['id']);
+					$html .= '<li>' . $user_instance->getLink() . '</li>';
+				}
+				$html .= '</ul>';
+			}
+		}
+
+		return $html;
+	}
+
 	// Rendus HTML:
 
 	public function renderHeaderStatusExtra()
@@ -462,6 +550,33 @@ class Bimp_ActionComm extends BimpObject
 		}
 
 		return $html;
+	}
+
+	public function renderDolTabs()
+	{
+		global $langs;
+		require_once DOL_DOCUMENT_ROOT . '/core/lib/agenda.lib.php';
+
+		$paramnoaction = '';
+		$head = calendars_prepare_head($paramnoaction);
+
+		dol_fiche_head($head, "list", $langs->trans('Agenda'), 0, 'action');
+	}
+
+	// Actions:
+
+	public function actionDone($data, &$success = '')
+	{
+		$warnings = array();
+//		$success = 'Événément marqué terminé';
+
+		$this->set('percent', 100);
+		$errors = $this->update($warnings, true);
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
 	}
 
 	// Overrides:
@@ -662,47 +777,7 @@ class Bimp_ActionComm extends BimpObject
 			)
 		);
 
-		$filters = array(
-			'a.fk_user_action'   => $id_user,
-			'or_todo'            => array(
-				'or' => array(
-					'and_no_percent' => array(
-						'and_fields' => array(
-							'a.percent' => array(
-								'operator' => '<',
-								'value'    => 0
-							),
-							'or_date'   => array(
-								'or' => array(
-									'a.datep'  => array(
-										'operator' => '>=',
-										'value'    => $date_now . ' 00:00:00'
-									),
-									'a.datep2' => array(
-										'operator' => '>=',
-										'value'    => $date_now . ' 00:00:00'
-									)
-								)
-							)
-						)
-					),
-					'a.percent'      => array(
-						'and' => array(
-							array(
-								'operator' => '>=',
-								'value'    => 0
-							),
-							array(
-								'operator' => '<',
-								'value'    => 100
-							)
-						)
-
-					)
-				)
-			),
-			'ac_type.user_notif' => 1
-		);
+		$filters = array();
 
 		if ($tms) {
 			$filters['a.tms'] = array(
@@ -710,6 +785,56 @@ class Bimp_ActionComm extends BimpObject
 				'value'    => $tms
 			);
 		}
+
+		$filters['ac_type.user_notif'] = 1;
+
+		$filters['or_user'] = array(
+			'or' => array(
+				'a.fk_user_action'   => $id_user,
+				'(SELECT COUNT(acr.rowid) FROM ' . MAIN_DB_PREFIX . 'actioncomm_resources acr WHERE acr.fk_actioncomm = a.id AND acr.fk_element = ' . $id_user . ' AND acr.element_type = \'user\')' => array(
+					'operator' => '>',
+					'value'    => 0
+				)
+			)
+		);
+
+		$filters['or_todo'] = array(
+			'or' => array(
+				'and_no_percent' => array(
+					'and_fields' => array(
+						'a.percent' => array(
+							'operator' => '<',
+							'value'    => 0
+						),
+						'or_date'   => array(
+							'or' => array(
+								'a.datep'  => array(
+									'operator' => '>=',
+									'value'    => $date_now . ' 00:00:00'
+								),
+								'a.datep2' => array(
+									'operator' => '>=',
+									'value'    => $date_now . ' 00:00:00'
+								)
+							)
+						)
+					)
+				),
+				'a.percent'      => array(
+					'and' => array(
+						array(
+							'operator' => '>=',
+							'value'    => 0
+						),
+						array(
+							'operator' => '<',
+							'value'    => 100
+						)
+					)
+
+				)
+			)
+		);
 
 		if (!empty($options['excluded_events'])) {
 			$filters['a.id'] = array(
@@ -763,7 +888,8 @@ class Bimp_ActionComm extends BimpObject
 				'today'    => $today,
 				'state'    => $ac->displayState(true),
 				'lieu'     => $ac->getData('location'),
-				'desc'     => $ac->getData('note')
+				'desc'     => $ac->getData('note'),
+				'close_btn' => (int) ($ac->isActionAllowed('done') && $ac->canSetAction('done'))
 			);
 		}
 

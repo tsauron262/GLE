@@ -27,30 +27,42 @@ objects:
                         method: getData
                         params:
                             - rowid
-    
+
 fields:
     fournisseur: unset
     code_compta: unset
     shopid:
         label: Shop ID
+        extrafields: client_rdc
+        extra: 1
         
     date_der_contact:
         label: Dernier contact
         type: date
+        extrafields: client_rdc
+        extra: 1
     date_debut_prospect:
         label: Début prospection
         type: date
+        extrafields: client_rdc
+        extra: 1
     date_ouverture:
         label: Ouverture
         type: date
+        extrafields: client_rdc
+        extra: 1
     fk_priorite:
         label: Priorité
+        extrafields: client_rdc
+        extra: 1
         values:
             array:
                 callback: 
                     method: getPriorities
     fk_statut_rdc:
         label: Prospection
+        extrafields: client_rdc
+        extra: 1
         values:
             array: statusRdc
     date_changement_statut_rdc:
@@ -67,6 +79,8 @@ fields:
                     method: getSourcesRdc                   
     contrefacon:
         label: Suspition de contrefaçon
+        extrafields: client_rdc
+        extra: 1
         type: bool
         
     fk_group_rdc:

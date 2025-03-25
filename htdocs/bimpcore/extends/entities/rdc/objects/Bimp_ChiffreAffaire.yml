@@ -10,7 +10,6 @@ labels:
 parent_module: bimpcore
 parent_object: 
     callback: 
-        method: getObjectParentName
 parent_id_property:
     callback: 
         method: getParent_IdProperty
@@ -50,9 +49,9 @@ fields:
             array:
                 callback:
                     method: getTypesObjetsRdc
-#    ca:
-#        label: Chiffre d'Affaire
-#        type: money
+    ca:
+        label: Chiffre d'Affaire
+        type: money
         
     fk_category:
         label: Catégorie CA
@@ -100,8 +99,6 @@ lists:
     default:
         title: liste des chiffres d'affaire
         n: 10
-        add_form_name: default
-        add_btn: 1
         cols:
             fk_category:
             ca:

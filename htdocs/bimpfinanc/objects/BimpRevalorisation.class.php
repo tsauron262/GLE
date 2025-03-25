@@ -8,6 +8,7 @@ class BimpRevalorisation extends BimpObject
 	const STATUS_ATT_EQUIPMENTS = 20;
 	const STATUS_ACCEPTED = 1;
 	const STATUS_REFUSED = 2;
+	const STATUS_NOT_APPLICABLE = 3;
 
 	public static $status_list = array(
 		0  => array('label' => 'En Attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
@@ -15,6 +16,7 @@ class BimpRevalorisation extends BimpObject
 		20 => array('label' => 'Attente équipements', 'icon' => 'fas_pause-circle', 'classes' => array('warning')),
 		1  => array('label' => 'Acceptée', 'icon' => 'fas_check', 'classes' => array('success')),
 		2  => array('label' => 'Refusée', 'icon' => 'fas_times', 'classes' => array('danger')),
+		3  => array('label' => 'Non applcable (commande hors ERP)', 'icon' => 'fas_times', 'classes' => array('info')),
 	);
 	public static $types = array(
 		'crt'            => 'CRT',
@@ -95,6 +97,7 @@ class BimpRevalorisation extends BimpObject
 			case 'cancelProcess':
 				switch ((int) $this->getData('status')) {
 					case 2:
+					case 3:
 						return 1;
 
 					case 1:
@@ -566,16 +569,22 @@ class BimpRevalorisation extends BimpObject
 					);
 				}
 			} elseif ($this->isActionAllowed('cancelProcess') && $this->canSetAction('cancelProcess')) {
-				$label = 'Annuler ';
-				switch ((int) $this->getData('status')) {
-					case 1:
-						$label .= 'l\'acceptation';
-						break;
+				$status = (int) $this->getData('status');
+				if ($status == 3) {
+					$label = 'Remettre en attente';
+				} else {
+					$label = 'Annuler ';
+					switch ($status) {
+						case 1:
+							$label .= 'l\'acceptation';
+							break;
 
-					case 2:
-						$label .= 'le refus';
-						break;
+						case 2:
+							$label .= 'le refus';
+							break;
+					}
 				}
+
 				$buttons[] = array(
 					'label'   => $label,
 					'icon'    => 'fas_undo',
@@ -742,9 +751,55 @@ class BimpRevalorisation extends BimpObject
 
 	public function checkSerials($update = false, &$nb_ok = 0)
 	{
+		$errors = array();
 		$type = $this->getData('type');
+		$status = (int) $this->getData('status');
+
 		if (!in_array($type, array('applecare', 'fac_ac'))) {
 			return array();
+		}
+
+		if ($type == 'fac_ac' && $status == self::STATUS_ATT_EQUIPMENTS) {
+			$not_applicable = false;
+			/** @var Bimp_FactureLine $fac_line */
+			$fac_line = $this->getChildObject('facture_line');
+
+			if (BimpObject::objectLoaded($fac_line)) {
+				if (preg_match('/^.+Ref CF : (CF[^ <]+)$/', $fac_line->desc, $matches)) {
+					$cf = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', array('ref' => $matches[1]));
+
+					if (BimpObject::objectLoaded($cf)) {
+						if (stripos($cf->getData('libelle'), 'STORES') !== false) {
+							$not_applicable = true;
+						} elseif (preg_match('/^.+Ref BR: ([^ <]+)$/', $fac_line->desc, $matches2)) {
+							/** @var BL_CommandeFournReception $br */
+							$br = BimpCache::findBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', array(
+								'ref' => $matches2[1],
+								'id_commande_fourn' => $cf->id
+							));
+
+							if (BimpObject::objectLoaded($br) && (int) $br->getData('stock_out')) {
+								$not_applicable = true;
+							}
+						}
+					}
+				}
+
+				if ($not_applicable) {
+					$nb_ok++;
+					$this->set('status', self::STATUS_NOT_APPLICABLE);
+
+					if ($update && $this->isLoaded()) {
+						if ($this->db->update($this->getTable(), array(
+								'status'     => $status
+							), 'id = ' . $this->id) <= 0) {
+							$errors[] = 'Echec de la mise à jour - ' . $this->db->err();
+						}
+					}
+
+					return $errors;
+				}
+			}
 		}
 
 		$serials = $this->getData('serial');
@@ -753,7 +808,6 @@ class BimpRevalorisation extends BimpObject
 			return array();
 		}
 
-		$errors = array();
 		$serials = str_replace(array(',', ';', "\n", "\t"), array(' ', ' ', ' ', ' '), $serials);
 		$serials = explode(' ', $serials);
 
@@ -818,8 +872,7 @@ class BimpRevalorisation extends BimpObject
 			}
 		}
 
-		$status = (int) $this->getData('status');
-		if ($this->getData('type') === 'applecare') {
+		if ($type === 'applecare') {
 			if ($status == 20 && count($equipments) == (int) $this->getData('qty')) {
 				$status = 0;
 			} elseif ($status == 0) {

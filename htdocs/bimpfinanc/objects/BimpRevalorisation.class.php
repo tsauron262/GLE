@@ -1343,7 +1343,7 @@ class BimpRevalorisation extends BimpObject
 				'value'    => ''
 			),
 			'status' => array(
-				'not_in' => array(1, 2)
+				'not_in' => array(1, 2, 3)
 			)
 		);
 

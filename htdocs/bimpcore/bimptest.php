@@ -35,6 +35,15 @@ if (!$user->admin) {
 //
 //echo '<pre>' . print_r($errors, 1) . '</pre>';
 
+$html = '<b>AC+for For Headphones AirPods Pro</b><br/>Ref BR: 8197083734<br/>Ref CF : CFB2301-28889<br/>Montant initial HT : 39,00 EUR';
+
+if (preg_match('/^.+Ref CF : (CF[^<]+).*$/', $html, $matches)) {
+	echo 'OK';
+	echo '<pre>' . print_r($matches, 1) . '</pre>';
+} else {
+	echo 'KO';
+}
+
 echo '<br/>FIN';
 echo '</body></html>';
 

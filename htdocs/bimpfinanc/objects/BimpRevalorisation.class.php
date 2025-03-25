@@ -769,7 +769,7 @@ class BimpRevalorisation extends BimpObject
 			$fac_line = $this->getChildObject('facture_line');
 
 			if (BimpObject::objectLoaded($fac_line)) {
-				if (preg_match('/^.+Ref CF : (CF[^ <]+)$/', $fac_line->desc, $matches)) {
+				if (preg_match('/^.+Ref CF : (CF[^ <]+).*$/', $fac_line->desc, $matches)) {
 					if ($user->login == 'f.martinez') {
 						echo 'SEARCH : '.$matches[1].'<br/>';
 					}
@@ -779,7 +779,7 @@ class BimpRevalorisation extends BimpObject
 						echo 'FOUND #' . $cf->id .'<br/>';
 						if (stripos($cf->getData('libelle'), 'STORES') !== false) {
 							$not_applicable = true;
-						} elseif (preg_match('/^.+Ref BR: ([^ <]+)$/', $fac_line->desc, $matches2)) {
+						} elseif (preg_match('/^.+Ref BR: ([^ <]+).*$/', $fac_line->desc, $matches2)) {
 							/** @var BL_CommandeFournReception $br */
 							$br = BimpCache::findBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', array(
 								'ref'               => $matches2[1],

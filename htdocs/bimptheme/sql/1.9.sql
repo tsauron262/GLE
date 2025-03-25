@@ -1,1 +1,1 @@
-ALTER TABLE `llx_menu` ADD `synchronised` tinyint(1) NOT NULL DEFAULT 1;
+ALTER TABLE `llx_menu` ADD COLUMN IF NOT EXISTS `synchronised` tinyint(1) NOT NULL DEFAULT 1;

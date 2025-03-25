@@ -9256,7 +9256,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		if (isset($params['title']) && (string) $params['title']) {
 			$js .= '\'' . htmlentities($params['title']) . '\'';
 		} else {
-			$js .= '\'Liste des ' . htmlentities($this->getLabel('name_plur')) . '\'';
+			$js .= '\'Liste des ' . htmlentities(addslashes($this->getLabel('name_plur'))) . '\'';
 		}
 		$js .= ', ';
 

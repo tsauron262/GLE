@@ -806,6 +806,10 @@ class Bimp_Menu extends BimpObject
 					$bdb = BimpCache::getBdb();
 					$bdb->db->begin();
 
+                                        $bimpthemeVersion = BimpCore::getConf('module_version_bimptheme');
+                                        if($bimpthemeVersion < 1.9)
+                                            $bdb->execute ('ALTER TABLE `llx_menu` ADD COLUMN IF NOT EXISTS `synchronised` tinyint(1) NOT NULL DEFAULT 1;');
+                                        
 					if ($bdb->delete('menu', 'menu_handler = \'bimptheme\' AND synchronised = 1') <= 0) {
 						$errors[] = 'Echec de la suppression des éléments actuels du menu bimptheme';
 					} else {

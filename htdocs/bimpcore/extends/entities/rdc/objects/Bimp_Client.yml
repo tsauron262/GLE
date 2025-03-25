@@ -19,6 +19,14 @@ objects:
         delete: 1
         instance:
             bimp_object: Bimp_ChiffreAffaire
+        list:
+            filters:
+                type_obj: 0
+                id_obj:
+                    callback:
+                        method: getData
+                        params:
+                            - rowid
     
 fields:
     fournisseur: unset
@@ -44,13 +52,11 @@ fields:
     fk_statut_rdc:
         label: Prospection
         values:
-            array:
-                callback: 
-                    method: getStatutsRdc
+            array: statusRdc
     date_changement_statut_rdc:
         label: Changement de statut
         type: date
-    delai_ouv:
+    delai_ouverture:
         label: Délai ouverture
         type: number
     fk_source_rdc:
@@ -123,7 +129,7 @@ fields_tables:
                         - BD
             - field: fk_statut_rdc
             - field: date_changement_statut_rdc
-            - field: delai_ouv
+            - field: delai_ouverture
             - field: fk_source_rdc
             - field: contrefacon
             - field: fk_group_rdc

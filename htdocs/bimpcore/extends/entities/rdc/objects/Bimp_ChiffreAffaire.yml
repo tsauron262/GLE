@@ -10,9 +10,7 @@ labels:
 parent_module: bimpcore
 parent_object: 
     callback: 
-        method: getParentObject
-        params:
-            - type_obj
+        method: getObjectParentName
 parent_id_property:
     callback: 
         method: getParent_IdProperty
@@ -28,20 +26,33 @@ objects:
                 module: bimpcore
                 name: Bimp_ChiffreAffaire
                 
+    parent_obj:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpcore
+                name:
+                    callback:
+                        method: getObjectParentName
+                        params:
+                            - type_obj
+
 fields:
-    id_objet:
+    id_obj:
         label: ID Objet
-        type: number
-    
+        object: parent_obj
+        type: id_object
+        depends_on: type_obj
     type_obj:
         label: Type
         values:
             array:
                 callback:
                     method: getTypesObjetsRdc
-    ca:
-        label: Chiffre d'Affaire
-        type: money
+#    ca:
+#        label: Chiffre d'Affaire
+#        type: money
         
     fk_category:
         label: Catégorie CA
@@ -59,6 +70,29 @@ fields:
     debut_period:
         label: Début Période
         type: date
+        depends_on: fk_period
+        input:
+            format: 
+                callback:
+                    method: getParamsPeriode
+        
+forms:
+    default:
+        rows:
+            id_obj:
+                field: id_obj
+                hidden: 1
+            type_obj:
+                field: type_obj
+                hidden: 1
+            fk_category:
+                field: fk_category
+            ca:
+                field: ca
+            fk_period:
+                field: fk_period
+            debut_period:
+                field: debut_period
     
 
 
@@ -66,8 +100,9 @@ lists:
     default:
         title: liste des chiffres d'affaire
         n: 10
+        add_form_name: default
+        add_btn: 1
         cols:
-            type_obj:
             fk_category:
             ca:
             fk_period:

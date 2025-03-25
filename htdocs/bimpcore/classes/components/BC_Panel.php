@@ -47,7 +47,7 @@ class BC_Panel extends BimpComponent
 
         $this->content_only = (int) $content_only;
         $this->level = $level;
-        $this->identifier = $object->object_name . '_' . ($name ? $name . '_' : '') . static::$type;
+        $this->identifier = $object->object_name . '_' . ($name ? $name . '_' : '') . static::$type.randomPassword(10);
 
         if (BimpObject::objectLoaded($object)) {
             $this->identifier .= '_' . $object->id;
@@ -92,7 +92,7 @@ class BC_Panel extends BimpComponent
         if (!(int) $this->params['show']) {
             return '';
         }
-        
+
         global $current_bc;
         if (!is_object($current_bc)) {
             $current_bc = null;
@@ -161,7 +161,7 @@ class BC_Panel extends BimpComponent
                     } else {
                         $content .= $value;
                     }
-                    
+
 //                    echo '<pre>';print_r($defs);
 //                    echo '</pre>'.$param_name.' '. get_class($this);
                     $content .= '"/>';
@@ -177,7 +177,7 @@ class BC_Panel extends BimpComponent
                 $content .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result" style="display: none"></div>';
             else
                 $content .= '<div class="ajaxResultContainerSousForm" id="' . $this->identifier . '_result" style="display: none"></div>';
-            
+
             $content .= '</div>';
 
             if ($this->params['after_content']) {

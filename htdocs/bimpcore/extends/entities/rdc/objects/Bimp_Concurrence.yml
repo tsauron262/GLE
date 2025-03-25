@@ -26,7 +26,11 @@ fields:
         required: 1
     site:
         label: Site
-        type: url
+        display_name: url
+        displays:
+            default:
+                type: callback
+                method: displayUrl
     fk_soc:
         label: Société
     
@@ -44,6 +48,8 @@ lists:
         n: 3
         add_form_name: default
         add_btn_label: Ajouter un concurrent
+        extra_btn:
+            callback: getListExtraButtons
         edit_btn: 1
         edit_form: default
         delete_btn: 1

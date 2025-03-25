@@ -2,6 +2,27 @@
 
 class Bimp_Client_ExtEntity extends Bimp_Client
 {
+	public static $statusRdc = array(
+		0 => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
+		1 => array('label' => 'Prospection: demande entrante'),
+		2 => array('label' => 'Prospection: lead identifié'),
+		3 => array('label' => 'Prospection: prise de contact'),
+		4 => array('label' => 'Prospection: contact et présentation ok'),
+		5 => array('label' => 'Prospect KO'),
+		6 => array('label' => 'KYC en cours'),
+		7 => array('label' => 'MANGOPAY en cours'),
+		8 => array('label' => 'En attente onboarding catalogue'),
+		9 => array('label' => 'Onboarding catalogue KO'),
+		10 => array('label' => 'Onboarding catalogue OK'),
+		11 => array('label' => 'Live'),
+		12 => array('label' => 'Résilié'),
+		13 => array('label' => 'Suspendu'),
+		14 => array('label' => 'Fermé')
+);
+//self::BS_SAV_RESERVED          => array('label' => 'Réservé par le client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
+//self::BS_SAV_CANCELED_BY_CUST  => array('label' => 'Annulé par le client', 'icon' => 'fas_times', 'classes' => array('danger')),
+//self::BS_SAV_CANCELED_BY_USER  => array('label' => 'Annulé par utilisateur', 'icon' => 'fas_times', 'classes' => array('danger')),
+
 	public static $statut_rdc_live = 11;
 	public static $statut_rdc_prospect_array = array(1, 2, 3, 4);
 
@@ -98,8 +119,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 		$statuts_rdc = BimpCache::getStatuts_rdc();
 
-		if (isset(self::$actions_selon_statut_rdc[$this->getData('fk_statut_rdc')])) {
-			foreach (self::$actions_selon_statut_rdc[$this->getData('fk_statut_rdc')] as $statut) {
+		$statu = $this->getData('fk_statut_rdc');
+		if($statu == 0)
+			$statu = 1;
+		if (isset(self::$actions_selon_statut_rdc[$statu])) {
+			foreach (self::$actions_selon_statut_rdc[$statu] as $statut) {
 				$listGroup_allowed = self::$group_allowed_actions[$statut];
 				$user_in_group = false;
 				foreach ($listGroup_allowed as $group) {
@@ -161,6 +185,10 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function isUserInGroup($g)
 	{
 		global $user;
+		/*todo a voir si on garde*/
+		if($user->admin)
+			return 1;
+
 		$id_group = BimpCore::getConf('id_user_group_' . $g);
 		$groups = $this->db->getRow('usergroup_user', 'fk_user = ' . $user->id . ' AND fk_usergroup = ' . $id_group , array('rowid'), 'array');
 		if($groups)

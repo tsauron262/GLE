@@ -814,6 +814,10 @@ class BimpRevalorisation extends BimpObject
 								'status' => $status
 							), 'id = ' . $this->id) <= 0) {
 							$errors[] = 'Echec de la mise à jour - ' . $this->db->err();
+						} else {
+							if ($user->login == 'f.martinez') {
+								echo 'UPL OK <br/>';
+							}
 						}
 					}
 

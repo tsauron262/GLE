@@ -761,28 +761,28 @@ class BimpRevalorisation extends BimpObject
 		}
 
 		if ($type == 'fac_ac' && in_array($status, array(self::STATUS_ATTENTE, self::STATUS_ATT_EQUIPMENTS))) {
-			if ($user->login == 'f.martinez') {
-				echo 'ICI<br/>';
-			}
+//			if ($user->login == 'f.martinez') {
+//				echo 'ICI<br/>';
+//			}
 			$not_applicable = false;
 			/** @var Bimp_FactureLine $fac_line */
 			$fac_line = $this->getChildObject('facture_line');
 
 			if (BimpObject::objectLoaded($fac_line)) {
 				if (preg_match('/^.+Ref CF : (CF[^ <]+).*$/', $fac_line->desc, $matches)) {
-					if ($user->login == 'f.martinez') {
-						echo 'SEARCH : ' . $matches[1] . '<br/>';
-					}
+//					if ($user->login == 'f.martinez') {
+//						echo 'SEARCH : ' . $matches[1] . '<br/>';
+//					}
 					$cf = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', array('ref' => $matches[1]));
 
 					if (BimpObject::objectLoaded($cf)) {
-						if ($user->login == 'f.martinez') {
-							echo 'FOUND #' . $cf->id . '<br/>';
-						}
+//						if ($user->login == 'f.martinez') {
+//							echo 'FOUND #' . $cf->id . '<br/>';
+//						}
 						if (stripos($cf->getData('libelle'), 'STORES') !== false) {
-							if ($user->login == 'f.martinez') {
-								echo 'NOT APPL. <br/>';
-							}
+//							if ($user->login == 'f.martinez') {
+//								echo 'NOT APPL. <br/>';
+//							}
 							$not_applicable = true;
 						} elseif (preg_match('/^.+Ref BR: ([^ <]+).*$/', $fac_line->desc, $matches2)) {
 							/** @var BL_CommandeFournReception $br */
@@ -792,15 +792,11 @@ class BimpRevalorisation extends BimpObject
 							));
 
 							if (BimpObject::objectLoaded($br) && (int) $br->getData('stock_out')) {
-								if ($user->login == 'f.martinez') {
-									echo 'NOT APPL. BR <br/>';
-								}
+//								if ($user->login == 'f.martinez') {
+//									echo 'NOT APPL. BR <br/>';
+//								}
 								$not_applicable = true;
 							}
-						}
-					} else {
-						if ($user->login == 'f.martinez') {
-							echo 'NOT FOUD <br/>';
 						}
 					}
 				}
@@ -811,13 +807,9 @@ class BimpRevalorisation extends BimpObject
 
 					if ($update && $this->isLoaded()) {
 						if ($this->db->update($this->getTable(), array(
-								'status' => $status
+								'status' => self::STATUS_NOT_APPLICABLE
 							), 'id = ' . $this->id) <= 0) {
 							$errors[] = 'Echec de la mise à jour - ' . $this->db->err();
-						} else {
-							if ($user->login == 'f.martinez') {
-								echo 'UPL OK <br/>';
-							}
 						}
 					}
 

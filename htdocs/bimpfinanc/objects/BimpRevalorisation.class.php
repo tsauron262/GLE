@@ -835,16 +835,16 @@ class BimpRevalorisation extends BimpObject
 				$where .= ' OR concat("S", serial) = \'' . $serial . '\'';
 			}
 
-			if ($user->login == 'f.martinez') {
-				echo 'CHECK : ' . $serial .' (' . $where . ')=> ';
-			}
+//			if ($user->login == 'f.martinez') {
+//				echo 'CHECK : ' . $serial .' (' . $where . ')=> ';
+//			}
 
 			$id_eq = (int) $this->db->getValue('be_equipment', 'id', $where);
 
 			if ($id_eq) {
-				if ($user->login == 'f.martinez') {
-					echo 'OK #' . $id_eq.'<br/>';
-				}
+//				if ($user->login == 'f.martinez') {
+//					echo 'OK #' . $id_eq.'<br/>';
+//				}
 
 				$where = 'equipments LIKE \'%[' . $id_eq . ']%\' AND type = \'' . $type . '\'';
 
@@ -869,9 +869,9 @@ class BimpRevalorisation extends BimpObject
 						}
 					}
 					$errors[] = $msg;
-					if ($user->login == 'f.martinez') {
-						echo $msg;
-					}
+//					if ($user->login == 'f.martinez') {
+//						echo $msg;
+//					}
 					continue;
 				}
 
@@ -880,9 +880,9 @@ class BimpRevalorisation extends BimpObject
 					$equipments[] = $id_eq;
 				}
 			} else {
-				if ($user->login == 'f.martinez') {
-					echo 'KO<br/>';
-				}
+//				if ($user->login == 'f.martinez') {
+//					echo 'KO<br/>';
+//				}
 				$new_serials[] = $serial;
 			}
 		}

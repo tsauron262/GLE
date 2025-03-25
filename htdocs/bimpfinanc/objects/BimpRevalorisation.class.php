@@ -869,7 +869,9 @@ class BimpRevalorisation extends BimpObject
 						}
 					}
 					$errors[] = $msg;
-					echo $msg;
+					if ($user->login == 'f.martinez') {
+						echo $msg;
+					}
 					continue;
 				}
 
@@ -878,6 +880,9 @@ class BimpRevalorisation extends BimpObject
 					$equipments[] = $id_eq;
 				}
 			} else {
+				if ($user->login == 'f.martinez') {
+					echo 'KO<br/>';
+				}
 				$new_serials[] = $serial;
 			}
 		}

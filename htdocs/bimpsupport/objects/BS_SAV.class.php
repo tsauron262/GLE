@@ -6353,9 +6353,9 @@ ORDER BY a.val_max DESC");
 								} else {
 									if ($current_status < self::BS_SAV_FERME) {
 										if ($not_restituted) {
-											$stock_errors = $product->correctStocks($id_entrepot, (int) $line->qty, Bimp_Product::STOCK_OUT, $codemove . 'NOT_RESTITUTED_LN' . $line->id, 'Non restitution ' . $this->getRef(), 'sav', (int) $this->id);
+											$stock_errors = $product->correctStocks($id_entrepot, $line->qty, Bimp_Product::STOCK_OUT, $codemove . 'NOT_RESTITUTED_LN' . $line->id, 'Non restitution ' . $this->getRef(), 'sav', (int) $this->id);
 										} else {
-											$stock_errors = $product->correctStocks($id_entrepot, (int) $line->qty, Bimp_Product::STOCK_OUT, $codemove . 'LN' . $line->id, 'Vente ' . $this->getRef(), 'sav', (int) $this->id);
+											$stock_errors = $product->correctStocks($id_entrepot, $line->qty, Bimp_Product::STOCK_OUT, $codemove . 'LN' . $line->id, 'Vente ' . $this->getRef(), 'sav', (int) $this->id);
 										}
 
 										if (count($stock_errors)) {
@@ -7144,7 +7144,7 @@ ORDER BY a.val_max DESC");
 									}
 								} else {
 									if ($status !== self::BS_SAV_FERME) { // Si fermé stocks déjà sortis.
-										$stock_errors = $product->correctStocks($id_entrepot, (int) $line->qty, Bimp_Product::STOCK_OUT, 'SAV_' . $this->id . '_NOT_RESTITUTED_LN' . $propal_line->id, 'Non restitution ' . $this->getRef(), 'sav', (int) $this->id);
+										$stock_errors = $product->correctStocks($id_entrepot, $line->qty, Bimp_Product::STOCK_OUT, 'SAV_' . $this->id . '_NOT_RESTITUTED_LN' . $propal_line->id, 'Non restitution ' . $this->getRef(), 'sav', (int) $this->id);
 										if (count($stock_errors)) {
 											$errors[] = BimpTools::getMsgFromArray($stock_errors);
 										}

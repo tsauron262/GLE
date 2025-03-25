@@ -751,6 +751,7 @@ class BimpRevalorisation extends BimpObject
 
 	public function checkSerials($update = false, &$nb_ok = 0)
 	{
+		global $user;
 		$errors = array();
 		$type = $this->getData('type');
 		$status = (int) $this->getData('status');
@@ -774,7 +775,7 @@ class BimpRevalorisation extends BimpObject
 						} elseif (preg_match('/^.+Ref BR: ([^ <]+)$/', $fac_line->desc, $matches2)) {
 							/** @var BL_CommandeFournReception $br */
 							$br = BimpCache::findBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', array(
-								'ref' => $matches2[1],
+								'ref'               => $matches2[1],
 								'id_commande_fourn' => $cf->id
 							));
 
@@ -791,7 +792,7 @@ class BimpRevalorisation extends BimpObject
 
 					if ($update && $this->isLoaded()) {
 						if ($this->db->update($this->getTable(), array(
-								'status'     => $status
+								'status' => $status
 							), 'id = ' . $this->id) <= 0) {
 							$errors[] = 'Echec de la mise à jour - ' . $this->db->err();
 						}
@@ -834,9 +835,17 @@ class BimpRevalorisation extends BimpObject
 				$where .= ' OR concat("S", serial) = \'' . $serial . '\'';
 			}
 
+			if ($user->login == 'f.martinez') {
+				echo 'CHECK : ' . $serial .' => ';
+			}
+
 			$id_eq = (int) $this->db->getValue('be_equipment', 'id', $where);
 
 			if ($id_eq) {
+				if ($user->login == 'f.martinez') {
+					echo 'OK #' . $id_eq.'<br/>';
+				}
+
 				$where = 'equipments LIKE \'%[' . $id_eq . ']%\' AND type = \'' . $type . '\'';
 
 				if ($this->isLoaded()) {
@@ -860,6 +869,7 @@ class BimpRevalorisation extends BimpObject
 						}
 					}
 					$errors[] = $msg;
+					echo $msg;
 					continue;
 				}
 

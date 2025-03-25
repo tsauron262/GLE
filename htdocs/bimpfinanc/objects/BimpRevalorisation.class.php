@@ -771,13 +771,18 @@ class BimpRevalorisation extends BimpObject
 			if (BimpObject::objectLoaded($fac_line)) {
 				if (preg_match('/^.+Ref CF : (CF[^ <]+).*$/', $fac_line->desc, $matches)) {
 					if ($user->login == 'f.martinez') {
-						echo 'SEARCH : '.$matches[1].'<br/>';
+						echo 'SEARCH : ' . $matches[1] . '<br/>';
 					}
 					$cf = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', array('ref' => $matches[1]));
 
 					if (BimpObject::objectLoaded($cf)) {
-						echo 'FOUND #' . $cf->id .'<br/>';
+						if ($user->login == 'f.martinez') {
+							echo 'FOUND #' . $cf->id . '<br/>';
+						}
 						if (stripos($cf->getData('libelle'), 'STORES') !== false) {
+							if ($user->login == 'f.martinez') {
+								echo 'NOT APPL. <br/>';
+							}
 							$not_applicable = true;
 						} elseif (preg_match('/^.+Ref BR: ([^ <]+).*$/', $fac_line->desc, $matches2)) {
 							/** @var BL_CommandeFournReception $br */
@@ -787,11 +792,16 @@ class BimpRevalorisation extends BimpObject
 							));
 
 							if (BimpObject::objectLoaded($br) && (int) $br->getData('stock_out')) {
+								if ($user->login == 'f.martinez') {
+									echo 'NOT APPL. BR <br/>';
+								}
 								$not_applicable = true;
 							}
 						}
 					} else {
-						echo 'NOT FOUD <br/>';
+						if ($user->login == 'f.martinez') {
+							echo 'NOT FOUD <br/>';
+						}
 					}
 				}
 

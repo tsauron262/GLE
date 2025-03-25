@@ -760,7 +760,7 @@ class BimpRevalorisation extends BimpObject
 			return array();
 		}
 
-		if ($type == 'fac_ac' && $status == self::STATUS_ATT_EQUIPMENTS) {
+		if ($type == 'fac_ac' && in_array($status, array(self::STATUS_ATTENTE, self::STATUS_ATT_EQUIPMENTS))) {
 			if ($user->login == 'f.martinez') {
 				echo 'ICI<br/>';
 			}

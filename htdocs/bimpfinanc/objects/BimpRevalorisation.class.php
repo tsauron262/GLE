@@ -836,7 +836,7 @@ class BimpRevalorisation extends BimpObject
 			}
 
 			if ($user->login == 'f.martinez') {
-				echo 'CHECK : ' . $serial .' => ';
+				echo 'CHECK : ' . $serial .' (' . $where . ')=> ';
 			}
 
 			$id_eq = (int) $this->db->getValue('be_equipment', 'id', $where);

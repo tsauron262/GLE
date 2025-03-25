@@ -12,22 +12,22 @@
  * @author tijean
  */
 class ActionsBimpbimp {
-    
-    
+
+
     function formObjectOptions($parameters, &$object, &$action, $hookmanager){
         global $langs;
         if($object->element == "contact")
 		echo '<script>'. file_get_contents(DOL_DOCUMENT_ROOT."/bimpbimp/js/contact.js").'</script>';
     }
-    
+
     function sendMail($parameters, &$object, &$action, $hookmanager){
         global $db;
-        $tabDomainValid = array('bimp.fr', 'ldlc.com', 'bimp-groupe.net');
+        $tabDomainValid = array('bimp.fr', 'ldlc.com', 'bimp-groupe.net', 'rueducommerce.fr');
         if ($object->sendmode == 'smtps' && !in_array($object->smtps->getFrom('host'), $tabDomainValid))
         {
             $add = $object->smtps->getFrom('user')."@".$object->smtps->getFrom('host');
             if($add != '' && stripos($add, '@') !== false && strlen($add) > 5){
-                $sql = $db->query("SELECT u.email, ue.alias FROM `llx_user` u, llx_user_extrafields ue WHERE u.rowid = ue.fk_object  
+                $sql = $db->query("SELECT u.email, ue.alias FROM `llx_user` u, llx_user_extrafields ue WHERE u.rowid = ue.fk_object
     AND (u.email = '".$add."' || ue.alias LIKE '%".$add."%')");
                 while($ln = $db->fetch_object($sql)){
                     $mails = explode(",", $ln->alias);
@@ -48,7 +48,7 @@ class ActionsBimpbimp {
                     }
                 }
             }
-            
+
             $this->error = "Adresse d'envoie non bimp ".$add." !";
             dol_syslog("Tentative d'envoie de mail non bimp : ".$add);
             return -1;

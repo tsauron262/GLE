@@ -761,28 +761,16 @@ class BimpRevalorisation extends BimpObject
 		}
 
 		if ($type == 'fac_ac' && in_array($status, array(self::STATUS_ATTENTE, self::STATUS_ATT_EQUIPMENTS))) {
-//			if ($user->login == 'f.martinez') {
-//				echo 'ICI<br/>';
-//			}
 			$not_applicable = false;
 			/** @var Bimp_FactureLine $fac_line */
 			$fac_line = $this->getChildObject('facture_line');
 
 			if (BimpObject::objectLoaded($fac_line)) {
 				if (preg_match('/^.+Ref CF : (CF[^ <]+).*$/', $fac_line->desc, $matches)) {
-//					if ($user->login == 'f.martinez') {
-//						echo 'SEARCH : ' . $matches[1] . '<br/>';
-//					}
 					$cf = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', array('ref' => $matches[1]));
 
 					if (BimpObject::objectLoaded($cf)) {
-//						if ($user->login == 'f.martinez') {
-//							echo 'FOUND #' . $cf->id . '<br/>';
-//						}
 						if (stripos($cf->getData('libelle'), 'STORES') !== false) {
-//							if ($user->login == 'f.martinez') {
-//								echo 'NOT APPL. <br/>';
-//							}
 							$not_applicable = true;
 						} elseif (preg_match('/^.+Ref BR: ([^ <]+).*$/', $fac_line->desc, $matches2)) {
 							/** @var BL_CommandeFournReception $br */
@@ -792,9 +780,6 @@ class BimpRevalorisation extends BimpObject
 							));
 
 							if (BimpObject::objectLoaded($br) && (int) $br->getData('stock_out')) {
-//								if ($user->login == 'f.martinez') {
-//									echo 'NOT APPL. BR <br/>';
-//								}
 								$not_applicable = true;
 							}
 						}
@@ -850,17 +835,9 @@ class BimpRevalorisation extends BimpObject
 				$where .= ' OR concat("S", serial) = \'' . $serial . '\'';
 			}
 
-//			if ($user->login == 'f.martinez') {
-//				echo 'CHECK : ' . $serial .' (' . $where . ')=> ';
-//			}
-
 			$id_eq = (int) $this->db->getValue('be_equipment', 'id', $where);
 
 			if ($id_eq) {
-//				if ($user->login == 'f.martinez') {
-//					echo 'OK #' . $id_eq.'<br/>';
-//				}
-
 				$where = 'equipments LIKE \'%[' . $id_eq . ']%\' AND type = \'' . $type . '\'';
 
 				if ($this->isLoaded()) {
@@ -884,9 +861,6 @@ class BimpRevalorisation extends BimpObject
 						}
 					}
 					$errors[] = $msg;
-//					if ($user->login == 'f.martinez') {
-//						echo $msg;
-//					}
 					continue;
 				}
 
@@ -895,9 +869,6 @@ class BimpRevalorisation extends BimpObject
 					$equipments[] = $id_eq;
 				}
 			} else {
-//				if ($user->login == 'f.martinez') {
-//					echo 'KO<br/>';
-//				}
 				$new_serials[] = $serial;
 			}
 		}

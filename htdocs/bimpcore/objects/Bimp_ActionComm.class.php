@@ -641,8 +641,8 @@ class Bimp_ActionComm extends BimpObject
 
 			case 'done':
 				$list->params['title'] = 'Mes événements  terminés';
-				$list->addFieldFilterValue('or_percent', array(
-					'or_done' => array(
+				$list->addFieldFilterValue('or_done', array(
+					'or' => array(
 						'and_no_percent' => array(
 							'and_fields' => array(
 								'a.percent' => array(
@@ -669,10 +669,11 @@ class Bimp_ActionComm extends BimpObject
 
 			default:
 				unset($list);
-				return '';
+				return BimpRender::renderAlerts('Type de liste invalide : ' . $type, 'danger');
 		}
 
 		global $user;
+		$list->addIdentifierSuffix($type);
 		$list->addFieldFilterValue('or_user', array(
 			'or' => array(
 				'a.fk_user_action'                                                                                                                                                                    => $user->id,

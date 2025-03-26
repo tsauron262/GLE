@@ -15,7 +15,7 @@ class user_agendaController extends BimpController
 				array(
 					'id' => 'user_events_todo',
 					'title' => 'À faire ou à venir',
-					'icon' => 'fas_hourglass-half',
+					'icon' => 'fas_hourglass-start',
 					'content' => $ac->renderUserEventsList('todo')
 				),
 				array(

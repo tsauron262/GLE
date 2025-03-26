@@ -1279,8 +1279,8 @@ class Bimp_User extends BimpObject
 			if ($userMessage['params']['type_metier'] != $type_metier) {
 				continue;
 			}
-			$required = BimpCore::getConf('userMessages__' . $code . '__required', $userMessage['params']['required'], 1);
-			$msg_active = BimpCore::getConf('userMessages__' . $code . '__msgActive', $userMessage['params']['active'], 1);
+			$required = BimpCore::getConf('userMessages__' . $code . '__required', $userMessage['params']['required']);
+			$msg_active = BimpCore::getConf('userMessages__' . $code . '__msgActive', $userMessage['params']['active']);
 			$abonner = ($this->getUserParamValue('userMessages__' . $code . '__abonner') != '' ? $this->getUserParamValue('userMessages__' . $code . '__abonner', 1) : 'yes');
 
 			if (!$msg_active) {

@@ -751,7 +751,7 @@ class BimpUserMsg
 		'canal_diffusion'    => 'email',
 		'def_abo'            => 1,
 		'type_metier'        => 'metier',
-		'check_availability' => 1,
+		'check_availability' => 0,
 		'allow_delegations'  => 1,
 		'allow_superior'     => 0,
 		'allow_default'      => 0

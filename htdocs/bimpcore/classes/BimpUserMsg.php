@@ -1093,7 +1093,7 @@ class BimpUserMsg
 						$errors[] = 'Echec de l\'envoi du message par e-mail';
 					}
 				} else {
-					$errors[] = 'Aucun destinataire trouvé pour le message "' . $code . '"';
+					BimpCore::addlog('Message utilisateur "' . $code . '" non envoyé (aucun destinataire)', 3, 'email', (is_a($obj, 'BimpObject') ? $obj : ''));
 				}
 			}
 

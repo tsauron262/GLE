@@ -2530,7 +2530,7 @@ class BC_Vente extends BimpObject
                     $product = $article->getChildObject('product');
                     $label = 'Vente #' . $this->id;
                     $code = $codemove . '_ART' . (int) $article->id;
-                    $stock_errors = $product->correctStocks($id_entrepot, (int) $article->getData('qty'), Bimp_Product::STOCK_OUT, $code, $label, 'vente_caisse', (int) $this->id);
+                    $stock_errors = $product->correctStocks($id_entrepot, $article->getData('qty'), Bimp_Product::STOCK_OUT, $code, $label, 'vente_caisse', (int) $this->id);
                     if (count($stock_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($stock_errors);
                     }
@@ -2587,9 +2587,9 @@ class BC_Vente extends BimpObject
                         $code = $codemove . '_RET' . (int) $return->id;
 
                         if ((int) $return->getData('defective')) {
-                            $stock_errors = $product->correctStocks($id_defective_entrepot, (int) $return->getData('qty'), Bimp_Product::STOCK_IN, $code, $label, 'vente_caisse', (int) $this->id);
+                            $stock_errors = $product->correctStocks($id_defective_entrepot, $return->getData('qty'), Bimp_Product::STOCK_IN, $code, $label, 'vente_caisse', (int) $this->id);
                         } else {
-                            $stock_errors = $product->correctStocks($id_entrepot, (int) $return->getData('qty'), Bimp_Product::STOCK_IN, $code, $label, 'vente_caisse', (int) $this->id);
+                            $stock_errors = $product->correctStocks($id_entrepot, $return->getData('qty'), Bimp_Product::STOCK_IN, $code, $label, 'vente_caisse', (int) $this->id);
                         }
 
                         if (count($stock_errors)) {

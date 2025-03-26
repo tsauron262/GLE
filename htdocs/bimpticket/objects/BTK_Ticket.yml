@@ -1,0 +1,200 @@
+table: btk_ticket
+controller: ticket
+icon: far_file-alt
+
+nom_url:
+    syntaxe: <ref>
+
+header_list_name: default
+header_btn:
+    callback: getHeaderButtons
+
+list_page_url:
+    controller: index
+    url_params:
+        tab: default
+
+labels:
+    name: ticket
+
+objects:
+    user_assigned:
+        extends: user
+        instance:
+            id_object:
+                field_value: id_user_assigned
+    
+    files:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        
+        list:
+            filters:
+                parent_module: bimpticket
+                parent_object_name: BTK_Ticket
+        
+        add_form:
+            name: upload
+            values:
+                fields:
+                    parent_module: bimpticket
+                    parent_object_name: BTK_Ticket
+
+fields:
+    #    ref:
+    #        label: Référence
+    status:
+        label: Statut
+        type: int
+        values:
+            array: status_list
+        default_value: 0
+    type:
+        label: Type
+        type: int
+        values:
+            array: types
+        default_value: 0
+    sujet:
+        label: Sujet ticket
+        type: html
+        required: 1
+        hashtags: 1
+    id_client:
+        label: Client
+        type: id_object
+        object: client
+        create_form: client_light
+        input:
+            card: default
+    id_contact:
+        label: Contact
+        type: id_object
+        object: contact
+        depends_on: id_client
+        display_if:
+            field_name: id_client
+            hide_values: 0,
+        create_form: default
+        edit_form: default
+        create_form_values:
+            fields:
+                fk_soc:
+                    field_value: id_client
+        input:
+            type: select
+            options:
+                array: clientContacts
+        search:
+            input:
+                type: search_object
+    id_user_assigned:
+        label: Attribué à
+        type: id_object
+        object: user_assigned
+        input:
+            type: search_user
+        default_value:
+            prop:
+                name: id
+                object:
+                    global: user
+    date_closed:
+        label: Date de clôture
+        type: date
+    delai_resolution:
+        label: Délai de résolution (en jours)
+        type: int
+        default_value: 0
+
+forms:
+    default:
+        rows:
+            -   field: id_user_assigned
+            -   field: type
+            -   field: id_client
+            -   field: id_contact
+            -   field: sujet
+
+fields_tables:
+    infos:
+        title: Informations
+        icon: info-circle
+        rows:
+            -   field: type
+            -   field: sujet
+    
+    client_infos:
+        title: Infos client
+        icon: info-circle
+        rows:
+            -   field: id_client
+                display: card
+            -   field: id_contact
+                display: card
+
+views:
+    default:
+        rows:
+            -   cols:
+                    -   type: object_header
+            -   cols:
+                    -   type: fields_table
+                        fields_table:
+                            name: infos
+                        col_lg: 6
+                        col_md: 6
+                    
+                    -   type: fields_table
+                        fields_table:
+                            name: client_infos
+                        col_lg: 6
+                        col_md: 6
+            -   cols:
+                    -   type: list
+                        list:
+                            name: default
+                            children: files
+            -   cols:
+                    -   type: custom
+                        custom:
+                            callback: renderNotesList
+
+filters_panels:
+    default:
+        filters:
+            id_client:
+            status:
+            id_user_assigned:
+            date_create:
+
+lists:
+    default:
+        title: Tickets
+        configurable: 1
+        checkboxes: 1
+        filters_panel: default
+        bulk_actions:
+            -   label: supprimer les tickets sélectionnés
+                icon: fas_trash-alt
+                onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        add_btn_label: Nouveau ticket
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        page_btn: 1
+        modal_view: default
+        cols:
+            id:
+            #            ref:
+            status:
+            sujet:
+            date_create:
+            id_client:
+            id_user_assigned:

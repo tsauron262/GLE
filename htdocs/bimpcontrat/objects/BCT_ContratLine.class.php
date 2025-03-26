@@ -5798,6 +5798,8 @@ class BCT_ContratLine extends BimpObject
 					if ((int) $fac_ended !== (int) $this->getData('fac_ended')) {
 						$this->updateField('fac_ended', (int) $fac_ended);
 						$infos[] = 'Facturations terminées';
+					} else {
+						$infos[] = 'Facturation en cours';
 					}
 
 					// Vérif achats terminés:
@@ -5814,27 +5816,33 @@ class BCT_ContratLine extends BimpObject
 					if ((int) $achat_ended !== (int) $this->getData('achat_ended')) {
 						$this->updateField('achat_ended', (int) $achat_ended);
 						$infos[] = 'Achats terminés';
+					} else {
+						$infos[] = 'Achats en cours';
 					}
 
-					if ($fac_ended && $achat_ended && $date_fin < date('Y-m-d') . ' 00:00:00') {
-						$all_children_closed = true;
+					if ($fac_ended && $achat_ended) {
+						if ($date_fin < date('Y-m-d') . ' 00:00:00') {
+							$all_children_closed = true;
 
-						$lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
-							'id_parent_line'     => $this->id,
-							'linked_object_name' => array('bundle', 'bundleCorrect')
-						));
-						if (!empty($lines)) {
-							foreach ($lines as $line) {
-								$line->checkStatus();
-								if ((int) $line->getData('statut') > 0 && (int) $line->getData('statut') < self::STATUS_CLOSED) {
-									$all_children_closed = false;
-									break;
+							$lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
+								'id_parent_line'     => $this->id,
+								'linked_object_name' => array('bundle', 'bundleCorrect')
+							));
+							if (!empty($lines)) {
+								foreach ($lines as $line) {
+									$line->checkStatus();
+									if ((int) $line->getData('statut') > 0 && (int) $line->getData('statut') < self::STATUS_CLOSED) {
+										$all_children_closed = false;
+										break;
+									}
 								}
 							}
-						}
 
-						if ($all_children_closed) {
-							$new_status = self::STATUS_CLOSED;
+							if ($all_children_closed) {
+								$new_status = self::STATUS_CLOSED;
+							}
+						} else {
+							$infos[] = 'Date de fin non atteinte (' . date('d / m / Y', strtotime($date_fin)) . ')';
 						}
 					}
 
@@ -5846,6 +5854,8 @@ class BCT_ContratLine extends BimpObject
 						} else {
 							$infos[] = 'Màj statut (' . $new_status . ')';
 						}
+					} else {
+						$infos[] = 'Aucun changement de statut';
 					}
 				}
 			}

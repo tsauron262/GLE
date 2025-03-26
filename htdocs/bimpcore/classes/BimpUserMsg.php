@@ -9,20 +9,29 @@ class BimpUserMsg
 			'module' => 'bimpcommercial',
 			'params' => array('allow_default' => 1),
 		),
-		'logistique_ok'                              => array(    // \Bimp_Commande::checkLogistiqueStatus
+		'logistique_commande_ok'                              => array(    // \Bimp_Commande::checkLogistiqueStatus
 			'label'  => 'La logistique complétée pour de votre commande XXX du client ...',
 			'dests'  => 'object::commercial',
 			'module' => 'bimpcommercial',
+			'params' => array(
+				'check_availability' => 0
+			)
 		),
 		'change_statut_facturation'                  => array(    // \Bimp_Commande::checkInvoiceStatus
 			'label'  => 'Changement de statut de facturation',
 			'dests'  => 'object::commercial',
 			'module' => 'bimpcommercial',
+			'params' => array(
+				'check_availability' => 0
+			)
 		),
 		'valide_commande_client'                     => array(    // \Bimp_Commande::onValidate
 			'label'  => 'Commande XXX pour le client ... a été validée',
 			'dests'  => 'object::commercial',
 			'module' => 'bimpcommercial',
+			'params' => array(
+				'check_availability' => 0
+			)
 		),
 		'rappel_commande_brouillon'                  => array(    // \Bimp_Commande::sendRappelCommandesBrouillons
 			'label'  => 'X factures en brouillon depuis ... jours, merci de les valider',
@@ -50,6 +59,9 @@ class BimpUserMsg
 			'label'  => 'Un acompte de X € a été ajouté à la facture XXX',
 			'dests'  => 'object::commercial',
 			'module' => 'bimpcommercial',
+			'params' => array(
+				'check_availability' => 0
+			)
 		),
 		'rappel_facture_brouillon'                   => array( // \Bimp_Facture::sendRappelFacturesBrouillons
 			'label'  => 'X factures en brouillon depuis ... jours, merci de les valider',
@@ -105,6 +117,9 @@ class BimpUserMsg
 			'label'  => 'L\'avenant N° XXX a été activé provisoirement. Vous disposez de 15 jours pour le faire signer par le client, après ce délai, l\'avenant sera abandonné automatiquement.',
 			'dests'  => 'object::commercial',
 			'module' => 'bimpcontract',
+			'params' => array(
+				'check_availability' => 0
+			)
 		),
 		'avenant_signe'                              => array(    // \BContract_avenant::signed
 			'label'  => 'L\'avenant N°AV XXX sur le contrat XXX a été sigé le d/m/Y.',

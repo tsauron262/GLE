@@ -3678,7 +3678,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                             $infoClient = " du client " . $client->getLink();
                         }
 
-						$code = 'logistique_ok';
+						$code = 'logistique_commande_ok';
 						$sujet = "Logistique commande OK";
 						$msg = 'Bonjour, la logistique de votre commande ' . $this->getLink() . $infoClient . ' est compléte ';
 						BimpUserMsg::envoiMsg($code, $sujet, $msg, $this);

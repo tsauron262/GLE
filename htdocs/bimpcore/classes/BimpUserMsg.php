@@ -440,12 +440,12 @@ class BimpUserMsg
 		),
 		'relance_FI_brouillon_Jplus1'                => array(    // \Cron::relanceTechBrouillonJplus1etPlus
 			'label'  => 'Voici la liste de vos fiches d’interventions en brouillon dont la date d’intervention est dépassée',
-			'dests'  => 'object::user_tech',
+			'dests'  => 'object::user',
 			'module' => 'bimptechnique',
 		),
 		'relance_FI_aFact_impoderable'               => array(    // \Cron::relanceCommercial
 			'label'  => 'voici la liste de vos fiches d’interventions en attente de facturation/comportant de l\'impodérable',
-			'dests'  => 'object::user_tech',
+			'dests'  => 'object::user',
 			'module' => 'bimptechnique',
 		),
 		'attribution_FI'                             => array(    // \BT_ficheInter::setSigned
@@ -472,22 +472,22 @@ class BimpUserMsg
 		),
 		'notif_create_FI'                            => array(    // \BT_ficheInter::create
 			'label'  => 'Une fiche d\'intervention vous a été attribuée. Fiche d\'intervention: XXX, Date prévue de l\'intervention: d/m/Y',
-			'dests'  => 'object::user_tech,conf::debugerp_email',
+			'dests'  => 'object::user,conf::debugerp_email',
 			'module' => 'bimptechnique',
 		),
 		'notif_change_tech_FI'                       => array(    // \BT_ficheInter::update
 			'label'  => 'La fiche d\'intervention XXX vous a été attribuée. Ref XXX. Client: XXX. Changement par : XXX. Pour plus de détails rendez-vous sur la fiche d\'intervention',
-			'dests'  => 'object::user_tech',
+			'dests'  => 'object::user',
 			'module' => 'bimptechnique',
 		),
 		'notif_change_horaire_FI'                    => array(    // \BT_ficheInter::update
 			'label'  => 'La fiche d\'intervention XXX a été modifiée au niveau des horaires. Nouveaux horaires du ... au ...',
-			'dests'  => 'object::user_tech',
+			'dests'  => 'object::user',
 			'module' => 'bimptechnique',
 		),
 		'notif_delete_FI'                            => array(    // \BT_ficheInter::delete
 			'label'  => 'La fiche d\'intervention XXX a été supprimée par client XXX. Commandes: ...',
-			'dests'  => 'object::user_tech,to::v.gilbert@bimp.fr',
+			'dests'  => 'object::user,to::v.gilbert@bimp.fr',
 			'module' => 'bimptechnique',
 		),
 		'depassement_heure_contrat_delegation'       => array(    // \BT_ficheInter_det::validate

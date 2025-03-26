@@ -175,9 +175,10 @@ class BDS_RelancesClientsProcess extends BDSProcess
 
                     if (BimpObject::objectLoaded($facture)) {
                         $comm_fac = $facture->getCommercial();
-						$comm_fac_id = (int) $comm_fac['id'];
+						$comm_fac_id = 0;
 
                         if (BimpObject::objectLoaded($comm_fac)) {
+							$comm_fac_id = (int) $comm_fac->id;
 //                            $email_comm_fac = $comm_fac->getData('email');
 
                             if ($comm_fac_id) {

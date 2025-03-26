@@ -38,7 +38,7 @@ class BimpUserMsg
 		),
 		'product_duree_limitee_expire_soon'          => array(    // \Bimp_Commande::checkLinesEcheances
 			'label'  => 'Produits à durée limitée arrivant bientôt à échéance',
-			'dests'  => 'object::commercial',
+			'dests'  => 'object::user',
 			'module' => 'bimpcommercial',
 		),
 		'facture_fourn_brouillon'                    => array(        // \Bimp_FactureFourn::sendInvoiceDraftWhithMail

@@ -159,7 +159,10 @@ class BDS_RelancesClientsProcess extends BDSProcess
                 }
 //                $email_comm_client = $client->getCommercialEmail(false, true);
 				$comm_client = $client->getCommercial(false);
-				$id_comm_client = (int) $comm_client['id'];
+				$id_comm_client = 0;
+				if (BimpObject::objectLoaded($comm_client)) {
+					$id_comm_client = $comm_client->id;
+				}
 
                 foreach ($factures as $id_fac => $fac_data) {
                     $relance_idx = (int) $fac_data['relance_idx'];

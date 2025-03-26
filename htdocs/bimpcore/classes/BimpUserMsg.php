@@ -348,8 +348,8 @@ class BimpUserMsg
 			'type_metier' => 'devs'
 		),
 		'notif_commercial_courrier_retard_regl'      => array( // \BDS_RelancesClientsProcess::processNotifsCommerciaux
-			'label'  => 'LE client XXX va recevoir sous 5 jours une letre de rappel / une mise en demeure concernant les retards de réglement ci-après. Si vous pensez que cette relance/mise en demeure n\'a pas lieu d\'être, merci d\'en informer immédiatement Recouvrement en justifiant votre demande (par exemple : règlement en notre possession, litige client, etc.) ...',
-			'dests'  => 'to::obj',
+			'label'  => 'Le client XXX va recevoir sous 5 jours une lettre de rappel / une mise en demeure concernant les retards de réglement ci-après. Si vous pensez que cette relance/mise en demeure n\'a pas lieu d\'être, merci d\'en informer immédiatement Recouvrement en justifiant votre demande (par exemple : règlement en notre possession, litige client, etc.) ...',
+			'dests'  => 'object::id_user',
 			'module' => 'bimpdatasync',
 		),
 		'probleme_stock'                             => array( //	\controlStock::go

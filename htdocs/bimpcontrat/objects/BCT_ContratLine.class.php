@@ -5795,11 +5795,9 @@ class BCT_ContratLine extends BimpObject
 						}
 					}
 
+					$infos[] = 'Facturations ' . ($fac_ended ? 'terminées' : 'en cours');
 					if ((int) $fac_ended !== (int) $this->getData('fac_ended')) {
 						$this->updateField('fac_ended', (int) $fac_ended);
-						$infos[] = 'Facturations terminées';
-					} else {
-						$infos[] = 'Facturation en cours';
 					}
 
 					// Vérif achats terminés:
@@ -5813,11 +5811,9 @@ class BCT_ContratLine extends BimpObject
 						}
 					}
 
+					$infos[] = 'Achats ' . ($achat_ended ? 'terminés' : 'en cours');
 					if ((int) $achat_ended !== (int) $this->getData('achat_ended')) {
 						$this->updateField('achat_ended', (int) $achat_ended);
-						$infos[] = 'Achats terminés';
-					} else {
-						$infos[] = 'Achats en cours';
 					}
 
 					if ($fac_ended && $achat_ended) {

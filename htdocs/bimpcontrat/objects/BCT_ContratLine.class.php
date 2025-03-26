@@ -5823,8 +5823,8 @@ class BCT_ContratLine extends BimpObject
 					if ($fac_ended && $achat_ended) {
 						if ($date_fin < date('Y-m-d') . ' 00:00:00') {
 							$all_children_closed = true;
-							if (!empty($lines)) {
-								foreach ($lines as $line) {
+							if (!empty($sub_lines)) {
+								foreach ($sub_lines as $line) {
 									$line->checkStatus();
 									if ((int) $line->getData('statut') > 0 && (int) $line->getData('statut') < self::STATUS_CLOSED) {
 										$all_children_closed = false;

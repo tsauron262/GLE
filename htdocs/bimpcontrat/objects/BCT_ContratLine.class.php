@@ -5728,18 +5728,22 @@ class BCT_ContratLine extends BimpObject
 	public function checkStatus(&$infos = array())
 	{
 		if ($this->isLoaded()) {
-			$lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
+			$sub_lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
 				'id_parent_line'     => $this->id,
 				'linked_object_name' => array('bundle', 'bundleCorrect')
 			));
 
-			if (!empty($lines)) {
+			if (!empty($sub_lines)) {
+				if ((int) $this->getData('achat_periodicity')) {
+					$this->updateField('achat_periodicity', 0);
+				}
+
 				$date_ouv_prev = $this->getData('date_ouverture_prevue');
 				$date_ouverture = $this->getData('date_ouverture');
 				$date_debut_validite = $this->getData('date_debut_validite');
 				$date_fin_validite = $this->getData('date_fin_validite');
 				$date_cloture = $this->getData('date_cloture');
-				foreach ($lines as $line) {
+				foreach ($sub_lines as $line) {
 					$line_infos = array();
 					$data_correct = array();
 
@@ -5819,11 +5823,6 @@ class BCT_ContratLine extends BimpObject
 					if ($fac_ended && $achat_ended) {
 						if ($date_fin < date('Y-m-d') . ' 00:00:00') {
 							$all_children_closed = true;
-
-							$lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
-								'id_parent_line'     => $this->id,
-								'linked_object_name' => array('bundle', 'bundleCorrect')
-							));
 							if (!empty($lines)) {
 								foreach ($lines as $line) {
 									$line->checkStatus();

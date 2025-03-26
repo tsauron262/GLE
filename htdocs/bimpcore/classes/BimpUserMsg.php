@@ -858,7 +858,7 @@ class BimpUserMsg
 								case 'user':
 									if ((is_a($obj, 'Bimp_User') || is_a($obj, 'User')) && BimpObject::objectLoaded($obj)) {
 										if (!in_array($obj->id, $id_users)) {
-											$id_users[] = $obj->id();
+											$id_users[] = $obj->id;
 										}
 									} else {
 										$errors[] = 'User : objet invalide';

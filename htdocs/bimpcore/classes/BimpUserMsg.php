@@ -472,7 +472,7 @@ class BimpUserMsg
 		),
 		'notif_create_FI'                            => array(    // \BT_ficheInter::create
 			'label'  => 'Une fiche d\'intervention vous a été attribuée. Fiche d\'intervention: XXX, Date prévue de l\'intervention: d/m/Y',
-			'dests'  => 'object::user,conf::debugerp_email',
+			'dests'  => 'object::user',
 			'module' => 'bimptechnique',
 		),
 		'notif_change_tech_FI'                       => array(    // \BT_ficheInter::update
@@ -1093,7 +1093,7 @@ class BimpUserMsg
 						$errors[] = 'Echec de l\'envoi du message par e-mail';
 					}
 				} else {
-					BimpCore::addlog('Message utilisateur "' . $code . '" non envoyé (aucun destinataire)', 3, 'email', (is_a($obj, 'BimpObject') ? $obj : ''));
+					BimpCore::addlog('Message utilisateur "' . $code . '" non envoyé (aucun destinataire)', 2, 'email', (is_a($obj, 'BimpObject') ? $obj : ''));
 				}
 			}
 

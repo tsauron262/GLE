@@ -9,7 +9,7 @@ class BimpUserMsg
 			'module' => 'bimpcommercial',
 			'params' => array('allow_default' => 1),
 		),
-		'logistique_commande_ok'                              => array(    // \Bimp_Commande::checkLogistiqueStatus
+		'logistique_commande_ok'                     => array(    // \Bimp_Commande::checkLogistiqueStatus
 			'label'  => 'La logistique complétée pour de votre commande XXX du client ...',
 			'dests'  => 'object::commercial',
 			'module' => 'bimpcommercial',
@@ -353,7 +353,7 @@ class BimpUserMsg
 		),
 		'message_ERP_nonlu'                          => array(    // \BimpNote::cronNonLu
 			'label'  => 'Vous avez X message(s) non lu. Pour désactiver cette relance, vous pouvez soit répondre au message de la pièce émettrice (dans les notes de pied de page) soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.',
-			'dests'  => 'to::obj',
+			'dests'  => 'object::id_user',
 			'module' => 'bimpcore',
 		),
 		'update_prices_file_marge_neg'               => array( // \BDS_ImportsLdlcProcess::executeUpdateFromFile
@@ -753,7 +753,7 @@ class BimpUserMsg
 		'type_metier'        => 'metier',
 		'check_availability' => 0,
 		'allow_delegations'  => 1,
-		'allow_superior'     => 0,
+		'allow_superior'     => 1,
 		'allow_default'      => 0
 	);
 
@@ -771,6 +771,7 @@ class BimpUserMsg
 
 			$params['active'] = self::isMsgActive($code);
 			$um['params'] = $params;
+
 			return $um;
 		}
 
@@ -791,7 +792,7 @@ class BimpUserMsg
 		return (int) BimpCore::getConf('userMessages__' . $code . '__msgActive', 1);
 	}
 
-	public static function envoiMsg($code, $sujet, $contenu, $obj = null, $piecejointe = array())
+	public static function envoiMsg($code, $sujet, $contenu, $obj = null, $piecejointe = array(), $debug = false)
 	{
 		$errors = array();
 
@@ -961,8 +962,10 @@ class BimpUserMsg
 										$shipToUsers = Bimp_User::getUsersByShipto($centre['shipTo']);
 										if (!empty($shipToUsers)) {
 											foreach ($shipToUsers as $u) {
-												$id_users[] = $u->id;
+												$id_users[] = $u['id'];
 											}
+										} else {
+											$errors[] = 'PAS DE USERS POUR LE SHIPTO ' . $centre['shipTo'];
 										}
 									}
 
@@ -1025,7 +1028,7 @@ class BimpUserMsg
 										if (BimpObject::objectLoaded($superior) && $superior->getData('statut') && (!$params['check_availability'] || $superior->isAvailable())) {
 											$userDestinataires[] = $superior;
 											$idsDejaAjoutes[] = $superior->id;
-											$redir_reasons[$superior->id] = 'Message recu par délégation de ' . $user->getFullName();
+											$redir_reasons[$superior->id] = 'Message recu en tant que supérieur de ' . $user->getFullName() .' car cet utilisateur ' . $unallowed_reason;
 										}
 									}
 								}
@@ -1080,8 +1083,16 @@ class BimpUserMsg
 				}
 
 				if (!empty($to_emails)) {
+					foreach ($to_emails as $key => $email) {
+						if (!BimpValidate::isEmail($email)) {
+							unset($to_emails[$key]);
+							$errors[] = 'email non valide ' . $email;
+						} else {
+							$to_emails[$key] = $email;
+						}
+					}
+
 					$to = implode(', ', $to_emails);
-					$to = BimpTools::cleanEmailsStr($to);
 					$filename_list = ($piecejointe ? $piecejointe[0] : array());
 					$mimetype_list = ($piecejointe ? $piecejointe[1] : array());
 					$mimefilename_list = ($piecejointe ? $piecejointe[2] : array());
@@ -1091,7 +1102,7 @@ class BimpUserMsg
 
 						foreach ($redir_reasons as $key => $redir_reason) {
 							if (is_string($key)) {
-								$header .= $key .' : ' . $redir_reason . "\n";
+								$header .= $key . ' : ' . $redir_reason . "\n";
 							} elseif (is_int($key)) {
 								$user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $key);
 								if (BimpObject::objectLoaded($user)) {

@@ -156,6 +156,7 @@ function check_user_password_ldap($usertotest, $passwordtotest, $entitytotest)
                     $result=$ldap->connectBind();
 		if ($result > 0) {
 			if ($result == 2) {	// Connection is ok for user/pass into LDAP
+				session_regenerate_id();
 				$login = $usertotest;
 				dol_syslog("functions_ldap::check_user_password_ldap $login authentication ok");
 				// For the case, we search the user id using a search key without the login (but using other fields like id),

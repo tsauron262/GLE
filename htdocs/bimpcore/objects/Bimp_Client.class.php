@@ -620,18 +620,18 @@ class Bimp_Client extends Bimp_Societe
 					))
 				)
 			);
-			$buttons[] = array(
-				'label'       => 'Création automatique',
-				'icon_before' => 'fas_cogs',
-				'classes'     => array('btn', 'btn-default'),
-				'attr'        => array(
-					'onclick' => $this->getJsActionOnclick('creat_auto', array(), array(
-						'form_name' => 'creat_auto',
+		}
+		$buttons[] = array(
+			'label'       => 'Création automatique',
+			'icon_before' => 'fas_cogs',
+			'classes'     => array('btn', 'btn-default'),
+			'attr'        => array(
+				'onclick' => $this->getJsActionOnclick('creat_auto', array(), array(
+					'form_name' => 'creat_auto',
 //                        'on_form_submit' => 'function($form, extra_data) {return onRelanceClientsPaiementsFormSubmit($form, extra_data);}'
-					))
-				)
-			);
-        }
+				))
+			)
+		);
 
         if (BimpCore::isEntity('bimp') && $this->canSetAction('listClientsToExcludeForCreditLimits')) {
             $buttons[] = array(

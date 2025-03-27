@@ -61,6 +61,7 @@ class InpiAPI extends BimpAPI
 		return $return;
 	}
 	public function getSocSiret($siren){
+		$siren = str_replace(' ', '', $siren);
 		$return = array();
 		foreach($this->getCache() as $soc) {
 			if($soc['siren'] == $siren) {
@@ -83,6 +84,7 @@ class InpiAPI extends BimpAPI
 		return $return;
 	}
 	public function getSiret($siret){
+		$siret = str_replace(' ', '', $siret);
 		$siren = substr($siret, 0, 9);
 		$return = array();
 		foreach($this->getCache() as $soc) {
@@ -115,6 +117,7 @@ class InpiAPI extends BimpAPI
 	}
 	public function getCompany($name = '', $siretSiren = '', &$errors = array())
 	{
+		$siretSiren = str_replace(' ', '', $siretSiren);
 //		return array();
 		$filters = array();
 		if ($siretSiren != '') {

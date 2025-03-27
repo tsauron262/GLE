@@ -8433,6 +8433,51 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		return BimpRender::renderAlerts($msg);
 	}
 
+
+
+	public function renderChildrenGraph($children_object, $list_name = 'default', $panel = false, $title = null, $icon = null, $level = 1)
+	{
+		$children_instance = $this->config->getObject('', $children_object);
+
+		if (!$this->isLoaded()) {
+			$msg = 'Impossible d\'afficher la liste des ' . $children_instance->getLabel('name_plur');
+			$msg .= ' - ID ' . $this->getLabel('of_the') . ' absent';
+			return BimpRender::renderAlerts($msg);
+		}
+
+		$children_instance->parent = $this;
+
+		if (!is_null($children_instance) && is_a($children_instance, 'BimpObject')) {
+			$title = (is_null($title) ? $this->getConf('objects/' . $children_object . '/list/title', $this->getConf('objects/' . $children_object . '/label', BimpTools::ucfirst($children_instance->getLabel('name_plur')))) : $title);
+			$icon = (is_null($icon) ? $this->getConf('objects/' . $children_object . '/list/icon', $icon) : $icon);
+
+			$list = new BC_Graph($children_instance, $list_name, $level, $this->id, $title, $icon);
+
+			$list_filters = $this->config->getCompiledParams('objects/' . $children_object . '/list/filters', array(), false, 'array');
+
+			if (is_array($list_filters) && count($list_filters)) {
+				foreach ($list_filters as $field_name => $value) {
+					$list->addFieldFilterValue($field_name, $value);
+				}
+			}
+
+			$add_form_name = $this->getConf('objects/' . $children_object . '/add_form/name', null);
+
+			if (!is_null($add_form_name)) {
+				$list->setAddFormName($add_form_name);
+			}
+
+			$add_form_values = $this->config->getCompiledParams('objects/' . $children_object . '/add_form/values', null, false, 'array');
+			if (!is_null($add_form_values) && count($add_form_values)) {
+				$list->setAddFormValues($add_form_values);
+			}
+
+			return $list->renderHtml();
+		}
+		$msg = 'Erreur technique: objets "' . $children_object . '" non trouvés pour ' . $this->getLabel('this');
+		return BimpRender::renderAlerts($msg);
+	}
+
 	public function renderChildCard($object_name, $card_name = '', $card_path = '')
 	{
 		$card = new BC_Card($this, $object_name, $card_name);

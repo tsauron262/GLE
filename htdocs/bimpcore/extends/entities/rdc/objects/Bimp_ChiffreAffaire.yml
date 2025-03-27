@@ -50,9 +50,9 @@ fields:
             array:
                 callback:
                     method: getTypesObjetsRdc
-        #    ca:
-        #        label: Chiffre d'Affaire
-        #        type: money
+    ca:
+        label: Chiffre d'Affaire
+        type: money
     
     fk_category:
         label: Catégorie CA
@@ -102,8 +102,56 @@ lists:
         n: 10
         add_form_name: default
         add_btn: 1
+        delete_btn: 1
         cols:
             fk_category:
             ca:
             fk_period:
             debut_period:
+                
+                
+graph:
+    rep:
+        mode: doughnut
+        title: Repartition Categories
+        xDateConfig:
+            field: debut_period
+            date1: 1
+            date2: 2
+            def: 5year
+            params: unset
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                callback: getCategForGrpah
+    evol:
+        title: Evolution CA
+        options:
+            fk_category:
+                name: Categories
+                type: select
+                values:
+                    callback: getCategoriesRdc
+                value: 0
+            fk_period:
+                name: Période
+                type: select
+                values:
+                    callback: getPeriodsRdc
+                value: 0
+        xDateConfig:
+            field: debut_period
+            date1: 1
+            date2: 2
+            def: 5year
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                total_ht:
+                    title: CA ht
+                    field: ca
+                    calc: SUM
+                    filters:
+                        callback: getFiltersForGraph

@@ -19,6 +19,19 @@ objects:
             bimp_object:
                 module: bimpcore
                 name: Bimp_Concurrence
+    chiffre_affaire:
+        relation: hasOne
+        delete: 1
+        instance:
+            bimp_object: Bimp_ChiffreAffaire
+        list:
+            filters:
+                type_obj: 1
+                id_obj:
+                    callback:
+                        method: getData
+                        params:
+                            - id
 
 fields:
     nom:
@@ -41,6 +54,44 @@ forms:
                 field: nom
             Site:
                 field: site
+                
+views:
+    default:
+        title: Concurent
+    ca:
+        title: Chiffre d'affaire
+        rows:
+            - cols:
+                  -   type: custom
+                      col_lg: 12
+                      col_md: 12
+                      col_sm: 12
+                      custom:
+                          callback:
+                              method: renderChildrenList
+                              params:
+                                  - chiffre_affaire
+                                  - default
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - rep
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - evol
 
 lists:
     default:

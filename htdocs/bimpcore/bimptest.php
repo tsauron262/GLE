@@ -27,22 +27,13 @@ if (!$user->admin) {
 	exit;
 }
 
-//echo 'Envoi : <br/>';
+define('MOD_DEV_SYN_MAIL', 'f.martinez@bimp.fr');
 
-///** @var Bimp_Commande $obj */
-////$obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', 104540);
-//$errors = BimpUserMsg::envoiMsg('code_erp', 'TEST MSG', 'Test test');
-//
-//echo '<pre>' . print_r($errors, 1) . '</pre>';
-
-$html = '<b>AC+for For Headphones AirPods Pro</b><br/>Ref BR: 8197083734<br/>Ref CF : CFB2301-28889<br/>Montant initial HT : 39,00 EUR';
-
-if (preg_match('/^.+Ref CF : (CF[^<]+).*$/', $html, $matches)) {
-	echo 'OK';
-	echo '<pre>' . print_r($matches, 1) . '</pre>';
-} else {
-	echo 'KO';
-}
+echo 'Envoi : <br/>';
+//$obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', 104540);
+$centres = BimpCache::getCentresData();
+$errors = BimpUserMsg::envoiMsg('sav_online_by_client', 'TEST MSG', 'Test test', $centres['AB']);
+echo 'Err<pre>' . print_r($errors, 1) . '</pre>';
 
 echo '<br/>FIN';
 echo '</body></html>';

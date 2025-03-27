@@ -969,7 +969,7 @@ class BimpUserMsg
 										$shipToUsers = Bimp_User::getUsersByShipto($centre['shipTo']);
 										if (!empty($shipToUsers)) {
 											foreach ($shipToUsers as $u) {
-												$id_users[] = $u->id;
+												$id_users[] = $u['id'];
 											}
 										} else {
 											$errors[] = 'PAS DE USERS POUR LE SHIPTO ' . $centre['shipTo'];

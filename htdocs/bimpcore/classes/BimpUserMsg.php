@@ -796,7 +796,7 @@ class BimpUserMsg
 		return (int) BimpCore::getConf('userMessages__' . $code . '__msgActive', 1);
 	}
 
-	public static function envoiMsg($code, $sujet, $contenu, $obj = null, $piecejointe = array())
+	public static function envoiMsg($code, $sujet, $contenu, $obj = null, $piecejointe = array(), $debug = false)
 	{
 		$errors = array();
 
@@ -961,6 +961,9 @@ class BimpUserMsg
 									}
 
 									if (empty($to_emails) && isset($params['allow_shipToUsers']) && $params['allow_shipToUsers']) {
+										if ($debug) {
+											echo 'ICI - ';
+										}
 										// sinon, recup des user du centre et les mettre dans id_users
 										BimpObject::loadClass('bimpcore', 'Bimp_User');
 										$shipToUsers = Bimp_User::getUsersByShipto($centre['shipTo']);
@@ -971,13 +974,23 @@ class BimpUserMsg
 										} else {
 											$errors[] = 'PAS DE USERS POUR LE SHIPTO ' . $centre['shipTo'];
 										}
+									} elseif ($debug) {
+										echo 'LA - ';
+										echo '<pre>MAILS : ' . print_r($to_emails, 1) . '</pre>';
+										echo '<pre>params : ' . print_r($params, 1) . '</pre>';
 									}
 
 									if (empty($to_emails) && empty($id_users) && isset($params['allow_user_default_sav_email']) && $params['allow_user_default_sav_email']) {
+										if ($debug) {
+											echo 'HERE - ';
+										}
+
 										$email = BimpCore::getConf('default_sav_email', null, 'bimpsupport');
 										if ($email && !in_array($email, $to_emails)) {
 											$to_emails[] = $email;
 										}
+									} elseif($debug) {
+										echo 'ok - ';
 									}
 									break;
 

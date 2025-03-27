@@ -34,7 +34,7 @@ echo 'Envoi : <br/>';
 
 $centres = BimpCache::getCentresData();
 $centres['AB']['mail'] = '';
-$errors = BimpUserMsg::envoiMsg('sav_online_by_client', 'TEST MSG', 'Test test', $centres['AB']);
+$errors = BimpUserMsg::envoiMsg('sav_online_by_client', 'TEST MSG', 'Test test', $centres['AB'], array(), true);
 echo 'Err<pre>' . print_r($errors, 1) . '</pre>';
 
 echo '<br/>FIN';

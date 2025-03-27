@@ -753,7 +753,7 @@ class BimpUserMsg
 		'type_metier'        => 'metier',
 		'check_availability' => 0,
 		'allow_delegations'  => 1,
-		'allow_superior'     => 0,
+		'allow_superior'     => 1,
 		'allow_default'      => 0
 	);
 
@@ -1028,7 +1028,7 @@ class BimpUserMsg
 										if (BimpObject::objectLoaded($superior) && $superior->getData('statut') && (!$params['check_availability'] || $superior->isAvailable())) {
 											$userDestinataires[] = $superior;
 											$idsDejaAjoutes[] = $superior->id;
-											$redir_reasons[$superior->id] = 'Message recu par délégation de ' . $user->getFullName();
+											$redir_reasons[$superior->id] = 'Message recu en tant que supérieur de ' . $user->getFullName() .' car cet utilisateur ' . $unallowed_reason;
 										}
 									}
 								}

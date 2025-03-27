@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
    <head>
-      <meta charset="UTF-8">		
+      <meta charset="UTF-8">
       <title>Vérification du code</title>
       <link rel="shortcut icon" type="image/x-icon" href="/bimp8/theme/eldy/img/favicon.ico"/>
       <link rel="stylesheet" href="<?= DOL_URL_ROOT . '/bimpsecurlogin/views/css/codeForm.css' ?>">
@@ -14,6 +14,7 @@
          <h2><?= $message ?></h2>
          <center>
             <form method="POST" action="">
+				<input type="hidden" name="token" value="<?php echo newToken();?>" />
                <input type="number" name="sms_code_1" maxLength="1" size="1" min="0" max="9" pattern="[0-9]{1}" />
                <input type="number" name="sms_code_2" maxLength="1" size="1" min="0" max="9" pattern="[0-9]{1}" />
                <input type="number" name="sms_code_3" maxLength="1" size="1" min="0" max="9" pattern="[0-9]{1}"/>
@@ -26,11 +27,11 @@
             </form>
             <form>
                <button id="return_button">Code non reçus ? renvoyer le code</button>
-            </form>   
-         </center>    
+            </form>
+         </center>
       </section>
    <center>
-      <img src="<?php echo BimpTools::getMyCompanyLogoUrl('BIMP_RESEAUNANCE_PRO.png'); ?>"> 
+      <img src="<?php echo BimpTools::getMyCompanyLogoUrl('BIMP_RESEAUNANCE_PRO.png'); ?>">
    </center>
 </body>
 </html>

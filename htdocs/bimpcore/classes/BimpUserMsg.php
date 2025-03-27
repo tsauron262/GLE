@@ -963,6 +963,11 @@ class BimpUserMsg
 											foreach ($shipToUsers as $u) {
 												$id_users[] = $u->id;
 											}
+										} else {
+											if ($user->login == 'f-martinez') {
+												$errors[] = 'PAS DE USERS POUR LE SHIPTO ' . $centre['shipTo'];
+											}
+
 										}
 									}
 

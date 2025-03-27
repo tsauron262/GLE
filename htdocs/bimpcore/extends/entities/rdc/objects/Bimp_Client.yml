@@ -33,36 +33,24 @@ fields:
     code_compta: unset
     shopid:
         label: Shop ID
-        extrafields: client_rdc
-        extra: 1
-        
+    
     date_der_contact:
         label: Dernier contact
         type: date
-        extrafields: client_rdc
-        extra: 1
     date_debut_prospect:
         label: Début prospection
         type: date
-        extrafields: client_rdc
-        extra: 1
     date_ouverture:
         label: Ouverture
         type: date
-        extrafields: client_rdc
-        extra: 1
     fk_priorite:
         label: Priorité
-        extrafields: client_rdc
-        extra: 1
         values:
             array:
-                callback: 
+                callback:
                     method: getPriorities
     fk_statut_rdc:
         label: Prospection
-        extrafields: client_rdc
-        extra: 1
         values:
             array: statusRdc
     date_changement_statut_rdc:
@@ -75,28 +63,26 @@ fields:
         label: Source
         values:
             array:
-                callback: 
-                    method: getSourcesRdc                   
+                callback:
+                    method: getSourcesRdc
     contrefacon:
         label: Suspition de contrefaçon
-        extrafields: client_rdc
-        extra: 1
         type: bool
-        
+    
     fk_group_rdc:
         label: Groupe
         values:
             array:
-                callback: 
-                    method: getUserGroupsArray 
+                callback:
+                    method: getUserGroupsArray
     fk_user_attr_rdc:
         label: Attribué à
         type: id_object
         object: user_attr
-        input: 
+        input:
             type: select
             options:
-                callback: 
+                callback:
                     method: getUserAttrByGroupArray
         depends_on: fk_group_rdc
     commentaire_rdc:
@@ -136,11 +122,11 @@ fields_tables:
             - field: date_debut_prospect
             - field: date_ouverture
             - field: fk_priorite
-              edit: 
-                callback:
-                    method: isUserInGroup
-                    params:
-                        - BD
+              edit:
+                  callback:
+                      method: isUserInGroup
+                      params:
+                          - BD
             - field: fk_statut_rdc
             - field: date_changement_statut_rdc
             - field: delai_ouverture
@@ -188,7 +174,7 @@ views:
                     col_sm: 12
                     fields_table:
                         name: param_rdc
-                        
+                  
                   - type: custom
                     col_lg: 12
                     col_md: 12
@@ -199,7 +185,7 @@ views:
                             params:
                                 - chiffre_affaire
                                 - default
-                        
+                  
                   - type: custom
                     col_lg: 6
                     col_md: 6
@@ -210,7 +196,7 @@ views:
                             params:
                                 - concurrence
                                 - default
-                        
+
 forms:
     default:
         extends: form_client_rdc
@@ -239,14 +225,14 @@ forms:
                     callback: isShopIdEditable
             Priorité:
                 field: fk_priorite
-                edit: 
-                  callback:
-                      method: isUserInGroup
-                      params:
-                          - BD
+                edit:
+                    callback:
+                        method: isUserInGroup
+                        params:
+                            - BD
             Prospection:
                 field: fk_statut_rdc
-                edit: 
+                edit:
                     callback: isProspectionEditable
             Source:
                 field: fk_source
@@ -258,16 +244,16 @@ forms:
                 field: fk_user_attr_rdc
             Commentaires:
                 field: commentaire_rdc
-                
+    
     formActionRdc:
         title: Choisir une action
         rows:
             - custom: 1
               label: Actions
               input_name: status
-              input: 
+              input:
                   type: select
-                  options: 
+                  options:
                       callback: getListButtons
 
 lists:

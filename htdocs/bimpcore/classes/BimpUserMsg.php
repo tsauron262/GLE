@@ -991,6 +991,7 @@ class BimpUserMsg
 										}
 									} elseif($debug) {
 										echo 'ok - ';
+										echo '<pre>USERS : ' . print_r($id_users, 1) . '</pre>';
 									}
 									break;
 

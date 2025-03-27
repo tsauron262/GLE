@@ -2128,23 +2128,6 @@ class BimpCache
 		return self::getCacheArray($cache_key);
 	}
 
-	public static function getCategoriesRdc()
-	{
-		$cache_key = 'category_ca_rdc_label';
-
-		if (!isset(self::$cache[$cache_key])) {
-			self::$cache[$cache_key] = array();
-
-			$rows = self::getBdb()->getRows('c_categorie_rdc', '`active` = 1', null, 'array', array('rowid', 'libelle'));
-			if (!is_null($rows)) {
-				foreach ($rows as $r) {
-					self::$cache[$cache_key][(int) $r['rowid']] = $r['libelle'];
-				}
-			}
-		}
-		return self::getCacheArray($cache_key);
-	}
-
 	public static function getSourcesRdc()
 	{
 		$cache_key = 'source_rdc_label';

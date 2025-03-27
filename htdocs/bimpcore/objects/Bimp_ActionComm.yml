@@ -5,6 +5,12 @@ common_fields: 0
 controller: actioncomm
 entity_name: agenda
 
+header_list_name: default
+list_page_url:
+    controller: user_agenda
+    params:
+        tab: default
+
 header_btn:
     callback: getActionsButtons
 
@@ -515,10 +521,20 @@ lists_cols:
         label: Etat
         value:
             callback: displayState
+    users_assigned:
+        label: Assigné à
+        value:
+            callback: displayUsersAssigned
 
 lists:
     default:
         configurable: 1
+        checkboxes: 1
+        bulk_actions:
+            callback: 
+                method: getListsBulkActions
+                params: 
+                    - default
         filters_panel: default
         sort_field: datep
         sort_way: desc
@@ -529,11 +545,11 @@ lists:
         add_form_name: add
         edit_btn: 1
         cols:
-            type:
+            fk_action:
             label:
             datep:
             datep2:
-            fk_user_action:
+            users_assigned:
             element:
             fk_soc:
             fk_contact:
@@ -541,6 +557,10 @@ lists:
     
     global:
         extends: default
+        bulk_actions:
+            callback:
+                params:
+                    0: global
         add_form_name: add
         add_btn: 1
         n: 10
@@ -558,6 +578,10 @@ lists:
     
     soc:
         extends: default
+        bulk_actions:
+            callback:
+                params:
+                    0: soc
         filters_panel: soc
         cols:
             fk_soc: unset
@@ -569,9 +593,13 @@ lists:
     fourn:
         extends: soc
         title: Evénements du fournisseur
-    
+        
     ficheInter:
         extends: default
+        bulk_actions:
+            callback:
+                params:
+                    0: ficheInter
         list_filters:
             callback:
                 method: getListFilters
@@ -582,5 +610,9 @@ lists:
             
     user: 
         extends: default
-
-header_list_name: default
+        bulk_actions:
+            callback:
+                params:
+                    0: user
+        cols:
+            users_assigned: unset

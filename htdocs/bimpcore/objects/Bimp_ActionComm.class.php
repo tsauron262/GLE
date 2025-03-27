@@ -40,7 +40,7 @@ class Bimp_ActionComm extends BimpObject
 		global $user;
 		switch ($action) {
 			case 'done':
-				if ($this->isUserAssigned()) {
+				if ($this->isLoaded() && $this->isUserAssigned()) {
 					return 1;
 				}
 
@@ -88,10 +88,12 @@ class Bimp_ActionComm extends BimpObject
 	{
 		switch ($action) {
 			case 'done':
-				$percent = (int)$this->getData('percent');
-				if ($percent < 0 || $percent >= 100) {
-					$errors[] = 'Cet événement n\'est pas en attente d\'être terminé';
-					return 0;
+				if ($this->isLoaded()) {
+					$percent = (int) $this->getData('percent');
+					if ($percent < 0 || $percent >= 100) {
+						$errors[] = 'Cet événement n\'est pas en attente d\'être terminé';
+						return 0;
+					}
 				}
 				return 1;
 		}
@@ -288,6 +290,30 @@ class Bimp_ActionComm extends BimpObject
 		}
 
 		return $buttons;
+	}
+
+	public function getListsBulkActions($list_type = 'default')
+	{
+		$actions = array();
+
+		// La vérif des droits se fera individuellement pour chaque événement
+
+		$actions[] = array(
+			'label'   => 'Supprimer les événements sélectionnés',
+			'icon'    => 'fas_trash-alt',
+			'onclick' => 'deleteSelectedObjects(\'list_id\', $(this))'
+		);
+
+		$actions[] = array(
+			'label'   => 'Marquer terminés',
+			'icon'    => 'fas_check',
+			'onclick' => $this->getJsBulkActionOnclick('done', array(), array(
+				'confirm_msg'   => 'Veuillez confirmer',
+				'single_action' => true
+			))
+		);
+
+		return $actions;
 	}
 
 	// Getters données:
@@ -563,15 +589,150 @@ class Bimp_ActionComm extends BimpObject
 		dol_fiche_head($head, "list", $langs->trans('Agenda'), 0, 'action');
 	}
 
+	public function renderUserEventsList($type)
+	{
+		$list = null;
+
+		$ac = BimpObject::getInstance('bimpcore', 'Bimp_ActionComm');
+		$list = new BC_ListTable($ac, 'user');
+		$date_now = date('Y-m-d');
+
+		switch ($type) {
+			case 'todo':
+				$list->params['title'] = 'Mes événements à faire ou à venir';
+				$list->addFieldFilterValue('or_percent', array(
+					'or' => array(
+						'and_no_percent' => array(
+							'and_fields' => array(
+								'a.percent' => array(
+									'operator' => '<',
+									'value'    => 0
+								),
+								'or_date'   => array(
+									'or' => array(
+										'a.datep'  => array(
+											'operator' => '>=',
+											'value'    => $date_now . ' 00:00:00'
+										),
+										'a.datep2' => array(
+											'operator' => '>=',
+											'value'    => $date_now . ' 00:00:00'
+										)
+									)
+								)
+							)
+						),
+						'a.percent'      => array(
+							'and' => array(
+								array(
+									'operator' => '>=',
+									'value'    => 0
+								),
+								array(
+									'operator' => '<',
+									'value'    => 100
+								)
+							)
+
+						)
+					)
+				));
+				break;
+
+			case 'done':
+				$list->params['title'] = 'Mes événements  terminés';
+				$list->addFieldFilterValue('or_done', array(
+					'or' => array(
+						'and_no_percent' => array(
+							'and_fields' => array(
+								'a.percent' => array(
+									'operator' => '<',
+									'value'    => 0
+								),
+								'a.datep2'  => array(
+									'operator' => '<',
+									'value'    => date('Y-m-d H:i:s')
+								)
+							)
+						),
+						'a.percent'      => array(
+							'operator' => '>=',
+							'value'    => 100
+						)
+					)
+				));
+				break;
+
+			case 'all':
+				$list->params['title'] = 'Tous mes événements';
+				break;
+
+			default:
+				unset($list);
+				return BimpRender::renderAlerts('Type de liste invalide : ' . $type, 'danger');
+		}
+
+		global $user;
+		$list->addIdentifierSuffix($type);
+		$list->addFieldFilterValue('or_user', array(
+			'or' => array(
+				'a.fk_user_action'                                                                                                                                                                    => $user->id,
+				'(SELECT COUNT(acr.rowid) FROM ' . MAIN_DB_PREFIX . 'actioncomm_resources acr WHERE acr.fk_actioncomm = a.id AND acr.fk_element = ' . $user->id . ' AND acr.element_type = \'user\')' => array(
+					'operator' => '>',
+					'value'    => 0
+				)
+			)
+		));
+		return $list->renderHtml();
+	}
+
 	// Actions:
 
 	public function actionDone($data, &$success = '')
 	{
+		$errors = array();
 		$warnings = array();
-//		$success = 'Événément marqué terminé';
 
-		$this->set('percent', 100);
-		$errors = $this->update($warnings, true);
+		if ($this->isLoaded()) {
+			$this->set('percent', 100);
+			$errors = $this->update($warnings, true);
+			$success = 'Événement terminé';
+		} else {
+			$ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+			if (empty($ids)) {
+				$errors[] = 'Aucun événement sélectionné';
+			} else {
+				$nb_ok = 0;
+				foreach ($ids as $id) {
+					$ac_errors = array();
+
+					$event = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm', (int) $id);
+					if (BimpObject::objectLoaded($event)) {
+						if ($event->canSetAction('done')) {
+							if ($event->isActionAllowed('done', $ac_errors)) {
+								$event->set('percent', 100);
+								$ac_errors = $event->update($warnings, true);
+							}
+						} else {
+							$ac_errors[] = 'Vous n\'avez pas la permission pour terminer cet événement';
+						}
+					} else {
+						$ac_errors[] = 'L\'événement #' . $id . ' n\'existe plus';
+					}
+
+					if (count($ac_errors)) {
+						$warnings[] = BimpTools::getMsgFromArray($ac_errors, 'Événement #' . $id);
+					} else {
+						$nb_ok++;
+					}
+				}
+
+				if ($nb_ok) {
+					$success = $nb_ok . ' événement(s) terminé(s)';
+				}
+			}
+		}
 
 		return array(
 			'errors'   => $errors,
@@ -790,7 +951,7 @@ class Bimp_ActionComm extends BimpObject
 
 		$filters['or_user'] = array(
 			'or' => array(
-				'a.fk_user_action'   => $id_user,
+				'a.fk_user_action'                                                                                                                                                                   => $id_user,
 				'(SELECT COUNT(acr.rowid) FROM ' . MAIN_DB_PREFIX . 'actioncomm_resources acr WHERE acr.fk_actioncomm = a.id AND acr.fk_element = ' . $id_user . ' AND acr.element_type = \'user\')' => array(
 					'operator' => '>',
 					'value'    => 0
@@ -874,21 +1035,21 @@ class Bimp_ActionComm extends BimpObject
 			}
 
 			$data['elements'][] = array(
-				'id'       => $ac->id,
-				'url'      => $ac->getUrl(),
-				'icon'     => $icon,
-				'label'    => $ac->getData('label'),
-				'type'     => $ac->displayDataDefault('fk_action'),
-				'date_str' => $ac->displayDates(true),
-				'code'     => $ac->getData('code'),
-				'tiers'    => $tiers_str,
-				'contact'  => (BimpObject::objectLoaded($contact) ? $contact->getLink() : ''),
-				'obj'      => $ac->displayElement(),
-				'bg_type'  => $bg_type,
-				'today'    => $today,
-				'state'    => $ac->displayState(true),
-				'lieu'     => $ac->getData('location'),
-				'desc'     => $ac->getData('note'),
+				'id'        => $ac->id,
+				'url'       => $ac->getUrl(),
+				'icon'      => $icon,
+				'label'     => $ac->getData('label'),
+				'type'      => $ac->displayDataDefault('fk_action'),
+				'date_str'  => $ac->displayDates(true),
+				'code'      => $ac->getData('code'),
+				'tiers'     => $tiers_str,
+				'contact'   => (BimpObject::objectLoaded($contact) ? $contact->getLink() : ''),
+				'obj'       => $ac->displayElement(),
+				'bg_type'   => $bg_type,
+				'today'     => $today,
+				'state'     => $ac->displayState(true),
+				'lieu'      => $ac->getData('location'),
+				'desc'      => $ac->getData('note'),
 				'close_btn' => (int) ($ac->isActionAllowed('done') && $ac->canSetAction('done'))
 			);
 		}

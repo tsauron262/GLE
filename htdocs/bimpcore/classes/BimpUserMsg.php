@@ -353,7 +353,7 @@ class BimpUserMsg
 		),
 		'message_ERP_nonlu'                          => array(    // \BimpNote::cronNonLu
 			'label'  => 'Vous avez X message(s) non lu. Pour désactiver cette relance, vous pouvez soit répondre au message de la pièce émettrice (dans les notes de pied de page) soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.',
-			'dests'  => 'to::obj',
+			'dests'  => 'object::id_user',
 			'module' => 'bimpcore',
 		),
 		'update_prices_file_marge_neg'               => array( // \BDS_ImportsLdlcProcess::executeUpdateFromFile
@@ -1080,8 +1080,18 @@ class BimpUserMsg
 				}
 
 				if (!empty($to_emails)) {
+					foreach($to_emails as $key => $email) {
+						if (!BimpValidate::isEmail($email)) {
+							unset($to_emails[$key]);
+							$errors[] = 'email non valide '.$email;
+						}
+						else
+							$to_emails[$key] = $email;
+					}
+
+
+
 					$to = implode(', ', $to_emails);
-					$to = BimpTools::cleanEmailsStr($to);
 					$filename_list = ($piecejointe ? $piecejointe[0] : array());
 					$mimetype_list = ($piecejointe ? $piecejointe[1] : array());
 					$mimefilename_list = ($piecejointe ? $piecejointe[2] : array());

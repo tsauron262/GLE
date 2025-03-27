@@ -964,10 +964,7 @@ class BimpUserMsg
 												$id_users[] = $u->id;
 											}
 										} else {
-											if ($user->login == 'f-martinez') {
-												$errors[] = 'PAS DE USERS POUR LE SHIPTO ' . $centre['shipTo'];
-											}
-
+											$errors[] = 'PAS DE USERS POUR LE SHIPTO ' . $centre['shipTo'];
 										}
 									}
 

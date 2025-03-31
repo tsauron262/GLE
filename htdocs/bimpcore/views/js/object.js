@@ -224,6 +224,7 @@ function setObjectAction($button, object_data, action, extra_data, $resultContai
         modal_scroll_bottom: true, // Auto scroll vers le bas de la modal du formulaire (à la validation) 
         use_bimpdatasync: false, // Utiliser BimpDataSync
         use_report: false, // Utiliser les rapports BimpDataSync
+		display_success: true,
         display_processing: true,
         processing_msg: 'Traitement en cours',
         remove_result_content: true,
@@ -405,6 +406,7 @@ function setObjectAction($button, object_data, action, extra_data, $resultContai
                 module: object_data.module,
                 object_name: object_data.object_name,
                 id_object: object_data.id_object,
+				display_success: options.display_success,
                 display_processing: options.display_processing,
                 processing_msg: options.processing_msg,
                 processing_padding: 10,

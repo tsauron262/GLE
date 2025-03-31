@@ -1,0 +1,21 @@
+
+title: Tickets
+bootstrap: 1
+
+
+objects:
+    ticket:
+        instance:
+            bimp_object: BTK_Ticket
+
+sections:
+    - type: tabs
+      tabs:
+          default:
+              label: Tous les tickets
+              sections:
+                  - type: list
+                    list:
+                        panel: 1
+                        object: ticket
+                        name: default

@@ -3,12 +3,12 @@
 class BimpValidate
 {
 
-    public static function isEmail($string)
+    public static function isEmail(&$string)
     {
         if (empty($string)) {
             return 0;
         }
-        
+
         if (is_string($string)) {
             $string = BimpTools::cleanEmailsStr($string);
 

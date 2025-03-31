@@ -109,6 +109,16 @@ class Bimp_Menu extends BimpObject
 		);
 	}
 
+	public static function getNextItemPosition($id_parent = 0)
+	{
+		$where = 'menu_handler = \'bimptheme\'';
+		$where .= ' AND fk_menu = ' . $id_parent;
+		if (!$id_parent) {
+			$where .= ' OR fk_menu IS NULL OR fk_menu <= 0';
+		}
+		return ((int) self::getBdb()->getMax('menu', 'position', 'fk_menu') + 1);
+	}
+
 	// Rendus HTML:
 
 	public function renderTree()
@@ -216,16 +226,6 @@ class Bimp_Menu extends BimpObject
 		}
 
 		return $errors;
-	}
-
-	public static function getNextItemPosition($id_parent = 0)
-	{
-		$where .= 'menu_handler = \'bimptheme\'';
-		$where .= ' AND fk_menu = ' . $id_parent;
-		if (!$id_parent) {
-			$where .= ' OR fk_menu IS NULL OR fk_menu <= 0';
-		}
-		return ((int) self::getBdb()->getMax('menu', 'position', 'fk_menu') + 1);
 	}
 
 	public static function addMenuItem($title, $icon, $code, $url, $parent_path = '', $module = '', $bimp_object = '', $perms = '', $enabled = '')

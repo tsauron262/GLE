@@ -61,6 +61,7 @@ class InpiAPI extends BimpAPI
 		return $return;
 	}
 	public function getSocSiret($siren){
+		$siren = str_replace(' ', '', $siren);
 		$return = array();
 		foreach($this->getCache() as $soc) {
 			if($soc['siren'] == $siren) {
@@ -83,10 +84,14 @@ class InpiAPI extends BimpAPI
 		return $return;
 	}
 	public function getSiret($siret){
+		$siret = str_replace(' ', '', $siret);
 		$siren = substr($siret, 0, 9);
 		$return = array();
 		foreach($this->getCache() as $soc) {
 			if($soc['siren'] == $siren) {
+				if($siret == $siren && isset($soc['siretP'])){
+					$siret = $soc['siretP'];
+				}
 				foreach ($soc['etablissements'] as $etb) {
 					if ($etb['siret'] == $siret) {
 						$return = array(
@@ -115,6 +120,7 @@ class InpiAPI extends BimpAPI
 	}
 	public function getCompany($name = '', $siretSiren = '', &$errors = array())
 	{
+		$siretSiren = str_replace(' ', '', $siretSiren);
 //		return array();
 		$filters = array();
 		if ($siretSiren != '') {
@@ -131,7 +137,7 @@ class InpiAPI extends BimpAPI
 
 		$data = $this->getSoc($filters, $errors);
 
-
+		$siretP = '';
 		foreach($data as $result) {
 			if (isset($result['formality'])) {
 				$etab = array();
@@ -152,6 +158,7 @@ class InpiAPI extends BimpAPI
 				}
 				if(isset($result['formality']['content']['personneMorale']['etablissementPrincipal'])){
 					$etab[] = $result['formality']['content']['personneMorale']['etablissementPrincipal'];
+					$siretP = $result['formality']['content']['personneMorale']['etablissementPrincipal']['descriptionEtablissement']['siret'];
 				}
 				foreach ($result['formality']['content']['personneMorale']['autresEtablissements'] as $etablissement) {
 					$etab[] = $etablissement;
@@ -159,6 +166,7 @@ class InpiAPI extends BimpAPI
 
 				if(isset($result['formality']['content']['personnePhysique']['etablissementPrincipal'])){
 					$etab[] = $result['formality']['content']['personnePhysique']['etablissementPrincipal'];
+					$siretP = $result['formality']['content']['personnePhysique']['etablissementPrincipal']['descriptionEtablissement']['siret'];
 				}
 				foreach ($result['formality']['content']['personnePhysique']['autresEtablissements'] as $etablissement) {
 					$etab[] = $etablissement;
@@ -182,7 +190,8 @@ class InpiAPI extends BimpAPI
 					'name'           => $name,
 					'adresse'        => $newAdresse,
 					'siren'          => $siren,
-					'etablissements' => $newEtab
+					'etablissements' => $newEtab,
+					'siretP'		 => $siretP
 				);
 			}
 

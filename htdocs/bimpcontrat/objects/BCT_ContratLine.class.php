@@ -67,6 +67,7 @@ class BCT_ContratLine extends BimpObject
 				return (int) ($user->admin || !empty($user->rights->bimpcontract->to_validate));
 
 			case 'periodicFacProcess':
+			case 'facRegul':
 				return $user->admin || $user->rights->facture->creer;
 
 			case 'periodicAchatProcess':
@@ -4679,7 +4680,7 @@ class BCT_ContratLine extends BimpObject
 
 			$html .= '<td style="text-align: center"><span class="badge badge-important">' . abs($total_achats_qty - $total_fac_qty) . '</span></td>';
 			$html .= '<td style="text-align: center">';
-			if ($this->isActionAllowed('regul') && $this->canSetAction('regul')) {
+			if ($this->isActionAllowed('facRegul') && $this->canSetAction('facRegul')) {
 				$onclick = $this->getJsActionOnclick('facRegul', array(), array(
 					'form_name' => 'fac_regul'
 				));
@@ -5728,18 +5729,22 @@ class BCT_ContratLine extends BimpObject
 	public function checkStatus(&$infos = array())
 	{
 		if ($this->isLoaded()) {
-			$lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
+			$sub_lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
 				'id_parent_line'     => $this->id,
 				'linked_object_name' => array('bundle', 'bundleCorrect')
 			));
 
-			if (!empty($lines)) {
+			if (!empty($sub_lines)) {
+				if ((int) $this->getData('achat_periodicity')) {
+					$this->updateField('achat_periodicity', 0);
+				}
+
 				$date_ouv_prev = $this->getData('date_ouverture_prevue');
 				$date_ouverture = $this->getData('date_ouverture');
 				$date_debut_validite = $this->getData('date_debut_validite');
 				$date_fin_validite = $this->getData('date_fin_validite');
 				$date_cloture = $this->getData('date_cloture');
-				foreach ($lines as $line) {
+				foreach ($sub_lines as $line) {
 					$line_infos = array();
 					$data_correct = array();
 
@@ -5795,9 +5800,9 @@ class BCT_ContratLine extends BimpObject
 						}
 					}
 
+					$infos[] = 'Facturations ' . ($fac_ended ? 'terminées' : 'en cours');
 					if ((int) $fac_ended !== (int) $this->getData('fac_ended')) {
 						$this->updateField('fac_ended', (int) $fac_ended);
-						$infos[] = 'Facturations terminées';
 					}
 
 					// Vérif achats terminés:
@@ -5811,30 +5816,29 @@ class BCT_ContratLine extends BimpObject
 						}
 					}
 
+					$infos[] = 'Achats ' . ($achat_ended ? 'terminés' : 'en cours');
 					if ((int) $achat_ended !== (int) $this->getData('achat_ended')) {
 						$this->updateField('achat_ended', (int) $achat_ended);
-						$infos[] = 'Achats terminés';
 					}
 
-					if ($fac_ended && $achat_ended && $date_fin < date('Y-m-d') . ' 00:00:00') {
-						$all_children_closed = true;
-
-						$lines = BimpCache::getBimpObjectObjects('bimpcontrat', 'BCT_ContratLine', array(
-							'id_parent_line'     => $this->id,
-							'linked_object_name' => array('bundle', 'bundleCorrect')
-						));
-						if (!empty($lines)) {
-							foreach ($lines as $line) {
-								$line->checkStatus();
-								if ((int) $line->getData('statut') > 0 && (int) $line->getData('statut') < self::STATUS_CLOSED) {
-									$all_children_closed = false;
-									break;
+					if ($fac_ended && $achat_ended) {
+						if ($date_fin < date('Y-m-d') . ' 00:00:00') {
+							$all_children_closed = true;
+							if (!empty($sub_lines)) {
+								foreach ($sub_lines as $line) {
+									$line->checkStatus();
+									if ((int) $line->getData('statut') > 0 && (int) $line->getData('statut') < self::STATUS_CLOSED) {
+										$all_children_closed = false;
+										break;
+									}
 								}
 							}
-						}
 
-						if ($all_children_closed) {
-							$new_status = self::STATUS_CLOSED;
+							if ($all_children_closed) {
+								$new_status = self::STATUS_CLOSED;
+							}
+						} else {
+							$infos[] = 'Date de fin non atteinte (' . date('d / m / Y', strtotime($date_fin)) . ')';
 						}
 					}
 
@@ -5846,6 +5850,8 @@ class BCT_ContratLine extends BimpObject
 						} else {
 							$infos[] = 'Màj statut (' . $new_status . ')';
 						}
+					} else {
+						$infos[] = 'Aucun changement de statut';
 					}
 				}
 			}

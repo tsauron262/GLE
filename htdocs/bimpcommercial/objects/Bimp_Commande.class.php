@@ -3678,7 +3678,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                             $infoClient = " du client " . $client->getLink();
                         }
 
-						$code = 'logistique_ok';
+						$code = 'logistique_commande_ok';
 						$sujet = "Logistique commande OK";
 						$msg = 'Bonjour, la logistique de votre commande ' . $this->getLink() . $infoClient . ' est compléte ';
 						BimpUserMsg::envoiMsg($code, $sujet, $msg, $this);
@@ -5260,9 +5260,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
             // Envoi des e-mails:
             foreach ($data as $id_commercial => $commandes) {
-                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_commercial);
+                $user_commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_commercial);
 
-                if (BimpObject::objectLoaded($user)) {
+                if (BimpObject::objectLoaded($user_commercial)) {
                     $subject = 'Produits à durée limitée arrivant bientôt à échéance';
                     $html = '';
                     $nProds = 0;
@@ -5329,7 +5329,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 					$msg .= $html;
 
 					$return .= 'Mail to ' . ($id_commercial) . ' (' . $nProds . ' produit(s)) => ';
-					if (!count(BimpUserMsg::envoiMsg('product_duree_limitee_expire_soon', $subject, $msg, $id_commercial))) {
+					if (!count(BimpUserMsg::envoiMsg('product_duree_limitee_expire_soon', $subject, $msg, $user_commercial))) {
 						$return .= '[OK]';
 						$bdb->update('bimp_commande_line', array(
 							'echeance_notif_send' => 1

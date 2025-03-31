@@ -27,13 +27,15 @@ if (!$user->admin) {
 	exit;
 }
 
-//echo 'Envoi : <br/>';
+define('MOD_DEV_SYN_MAIL', 'f.martinez@bimp.fr');
 
-///** @var Bimp_Commande $obj */
-////$obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', 104540);
-//$errors = BimpUserMsg::envoiMsg('code_erp', 'TEST MSG', 'Test test');
-//
-//echo '<pre>' . print_r($errors, 1) . '</pre>';
+echo 'Envoi : <br/>';
+//$obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', 104540);
+
+$centres = BimpCache::getCentresData();
+$centres['AB']['mail'] = '';
+$errors = BimpUserMsg::envoiMsg('sav_online_by_client', 'TEST MSG', 'Test test', $centres['AB'], array(), true);
+echo 'Err<pre>' . print_r($errors, 1) . '</pre>';
 
 echo '<br/>FIN';
 echo '</body></html>';

@@ -7,6 +7,7 @@
 3504000 : bimpvalidation
 3505000 : bimpcontrat
 3506000 : bimpapple
-3507000 : bimplocations
+3507000 : bimplocation
+3508000 : bimpticket
 
 

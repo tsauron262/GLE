@@ -91,6 +91,12 @@ class actioncomm_event extends AbstractNotification {
 	}
 
 	getElementHeaderButtons(element, key) {
+		if (element.close_btn) {
+			var onclick = 'setObjectAction($(this), {module: \'bimpcore\', object_name: \'Bimp_ActionComm\', id_object: ' + element.id + '}';
+			onclick += ', \'done\', {}, null, null, {display_processing: false})';
+			return '<button name="close" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fas fa5-check iconLeft"></i>Terminer</button>';	
+		}		
+		
 		return '';
 	}
 

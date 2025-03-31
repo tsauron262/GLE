@@ -9,20 +9,29 @@ class BimpUserMsg
 			'module' => 'bimpcommercial',
 			'params' => array('allow_default' => 1),
 		),
-		'logistique_ok'                              => array(    // \Bimp_Commande::checkLogistiqueStatus
+		'logistique_commande_ok'                     => array(    // \Bimp_Commande::checkLogistiqueStatus
 			'label'  => 'La logistique complétée pour de votre commande XXX du client ...',
 			'dests'  => 'object::commercial',
 			'module' => 'bimpcommercial',
+			'params' => array(
+				'check_availability' => 0
+			)
 		),
 		'change_statut_facturation'                  => array(    // \Bimp_Commande::checkInvoiceStatus
 			'label'  => 'Changement de statut de facturation',
 			'dests'  => 'object::commercial',
 			'module' => 'bimpcommercial',
+			'params' => array(
+				'check_availability' => 0
+			)
 		),
 		'valide_commande_client'                     => array(    // \Bimp_Commande::onValidate
 			'label'  => 'Commande XXX pour le client ... a été validée',
 			'dests'  => 'object::commercial',
 			'module' => 'bimpcommercial',
+			'params' => array(
+				'check_availability' => 0
+			)
 		),
 		'rappel_commande_brouillon'                  => array(    // \Bimp_Commande::sendRappelCommandesBrouillons
 			'label'  => 'X factures en brouillon depuis ... jours, merci de les valider',
@@ -38,7 +47,7 @@ class BimpUserMsg
 		),
 		'product_duree_limitee_expire_soon'          => array(    // \Bimp_Commande::checkLinesEcheances
 			'label'  => 'Produits à durée limitée arrivant bientôt à échéance',
-			'dests'  => 'object::commercial',
+			'dests'  => 'object::user',
 			'module' => 'bimpcommercial',
 		),
 		'facture_fourn_brouillon'                    => array(        // \Bimp_FactureFourn::sendInvoiceDraftWhithMail
@@ -50,6 +59,9 @@ class BimpUserMsg
 			'label'  => 'Un acompte de X € a été ajouté à la facture XXX',
 			'dests'  => 'object::commercial',
 			'module' => 'bimpcommercial',
+			'params' => array(
+				'check_availability' => 0
+			)
 		),
 		'rappel_facture_brouillon'                   => array( // \Bimp_Facture::sendRappelFacturesBrouillons
 			'label'  => 'X factures en brouillon depuis ... jours, merci de les valider',
@@ -105,6 +117,9 @@ class BimpUserMsg
 			'label'  => 'L\'avenant N° XXX a été activé provisoirement. Vous disposez de 15 jours pour le faire signer par le client, après ce délai, l\'avenant sera abandonné automatiquement.',
 			'dests'  => 'object::commercial',
 			'module' => 'bimpcontract',
+			'params' => array(
+				'check_availability' => 0
+			)
 		),
 		'avenant_signe'                              => array(    // \BContract_avenant::signed
 			'label'  => 'L\'avenant N°AV XXX sur le contrat XXX a été sigé le d/m/Y.',
@@ -338,7 +353,7 @@ class BimpUserMsg
 		),
 		'message_ERP_nonlu'                          => array(    // \BimpNote::cronNonLu
 			'label'  => 'Vous avez X message(s) non lu. Pour désactiver cette relance, vous pouvez soit répondre au message de la pièce émettrice (dans les notes de pied de page) soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.',
-			'dests'  => 'to::obj',
+			'dests'  => 'object::id_user',
 			'module' => 'bimpcore',
 		),
 		'update_prices_file_marge_neg'               => array( // \BDS_ImportsLdlcProcess::executeUpdateFromFile
@@ -348,8 +363,8 @@ class BimpUserMsg
 			'type_metier' => 'devs'
 		),
 		'notif_commercial_courrier_retard_regl'      => array( // \BDS_RelancesClientsProcess::processNotifsCommerciaux
-			'label'  => 'LE client XXX va recevoir sous 5 jours une letre de rappel / une mise en demeure concernant les retards de réglement ci-après. Si vous pensez que cette relance/mise en demeure n\'a pas lieu d\'être, merci d\'en informer immédiatement Recouvrement en justifiant votre demande (par exemple : règlement en notre possession, litige client, etc.) ...',
-			'dests'  => 'to::obj',
+			'label'  => 'Le client XXX va recevoir sous 5 jours une lettre de rappel / une mise en demeure concernant les retards de réglement ci-après. Si vous pensez que cette relance/mise en demeure n\'a pas lieu d\'être, merci d\'en informer immédiatement Recouvrement en justifiant votre demande (par exemple : règlement en notre possession, litige client, etc.) ...',
+			'dests'  => 'object::id_user',
 			'module' => 'bimpdatasync',
 		),
 		'probleme_stock'                             => array( //	\controlStock::go
@@ -440,12 +455,12 @@ class BimpUserMsg
 		),
 		'relance_FI_brouillon_Jplus1'                => array(    // \Cron::relanceTechBrouillonJplus1etPlus
 			'label'  => 'Voici la liste de vos fiches d’interventions en brouillon dont la date d’intervention est dépassée',
-			'dests'  => 'object::user_tech',
+			'dests'  => 'object::user',
 			'module' => 'bimptechnique',
 		),
 		'relance_FI_aFact_impoderable'               => array(    // \Cron::relanceCommercial
 			'label'  => 'voici la liste de vos fiches d’interventions en attente de facturation/comportant de l\'impodérable',
-			'dests'  => 'object::user_tech',
+			'dests'  => 'object::user',
 			'module' => 'bimptechnique',
 		),
 		'attribution_FI'                             => array(    // \BT_ficheInter::setSigned
@@ -472,22 +487,22 @@ class BimpUserMsg
 		),
 		'notif_create_FI'                            => array(    // \BT_ficheInter::create
 			'label'  => 'Une fiche d\'intervention vous a été attribuée. Fiche d\'intervention: XXX, Date prévue de l\'intervention: d/m/Y',
-			'dests'  => 'object::user_tech,conf::debugerp_email',
+			'dests'  => 'object::user',
 			'module' => 'bimptechnique',
 		),
 		'notif_change_tech_FI'                       => array(    // \BT_ficheInter::update
 			'label'  => 'La fiche d\'intervention XXX vous a été attribuée. Ref XXX. Client: XXX. Changement par : XXX. Pour plus de détails rendez-vous sur la fiche d\'intervention',
-			'dests'  => 'object::user_tech',
+			'dests'  => 'object::user',
 			'module' => 'bimptechnique',
 		),
 		'notif_change_horaire_FI'                    => array(    // \BT_ficheInter::update
 			'label'  => 'La fiche d\'intervention XXX a été modifiée au niveau des horaires. Nouveaux horaires du ... au ...',
-			'dests'  => 'object::user_tech',
+			'dests'  => 'object::user',
 			'module' => 'bimptechnique',
 		),
 		'notif_delete_FI'                            => array(    // \BT_ficheInter::delete
 			'label'  => 'La fiche d\'intervention XXX a été supprimée par client XXX. Commandes: ...',
-			'dests'  => 'object::user_tech,to::v.gilbert@bimp.fr',
+			'dests'  => 'object::user,to::v.gilbert@bimp.fr',
 			'module' => 'bimptechnique',
 		),
 		'depassement_heure_contrat_delegation'       => array(    // \BT_ficheInter_det::validate
@@ -736,9 +751,9 @@ class BimpUserMsg
 		'canal_diffusion'    => 'email',
 		'def_abo'            => 1,
 		'type_metier'        => 'metier',
-		'check_availability' => 1,
+		'check_availability' => 0,
 		'allow_delegations'  => 1,
-		'allow_superior'     => 0,
+		'allow_superior'     => 1,
 		'allow_default'      => 0
 	);
 
@@ -756,6 +771,7 @@ class BimpUserMsg
 
 			$params['active'] = self::isMsgActive($code);
 			$um['params'] = $params;
+
 			return $um;
 		}
 
@@ -776,7 +792,7 @@ class BimpUserMsg
 		return (int) BimpCore::getConf('userMessages__' . $code . '__msgActive', 1);
 	}
 
-	public static function envoiMsg($code, $sujet, $contenu, $obj = null, $piecejointe = array())
+	public static function envoiMsg($code, $sujet, $contenu, $obj = null, $piecejointe = array(), $debug = false)
 	{
 		$errors = array();
 
@@ -858,7 +874,7 @@ class BimpUserMsg
 								case 'user':
 									if ((is_a($obj, 'Bimp_User') || is_a($obj, 'User')) && BimpObject::objectLoaded($obj)) {
 										if (!in_array($obj->id, $id_users)) {
-											$id_users[] = $obj->id();
+											$id_users[] = $obj->id;
 										}
 									} else {
 										$errors[] = 'User : objet invalide';
@@ -946,8 +962,10 @@ class BimpUserMsg
 										$shipToUsers = Bimp_User::getUsersByShipto($centre['shipTo']);
 										if (!empty($shipToUsers)) {
 											foreach ($shipToUsers as $u) {
-												$id_users[] = $u->id;
+												$id_users[] = $u['id'];
 											}
+										} else {
+											$errors[] = 'PAS DE USERS POUR LE SHIPTO ' . $centre['shipTo'];
 										}
 									}
 
@@ -1010,7 +1028,7 @@ class BimpUserMsg
 										if (BimpObject::objectLoaded($superior) && $superior->getData('statut') && (!$params['check_availability'] || $superior->isAvailable())) {
 											$userDestinataires[] = $superior;
 											$idsDejaAjoutes[] = $superior->id;
-											$redir_reasons[$superior->id] = 'Message recu par délégation de ' . $user->getFullName();
+											$redir_reasons[$superior->id] = 'Message recu en tant que supérieur de ' . $user->getFullName() .' car cet utilisateur ' . $unallowed_reason;
 										}
 									}
 								}
@@ -1065,8 +1083,16 @@ class BimpUserMsg
 				}
 
 				if (!empty($to_emails)) {
+					foreach ($to_emails as $key => $email) {
+						if (!BimpValidate::isEmail($email)) {
+							unset($to_emails[$key]);
+							$errors[] = 'email non valide ' . $email;
+						} else {
+							$to_emails[$key] = $email;
+						}
+					}
+
 					$to = implode(', ', $to_emails);
-					$to = BimpTools::cleanEmailsStr($to);
 					$filename_list = ($piecejointe ? $piecejointe[0] : array());
 					$mimetype_list = ($piecejointe ? $piecejointe[1] : array());
 					$mimefilename_list = ($piecejointe ? $piecejointe[2] : array());
@@ -1076,7 +1102,7 @@ class BimpUserMsg
 
 						foreach ($redir_reasons as $key => $redir_reason) {
 							if (is_string($key)) {
-								$header .= $key .' : ' . $redir_reason . "\n";
+								$header .= $key . ' : ' . $redir_reason . "\n";
 							} elseif (is_int($key)) {
 								$user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $key);
 								if (BimpObject::objectLoaded($user)) {
@@ -1093,7 +1119,7 @@ class BimpUserMsg
 						$errors[] = 'Echec de l\'envoi du message par e-mail';
 					}
 				} else {
-					$errors[] = 'Aucun destinataire trouvé pour le message "' . $code . '"';
+					BimpCore::addlog('Message utilisateur "' . $code . '" non envoyé (aucun destinataire)', 2, 'email', (is_a($obj, 'BimpObject') ? $obj : ''));
 				}
 			}
 

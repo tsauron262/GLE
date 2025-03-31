@@ -2968,7 +2968,7 @@ class BimpCache
 						'code'                   => $centre->getData('code'),
 						'label'                  => $centre->getData('label'),            // 2
 						'tel'                    => $centre->getData('tel'),            // 0
-						'mail'                   => $centre->getData('mail'),            // 1
+						'mail'                   => $centre->getData('email'),            // 1
 						'address'                => $centre->getData('address'),        // 7
 						'zip'                    => $centre->getData('zip'),            // 5
 						'town'                   => $centre->getData('town'),            // 6

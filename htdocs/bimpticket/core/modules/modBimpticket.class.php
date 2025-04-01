@@ -95,6 +95,11 @@ class modBimpticket extends DolibarrModules {
     public function init($options = '') {
 		$sql = array();
 
+		if (!BimpCore::isModuleActive('ticket')) {
+			setEventMessage('Module dolibarr "ticket" non installé. Veuillez l\'installer préalablement', 'errors');
+			return 0;
+		}
+
 		require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 		$name = 'module_version_' . strtolower($this->name);
 
@@ -105,6 +110,7 @@ class modBimpticket extends DolibarrModules {
 				setEventMessage('Echec exécution du fichier install.sql - ' . $bdb->err(), 'errors');
 			}
 		}
+
 		return $this->_init($sql, $options);
     }
 

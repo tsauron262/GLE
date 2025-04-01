@@ -47,7 +47,7 @@ class BC_Panel extends BimpComponent
 
         $this->content_only = (int) $content_only;
         $this->level = $level;
-        $this->identifier = $object->object_name . '_' . ($name ? $name . '_' : '') . static::$type . BimpTools::randomPassword(10, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
+        $this->identifier = $object->object_name . '_' . ($name ? $name . '_' : '') . static::$type . BimpTools::randomPassword(10, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', false);
 
         if (BimpObject::objectLoaded($object)) {
             $this->identifier .= '_' . $object->id;

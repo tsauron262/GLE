@@ -67,6 +67,7 @@ class BCT_ContratLine extends BimpObject
 				return (int) ($user->admin || !empty($user->rights->bimpcontract->to_validate));
 
 			case 'periodicFacProcess':
+			case 'facRegul':
 				return $user->admin || $user->rights->facture->creer;
 
 			case 'periodicAchatProcess':
@@ -4679,7 +4680,7 @@ class BCT_ContratLine extends BimpObject
 
 			$html .= '<td style="text-align: center"><span class="badge badge-important">' . abs($total_achats_qty - $total_fac_qty) . '</span></td>';
 			$html .= '<td style="text-align: center">';
-			if ($this->isActionAllowed('regul') && $this->canSetAction('regul')) {
+			if ($this->isActionAllowed('facRegul') && $this->canSetAction('facRegul')) {
 				$onclick = $this->getJsActionOnclick('facRegul', array(), array(
 					'form_name' => 'fac_regul'
 				));

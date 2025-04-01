@@ -108,6 +108,10 @@ lists_cols:
         label: Mail
         value:
             callback: getMail
+    valStock:
+        label: Valorisation achat HT
+        value:
+            callback: getValStock
 
 lists:
     default:
@@ -130,6 +134,7 @@ lists:
             zip:
             town:
             statut:
+            valStock:
 
 searches:
     default:

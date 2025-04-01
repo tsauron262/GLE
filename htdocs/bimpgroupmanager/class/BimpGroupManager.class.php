@@ -324,7 +324,7 @@ class BimpGroupManager {
             return 0;
         }
         //dol_syslog("Ajout au groupe ".$parentid . " le user ".$user->id, 3);
-        if (! is_object($user->oldcopy)) 
+        if (! is_object($user->oldcopy))
             $user->oldcopy = clone $user;
         if ($user->SetInGroup($parentid, $entity)) {
             $this->initCache();
@@ -337,7 +337,7 @@ class BimpGroupManager {
     /**
      * Caches
      */
-    
+
     function getGroup($id) {
         if (!isset(static::$cacheStatic['tabGrp'][$id])) {
             $grp = new UserGroup($this->db);
@@ -346,23 +346,23 @@ class BimpGroupManager {
         }
         return static::$cacheStatic['tabGrp'][$id];
     }
-    
+
     function getGroupName($id) {
         $sql = $this->db->query('SELECT nom FROM '.MAIN_DB_PREFIX.'usergroup WHERE rowid = '.$id);
         while($ln = $this->db->fetch_object($sql)){
             return $ln->nom;
         }
     }
-    
+
     /* Get all groups id where the user is */
 
-    function getGroupIdByUserId($userid, $entity = 1) {        
+    function getGroupIdByUserId($userid, $entity = 1) {
         if (!isset(static::$cacheStatic['grpsUser'][$userid])) {
             $groupids = array();
             $sql = "SELECT fk_usergroup";
             $sql.= " FROM " . MAIN_DB_PREFIX . "usergroup_user";
-            $sql.= " WHERE fk_user=" . $userid. ($entity !== '' ? ' AND entity='.$entity : '');
-            
+            $sql.= " WHERE fk_user=" . $userid. ($entity != '' ? ' AND entity='.$entity : '');
+
             $result = $this->db->query($sql);
             if ($result and mysqli_num_rows($result) > 0) {
                 while ($obj = $this->db->fetch_object($result)) {

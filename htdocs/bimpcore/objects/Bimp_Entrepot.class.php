@@ -18,6 +18,11 @@ class Bimp_Entrepot extends BimpObject
 		return (isset($user->rights->stock->creer) && $user->rights->stock->creer);
 	}
 
+	public function getValStock(){
+		$infos = $this->dol_object->nb_products();
+		return BimpTools::displayMoneyValue($infos['value']);
+	}
+
 	public function canDelete()
 	{
 		global $user;

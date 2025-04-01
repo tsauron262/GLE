@@ -11426,6 +11426,44 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 	// Gestion statique des objets:
 
+
+	public static function createOrUpdateBimpObject($module, $object_name, $dataFiltre, $data, $deleteIfMultiple, $force_create = false, &$errors = array(), &$warnings = array(), $no_transactions_db = false, $no_html = false)
+	{
+		//atention filtre doit être unique, sinon la ligne serra recrée
+		$errors = array();
+		if (!count($dataFiltre)) {
+			$errors[] = 'Pas de filtre createOrUpdateBimpObject';
+		} else {
+			$obj = BimpCache::findBimpObjectInstance($module, $object_name, $dataFiltre, $deleteIfMultiple, $deleteIfMultiple, false);
+			if (is_null($obj) || !BimpObject::objectLoaded($obj)) {
+				$data = BimpTools::merge_array($dataFiltre, $data);
+				return static::createBimpObject($module, $object_name, $data, $force_create, $errors, $warnings, $no_transactions_db, $no_html);
+			}
+			else{
+				$maj = false;
+				foreach($data as $key => $valueAComparer1){
+					$valueAComparer2 = str_replace(' ', '', $obj->getData($key));
+					$valueAComparer1 = str_replace(' ', '', $valueAComparer1);
+					if($valueAComparer2 == 0)
+						$valueAComparer2 = '';
+					if($valueAComparer1 == 0)
+						$valueAComparer1 = '';
+					if($valueAComparer1 != $valueAComparer2){
+						$maj = true;
+						break;
+					}
+				}
+				if($maj) {
+					$errors = BimpTools::merge_array($errors, $obj->updateFields($data, $force_create, $warnings));
+				}
+				return $obj;
+			}
+
+
+		}
+		return null;
+	}
+
 	public static function createBimpObject($module, $object_name, $data, $force_create = false, &$errors = array(), &$warnings = array(), $no_transactions_db = false, $no_html = false)
 	{
 		$instance = static::getInstance($module, $object_name);

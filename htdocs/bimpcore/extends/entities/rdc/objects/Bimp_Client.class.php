@@ -283,7 +283,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 		// on a enregistré le shopId => on met à jour le Tiers avec API Mirakl S20;
 		if ($this->getData('shopid') != $this->getInitData('shopid')) {
-			$this->appelMiraklS20(BimpTools::getPostFieldValue('shopid'));
+//			$this->appelMiraklS20(BimpTools::getPostFieldValue('shopid'));
 		}
 
 		return parent::update($warnings, $force_update);

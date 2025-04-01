@@ -29,6 +29,10 @@ objects:
                             - rowid
 
 fields:
+    zip:
+        required: 0
+    town:
+        required: 0
     fournisseur: unset
     code_compta: unset
     shopid:

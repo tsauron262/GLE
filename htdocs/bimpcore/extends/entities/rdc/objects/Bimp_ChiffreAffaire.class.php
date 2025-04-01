@@ -25,7 +25,8 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject {
 	public function getParentObject($type) 	{
 		return self::$parentObjectArray[$type];
 	}
-	public function getParent_IdProperty($type) 	{
+	public function getParent_IdProperty() 	{
+		$type = BimpTools::getPostFieldValue('type_obj', $this->getData('type_obj'), 'int');
 		return self::$parentIdProperty[$type];
 	}
 

@@ -104,19 +104,38 @@ class Bimp_Menu extends BimpObject
 
 	public function getPositionsFilters()
 	{
-		return array(
-			'fk_menu' => (int) $this->getData('fk_menu')
+		$filters = array(
+			'menu_handler' => 'bimptheme'
 		);
+
+		$id_parent = (int) $this->getData('fk_menu');
+
+		if ($id_parent) {
+			$filters['fk_menu'] = $id_parent;
+		} else {
+			$filters['or_parent'] = array(
+				'or_field' => array(
+					'fk_menu' => array(
+						0,
+						'IS_NULL'
+					)
+				)
+			);
+		}
+
+		return $filters;
 	}
 
 	public static function getNextItemPosition($id_parent = 0)
 	{
 		$where = 'menu_handler = \'bimptheme\'';
-		$where .= ' AND fk_menu = ' . $id_parent;
-		if (!$id_parent) {
-			$where .= ' OR fk_menu IS NULL OR fk_menu <= 0';
+		if ($id_parent) {
+			$where .= ' AND fk_menu = ' . $id_parent;
+		} else {
+			$where .= ' AND (fk_menu IS NULL OR fk_menu <= 0)';
 		}
-		return ((int) self::getBdb()->getMax('menu', 'position', 'fk_menu') + 1);
+
+		return (int) self::getBdb()->getMax('menu', 'position', $where) + 1;
 	}
 
 	// Rendus HTML:
@@ -438,7 +457,7 @@ class Bimp_Menu extends BimpObject
 				$sql .= ');' . "\n";
 
 				$children = BimpCache::getBimpObjectObjects('bimptheme', 'Bimp_Menu', array(
-					'fk_menu' => (int) $this->id,
+					'fk_menu'      => (int) $this->id,
 					'synchronised' => 1
 				));
 

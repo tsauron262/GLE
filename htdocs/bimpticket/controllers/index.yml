@@ -6,7 +6,7 @@ bootstrap: 1
 objects:
     ticket:
         instance:
-            bimp_object: BTK_Ticket
+            bimp_object: Bimp_Ticket
 
 sections:
     - type: tabs

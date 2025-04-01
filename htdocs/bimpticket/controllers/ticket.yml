@@ -11,7 +11,7 @@ title:
 objects:
     ticket:
         instance:
-            bimp_object: BTK_Ticket
+            bimp_object: Bimp_Ticket
             id_object:
                 request: id
 

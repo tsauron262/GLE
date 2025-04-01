@@ -1,9 +1,9 @@
 <?php
 //Entity: Rue du commerce (rdc)
 
-require_once DOL_DOCUMENT_ROOT . '/bimpticket/objects/BTK_Ticket.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpticket/objects/Bimp_Ticket.class.php';
 
-class BTK_Ticket_ExtEntity extends BTK_Ticket
+class Bimp_Ticket_ExtEntity extends Bimp_Ticket
 {
 	public static $types = array(
 		1  => 'Intégration',

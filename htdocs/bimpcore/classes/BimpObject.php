@@ -672,6 +672,7 @@ class BimpObject extends BimpCache
 				$property = 'id_parent';
 			}
 		}
+
 		return $property;
 	}
 
@@ -7339,14 +7340,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				$filters = array();
 			}
 			$parent_id_property = $this->getParentIdProperty();
-			if (!is_null($parent_id_property)) {
+			if ($parent_id_property) {
 				$id_parent = $this->getData($parent_id_property);
-				if (is_null($id_parent) || !$id_parent) {
+				if (!$id_parent) {
 					return '';
 				}
 				$filters[$parent_id_property] = $id_parent;
 			}
-
 
 			$table = $this->getTable();
 			$primary = $this->getPrimary();
@@ -7357,6 +7357,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				if ($this->db->update($table, array(
 						$this->position_field => (int) $new_position
 					), '`' . $primary . '` = ' . (int) $this->id) <= 0) {
+					$errors[] = $this->db->err();
 					$check = false;
 				}
 
@@ -7376,6 +7377,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 							if ($this->db->update($table, array(
 									$this->position_field => (int) $i
 								), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
+								$errors[] = $this->db->err();
 								$check = false;
 							}
 						}
@@ -7390,7 +7392,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				if ($this->db->update($table, array(
 						$this->position_field => (int) $this->getNextPosition()
 					), '`' . $primary . '` = ' . $this->id) <= 0) {
-					$errors[] = $this->db->err();
+					$errors[] = '1 - ' . $this->db->err();
 					$check = false;
 				}
 
@@ -7416,7 +7418,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 								if ($this->db->update($table, array(
 										$this->position_field => ((int) $item[$this->position_field] - 1)
 									), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
-									$errors[] = $this->db->err();
+									$errors[] = '2 - ' . $this->db->err();
 									$check = false;
 								}
 							}
@@ -7440,7 +7442,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 								if ($this->db->update($table, array(
 										$this->position_field => ((int) $item[$this->position_field] + 1)
 									), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
-									$errors[] = $this->db->err();
+									$errors[] = '3 - ' . $this->db->err();
 									$check = false;
 								}
 							}
@@ -7452,7 +7454,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 						if ($this->db->update($table, array(
 								$this->position_field => $new_position
 							), '`' . $primary . '` = ' . $this->id) <= 0) {
-							$errors[] = $this->db->err();
+							$errors[] = '4 - ' . $this->db->err();
 							$check = false;
 						}
 					}
@@ -7460,14 +7462,18 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 					if ($check) {
 						$this->db->db->commit();
 					} else {
+						$errors[] = 'FAIl';
 						$this->db->db->rollback();
 					}
 				}
 			}
 
 			return $check;
+		} else {
+			$errors[] = 'Pas de positions';
 		}
 
+		$errors[] = 'ICI';
 		return false;
 	}
 

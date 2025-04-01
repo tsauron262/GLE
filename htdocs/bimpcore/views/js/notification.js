@@ -671,6 +671,9 @@ function BimpNotifications() {
 
         // Variable définie coté PHP (BimpCore::getJsVars())
         if (typeof (bimp_notifications_actives) !== 'undefined') {
+			$.ajaxSetup({
+				cache: true
+			});
             for (const [id_notification, value] of Object.entries(bimp_notifications_actives)) {
                 $.getScript(dol_url_root + '/' + value.module + '/views/js/' + value.nom + '.js', function () {
                     eval('bimp_notifications.notifications[' + value.id_notification + '] = new ' + value.nom + '(' + value.id_notification + ', \'' + value.storage_key + '\');');

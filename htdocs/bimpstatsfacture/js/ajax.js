@@ -34,7 +34,8 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             nomFichier: nomFichier,
             is_customer: is_customer,
             typePlace: typePlace,
-            action: 'getFactures'
+			action: 'getFactures',
+			token: dol_token
         },
         error: function () {
             console.log("Erreur PHP");

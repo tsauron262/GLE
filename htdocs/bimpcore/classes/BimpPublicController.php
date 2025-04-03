@@ -443,7 +443,8 @@ class BimpPublicController extends BimpController
         $html = '';
 
         $html .= '<label for="email">Email</label><br/>';
-        $html .= '<input id="email" type="text" name="bic_reinit_pw_email" placeholder="Email" value="' . BimpTools::getValue('email', '', 'alphanohtml') . '">';
+		$html .= '<input id="email" type="text" name="bic_reinit_pw_email" placeholder="Email" value="' . BimpTools::getValue('email', '', 'alphanohtml') . '">';
+		$html .= '<input id="token" type="hidden" name="token" value="'.newToken().'"><br/>';
 
         return $html;
     }
@@ -465,6 +466,7 @@ class BimpPublicController extends BimpController
 
         $html .= '<br/><label for="confirm_pw">Confirmer votre nouveau mot de passe</label><br />';
         $html .= '<input id="confirm_pw" onkeyup="verif_pw()" type="password" name="bic_confirm_new_pw" placeholder="Confirmation">';
+		$html .= '<input id="token" type="hidden" name="token" value="'.newToken().'"><br/>';
 
         return $html;
     }

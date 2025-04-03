@@ -68,7 +68,7 @@ class BiAPI extends BimpAPI
 	}
 	public function getDefaultRequestsHeaders($request_name, &$errors = array())
 	{
-		return array('CURLOPT_USERPWD', $this->getParam('login') . ":" . $this->getParam('mdp'));
+		return array('CURLOPT_USERPWD' => $this->getParam('login') . ":" . $this->getParam('mdp'));
 	}
 
 

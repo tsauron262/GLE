@@ -56,7 +56,7 @@ class PisteAPI extends BimpAPI
         'access' => 'Token d\'accès'
     );
 
-    // Requêtes: 
+    // Requêtes:
 
     public function rechercheClientStructures($siret, $params = array(), &$errors = array(), &$warnings = array())
     {
@@ -67,7 +67,7 @@ class PisteAPI extends BimpAPI
         $params = BimpTools::overrideArray(array(
                     'fields' => array(
                         'structure' => array(
-                            'identifiantStructure'     => $siret,
+                            'identifiantStructure'     => str_replace(' ', '', $siret),
                             'typeIdentifiantStructure' => 'SIRET',
                             'statutStructure'          => 'ACTIF'
                         )
@@ -158,7 +158,7 @@ class PisteAPI extends BimpAPI
         return $return;
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function connect(&$errors = array(), &$warnings = array())
     {
@@ -484,7 +484,7 @@ class PisteAPI extends BimpAPI
         }
     }
 
-    // Install: 
+    // Install:
 
     public function install($title = '', &$warnings = array())
     {

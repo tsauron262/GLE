@@ -635,6 +635,17 @@ if (!defined('NOTOKENRENEWAL') && !defined('NOSESSION')) {
 
 //dol_syslog("CSRF info: ".defined('NOCSRFCHECK')." - ".$dolibarr_nocsrfcheck." - ".$conf->global->MAIN_SECURITY_CSRF_WITH_TOKEN." - ".$_SERVER['REQUEST_METHOD']." - ".GETPOST('token', 'alpha'));
 
+/*
+ * mod drsi
+ */
+
+if($_REQUEST['action'] == 'getUserNotifications' && !defined('NOCSRFCHECK'))
+	define('NOCSRFCHECK', 1);
+/*fmoddrsi*/
+
+
+
+
 // Check validity of token, only if option MAIN_SECURITY_CSRF_WITH_TOKEN enabled or if constant CSRFCHECK_WITH_TOKEN is set into page
 if ((!defined('NOCSRFCHECK') && empty($dolibarr_nocsrfcheck) && getDolGlobalInt('MAIN_SECURITY_CSRF_WITH_TOKEN')) || defined('CSRFCHECK_WITH_TOKEN')) {
 	// Array of action code where CSRFCHECK with token will be forced (so token must be provided on url request)

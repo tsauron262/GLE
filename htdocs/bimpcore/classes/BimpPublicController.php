@@ -107,14 +107,14 @@ class BimpPublicController extends BimpController
                 if (BimpTools::isSubmit('ajax')) {
                     die(json_encode(Array("request_id" => $_REQUEST['request_id'], 'nologged' => 1)));
                 } elseif ($this->login_file) {
-                    // Chargement du formulaire de connexion: 
+                    // Chargement du formulaire de connexion:
                     $this->displayLoginForm();
                 } else {
                     accessforbidden();
                     exit;
                 }
             } elseif ($this->new_pw_file && ((int) BimpTools::getPostFieldValue('bic_change_pw', 0, 'int') || (int) $userClient->getData('renew_required'))) {
-                // Formulaire changement de MDP: 
+                // Formulaire changement de MDP:
                 $_SESSION['back_url'] = $_SERVER['REQUEST_URI'];
                 $this->displayChangePwForm(array(), (int) $userClient->getData('renew_required'));
                 exit;
@@ -157,7 +157,7 @@ class BimpPublicController extends BimpController
         }
 
         if (!static::$user_client_required || BimpObject::objectLoaded($userClient)) {
-            // Si connexion ok: 
+            // Si connexion ok:
             global $user, $langs, $db;
             if (BimpObject::objectLoaded($userClient)) {
                 $langs->setDefaultLang(BIC_UserClient::$langs_list[$userClient->getData('lang')]);
@@ -215,13 +215,13 @@ class BimpPublicController extends BimpController
         return BimpCore::getConf('default_public_entity', null, 'bimpinterfaceclient');
     }
 
-    // Affichage standards: 
+    // Affichage standards:
 
     public function displayHeader()
     {
         global $hookmanager;
 
-        // Création et initialisation du BimpLayout: 
+        // Création et initialisation du BimpLayout:
         $layout = BimpLayout::getInstance();
         $layout->page_title = $this->getPageTitle();
 
@@ -249,7 +249,7 @@ class BimpPublicController extends BimpController
         parent::display();
     }
 
-    // Affichages forms publics: 
+    // Affichages forms publics:
 
     public function displayPublicForm($form_name, $params = array(), $form_errors = array())
     {
@@ -413,7 +413,7 @@ class BimpPublicController extends BimpController
                 ), $errors);
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderLoginFormInputsHtml()
     {
@@ -424,7 +424,8 @@ class BimpPublicController extends BimpController
         $html .= '<input id="bic_login_email" type="text" name="bic_login_email" placeholder="Email" value="' . (BimpTools::getValue('email', '', 'alphanohtml')) . '">';
         $html .= '<br/><br/>';
         $html .= '<label for="bic_login_pw">Mot de passe</label><br/>';
-        $html .= '<input id="bic_login_pw" type="password" name="bic_login_pw" placeholder="Mot de passe"><br/>';
+		$html .= '<input id="bic_login_pw" type="password" name="bic_login_pw" placeholder="Mot de passe"><br/>';
+		$html .= '<input id="token" type="hidden" name="token" value="'.newToken().'"><br/>';
         $html .= '<p style="text-align: center"><a href="javascript: var email = document.getElementById(\'bic_login_email\').value; window.location = \'' . BimpObject::getPublicBaseUrl() . 'display_public_form=1&public_form=reinitPw\' + (email ? \'&email=\' + email : \'\');">Mot de passe oublié</a></p>';
 
         if (BimpCore::getConf('use_sav', null, 'bimpsupport') && (int) BimpCore::getConf('sav_public_reservations', null, 'bimpsupport')) {
@@ -468,7 +469,7 @@ class BimpPublicController extends BimpController
         return $html;
     }
 
-    // Traitements forms publics: 
+    // Traitements forms publics:
 
     public function processPublicForm()
     {

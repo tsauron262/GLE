@@ -92,6 +92,20 @@ fields:
     commentaire_rdc:
         label: Commentaires
         type: text
+    outstanding_limit: unset
+    outstanding_limit_credit_check: unset
+    outstanding_limit_manuel: unset
+    outstanding_limit_manuel_old: unset
+    outstanding_limit_atradius: unset
+    date_atradius: unset
+    date_rappel_atradius: unset
+    date_demande_atradius: unset
+    status_atradius: unset
+    outstanding_limit_icba: unset
+    date_depot_icba: unset
+    id_atradius: unset
+    id_contact_relances: unset
+    filters: unset
 
 fields_tables:
     identity_rdc:

@@ -70,10 +70,6 @@ class BL_CommandeFournReception extends BimpObject
 				if (!$this->isLoaded($errors)) {
 					return 0;
 				}
-				global $user;
-				if ($user->login == 'f.martinez') {
-					return 1;
-				}
 				if (((int) $this->getData('status') !== self::BLCFR_RECEPTIONNEE) && !(int) $this->getData('validation_status')) {
 					$errors[] = 'La réception n\'est pas réceptionnée ou partiellement réceptionnée';
 					return 0;
@@ -121,11 +117,6 @@ class BL_CommandeFournReception extends BimpObject
 		if (!$this->isLoaded()) {
 			$errors[] = 'ID de la réception absent';
 		} else {
-			global $user;
-			if ($user->login == 'f.martinez') {
-				return 1;
-			}
-
 			if ((int) $this->getData('id_facture')) {
 				$errors[] = 'Cette réception a été facturée';
 			} else {

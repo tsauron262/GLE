@@ -13,124 +13,81 @@ class BiAPI extends BimpAPI
 	public static $include_debug_json = false;
 	public static $urls_bases = array(
 		'default' => array(
-			'prod' => 'https://mirakl-web.groupe-rueducommerce.fr/',
+			'prod' => 'http://ven-bi-1/OLAP/',
 			'test' => ''
 		)
 	);
 	public static $requests = array(
-		'getShops' => array(
-			'label'         => 'Récupération des informations des shops ',
-			'url'           => '/api/shops'
+		'req' => array(
+			'label'         => 'Requête',
+			'url'           => 'msmdpump.dll',
+			'content_type' 	=> 'text/xml',
 		),
 	);
-//    public static $tokens_types = array(
-//        'access' => 'Token d\'accès'
-//    );
+	public function sendReq($req){
+		$errors = array();
+		$xml = '<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <soap:Body>
+    <Execute xmlns="urn:schemas-microsoft-com:xml-analysis">
+      <Command>
+        <Statement>'.$req.'</Statement>
+      </Command>
+      <Properties>
+        <PropertyList>
+          <Catalog>SiteRDC</Catalog>
+          <Format>Tabular</Format>
+        </PropertyList>
+      </Properties>
+    </Execute>
+  </soap:Body>
+</soap:Envelope>';
 
-	// Requêtes:
 
-	// Settings:
+		$return = $this->execCurl('req', array(
+			'header_out'=>1,
+			'post_mode'	=> 'array',
+			'fields'	=> $xml,
+
+		), $errors);
+
+
+//		$ch = curl_init($this->getParam('url'));
+//		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: text/xml'));
+//		curl_setopt($ch, CURLOPT_HEADER, 1);
+//		curl_setopt($ch, CURLOPT_USERPWD, $this->getParam('login') . ":" . $this->getParam('mdp'));
+//		curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+//		curl_setopt($ch, CURLOPT_POST, 1);
+//		curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
+//		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+//		$return = curl_exec($ch);
+//		curl_close($ch);
+		return $return;
+	}
+	public function getDefaultRequestsHeaders($request_name, &$errors = array())
+	{
+		return array('CURLOPT_USERPWD', $this->getParam('login') . ":" . $this->getParam('mdp'));
+	}
+
 
 	public function testRequest(&$errors = array(), &$warnings = array())
 	{
-
-		try {
-			$hostname = "ven-bi-1.siege.ldlc.com/DATABI";
-			$port = 10060;
-			$dbname = "SiteRDC";
-			$username = "t.sauron";
-			$pw = 'zLpVTs$VwPmP01EUc7dfFu';
-			$dbh = new PDO ("dblib:host=$hostname:$port;dbname=$dbname","$username","$pw");
-		} catch (PDOException $e) {
-			echo "Failed to get DB handle: " . $e->getMessage() . "\n";
-			exit;
-		}
-		$stmt = $dbh->prepare("select name from master..sysdatabases where name = db_name()");
-		$stmt->execute();
-		while ($row = $stmt->fetch()) {
-			print_r($row);
-		}
-		unset($dbh); unset($stmt);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//		$serverName = "your_server_name";
-//		$connectionOptions = array(
-//			"Database" => "your_database_name",
-//			"UID" => "your_username",
-//			"PWD" => "your_password"
-//		);
-//
-//		// Établir la connexion
-//		$conn = sqlsrv_connect($serverName, $connectionOptions);
-//
-//		if ($conn === false) {
-//			die(print_r(sqlsrv_errors(), true));
-//		}
-//
-//		// Exécuter une requête
-//		$sql = 'EVALUATE
-//SUMMARIZECOLUMNS(
-//    Vendeurs[Nom],
-//    Vendeurs[FreeShipping],
-//KEEPFILTERS( TREATAS( {2025}, Calendrier[Année] )),
-//"CA Total HT", [CA Total HT]
-//)
-//ORDER BY
-//    Vendeurs[Nom] ASC,
-//    Vendeurs[FreeShipping] ASC;';
-//		$stmt = sqlsrv_query($conn, $sql);
-//
-//		if ($stmt === false) {
-//			die(print_r(sqlsrv_errors(), true));
-//		}
-//
-//		// Traiter les résultats
-//		while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-//			print_r($row);
-//		}
-//
-//		// Fermer la connexion
-//		sqlsrv_free_stmt($stmt);
-//		sqlsrv_close($conn);
-	}
-
-	public function getShopInfo($shop_id, &$errors = array())
-	{
-		$data = $this->execCurl('getShops', array(
-			'url_params' => array('shop_ids' => $shop_id)
-		), $errors);
-
-		return $data;
+		$return = $this->sendReq('SUMMARIZECOLUMNS(
+	Vendeurs[Nom],
+	Vendeurs[FreeShipping],
+	KEEPFILTERS( TREATAS( {2025}, Calendrier[Année] )),
+"CA Total HT", [CA Total HT]
+)
+ORDER BY
+    Vendeurs[Nom] ASC,
+    Vendeurs[FreeShipping] ASC');
+		$warnings[] = $return;
 	}
 
 
-	public function getDefaultRequestsHeaders($request_name, &$errors = array())
-	{
-		if ($this->options['mode'] === 'test') {
-			$apiKey = BimpTools::getArrayValueFromPath($this->params, 'test_api_key', '');
-		} else {
-			$apiKey = BimpTools::getArrayValueFromPath($this->params, 'prod_api_key', '');
-		}
 
-		return array(
-			'Authorization' => $apiKey,
-			'Accept'    => 'application/json'
-		);
-	}
 
 	// Install:
 

@@ -559,6 +559,7 @@ abstract class BimpAPI
 					if (!count($errors)) {
 						// Exécution:
 						$response = curl_exec($ch);
+						curl_close($ch);
 
 						// Traitement de la réponse:
 						$response_code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);

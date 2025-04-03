@@ -11938,7 +11938,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 					die('<script ' . BimpTools::getScriptAttribut() . '>window.location = \'' . $url . "';</script>");
 				}
 			} elseif ($btn && $url != "") {
-				return "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='" . $texteBtn . "'/><input type='hidden' name='redirectForce' value='1'/></form>";
+				return "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='" . $texteBtn . "'/><input type='hidden' name='redirectForce' value='1'/><input id='token' type='hidden' name='token' value='".newToken()."'></form>";
 			}
 		}
 		return '';

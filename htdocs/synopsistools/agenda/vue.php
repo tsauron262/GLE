@@ -180,7 +180,7 @@ $js .= <<<EOF
                 url: dol_url_root + "/synopsistools/agenda/ajax.php",
                 type: "POST",
                 datatype: "xml",
-                data: "setUser=" + calEvent.userId + "&id=" + calEvent.id + "&start=" + calEvent.start.getTime() + "&end=" + calEvent.end.getTime() + "&clone="+calEvent.clone,
+                data: "setUser=" + calEvent.userId + "&id=" + calEvent.id + "&start=" + calEvent.start.getTime() + "&end=" + calEvent.end.getTime() + "&clone="+calEvent.clone + "&token=" + dol_token,
                 error: function(msg) {
                     alert("erreur");
                 },

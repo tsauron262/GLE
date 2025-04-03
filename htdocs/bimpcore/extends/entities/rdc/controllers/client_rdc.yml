@@ -53,7 +53,7 @@ sections:
                 object: client
                 method: renderLinkedObjectList
                 params:
-                    - tickets
+                    - btk_tickets
                         
           - id: all_files
             title: Fichiers

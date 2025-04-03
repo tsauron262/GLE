@@ -1,0 +1,5 @@
+fields:
+    firstname:
+        required: 0
+    email:
+        required: 0

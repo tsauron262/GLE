@@ -315,7 +315,7 @@ class BimpInput
                 if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
                     $classes[] = 'allow_hashtags ';
                 }
-                
+
                 if (isset($options['auto_expand']) && (int) $options['auto_expand']) {
                     $classes[] = 'auto_expand ';
                 }
@@ -1152,6 +1152,15 @@ class BimpInput
                 }
                 break;
         }
+		if (BimpTools::getArrayValueFromPath($options, 'format', 0)) {
+			$display_js_format = BimpTools::getArrayValueFromPath($options, 'format', 0);
+			if($display_js_format == 'MM YYYY'){
+				$js_format = 'YYYY-MM-01';
+			}
+			elseif($display_js_format == 'YYYY'){
+				$js_format = 'YYYY-01-01';
+			}
+		}
 
         if (!$value && isset($options['display_now']) && $options['display_now']) {
             $value = date($php_format);
@@ -1731,7 +1740,7 @@ class BimpInput
 
     public static function renderSearchInputContainer($input_name, $search_type, $search_on_key_up, $min_chars = 1, $content = '', $extra_data = array())
     {
-        // Utilisé uniquement dans les barres de recherche des listes. 
+        // Utilisé uniquement dans les barres de recherche des listes.
         $html = '';
         $html .= '<div class="searchInputContainer"';
         $html .= ' data-field_name="' . $input_name . '"';

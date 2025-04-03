@@ -2,15 +2,15 @@
 
 class BC_Graph extends BC_Panel
 {
-    
+
     public $component_name = 'Graph';
     public static $type = 'graph';
-    
+
     public $fieldX = '';
-    
-    
+
+
     public function __construct(\BimpObject $object, $name, $content_only = false, $level = 1, $title = null, $icon = null, $id_config = null) {
-        
+
         $this->params_def['options'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['xDateConfig'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['date'] = array('data_type' => 'array', 'default' => array());
@@ -26,17 +26,17 @@ class BC_Graph extends BC_Panel
 //        print_r($_POST);
 //        echo '<br/><br/>';
 //        print_r(BimpTools::getPostFieldValue('param_filters'));die('rr');
-        
+
         return parent::__construct($object, $name, 'graph', $content_only, $level, $title, $icon, $id_config);
     }
-    
-    
-    
+
+
+
     public function renderHtmlContent() {
         if (count($this->errors)) {
             return parent::renderHtml();
         }
-        
+
         $html = '';
         $html .= '<div class="chartOption"></div>';
         $html .= '<div class="chartContainer" style="height: 800px; width: 100%;"></div>';
@@ -44,7 +44,7 @@ class BC_Graph extends BC_Panel
 
         return $html;
     }
-    
+
     public function initUserData($dataForm){
         /* recup des champ client*/
         $dataTmp = explode('&', $dataForm);
@@ -54,10 +54,10 @@ class BC_Graph extends BC_Panel
             if(isset($dataTmp2[1]))
                 $dataClient[$dataTmp2[0]] = $dataTmp2[1];
         }
-        
-        
+
+
         $this->formData = $this->params['options'];
-        
+
         if(is_array($this->params['xDateConfig']) && count($this->params['xDateConfig'])){
             if(isset($this->params['xDateConfig']['field']))
                 $this->fieldX = $this->params['xDateConfig']['field'];
@@ -79,7 +79,7 @@ class BC_Graph extends BC_Panel
                 if(in_array('year', $this->params['xDateConfig']['params']))
                         $this->formData['xDateConfig']['values']['year'] = 'Ans';
             }
-           
+
             if(isset($this->params['xDateConfig']['date1']) && $this->params['xDateConfig']['date1']){
                 $this->formData['date1'] = array(
                     'name' => 'Du',
@@ -101,7 +101,7 @@ class BC_Graph extends BC_Panel
                     }
                 }
             }
-           
+
             if(isset($this->params['xDateConfig']['date2']) && $this->params['xDateConfig']['date2']){
                 $this->formData['date2'] = array(
                     'name' => 'Au',
@@ -121,10 +121,10 @@ class BC_Graph extends BC_Panel
                 'value'=> $this->params['relative']
             );
         }
-        
+
         foreach($this->formData as $tmpName => $tmpData){
         }
-        
+
         $this->userOptions = array();
         foreach($this->formData as $input_name => $datas){
             $val = '';
@@ -136,7 +136,7 @@ class BC_Graph extends BC_Panel
             }
             $this->formData[$input_name]['value'] = $val;
             $this->userOptions[$input_name] = $val;
-            
+
             if($val != ''){
                 switch($input_name) {
                     case 'date1':
@@ -148,13 +148,13 @@ class BC_Graph extends BC_Panel
                 }
             }
         }
-        
+
     }
-    
+
     public function renderForm(){
         //gestion des options
         if(isset($this->formData) && count($this->formData)){
-            
+
             $formHtml = '<form id="'. $list_id . '_' . $data['idGraph'] . '_chartForm">';
             $formHtml .= '<table class="bimp_list_table">';
             $formHtml .= '<tbody class="headers_col">';
@@ -165,33 +165,33 @@ class BC_Graph extends BC_Panel
                 if(isset($optionData['values']))
                     $optionsInput['options'] = $optionData['values'];
                 $formHtml .= '<tr><th>'.$optionData['name'].'</th><td>'.BimpInput::renderInput($optionData['type'], $input_name, $value, $optionsInput).'</td></tr>';
-                
-                
+
+
             }
             $formHtml .= '</tbody></table>'.BimpRender::renderButton(array('label' => 'Valider', 'classes'=>array('btnRefreshGraph'), 'type' => 'primary'));
             $formHtml .= '</form>';
             return $formHtml;
         }
     }
-    
+
     public function getDatas($dataForm){
         global $modeCSV, $modeGraph;
         $modeCSV = $modeGraph = true;
         $success = "";
         $errors = array();
         $warnings = array();
-        
+
         $this->initUserData($dataForm);
 
 
         $nameGraph = $this->name;
-        
-        
-        
+
+
+
 
         $options = array();
-        
-        
+
+
         $options['animationEnabled'] = true;
         $options['theme'] = "light2";
         if($this->params['title'] != '')
@@ -226,8 +226,8 @@ class BC_Graph extends BC_Panel
             "dockInsidePlotArea" => false,
             "itemclick"          => "toogleDataSeries",
         );
-        
-        
+
+
         $method = $this->params['data_callback'];
         if($method &&  method_exists($this->object, $method)){
             $dataGraphe = $this->object->$method($this->userOptions);
@@ -241,7 +241,7 @@ class BC_Graph extends BC_Panel
         else{
             $errors[] = 'Aucune methode pour charger le content';
         }
-        
+
         $useK = false;
         if($this->params['use_k']){
             foreach($dataGraphe as $tmp1){
@@ -261,7 +261,7 @@ class BC_Graph extends BC_Panel
                 }
             }
         }
-        
+
         $tmpDataStatic = array();
         $tmpDataStatic["type"] = "line";
         $tmpDataStatic["showInLegend"] = true;
@@ -275,7 +275,7 @@ class BC_Graph extends BC_Panel
             $dataGraphe[$i] = BimpTools::overrideArray($tmpDataStatic, $tmpData);
         }
         $options['data'] = $dataGraphe;
-        
+
 //            echo '<pre>'; print_r($options);
 
         $optionsJson = json_encode($options);
@@ -291,41 +291,39 @@ class BC_Graph extends BC_Panel
 //            'success_callback' => $success_callback
         );
     }
-    
-    
+
+
     public function addFieldFilterValue($field_name, $value)
     {
         $this->params['filters'] = BimpTools::mergeSqlFilter($this->params['filters'], $field_name, $value);
     }
-    
-    
+
+
     public function getDatasInfos($params){
         $datas= array();
         $xFiled = $this->fieldX;
-        if($this->userOptions['xDateConfig'] == 'year'){
-            $xFiled = 'date_format('.$xFiled.', \'%Y\')';
-        }
-        elseif($this->userOptions['xDateConfig'] == 'month'){
-            $xFiled = 'date_format('.$xFiled.', \'%Y-%m\')';
-        }
-        elseif($this->userOptions['xDateConfig'] == 'day'){
-            $xFiled = 'date_format('.$xFiled.', \'%Y-%m-%d\')';
-        }
-        elseif($this->userOptions['xDateConfig'] == 'hour'){
-            $xFiled = 'date_format('.$xFiled.', \'%Y-%m-%d %h:00:00\')';
-        }
-        elseif($this->userOptions['xDateConfig'] == 'week'){
-            $xFiled = 'MIN(date_format('.$xFiled.', \'%Y-%m-%d\'))';
-        }
-        $return_fields = array($xFiled.' as x');//.$this->fieldX);
-        
-        
+
+		if($this->params['mode'] != 'doughnut') {
+			if ($this->userOptions['xDateConfig'] == 'year') {
+				$xFiled = 'date_format(' . $xFiled . ', \'%Y\')';
+			} elseif ($this->userOptions['xDateConfig'] == 'month') {
+				$xFiled = 'date_format(' . $xFiled . ', \'%Y-%m\')';
+			} elseif ($this->userOptions['xDateConfig'] == 'day') {
+				$xFiled = 'date_format(' . $xFiled . ', \'%Y-%m-%d\')';
+			} elseif ($this->userOptions['xDateConfig'] == 'hour') {
+				$xFiled = 'date_format(' . $xFiled . ', \'%Y-%m-%d %h:00:00\')';
+			} elseif ($this->userOptions['xDateConfig'] == 'week') {
+				$xFiled = 'MIN(date_format(' . $xFiled . ', \'%Y-%m-%d\'))';
+			}
+			$return_fields = array($xFiled . ' as x');//.$this->fieldX);
+		}
+
         $groupBy = ($this->params['mode'] == 'doughnut')? null : 'x';
         if($this->userOptions['xDateConfig'] == 'week'){
             $groupBy = 'date_format('.$this->fieldX.', \'%Y-%u\')';
         }
-        
-        
+
+
         $joins = array();
         $i = 0;
         if(isset($params['fields'])){
@@ -348,9 +346,9 @@ class BC_Graph extends BC_Panel
                 $visible = 1;
                 if(is_array($tabField) && isset($tabField['visible']))
                     $visible = $tabField['visible'];
-                
+
                 $return_fields[] = $calc.'('.$field.') as y';
-                
+
                 if($this->params['mode'] == 'doughnut'){
                     if(!isset($data)){
                         $data = array(
@@ -370,13 +368,13 @@ class BC_Graph extends BC_Panel
                         'dataPoints'=> array()
                     );
                 }
-                
+
                 $filters = $this->params['filters'];
                 if(isset($tabField['filters']) && is_array($tabField['filters'])){
                     foreach($tabField['filters'] as $field_name => $value)
                         $filters = BimpTools::mergeSqlFilter($filters, $field_name, $value);
                 }
-                
+
                 $oldValue = null;
                 if($this->userOptions['relative'] == 1){
                     $filtersOldValue = $filters;
@@ -386,18 +384,18 @@ class BC_Graph extends BC_Panel
                     if(isset($resultOldValue[0]))
                         $oldValue = $resultOldValue[0]['y'];
                 }
-                
+
                 $result = $this->object->getList($filters, 10000, 1, $this->fieldX, 'ASC', 'array', $return_fields, $joins, null, 'ASC', $groupBy);
-                
+
                 /*
                  * todo rajouter pour le relative la recup de la derniére oldValue avant la date de début.
                  */
-                
+
                 foreach($result as $tmp){
                     $y = floatval($tmp['y']);
                     if($this->userOptions['relative'] == 1 && !is_null($oldValue))
                         $y = $y - $oldValue;
-                        
+
                     if(is_array($tabField) && isset($tabField['reverse']) && $tabField['reverse'])
                         $y = -$y;
                     if($this->userOptions['relative'] != 1 || !is_null($oldValue))

@@ -46,12 +46,14 @@ class BC_Input extends BimpComponent
 			'with_secondes' => array('data_type' => 'bool', 'default' => 0)
 		),
 		'date'                        => array(
-			'display_now' => array('data_type' => 'bool', 'default' => 0)
+			'display_now' => array('data_type' => 'bool', 'default' => 0),
+			'format' => array('data_type' => 'text', 'default' => '')
 		),
 		'datetime'                    => array(
 			'display_now'   => array('data_type' => 'bool', 'default' => 0),
 			'with_hours'    => array('data_type' => 'bool', 'default' => 1),
-			'with_secondes' => array('data_type' => 'bool', 'default' => 0)
+			'with_secondes' => array('data_type' => 'bool', 'default' => 0),
+			'format' => array('data_type' => 'text', 'default' => '')
 		),
 		'timer'                       => array(
 			'with_days'     => array('data_type' => 'bool', 'default' => 1), // A implémenter
@@ -415,10 +417,12 @@ class BC_Input extends BimpComponent
 
 			case 'datetime':
 				$options['with_hours'] = isset($this->params['with_hours']) ? $this->params['with_hours'] : 1;
+				$options['format'] = isset($this->params['format']) ? $this->params['format'] : '';
 			case 'time':
 				$options['with_secondes'] = isset($this->params['with_secondes']) ? $this->params['with_secondes'] : 0;
 			case 'date':
 				$options['display_now'] = isset($this->params['display_now']) ? $this->params['display_now'] : 0;
+				$options['format'] = isset($this->params['format']) ? $this->params['format'] : '';
 				break;
 
 			case 'timer':

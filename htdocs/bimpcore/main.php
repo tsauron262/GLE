@@ -6,7 +6,7 @@ ini_set('display_errors', 0);
 
 if ($context == 'public') {
     define("NOLOGIN",1);
-    define("NOSESSION", 1);
+//    define("NOSESSION", 1);
 
     define('XFRAMEOPTIONS_ALLOWALL', true);
 

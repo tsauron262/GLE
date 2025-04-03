@@ -480,6 +480,9 @@ abstract class BimpAPI
 
 					// Options CURL:
 					$curl_options_str = array();
+					foreach($curl_options as $opt_key => $opt_value) {
+						$curl_options_str['CURL_KEY '.$opt_key] = $opt_value;
+					}
 					$curl_options[CURLOPT_RETURNTRANSFER] = true;
 					$curl_options_str['CURLOPT_RETURNTRANSFER'] = true;
 
@@ -521,6 +524,19 @@ abstract class BimpAPI
 
 							case 'string':
 								$fields = BimpTools::makeUrlParamsFromArray($params['fields']);
+								break;
+						}
+
+						if (!empty($fields)) {
+							$curl_options[CURLOPT_POSTFIELDS] = $fields;
+							$curl_options_str['CURLOPT_POSTFIELDS'] = $fields;
+						}
+					}
+					else{
+						switch ($params['post_mode']) {
+							case 'xml':
+								$curl_options[CURLOPT_POSTFIELDS] = $params['fields'];
+								$curl_options_str['CURLOPT_POSTFIELDS'] = $params['fields'];
 								break;
 						}
 

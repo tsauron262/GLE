@@ -125,6 +125,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 	{
 		$correspondance = array(
 			'nom'				=> 'Name',
+			'name_alias'		=> 'Denomination_sociale__c',
 			'email' 			=> 'E_mail_siege_social__c',
 			'address'			=> 'BillingStreet',
 			'zip'				=> 'BillingPostalCode',
@@ -156,9 +157,13 @@ class BDS_ImportsDiversProcess extends BDSProcess
 //			echo '<pre>'.print_r($this->data_persistante, true).'</pre>'; echo '<pre>'.print_r($data, true).'</pre>';die;
 			$ln = array_combine($this->data_persistante['header'], $data);
 
-
 			if ($ln['Name']) {
 				$data = $dataFiltres = array();
+				if ($ln['Denomination_sociale__c'])	{
+					$foo = $ln['Denomination_sociale__c'];
+					$ln['Denomination_sociale__c'] = $ln['Name'];
+					$ln['Name'] = $foo;
+				}
 				foreach($ln as $key => $value){
 					$value = utf8_encode($value);
 					if($correspondance2[$key]){

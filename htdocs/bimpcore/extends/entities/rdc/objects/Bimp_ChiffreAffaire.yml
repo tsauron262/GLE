@@ -11,11 +11,7 @@ parent_module: bimpcore
 parent_object:
     callback:
         method: getObjectParentName
-parent_id_property:
-    callback:
-        method: getParent_IdProperty
-        params:
-            - type_obj
+parent_id_property: id_obj
 
 objects:
     chiffre_affaire:

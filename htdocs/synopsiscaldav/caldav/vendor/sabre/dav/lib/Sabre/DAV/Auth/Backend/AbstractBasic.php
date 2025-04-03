@@ -75,7 +75,7 @@ abstract class AbstractBasic implements BackendInterface {
 
         // Authenticates the user
 
-		$tableUserBannie = array('j.gerhart', 'j.gerhart@bimp.fr');
+		$tableUserBannie = array('j.gerhart', 'j.gerhart@bimp.fr', 'a.marin', 'a.marin@bimp.fr');
 		if(in_array($userpass[0], $tableUserBannie))
 			die('User banni');
 

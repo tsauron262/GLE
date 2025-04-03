@@ -1,0 +1,88 @@
+forms:
+    default:
+        rows:
+            fk_motif_echange:
+                field: fk_motif_echange
+                display_if:
+                    field_name: fk_action
+                    show_values:
+                        callback: getIdsAfficheEchange
+            action_echange:
+                field: action_echange
+                display_if:
+                    field_name: fk_action
+                    show_values: 
+                        callback: getIdsAfficheEchange
+            point_positif_echange:
+                field: point_positif_echange
+                display_if:
+                    field_name: fk_action
+                    show_values:
+                        callback: getIdsAfficheEchange
+            risque_identifie_echange:
+                field: risque_identifie_echange
+                display_if:
+                    field_name: fk_action
+                    show_values: 
+                        callback: getIdsAfficheEchange
+                
+            link: unset
+            users_assigned:
+                input:
+                    help: unset
+            fk_project: unset    
+
+fields:
+    label:
+        label: Sujet
+
+    fk_motif_echange:
+        label: Motif de l'echange
+        values:
+            array: motifEchange
+    action_echange:
+        label: Action
+        type: text
+    point_positif_echange:
+        label: Point positif
+        type: text
+    risque_identifie_echange:
+        label: Risque identifié
+        type: text
+            
+
+fields_tables:
+    infos:
+        title: Infos
+        icon: fas_info-circle
+        rows:
+            -   field: fk_user_author
+                display: nom_url
+            -   field: fk_user_action
+                display: nom_url
+            -   label: Assigné à
+                value:
+                    callback: displayUsersAssigned
+            -   field: label
+            -   field: fk_action
+            -   field: datep
+            -   field: datep2
+            -   field: note
+            -   field: fk_motif_echange
+                show:
+                    callback:
+                        method: getAfficheEchange
+            -   field: action_echange
+                show:
+                    callback:
+                        method: getAfficheEchange
+            -   field: point_positif_echange
+                show:
+                    callback:
+                        method: getAfficheEchange
+            -   field: risque_identifie_echange
+                show:
+                    callback: 
+                        method: getAfficheEchange
+            - code: unset
+            - percent: unset

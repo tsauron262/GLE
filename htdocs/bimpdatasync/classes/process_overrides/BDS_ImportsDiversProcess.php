@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_ImportsDiversProcess extends BDSProcess
 {
 
-    public static $current_version = 3;
+    public static $current_version = 4;
     public static $default_public_title = 'Imports Divers';
 
     // Imports AppleCare:
@@ -125,6 +125,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 	{
 		$correspondance = array(
 			'nom'				=> 'Name',
+			'name_alias'		=> 'Denomination_sociale__c',
 			'email' 			=> 'E_mail_siege_social__c',
 			'address'			=> 'BillingStreet',
 			'zip'				=> 'BillingPostalCode',
@@ -156,9 +157,13 @@ class BDS_ImportsDiversProcess extends BDSProcess
 //			echo '<pre>'.print_r($this->data_persistante, true).'</pre>'; echo '<pre>'.print_r($data, true).'</pre>';die;
 			$ln = array_combine($this->data_persistante['header'], $data);
 
-
 			if ($ln['Name']) {
 				$data = $dataFiltres = array();
+				if ($ln['Denomination_sociale__c'])	{
+					$foo = $ln['Denomination_sociale__c'];
+					$ln['Denomination_sociale__c'] = $ln['Name'];
+					$ln['Name'] = $foo;
+				}
 				foreach($ln as $key => $value){
 					$value = utf8_encode($value);
 					if($correspondance2[$key]){
@@ -205,7 +210,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 
 	public function initImportContactRDC(&$data, &$errors = array())
 	{
-		$file = $this->getOption('csv_file2', '');
+		$file = $this->getOption('csv_file3', '');
 		if ($file) {
 			$this->updateParameter('csv_file', $file);
 			$this->updateParameter('elem_ok', 0);
@@ -225,7 +230,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			} else {
 				$data['steps'] = array(
 					'import' => array(
-						'label'                  => 'Création des clients',
+						'label'                  => 'Création des contacts',
 						'on_error'               => 'continue',
 						'elements'               => array_keys($rows),
 						'nbElementsPerIteration' => 20
@@ -239,13 +244,13 @@ class BDS_ImportsDiversProcess extends BDSProcess
 	public function executeImportContactRDC($step_name, &$errors = array(), $extra_data = array())
 	{
 		$correspondance = array(
-			'fk_soc'			=> 'Name',
-			'lastname' 			=> 'E_mail_siege_social__c',
-			'firstname' 		=> 'E_mail_siege_social__c',
-			'address'			=> 'BillingStreet',
-			'zip'				=> 'BillingPostalCode',
-			'town'				=> 'BillingCity',
+			'lastname' 			=> 'LastName',
+			'firstname' 		=> 'FirstName',
+			'address'			=> 'MailingStreet',
+			'zip'				=> 'MailingPostalCode',
+			'town'				=> 'MailingCity',
 			'phone'				=> 'Phone',
+			'phone_mobile'		=> 'MobilePhone',
 			'email'				=> 'Email',
 			'poste'				=> 'Title',
 			'import_key'		=> 'Id',
@@ -271,13 +276,15 @@ class BDS_ImportsDiversProcess extends BDSProcess
 //			echo '<pre>'.print_r($this->data_persistante, true).'</pre>'; echo '<pre>'.print_r($data, true).'</pre>';die;
 			$ln = array_combine($this->data_persistante['header'], $data);
 
-
-			if ($ln['Name']) {
+			if (strlen($ln['LastName'])) {
 				$data = $dataFiltres = array();
+				$errors = $warnings = array();
+
 				foreach($ln as $key => $value){
+					$value = utf8_encode($value);
 					if($correspondance2[$key]){
 						if(stripos($value, '<script') !== false){
-							if(stripos($ln['Name'], '<script') === false){
+							if(stripos($ln['LastName'], '<script') === false){
 								$this->Error('Script détecté', null, $ln['Name'].' ligne '.($id+1));
 								continue 2;
 							}
@@ -291,20 +298,29 @@ class BDS_ImportsDiversProcess extends BDSProcess
 							$dataFiltres[$correspondance2[$key]] = $value;
 						}
 					}
+					// retrouver le fk_soc selon le AccountId
+					$fk_soc = $this->db->getValue('societe', 'rowid', 'import_key = \''.$ln['AccountId'].'\'');
+					if($fk_soc){
+						$data['fk_soc'] = $fk_soc;
+						$dataFiltres['fk_soc'] = $fk_soc;
+					} else {
+						$this->Error('Société non trouvée', null, $ln['AccountId'].' ligne '.($id+1));
+						continue 2;
+					}
 				}
-				$errors = $warnings = array();
+
 				$obj = BimpObject::createOrUpdateBimpObject('bimpcore', 'Bimp_Contact', $dataFiltres, $data, true, true, $errors, $warnings);
 				foreach ($errors as $error) {
-					$this->Error($error, null, $ln['Name']);
+					$this->Error($error, null, $ln['LastName'] . ' # ' . $ln['FirstName'] . ' ligne '.($id+1));
 				}
 				foreach ($warnings as $warning) {
-					$this->Alert($warning, null, $ln['Name']);
+					$this->Alert($warning, null, $ln['LastName'].' ligne '.($id+1));
 				}
 				$ok[] = $ln['Name'].' - '.$obj->id;
 //				if(!count($errors))
 //					$this->Success('OK<pre>' . print_r($data, true).'</pre>', null, $ln['Name']);
 			} else {
-				$this->Error('Ligne invalide: <pre>' . print_r($ln, true).'</pre>', null, $ln['Name']);
+				$this->Error('Ligne invalide: <pre>' . print_r($ln, true).'</pre>', null, $ln['FirstName'] . "/" . $ln['LastName'] . "/" . $ln['Email'] .' ligne '.($id+1));
 			}
 			$this->incIgnored();
 		}
@@ -401,6 +417,32 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			$errors = array_merge($errors, $op->addOptions(array('csv_file2')));
 		}
 	}
+		if ($cur_version < 4) {
+			// Opération "Import contact rdc":
+			BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+				'id_process'    => (int) $id_process,
+				'label'         => 'Fichier CSV',
+				'name'          => 'csv_file3',
+				'info'          => '',
+				'type'          => 'file',
+				'default_value' => '',
+				'required'      => 0
+			), true, $errors, $warnings);
+			$op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+				'id_process'    => (int) $id_process,
+				'title'         => 'Import Contact RDC',
+				'name'          => 'importContactRDC',
+				'description'   => '',
+				'warning'       => 'Fichier CSV : ',
+				'active'        => 1,
+				'use_report'    => 1,
+				'reports_delay' => 15
+			), true, $errors, $warnings);
+
+			if (BimpObject::objectLoaded($op)) {
+				$errors = array_merge($errors, $op->addOptions(array('csv_file3')));
+			}
+		}
 
         return $errors;
     }

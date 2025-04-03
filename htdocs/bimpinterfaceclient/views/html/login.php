@@ -5,6 +5,7 @@
 <label for="password">Mot de passe</label>
 <br />
 <input id="password" type="password" name="bic_login_pw" placeholder="Mot de passe">
+<input id="token" type="hidden" name="token" value="<?php echo newToken(); ?>">
 
 <br/>
 <p style="text-align: center"><a href="javascript: var email = $(\'input[name=bic_login_email]\').val(); window.location = \'./client.php?display_public_form=1&public_form=reinitPw\' + (email ? \'&email=\' + email : \'\') + &success_url= + document.location.href;');">Mot de passe oublié</a></p>

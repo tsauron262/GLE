@@ -1,5 +1,5 @@
 table: bimpcore_dictionnary
-controller: dictionnary
+#controller: dictionnary
 icon: fas_book
 
 common_fields: 0
@@ -13,7 +13,14 @@ labels:
     name: dictionnaire
 
 objects:
-
+    values: 
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpDictionnaryValue
+                
 fields:
     code:
         label: Code
@@ -21,28 +28,9 @@ fields:
     name:
         label: Nom
     
-    table:
-        label: Table
-    
-    filters: 
-        label: Filtres
+    values_params: 
+        label: Paramètres des valeurs
         type: json
-        
-    fields:
-        label: Champs
-        type: json
-    
-    key_field:
-        label: Champ clé
-        default_value: code
-    
-    label_field:
-        label: Champ libellé
-        default_value: label
-    
-    active_field:
-        label: Champ activé
-        default_value: active
     
     active:
         label: Actif
@@ -67,9 +55,12 @@ lists:
         n: 0
         edit_btn: 1
         edit_form: edit
+        delete_btn: 1
+        extra_btn: 
+            callback: getListsButtons
         cols:
             code:
             name:
-            table:
             active:
+                edit: 1
                 

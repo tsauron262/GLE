@@ -165,6 +165,9 @@ class ActionsBimpcore
 			if (stripos($url, '/contact/') !== false) {
 				$tabObj = array("bimpcore", "Bimp_Contact");
 			}
+			if (stripos($url, '/ticket/') !== false) {
+				$tabObj = array("bimpticket", "Bimp_Ticket");
+			}
 		}
 
 		if (isset($tabObj) && stripos($url, 'ajax') === false) {

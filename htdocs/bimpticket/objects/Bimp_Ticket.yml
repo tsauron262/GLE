@@ -14,6 +14,7 @@ nom_url:
     syntaxe: <ref>
 
 header_list_name: default
+header_edit_form: default
 header_btn:
     callback: getHeaderButtons
 
@@ -87,10 +88,10 @@ fields:
     
     type:
         label: Type
-        type: int
-        values:
-            array: types
-        default_value: 0
+        values: 
+            dict: 
+                code: bimp_ticket_types
+                include_empty: 1
     
     origin_email:
         label: Adresse Email source
@@ -140,6 +141,7 @@ fields:
     timing:
         label: Timing
         
+        
     resolution:
         label: Résolution
         type: text
@@ -150,6 +152,7 @@ fields:
         type: int
         default_value: 0
         
+        
     datec:
         label: Date de création
         type: datetime
@@ -158,7 +161,7 @@ fields:
         label: Date de mise à jour
         type: datetime
     
-    date_closed:
+    date_close:
         label: Date de clôture
         type: datetime
         

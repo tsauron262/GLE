@@ -3,6 +3,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 
 class Bimp_Ticket extends BimpDolObject
 {
+	public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
 	const STATUS_DRAFT = 0;
 	const STATUS_READ = 1;

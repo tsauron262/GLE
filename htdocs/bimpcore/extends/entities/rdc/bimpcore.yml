@@ -7,3 +7,7 @@ params:
         label: id du Group BD
         def: 0
         cat: groups
+    id_user_group_TECH_RDC:
+        label: id du Group TECH RDC
+        def: 0
+        cat: groups

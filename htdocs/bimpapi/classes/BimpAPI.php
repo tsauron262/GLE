@@ -480,6 +480,9 @@ abstract class BimpAPI
 
 					// Options CURL:
 					$curl_options_str = array();
+					foreach($curl_options as $opt_key => $opt_value) {
+						$curl_options_str['CURL_KEY '.$opt_key] = $opt_value;
+					}
 					$curl_options[CURLOPT_RETURNTRANSFER] = true;
 					$curl_options_str['CURLOPT_RETURNTRANSFER'] = true;
 
@@ -529,6 +532,19 @@ abstract class BimpAPI
 							$curl_options_str['CURLOPT_POSTFIELDS'] = $fields;
 						}
 					}
+					else{
+						switch ($params['post_mode']) {
+							case 'xml':
+								$curl_options[CURLOPT_POSTFIELDS] = $params['fields'];
+								$curl_options_str['CURLOPT_POSTFIELDS'] = $params['fields'];
+								break;
+						}
+
+						if (!empty($fields)) {
+							$curl_options[CURLOPT_POSTFIELDS] = $fields;
+							$curl_options_str['CURLOPT_POSTFIELDS'] = $fields;
+						}
+					}
 
 					switch ($params['type']) {
 						case 'GET':
@@ -559,6 +575,7 @@ abstract class BimpAPI
 					if (!count($errors)) {
 						// Exécution:
 						$response = curl_exec($ch);
+						curl_close($ch);
 
 						// Traitement de la réponse:
 						$response_code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);

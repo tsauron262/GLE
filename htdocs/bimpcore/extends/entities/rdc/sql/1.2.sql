@@ -1,0 +1,15 @@
+ALTER table llx_societe
+	ADD date_der_contact date DEFAULT NULL,
+	ADD date_debut_prospect date DEFAULT NULL,
+	ADD date_ouverture date DEFAULT NULL,
+	ADD fk_priorite int(11) DEFAULT 0,
+	ADD fk_statut_rdc int(11) DEFAULT 0,
+	ADD date_changement_statut_rdc date DEFAULT NULL,
+	ADD delai_ouverture int(11) DEFAULT 0,
+	ADD commentaire_rdc text default NULL,
+	ADD fk_source_rdc int(11) DEFAULT 0,
+	ADD fk_user_attr_rdc int(11) DEFAULT 0,
+	ADD fk_group_rdc int(11) DEFAULT 0,
+	ADD shopid int(11) DEFAULT 0,
+	ADD fk_master_cat int(11) DEFAULT 0,
+	ADD contrefacon tinyint(1) DEFAULT 0;

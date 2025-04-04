@@ -51,7 +51,7 @@ class BiAPI extends BimpAPI
 			'post_mode'	=> 'xml',
 			'fields'	=> $xml,
 			'curl_options' => array(
-				CURLOPT_USERPWD => $this->getParam('login') . ":" . $this->getParam('mdp'),
+//				CURLOPT_USERPWD => $this->getParam('login') . ":" . $this->getParam('mdp'),
 				CURLOPT_POST => 1
 			)
 		), $errors);
@@ -68,6 +68,17 @@ class BiAPI extends BimpAPI
 //		$return = curl_exec($ch);
 //		curl_close($ch);
 		return $return;
+	}
+
+	public function getDefaultRequestsHeaders($request_name, &$errors = []){
+		$headers = array();
+		if($this->getParam('basic') != ''){
+			$headers['Authorization'] = 'Basic ' . $this->getParam('basic');
+		}
+		else{
+			$headers['Authorization'] = 'Basic ' . base64_encode($this->getParam('login') . ":" . $this->getParam('mdp'));
+		}
+		return $headers;
 	}
 
 
@@ -117,6 +128,11 @@ ORDER BY
 				'id_api' => $api->id,
 				'name'   => 'mdp',
 				'title'  => 'Mdp'
+			), true, $warnings, $warnings);
+			BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+				'id_api' => $api->id,
+				'name'   => 'basic',
+				'title'  => 'Basic'
 			), true, $warnings, $warnings);
 		}
 

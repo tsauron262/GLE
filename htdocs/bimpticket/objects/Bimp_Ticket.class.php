@@ -16,44 +16,304 @@ class Bimp_Ticket extends BimpDolObject
 	const STATUS_TRANSFERED = 11;
 
 	public static $status_list = array(
-		self::STATUS_DRAFT       => array('label' => 'Nouveau', 'icon' => 'fas_file-alt', 'classes' => array('info')),
-//		self::STATUS_READ        => array('label' => 'Lu', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
-		self::STATUS_ASSIGNED    => array('label' => 'Assigné', 'icon' => 'fas_user-check', 'classes' => array('info')),
-		self::STATUS_IN_PROGRESS => array('label' => 'En cours', 'icon' => 'fas_cogs', 'classes' => array('warning')),
-		self::STATUS_WAITING     => array('label' => 'En attente', 'icon' => 'fas_check', 'classes' => array('warning')),
-		self::STATUS_CLOSED      => array('label' => 'Terminé', 'icon' => 'fas_check', 'classes' => array('success')),
-		self::STATUS_CANCELED    => array('label' => 'Annulé', 'icon' => 'fas_times', 'classes' => array('danger')),
-		self::STATUS_TRANSFERED  => array('label' => 'Annulé', 'icon' => 'fas_times', 'classes' => array('important')),
+		self::STATUS_DRAFT          => array('label' => 'Nouveau', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
+		self::STATUS_READ           => array('label' => 'A assigner', 'icon' => 'fas_exclamation-circle', 'classes' => array('warning')),
+		self::STATUS_ASSIGNED       => array('label' => 'Assigné', 'icon' => 'fas_user-check', 'classes' => array('info')),
+		self::STATUS_IN_PROGRESS    => array('label' => 'En cours', 'icon' => 'fas_cogs', 'classes' => array('info')),
+		self::STATUS_NEED_MORE_INFO => array('label' => 'En attente d\'infos', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
+		self::STATUS_WAITING        => array('label' => 'En attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
+		self::STATUS_CLOSED         => array('label' => 'Terminé', 'icon' => 'fas_check', 'classes' => array('success')),
+		self::STATUS_CANCELED       => array('label' => 'Annulé', 'icon' => 'fas_times', 'classes' => array('danger')),
+		self::STATUS_TRANSFERED     => array('label' => 'Trtansféré', 'icon' => 'fas_sign-out-alt', 'classes' => array('important')),
 	);
 
 	public static $types = array();
+
+	// Getters données:
+
+	public function getAddContactIdClient()
+	{
+		return (int) BimpTools::getPostFieldValue('fk_soc', (int) $this->getData('fk_soc'), 'int');
+	}
 
 	// Getters params:
 
 	public function getHeaderButtons()
 	{
 		$buttons = array();
+
+		if ($this->isActionAllowed('newStatus') && $this->canSetAction('newStatus')) {
+			$cur_status = (int) $this->getData('fk_statut');
+			$buttons[] = array(
+				'label'   => 'Changer le statut',
+				'icon'    => 'fas_pen',
+				'onclick' => $this->getJsActionOnclick('newStatus', array(), array(
+					'form_name' => 'new_status'
+				))
+			);
+
+			if ($cur_status < self::STATUS_IN_PROGRESS) {
+				if ($this->isActionAllowed('newStatus') && $this->canSetAction('newStatus')) {
+					$buttons[] = array(
+						'label'   => 'En cours',
+						'icon'    => 'fas_cogs',
+						'onclick' => $this->getJsActionOnclick('newStatus', array(
+							'new_status' => self::STATUS_IN_PROGRESS,
+						), array())
+					);
+				}
+			} elseif ($cur_status < self::STATUS_CLOSED) {
+				$buttons[] = array(
+					'label'   => 'Terminé',
+					'icon'    => 'fas_check',
+					'onclick' => $this->getJsActionOnclick('newStatus', array(
+						'new_status' => self::STATUS_CLOSED,
+					), array())
+				);
+			}
+		}
+
+
 		return $buttons;
 	}
 
-	// Getters Array
-	public function getClientContactsArray($include_empty = true, $active_only = true)
-	{
-		$id_client = (int) $this->getData('id_client');
+	// Getters arrays:
 
-		if ($id_client) {
-			return self::getSocieteContactsArray($id_client, $include_empty, '', $active_only);
+	public function getNewStatusOptionsArray()
+	{
+		$cur_status = (int) $this->getData('fk_statut');
+
+		$options = self::$status_list;
+
+		unset($options[$cur_status]);
+		if ($cur_status != self::STATUS_READ) {
+			unset($options[self::STATUS_READ]);
+		}
+		if ($cur_status != self::STATUS_ASSIGNED) {
+			unset($options[self::STATUS_ASSIGNED]);
+		}
+		if ($cur_status != self::STATUS_NEED_MORE_INFO) {
+			unset($options[self::STATUS_NEED_MORE_INFO]);
 		}
 
-		return array();
+		if ($cur_status >= self::STATUS_IN_PROGRESS) {
+			unset($options[self::STATUS_DRAFT]);
+		}
+
+		return $options;
+	}
+
+	// Rendus HTML :
+
+	public function renderHeaderExtraLeft()
+	{
+		$html = '';
+
+		if ($this->isLoaded($errors)) {
+			$datec = $this->getData('datec');
+			if ($datec) {
+				$html .= '<div class="object_header_infos">';
+				$html .= 'Créé le ' . $this->displayDataDefault('datec');
+
+				if ((int) $this->getData('fk_user_create')) {
+					$user_create = $this->getChildObject('user_create');
+					if (BimpObject::objectLoaded($user_create)) {
+						$html .= ' par ' . $user_create->getLink();
+					}
+				}
+				$html .= '</div>';
+			}
+
+			$dateu = $this->getData('date_update');
+			if ($dateu) {
+				$html .= '<div class="object_header_infos">';
+				$html .= 'Dernière mise à jour le ' . $this->displayDataDefault('date_update');
+
+				if ((int) $this->getData('fk_user_update')) {
+					$user_update = $this->getChildObject('user_update');
+					if (BimpObject::objectLoaded($user_update)) {
+						$html .= ' par ' . $user_update->getLink();
+					}
+				}
+				$html .= '</div>';
+			}
+
+			$date_close = $this->getData('date_close');
+			if ($date_close) {
+				$html .= '<div class="object_header_infos">';
+				$html .= 'Fermée le ' . $this->displayDataDefault('date_close');
+				$html .= '</div>';
+			}
+
+			if ((int) $this->getData('fk_user_assign')) {
+				$user_assign = $this->getChildObject('user_assign');
+				if (BimpObject::objectLoaded($user_assign)) {
+					$html .= '<div style="margin-top: 10px">';
+					$html .= '<b>Assigné à</b> ' . $user_assign->getLink();
+					$html .= '</div>';
+				}
+			}
+			$client = $this->getChildObject('client');
+			if (BimpObject::objectLoaded($client)) {
+				$html .= '<div style="margin-top: 10px">';
+				$html .= '<b>Client : </b> ' . $client->getLink();
+				$html .= '</div>';
+			}
+		}
+
+		return $html;
+	}
+
+	// Traitements :
+
+	public function checkStatus()
+	{
+		$cur_status = (int) $this->getData('fk_statut');
+
+		if (!(int) $this->getData('fk_user_assign')) {
+			if ($cur_status < self::STATUS_CLOSED && $cur_status > self::STATUS_READ) {
+				$this->updateField('fk_statut', self::STATUS_READ);
+			}
+		} elseif ($cur_status < self::STATUS_READ) {
+			$this->updateField('fk_statut', self::STATUS_ASSIGNED);
+		}
+	}
+
+	public function checkUserAssigned()
+	{
+		if ($this->isLoaded()) {
+			$fk_user_assigned = (int) $this->getData('fk_user_assign');
+			$users_assigned = $this->dol_object->getIdContact('internal', 'SUPPORTTEC');
+			$id_user_assigned = 0;
+			if (isset($users_assigned[0])) {
+				$id_user_assigned = $users_assigned[0];
+			}
+			if (!$id_user_assigned && $fk_user_assigned) {
+				$this->dol_object->add_contact($fk_user_assigned, 'SUPPORTTEC', 'internal');
+			}
+
+			if (!$fk_user_assigned && $id_user_assigned) {
+				$this->updateField('fk_user_assign', $id_user_assigned);
+			}
+		}
+	}
+
+	public function onContactsListUpdate()
+	{
+		$users_assigned = $this->dol_object->getIdContact('internal', 'SUPPORTTEC');
+		$id_user_assigned = 0;
+
+		if (isset($users_assigned[0])) {
+			$id_user_assigned = $users_assigned[0];
+		}
+
+		if ($id_user_assigned !== (int) $this->getData('fk_user_assign')) {
+			$this->updateField('fk_user_assign', $id_user_assigned);
+		}
+	}
+
+	// Actions:
+
+	public function actionNewStatus($data, &$success = '')
+	{
+		$errors = array();
+		$warnings = array();
+		$success = '';
+
+		$new_status = BimpTools::getPostFieldValue('new_status', null, 'int');
+		if (is_null($new_status)) {
+			$errors[] = 'Aucun statut sélectionné';
+		} else {
+			$new_status = (int) $new_status;
+
+			if ($new_status === (int) $this->getData('fk_statut')) {
+				$errors[] = 'Ce ticket a déjà le statut "' . self::$status_list[$new_status]['label'] . '"';
+			} else {
+				$this->set('fk_statut', $new_status);
+
+				if ($new_status === self::STATUS_CLOSED) {
+					$this->set('resolution', BimpTools::getArrayValueFromPath($data, 'resolution', ''));
+					$date_now = date('Y-m-d H:i:s');
+					$this->set('date_close', $date_now);
+
+					$datec = $this->getData('datec');
+					if ($datec) {
+						$interval = BimpTools::getDatesIntervalData($datec, $date_now);
+						$this->set('resolution', $interval['full_days']);
+					}
+				}
+
+				$errors = $this->update($warnings, true);
+
+				if (!count($errors)) {
+					$msg = 'Mise au statut "' . self::$status_list[$new_status]['label'] . '"';
+					$success = $msg;
+
+					if (in_array($new_status, array(self::STATUS_WAITING, self::STATUS_CANCELED, self::STATUS_TRANSFERED))) {
+						$reason = BimpTools::getArrayValueFromPath($data, 'reason', '');
+						if ($reason) {
+							$msg .= '<br/><b>Motif : </b>' . $reason;
+						}
+					}
+
+					$this->addObjectLog($msg, 'STATUS_' . $new_status);
+				}
+			}
+		}
+
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
 	}
 
 	// Overrides :
+
+	public function onSave(&$errors = array(), &$warnings = array())
+	{
+		parent::onSave($errors, $warnings);
+	}
+	public function validate()
+	{
+		$errors = parent::validate();
+
+		if (!count($errors)) {
+			global $user;
+
+			if (BimpObject::objectLoaded($user)) {
+				$this->set('fk_user_update', $user->id);
+			}
+		}
+
+		return $errors;
+	}
 
 	public function create(&$warnings = array(), $force_create = false)
 	{
 		$this->set('ref', $this->dol_object->getDefaultRef());
 
-		return parent::create($warnings, $force_create);
+		$errors = parent::create($warnings, $force_create);
+
+		if (!count($errors)) {
+			$this->checkUserAssigned();
+
+			$contacts = (int) $this->dol_object->getIdContact('external', 'SUPPORTCLI');
+			if (!isset($contacts[0])) {
+				$id_contact_suivi = (int) BimpTools::getPostFieldValue('id_contact_suivi', 0);
+				if (!$id_contact_suivi) {
+					$client = $this->getChildObject('client');
+					if (BimpObject::objectLoaded($client)) {
+						$id_contact_suivi = (int) $client->getData('contact_default');
+					}
+				}
+
+				if ($id_contact_suivi) {
+					$this->dol_object->add_contact($id_contact_suivi, 'SUPPORTCLI', 'external');
+				}
+			}
+		}
+
+		return $errors;
 	}
 }

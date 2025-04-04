@@ -45,11 +45,11 @@ objects:
             id_object:
                 field_value: fk_user_update
     
-    user_assigned:
+    user_assign:
         extends: user
         instance:
             id_object:
-                field_value: id_user_assigned
+                field_value: fk_user_assign
     
     files:
         instance:
@@ -75,7 +75,6 @@ fields:
     
     fk_statut:
         label: Statut
-        dol_prop: status
         type: int
         values:
             array: status_list
@@ -88,8 +87,8 @@ fields:
     
     type:
         label: Type
-        values: 
-            dict: 
+        values:
+            dict:
                 code: bimp_ticket_types
                 include_empty: 1
     
@@ -119,7 +118,7 @@ fields:
     fk_user_assign:
         label: Attribué à
         type: id_object
-        object: user_assigned
+        object: user_assign
         input:
             type: search_user
         default_value: 0
@@ -140,19 +139,12 @@ fields:
     
     timing:
         label: Timing
-        
-        
-    resolution:
-        label: Résolution
-        type: text
-        hashtags: 1
     
-    delai_resolution:
+    resolution:
         label: Délai de résolution (en jours)
         type: int
         default_value: 0
-        
-        
+    
     datec:
         label: Date de création
         type: datetime
@@ -164,16 +156,134 @@ fields:
     date_close:
         label: Date de clôture
         type: datetime
-        
+
+
 forms:
     default:
         rows:
             -   field: fk_user_assign
             -   field: type
             -   field: fk_soc
-            -   field: id_contact
             -   field: subject
             -   field: message
+    
+    create:
+        rows:
+            -   field: fk_user_assign
+            -   field: type
+            -   field: fk_soc
+            -   custom: 1
+                label: Contact client suivi
+                input_name: id_contact_suivi
+                data_type: id
+                input:
+                    type: select
+                    options:
+                        callback:
+                            method: getClientContactsArray
+                            params:
+                                - 1
+                                - 1
+                depends_on: fk_soc
+            -   field: subject
+            -   field: message
+    
+    new_status:
+        rows:
+            -   custom: 1
+                label: Nouveau Statut
+                input_name: new_status
+                data_type: int
+                input: 
+                    type: select
+                    options:
+                        callback: getNewStatusOptionsArray
+            -   custom: 1
+                label: Motif
+                input_name: reason
+                input: 
+                    type: textarea
+                    hashtags: 1
+                display_if: 
+                    field_name: new_status
+                    show_values: 7,9,11
+    
+    contact:
+        title: Ajouter un contact
+        rows:
+            -   custom: 1
+                label: Type
+                input_name: type
+                input:
+                    type: select
+                    options:
+                        1: Contact tiers
+                        2: Utilisateur
+            -   custom: 1
+                label: Tiers
+                input_name: id_client
+                input:
+                    type: search_object
+                    object: client
+                value:
+                    field_value: fk_soc
+                display_if:
+                    field_name: type
+                    show_values: 1
+            -   custom: 1
+                label: Contact
+                input_name: id_contact
+                data_type: id_object
+                object: contact
+                edit_form: default
+                create_form: default
+                create_form_values:
+                    fields:
+                        fk_soc:
+                            callback: getAddContactIdClient
+                value:
+                    request: fields/id_contact
+                input:
+                    type: select
+                    options:
+                        array: clientContacts
+                display_if:
+                    field_name: type
+                    show_values: 1
+                depends_on: id_client
+            -   custom: 1
+                label: Utilisateur
+                input_name: id_user
+                input:
+                    type: search_user
+                value:
+                    prop:
+                        object:
+                            global: user
+                        name: id
+                display_if:
+                    field_name: type
+                    show_values: 2
+            -   custom: 1
+                label: Type de contact
+                input_name: tiers_type_contact
+                input:
+                    type: select
+                    options:
+                        array: externalContactTypes
+                display_if:
+                    field_name: type
+                    show_values: 1
+            -   custom: 1
+                label: Type de contact
+                input_name: user_type_contact
+                input:
+                    type: select
+                    options:
+                        array: internalContactTypes
+                display_if:
+                    field_name: type
+                    show_values: 2
 
 fields_tables:
     infos:
@@ -197,6 +307,17 @@ views:
             -   cols:
                     -   type: object_header
             -   cols:
+                    -   type: view
+                        view:
+                            name: fiche
+            -   cols:
+                    -   type: custom
+                        custom:
+                            callback: renderNotesList
+    
+    fiche:
+        rows:
+            -   cols:
                     -   type: fields_table
                         fields_table:
                             name: infos
@@ -209,19 +330,19 @@ views:
                         col_lg: 6
                         col_md: 6
             -   cols:
+                    -   type: custom
+                        custom:
+                            callback: renderContacts
+            -   cols:
                     -   type: list
                         list:
                             name: default
                             children: files
-            -   cols:
-                    -   type: custom
-                        custom:
-                            callback: renderNotesList
 
 filters_panels:
     default:
         filters:
-            type: 
+            type:
             fk_soc:
             fk_statut:
             fk_user_assigned:
@@ -240,7 +361,7 @@ lists:
         sort_field: date_create
         sort_way: desc
         n: 10
-        add_form_name: default
+        add_form_name: create
         add_btn_label: Nouveau ticket
         edit_btn: 1
         edit_form: default

@@ -37,38 +37,11 @@ objects:
         instance:
             id_object:
                 field_value: fk_soc
-    
     lines:
         relation: hasMany
         delete: 1
         instance:
             bimp_object: BCT_ContratLine
-    
-#    avenant:
-#        relation: hasMany
-#        delete: 1
-#        instance:
-#            bimp_object: Bimp_ContratAvenant
-    
-    files:
-        relation: hasMany
-        delete: 1
-        instance:
-            bimp_object:
-                module: bimpcore
-                name: BimpFile
-        list: 
-            filters:
-                parent_module: bimpcontract
-                parent_object_name: BContract_contrat
-                deleted: 0
-        add_form: 
-            name: upload
-            values:
-                fields: 
-                    parent_module: bimpcontract
-                    parent_object_name: BContract_contrat
-    
     user_create:
         extends: user
         instance:
@@ -98,7 +71,6 @@ objects:
         instance:
             id_object:
                 field_value: fk_commercial_signature
-    
     entrepot: 
         instance: 
             id_object:
@@ -108,7 +80,6 @@ objects:
         instance: 
             id_object:
                 field_value: entrepot
-    
     client_facturation:
         extends: client
         instance:
@@ -134,7 +105,6 @@ objects:
                 name: Bimp_SocBankAccount
             id_object:
                 field_value: rib_client
-                
     files:
         relation: hasMany
         delete: 1

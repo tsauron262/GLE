@@ -3,6 +3,9 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 
 class Bimp_Ticket extends BimpDolObject
 {
+	/* @var Ticket */
+	public $dol_object;
+
 	public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
 	const STATUS_DRAFT = 0;
@@ -29,6 +32,33 @@ class Bimp_Ticket extends BimpDolObject
 
 	public static $types = array();
 
+	// Getters booléens:
+
+	public function isActionAllowed($action, &$errors = array())
+	{
+		switch ($action) {
+			case 'assign':
+				if ($this->isLoaded()) {
+					if ((int) $this->getData('fk_statut') >= self::STATUS_CLOSED) {
+						$errors[] = 'Ticket déjà fermé';
+						return 0;
+					}
+				}
+				return 1;
+
+			case 'newStatus':
+				if ($this->isLoaded()) {
+					$cur_status = (int) $this->getData('fk_statut');
+					if ($cur_status < self::STATUS_ASSIGNED) {
+						$errors[] = 'Ticket non assigné';
+						return 0;
+					}
+				}
+				return 1;
+		}
+		return parent::isActionAllowed($action, $errors);
+	}
+
 	// Getters données:
 
 	public function getAddContactIdClient()
@@ -42,6 +72,17 @@ class Bimp_Ticket extends BimpDolObject
 	{
 		$buttons = array();
 
+		if ($this->isActionAllowed('assign') && $this->canSetAction('assign')) {
+			$id_user = (int) $this->getData('fk_user_assign');
+
+			$buttons[] = array(
+				'label'   => ($id_user ? 'Changer d\'assignation' : 'Assigner'),
+				'icon'    => 'fas_user-plus',
+				'onclick' => $this->getJsActionOnclick('assign', array(), array(
+					'form_name' => 'assign'
+				))
+			);
+		}
 		if ($this->isActionAllowed('newStatus') && $this->canSetAction('newStatus')) {
 			$cur_status = (int) $this->getData('fk_statut');
 			$buttons[] = array(
@@ -72,7 +113,6 @@ class Bimp_Ticket extends BimpDolObject
 				);
 			}
 		}
-
 
 		return $buttons;
 	}
@@ -171,29 +211,41 @@ class Bimp_Ticket extends BimpDolObject
 		$cur_status = (int) $this->getData('fk_statut');
 
 		if (!(int) $this->getData('fk_user_assign')) {
-			if ($cur_status < self::STATUS_CLOSED && $cur_status > self::STATUS_READ) {
+			if ($cur_status < self::STATUS_CLOSED) {
 				$this->updateField('fk_statut', self::STATUS_READ);
 			}
-		} elseif ($cur_status < self::STATUS_READ) {
+		} elseif ($cur_status <= self::STATUS_READ) {
 			$this->updateField('fk_statut', self::STATUS_ASSIGNED);
 		}
 	}
 
-	public function checkUserAssigned()
+	public function checkUserAssigned($check_status = true, $init_user_assign = 0)
 	{
 		if ($this->isLoaded()) {
 			$fk_user_assigned = (int) $this->getData('fk_user_assign');
 			$users_assigned = $this->dol_object->getIdContact('internal', 'SUPPORTTEC');
-			$id_user_assigned = 0;
-			if (isset($users_assigned[0])) {
-				$id_user_assigned = $users_assigned[0];
-			}
-			if (!$id_user_assigned && $fk_user_assigned) {
-				$this->dol_object->add_contact($fk_user_assigned, 'SUPPORTTEC', 'internal');
+
+			if ($fk_user_assigned) {
+				$id_type_contact = $this->db->getValue('c_type_contact', 'rowid', 'element = \'ticket\' AND source = \'internal\' AND code = \'SUPPORTTEC\'');
+				$this->db->delete('element_contact', 'fk_c_type_contact = ' . $id_type_contact . ' AND element_id = ' . $this->id . ' AND fk_socpeople != ' . $fk_user_assigned);
+
+				if (!(int) $this->db->getValue('element_contact', 'rowid', 'fk_c_type_contact = ' . $id_type_contact . ' AND element_id = ' . $this->id . ' AND fk_socpeople = ' . $fk_user_assigned)) {
+					$this->dol_object->add_contact($fk_user_assigned, 'SUPPORTTEC', 'internal');
+				}
+			} else {
+				$users_assigned = $this->dol_object->getIdContact('internal', 'SUPPORTTEC');
+				if (isset($users_assigned[0]) && (int) $users_assigned[0]) {
+					$this->updateField('fk_user_assign', (int) $users_assigned[0]);
+					$fk_user_assigned = (int) $users_assigned[0];
+				}
 			}
 
-			if (!$fk_user_assigned && $id_user_assigned) {
-				$this->updateField('fk_user_assign', $id_user_assigned);
+			if ($init_user_assign !== $fk_user_assigned) {
+				$this->addObjectLog('Assigné à ' . ($fk_user_assigned ? '{{Utilisateur:' . $fk_user_assigned . '}}' : 'personne'), 'ASSIGNED');
+			}
+
+			if ($check_status) {
+				$this->checkStatus();
 			}
 		}
 	}
@@ -207,12 +259,60 @@ class Bimp_Ticket extends BimpDolObject
 			$id_user_assigned = $users_assigned[0];
 		}
 
-		if ($id_user_assigned !== (int) $this->getData('fk_user_assign')) {
-			$this->updateField('fk_user_assign', $id_user_assigned);
+		$cur_user_assign = (int) $this->getData('fk_user_assign');
+		if ($id_user_assigned !== $cur_user_assign) {
+			$err = $this->updateField('fk_user_assign', $id_user_assigned);
+
+			if (empty($err)) {
+				$this->checkUserAssigned(true, $cur_user_assign);
+			}
 		}
 	}
 
 	// Actions:
+
+	public function actionAssign($data, &$success = '')
+	{
+		$errors = array();
+		$warnings = array();
+		$success = '';
+
+		if ($this->isLoaded($errors)) {
+			$init_user_assign = (int) $this->getInitData('fk_user_assign');
+			$fk_user_assign = BimpTools::getArrayValueFromPath($data, 'fk_user_assign', 0);
+
+			$errors = $this->updateField('fk_user_assign', $fk_user_assign);
+
+			if (!count($errors)) {
+				$this->checkUserAssigned(true, $init_user_assign);
+			}
+		} else {
+			$ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+			if (empty($ids)) {
+				$errors[] = 'Aucun ticket sélectionné';
+			} else {
+				$nbOk = 0;
+				foreach ($ids as $id) {
+					$ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $id);
+					if (BimpObject::objectLoaded($ticket)) {
+						$res = $ticket->setObjectAction('assign', $data, $success);
+
+						if (!empty($res['errors'])) {
+							$warnings = BimpTools::getMsgFromArray($res['errors'], 'Echec de la mise à jour du ticket ' . $ticket->getRef());
+						}
+					} else {
+						$warnings[] = 'Le tcket #' . $id . ' n\'existe plus';
+					}
+				}
+			}
+		}
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
 
 	public function actionNewStatus($data, &$success = '')
 	{
@@ -268,12 +368,38 @@ class Bimp_Ticket extends BimpDolObject
 		);
 	}
 
+	public function actionAddContact($data, &$success)
+	{
+		$errors = array();
+
+		$type = (int) BimpTools::getArrayValueFromPath($data, 'type', 0);
+		if ($type == 2) {
+			$id_type_contact = (int) $this->db->getValue('c_type_contact', 'rowid', 'source = \'internal\' AND element = \'ticket\' AND code = \'SUPPORTTEC\'');
+			if ($id_type_contact && (int) BimpTools::getArrayValueFromPath($data, 'user_type_contact', 0) == $id_type_contact) {
+				$users_assigned = $this->dol_object->getIdContact('internal', 'SUPPORTTEC');
+				if (!empty($users_assigned)) {
+					$errors[] = 'Ce ticket est déjà assigné à un utilisateur';
+				}
+			}
+		}
+
+		if (!count($errors)) {
+			return parent::actionAddContact($data, $success);
+		}
+
+		return array(
+			'errors' => $errors,
+			'wanrnings' => array()
+		);
+	}
+
 	// Overrides :
 
 	public function onSave(&$errors = array(), &$warnings = array())
 	{
 		parent::onSave($errors, $warnings);
 	}
+
 	public function validate()
 	{
 		$errors = parent::validate();
@@ -296,7 +422,7 @@ class Bimp_Ticket extends BimpDolObject
 		$errors = parent::create($warnings, $force_create);
 
 		if (!count($errors)) {
-			$this->checkUserAssigned();
+			$this->checkUserAssigned(true);
 
 			$contacts = (int) $this->dol_object->getIdContact('external', 'SUPPORTCLI');
 			if (!isset($contacts[0])) {
@@ -315,5 +441,20 @@ class Bimp_Ticket extends BimpDolObject
 		}
 
 		return $errors;
+	}
+
+	public function update(&$warnings = array(), $force_update = false)
+	{
+		$init_fk_user_assign = (int) $this->getInitData('fk_user_assign');
+		$errors = parent::update($warnings, $force_update);
+
+		if (!count($errors)) {
+			if ($init_fk_user_assign !== (int) $this->getData('fk_user_assign')) {
+				$this->checkUserAssigned(true, $init_fk_user_assign);
+			}
+		}
+
+		return $errors;
+
 	}
 }

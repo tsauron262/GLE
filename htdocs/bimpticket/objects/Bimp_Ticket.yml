@@ -116,7 +116,7 @@ fields:
         default_value: 0
     
     fk_user_assign:
-        label: Attribué à
+        label: Assigné à
         type: id_object
         object: user_assign
         input:
@@ -157,11 +157,9 @@ fields:
         label: Date de clôture
         type: datetime
 
-
 forms:
     default:
         rows:
-            -   field: fk_user_assign
             -   field: type
             -   field: fk_soc
             -   field: subject
@@ -170,6 +168,7 @@ forms:
     create:
         rows:
             -   field: fk_user_assign
+                label: Assigner à
             -   field: type
             -   field: fk_soc
             -   custom: 1
@@ -284,6 +283,11 @@ forms:
                 display_if:
                     field_name: type
                     show_values: 2
+                    
+    assign: 
+        rows:
+            -   field: fk_user_assign
+                label: Assigner à
 
 fields_tables:
     infos:

@@ -156,7 +156,7 @@ class ActionsBimpcore
 				$tabObj = array("bimptechnique", "BT_ficheInter");
 			}
 
-			if (stripos($url, '/user/') !== false && !stripos($url, 'create') && !stripos($url, 'logout')) {
+			if (stripos($url, '/user/') !== false && !stripos($url, 'create') && !stripos($url, 'adduser') && !stripos($url, 'logout')) {
 				$tabObj = array("bimpcore", "Bimp_User");
 			}
 			if (stripos($url, '/user/group/') !== false) {

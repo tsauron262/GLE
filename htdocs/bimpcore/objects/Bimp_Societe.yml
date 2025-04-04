@@ -812,6 +812,10 @@ fields:
         label: Consigne référence externe
         type: text
         
+    import_key:
+        label: Clé d'import
+        type: text
+        
 fields_tables: 
     identity:
         title: Identité

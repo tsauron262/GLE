@@ -8291,6 +8291,7 @@ class Bimp_CommandeLine extends ObjectLine
 		$errors = array();
 		$warnings = array();
 		$success = 'Suppression de la ligne de commande fournisseur effectuée avec succès';
+		$sc = '';
 
 		if (!isset($data['id_commande_fourn_line']) || !(int) $data['id_commande_fourn_line']) {
 			$errors[] = 'ID de la commande fournisseur absent';
@@ -8305,6 +8306,7 @@ class Bimp_CommandeLine extends ObjectLine
 				} elseif ((int) $commande_fourn->getData('fk_statut') !== 0) {
 					$errors[] = 'La commande fournisseur "' . $commande_fourn->getRef() . '" n\'a plus le statut "brouillon"';
 				} else {
+					$sc = 'triggerObjectChange(\'bimpcommercial\', \'Bimp_CommandeFournLine\', ' . $line->id . ')';
 					$qty = (int) $line->qty;
 					$errors = $line->delete($warnings, true);
 
@@ -8334,7 +8336,8 @@ class Bimp_CommandeLine extends ObjectLine
 
 		return array(
 			'errors'   => $errors,
-			'warnings' => $warnings
+			'warnings' => $warnings,
+			'success_callback' => $sc
 		);
 	}
 

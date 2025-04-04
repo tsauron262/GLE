@@ -315,7 +315,7 @@ function setObjectAction($button, object_data, action, extra_data, $resultContai
                                 var name = $(this).attr('name');
                                 nbFile++;
                                 button.addClass('disabled');
-                                $('#' + id).simpleUpload(DOL_URL_ROOT + "/bimpcore/ajax/upload.php?id=" + name, {
+                                $('#' + id).simpleUpload(DOL_URL_ROOT + "/bimpcore/ajax/upload.php?id=" + name + "&token=" + dol_token, {
                                     start: function (file) {
                                         $form.append('<div id="progressbar_' + id + '"></div>');
                                     },

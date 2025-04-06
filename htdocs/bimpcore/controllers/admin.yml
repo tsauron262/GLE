@@ -72,6 +72,11 @@ objects:
             bimp_object:
                 module: bimpcore
                 name: BimpCGV
+    dictionnaries: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpDictionnary
     
                 
 sections:
@@ -220,4 +225,13 @@ sections:
                   list:
                       panel: 1
                       object: cgv
+                      name: default
+
+        dictionnaries:
+            label: Dictionnaires
+            sections:
+                - type: list
+                  list:
+                      panel: 1
+                      object: dictionnaries
                       name: default

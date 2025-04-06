@@ -18,8 +18,40 @@ objects:
 main_object: ticket
 
 sections:
-    - type: view
-      view:
-          object: ticket
-          name: default
-          panel: 0
+    -   type: object_header
+        object_header:
+            object: ticket
+    -   type: nav_tabs
+        nav_tabs:
+            -   id: card
+                title: Fiche
+                icon: fas_file
+                struct:
+                    type: rows
+                    rows:
+                        -   cols:
+                                -   type: view
+                                    view:
+                                        object: ticket
+                                        name: fiche
+            -   id: divers
+                title: Divers (admin)
+                icon: fas_tools
+                show:
+                    callback:
+                        method: iAmAdmin
+                        object: ticket
+                struct:
+                    type: custom
+                    custom:
+                        callback:
+                            method: renderBimpOjectDivers
+                            object: ticket
+    -   type: custom
+        custom:
+            callback:
+                method: renderNotesList
+                object: ticket
+                params:
+                    - 1
+    

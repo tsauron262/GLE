@@ -1,0 +1,94 @@
+table: bimpcore_dictionnary_value
+icon: fas_list-ol
+
+common_fields: 0
+
+positions: 1
+position_insert: after
+
+parent_module: bimpcore
+parent_object: BimpDictionnary
+parent_id_property: id_dict
+
+labels:
+    name: valeur
+    is_female: 1
+
+fields:
+    id_dict:
+        label: Dictionnaire
+        type: id_parent
+        required: 1
+    
+    code:
+        label: Code
+        required: 1
+    
+    label:
+        label: Libellé
+        required: 1
+    
+    icon:
+        label: Icône
+    
+    class:
+        label: Classe
+        values:
+            array: classes
+    
+    active:
+        label: Active
+        type: bool
+        default_value: 1
+    
+    extra_data:
+        label: Données supplémentaires
+        type: json
+
+forms:
+    default:
+        rows:
+            -   field: code
+            -   field: label
+            -   field: icon
+            -   field: class
+            -   field: active
+                
+lists:
+    default: 
+        title: Valeurs
+        icon: fas_list-ol
+        configurable: 0
+        checkboxes: 1
+        positions: 1
+        bulk_actions:
+                - label: Supprimer les valeurs sélectionnées
+                  icon: fas_trash-alt
+                  onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: position
+        sort_way: asc
+        n: 0
+        add_object_row: 1
+        add_object_row_open: 1
+        add_form_name: default
+        add_btn_label: Nouvelle valeur
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        cols: 
+            id_dict:
+            code:
+                edit: 1
+            label:
+                edit: 1
+            icon:
+                edit: 1
+            class:
+                edit: 1
+            active:
+                edit: 1
+            
+    dictionnary: 
+        extends: default
+        cols:
+            id_dict: unset

@@ -556,6 +556,35 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     // Getters config:
 
+	public function getListExtraBtn()
+	{
+		$buttons = parent::getListExtraBtn();
+
+		if ($this->isLoaded() && !(int) $this->isDeletable() && $this->getData('linked_object_name') === 'commande_line') {
+			$id_commande_line = (int) $this->getData('linked_id_object');
+			if ($id_commande_line) {
+				/* @var $cf Bimp_CommandeFourn */
+				$cf = $this->getParentInstance();
+				if ($cf->areLinesEditable()) {
+					$commande_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_commande_line);
+					if (BimpObject::objectLoaded($commande_line)) {
+						$buttons[] = array(
+							'label' => 'Supprimer',
+							'icon' => 'fas_trash-alt',
+							'onclick' => $commande_line->getJsActionOnclick('cancelCommandeFourn', array(
+								'id_commande_fourn_line' => $this->id
+							), array(
+								'confirm_msg' => 'Veuillez confirmer la suppression de cette ligne'
+							))
+						);
+					}
+				}
+			}
+		}
+
+		return $buttons;
+	}
+
     public function getLogistiqueBulkActions()
     {
         return array();
@@ -863,16 +892,16 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $qty_modif = (float) $this->getData('qty_modif');
 
         // Qté totale
-
+		$popover = '';
         if ($total_qty >= 0) {
             if ($qty_modif) {
-                $popover .= 'Qtés totales (qtés commandées +/- qtés modifiées)';
+                $popover = 'Qtés totales (qtés commandées +/- qtés modifiées)';
             } else {
                 $popover = 'Qtés commandées';
             }
         } else {
             if ($qty_modif) {
-                $popover .= 'Qtés totales (qtés retournées +/- qtés modifiées)';
+                $popover = 'Qtés totales (qtés retournées +/- qtés modifiées)';
             } else {
                 $popover = 'Qtés retournées';
             }

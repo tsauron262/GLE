@@ -606,7 +606,7 @@ VALUES
 		$db->begin();
 		$errors = array();
 
-		$sql = $db->query("SELECT rowid FROM ".MAIN_DB_PREFIX."facture f LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafields fa ON fa.fk_object = f.rowid WHERE f.rowid NOT IN (SELECT id_facture FROM `".MAIN_DB_PREFIX."bc_vente`) AND f.rowid NOt IN (SELECT id_avoir FROM `".MAIN_DB_PREFIX."bc_vente`) AND entity = ".$conf->entity." AND fk_statut > 0 AND (f.date_valid > (SELECT MAX(date_closing) FROM `".MAIN_DB_PREFIX."bl_inventory_2` WHERE fk_warehouse = fa.entrepot) || fa.entrepot NOT IN (SELECT fk_warehouse FROM `".MAIN_DB_PREFIX."bl_inventory_2`));");
+		$sql = $db->query("SELECT f.rowid FROM ".MAIN_DB_PREFIX."facture f LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafields fa ON fa.fk_object = f.rowid WHERE f.rowid NOT IN (SELECT id_facture FROM `".MAIN_DB_PREFIX."bc_vente`) AND f.rowid NOt IN (SELECT id_avoir FROM `".MAIN_DB_PREFIX."bc_vente`) AND entity = ".$conf->entity." AND fk_statut > 0 AND (f.date_valid > (SELECT MAX(date_closing) FROM `".MAIN_DB_PREFIX."bl_inventory_2` WHERE fk_warehouse = fa.entrepot) || fa.entrepot NOT IN (SELECT fk_warehouse FROM `".MAIN_DB_PREFIX."bl_inventory_2`));");
 		while($ln = $db->fetch_object($sql)){
 			$fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $ln->rowid);
 			$errorsF = $fact->reDestock();

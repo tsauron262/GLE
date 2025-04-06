@@ -635,6 +635,17 @@ if (!defined('NOTOKENRENEWAL') && !defined('NOSESSION')) {
 
 //dol_syslog("CSRF info: ".defined('NOCSRFCHECK')." - ".$dolibarr_nocsrfcheck." - ".$conf->global->MAIN_SECURITY_CSRF_WITH_TOKEN." - ".$_SERVER['REQUEST_METHOD']." - ".GETPOST('token', 'alpha'));
 
+/*
+ * mod drsi
+ */
+
+if($_REQUEST['action'] == 'getUserNotifications' && !defined('NOCSRFCHECK'))
+	define('NOCSRFCHECK', 1);
+/*fmoddrsi*/
+
+
+
+
 // Check validity of token, only if option MAIN_SECURITY_CSRF_WITH_TOKEN enabled or if constant CSRFCHECK_WITH_TOKEN is set into page
 if ((!defined('NOCSRFCHECK') && empty($dolibarr_nocsrfcheck) && getDolGlobalInt('MAIN_SECURITY_CSRF_WITH_TOKEN')) || defined('CSRFCHECK_WITH_TOKEN')) {
 	// Array of action code where CSRFCHECK with token will be forced (so token must be provided on url request)
@@ -663,7 +674,7 @@ if ((!defined('NOCSRFCHECK') && empty($dolibarr_nocsrfcheck) && getDolGlobalInt(
 
 	// Check a token is provided for all cases that need a mandatory token
 	// (all POST actions + all sensitive GET actions + all mass actions + all login/actions/logout on pages with CSRFCHECK_WITH_TOKEN set)
-	/*if (
+	if (
 		(!empty($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST') ||
 		$sensitiveget ||
 		GETPOSTISSET('massaction') ||
@@ -685,6 +696,11 @@ if ((!defined('NOCSRFCHECK') && empty($dolibarr_nocsrfcheck) && getDolGlobalInt(
 				} else {
 					dol_syslog("--- Access to ".(empty($_SERVER["REQUEST_METHOD"]) ? '' : $_SERVER["REQUEST_METHOD"].' ').$_SERVER["PHP_SELF"]." refused by CSRF protection (POST method or GET with a sensible value for 'action' parameter) in main.inc.php. Token not provided.", LOG_WARNING);
 					print "Access to this page this way (POST method or GET with a sensible value for 'action' parameter) is refused by CSRF protection in main.inc.php. Token not provided.\n";
+					/*
+					 * moddrsi envoie mail
+					 */
+					global $user;
+					mailSyn2('CSRF protection 3', 'tommy@bimp.fr', null, 'Access to this page this way (POST method or GET with a sensible value for \'action\' parameter) is refused by CSRF protection in main.inc.php. Token not provided.'."--- Access to ".(empty($_SERVER["REQUEST_METHOD"]) ? '' : $_SERVER["REQUEST_METHOD"].' ').$_SERVER["PHP_SELF"]." refused by CSRF protection (invalid token), so we disable POST and some GET parameters - referrer=".(empty($_SERVER['HTTP_REFERER']) ? '' : $_SERVER['HTTP_REFERER']).", action=".GETPOST('action', 'aZ09').", _GET|POST['token']=".GETPOST('token', 'alpha').' login : '.$user->login.' request : '.print_r($_REQUEST, 1));
 					print "If you access your server behind a proxy using url rewriting and the parameter is provided by caller, you might check that all HTTP header are propagated (or add the line \$dolibarr_nocsrfcheck=1 into your conf.php file or MAIN_SECURITY_CSRF_WITH_TOKEN to 0";
 					if (getDolGlobalString('MAIN_SECURITY_CSRF_WITH_TOKEN')) {
 						print " instead of " . getDolGlobalString('MAIN_SECURITY_CSRF_WITH_TOKEN');
@@ -694,7 +710,7 @@ if ((!defined('NOCSRFCHECK') && empty($dolibarr_nocsrfcheck) && getDolGlobalInt(
 			}
 			die;
 		}
-	}*/
+	}
 
 	$sessiontokenforthisurl = (empty($_SESSION['token']) ? '' : $_SESSION['token']);
 	// TODO Get the sessiontokenforthisurl into an array of session token (one array per base URL so we can use the CSRF per page and we keep ability for several tabs per url in a browser)
@@ -705,6 +721,7 @@ if ((!defined('NOCSRFCHECK') && empty($dolibarr_nocsrfcheck) && getDolGlobalInt(
 		if (!defined('NOTOKENRENEWAL')) {
 			// If the page is not a page that disable the token renewal, we report a warning message to explain token has epired.
 			setEventMessages('SecurityTokenHasExpiredSoActionHasBeenCanceledPleaseRetry', null, 'warnings', '', 1);
+			mailSyn2('SecurityTokenHasExpiredSoActionHasBeenCanceledPleaseRetry', 'tommy@bimp.fr', null, "--- Access to ".(empty($_SERVER["REQUEST_METHOD"]) ? '' : $_SERVER["REQUEST_METHOD"].' ').$_SERVER["PHP_SELF"]." refused by CSRF protection (invalid token), so we disable POST and some GET parameters - referrer=".(empty($_SERVER['HTTP_REFERER']) ? '' : $_SERVER['HTTP_REFERER']).", action=".GETPOST('action', 'aZ09').", _GET|POST['token']=".GETPOST('token', 'alpha'));
 		}
 		$savid = null;
 		if (isset($_POST['id'])) {
@@ -2197,7 +2214,7 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
 					if (preg_match('/^(http|\/\/)/i', $jsfile)) {
 						print '<script nonce="'.getNonce().'" src="'.$jsfile.((strpos($jsfile, '?') === false) ? '?' : '&amp;').'lang='.$langs->defaultlang.'"></script>'."\n";
 					} else {
-						print '<script nonce="'.getNonce().'" src="'.dol_buildpath($jsfile, 1).((strpos($jsfile, '?') === false) ? '?' : '&amp;').'lang='.$langs->defaultlang.'"></script>'."\n";
+						print '<script nonce="'.getNonce().'" src="'.dol_buildpath($jsfile, 1).((strpos($jsfile, '?') === false) ? '?' : '&amp;')./*empeche le cache'lang='.$langs->defaultlang.*/'"></script>'."\n";
 					}
 				}
 			}

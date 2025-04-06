@@ -91,7 +91,7 @@ abstract class BimpComponent
         return true;
     }
 
-    // Gestion des paramètres: 
+    // Gestion des paramètres:
 
     public function setConfPath($path = '')
     {
@@ -169,7 +169,7 @@ abstract class BimpComponent
 
     protected static function fetchParamStatic(BimpConfig $config, $name, $definitions, $path, &$errors = array(), $no_ajax_params = false, $no_default_values = false)
     {
-        // $no_default_values = true: à utiliser pour surcharger des paramètres existants. 
+        // $no_default_values = true: à utiliser pour surcharger des paramètres existants.
 
         if (!isset($definitions[$name])) {
             $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (définitions absentes)';
@@ -417,12 +417,12 @@ abstract class BimpComponent
                 $this->newUserConfigSet = true;
             }
 
-            // Si nouvelle config demandée: 
+            // Si nouvelle config demandée:
             if (!$id_config && BimpTools::isSubmit('id_' . static::$type . '_config')) {
                 $id_config = (int) BimpTools::getValue('id_' . static::$type . '_config', 0, 'int');
 
                 if (!$id_config) {
-                    // Choix de ne pas utiliser de config par l'utilisateur: 
+                    // Choix de ne pas utiliser de config par l'utilisateur:
                     $config_instance = BCUserConfig::getInstanceFromComponentType(static::$type);
                     $key = $config_instance::getCurrentConfigKeyStatic($this->object, $this->name);
                     if ($key) {
@@ -439,7 +439,7 @@ abstract class BimpComponent
                 $set_as_current = true;
             }
 
-            // Si config en cours d'utilisation: 
+            // Si config en cours d'utilisation:
             if (!$id_config && BimpTools::isSubmit('id_current_' . static::$type . '_config')) {
                 $id_config = (int) BimpTools::getValue('id_current_' . static::$type . '_config', 0, 'int');
                 $this->newUserConfigSet = false;
@@ -453,7 +453,7 @@ abstract class BimpComponent
                 }
             }
 
-            // Chargement de la config: 
+            // Chargement de la config:
             if ($id_config) {
                 $this->userConfig = BCUserConfig::getInstanceFromComponentType(static::$type, (int) $id_config);
 
@@ -467,7 +467,7 @@ abstract class BimpComponent
                 }
             }
 
-            // Chargement de la configuration courante ou par défaut: 
+            // Chargement de la configuration courante ou par défaut:
             if (!BimpObject::objectLoaded($this->userConfig)) {
                 global $user;
 
@@ -511,13 +511,13 @@ abstract class BimpComponent
         }
 
         if (is_a($pdf, 'BimpModelPDF')) {
-            
+
         } else {
             $this->addError('Erreur technique - instance de BimpModelPDF invalide');
         }
     }
 
-    // Gestion des erreurs: 
+    // Gestion des erreurs:
 
     public function addTechnicalError($msg)
     {
@@ -545,7 +545,7 @@ abstract class BimpComponent
         ));
     }
 
-    // Méthodes statiques: 
+    // Méthodes statiques:
 
     public static function getConfigPath($object, $name, $type = null)
     {

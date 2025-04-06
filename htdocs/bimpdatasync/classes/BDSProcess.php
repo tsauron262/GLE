@@ -71,7 +71,7 @@ abstract class BDSProcess
             $this->process = $process;
         }
 
-        // Chargement des paramètres du processus: 
+        // Chargement des paramètres du processus:
         $parameters = $this->process->getChildrenObjects('params');
         foreach ($parameters as $p) {
             $value = (string) $p->getData('value');
@@ -98,7 +98,7 @@ abstract class BDSProcess
 
     public function deleteObjects($objects)
     {
-        
+
     }
 
     public function start()
@@ -133,7 +133,7 @@ abstract class BDSProcess
         }
     }
 
-    // Déclenchement des opération: 
+    // Déclenchement des opération:
 
     public function gestionPersistance($id_operation, $debut = true, $erase = false)
     {
@@ -178,7 +178,7 @@ abstract class BDSProcess
                     $data['use_report'] = (int) $operation->getData('use_report');
                 }
 
-                // Vérification des options: 
+                // Vérification des options:
                 $options = $operation->getAssociatesObjects('options');
                 foreach ($options as $option) {
                     if (!isset($this->options[$option->getData('name')])) {
@@ -200,7 +200,7 @@ abstract class BDSProcess
                 }
 
                 if (!count($errors)) {
-                    // Création du rapport. 
+                    // Création du rapport.
                     if ($data['use_report']) {
                         $title = $this->process->getData('title') . ' - ' . $operation->getData('title') . ' du ' . date('d / m / Y');
                         $this->createReport($title, $this->options['mode'], $id_operation);
@@ -209,7 +209,7 @@ abstract class BDSProcess
                         }
                     }
 
-                    // Initialisation de l\'opération: 
+                    // Initialisation de l\'opération:
                     $this->{$method}($data, $errors);
                     if (count($errors)) {
                         $this->Error(BimpTools::getMsgFromArray($errors, 'Erreurs lors de l\'initialisation du processus'));
@@ -260,7 +260,7 @@ abstract class BDSProcess
                     $msg = 'Erreur technique : l\'opération d\'ID ' . $id_operation . ' n\'existe plus';
                     $errors[] = $msg;
                 } else {
-                    // Vérification des options: 
+                    // Vérification des options:
                     $options = $operation->getAssociatesObjects('options');
                     foreach ($options as $option) {
                         if (!isset($this->options[$option->getData('name')])) {
@@ -272,7 +272,7 @@ abstract class BDSProcess
                     }
 
                     if ($this->options_ok) {
-                        // Finalisation de l'opération: 
+                        // Finalisation de l'opération:
                         $method = 'finalize';
                         $words = explode('_', $operation->getData('name'));
                         foreach ($words as $word) {
@@ -324,7 +324,7 @@ abstract class BDSProcess
                 }
 
                 if (method_exists($this, $method)) { // Méthode non obligatoire
-                    // Vérification des options: 
+                    // Vérification des options:
                     $options = $operation->getAssociatesObjects('options');
                     foreach ($options as $option) {
                         if (!isset($this->options[$option->getData('name')])) {
@@ -336,7 +336,7 @@ abstract class BDSProcess
                     }
 
                     if ($this->options_ok) {
-                        // Finalisation de l'opération: 
+                        // Finalisation de l'opération:
                         $result = $this->{$method}($errors, $extra_data);
                     }
                 }
@@ -426,7 +426,7 @@ abstract class BDSProcess
                                 }
                             }
 
-                            // Exécution de l'opération pour cette étape: 
+                            // Exécution de l'opération pour cette étape:
                             $step_result = $this->{$method}($step_name, $step_errors, $extra_data);
 
 //                            $this->DebugData($step_result, 'Resultat étape');
@@ -493,6 +493,8 @@ abstract class BDSProcess
                 $this->debug_content .= '</pre>';
             }
         }
+		else
+			BimpDebug::$active = false;
 
         if (BimpObject::objectLoaded($this->process)) {
             if ((int) $id_report && (!BimpObject::objectLoaded($this->report) || $this->report != $id_report)) {
@@ -505,7 +507,7 @@ abstract class BDSProcess
                 $errors[] = $msg;
                 $this->Error($msg);
             } else {
-                // Vérification des options: 
+                // Vérification des options:
                 $options = $operation->getAssociatesObjects('options');
                 foreach ($options as $option) {
                     if (!isset($this->options[$option->getData('name')])) {
@@ -517,7 +519,7 @@ abstract class BDSProcess
                 }
 
                 if ($this->options_ok) {
-                    // Excution de l'opération: 
+                    // Excution de l'opération:
                     $method = 'execute';
                     $words = explode('_', $operation->getData('name'));
                     foreach ($words as $word) {
@@ -599,7 +601,7 @@ abstract class BDSProcess
     public function executeSoapRequest($params, &$errors)
     {
         // todo: la fonction doit être revue suite à la nouvelle version
-//        // On désactive la temporisation de sortie de manière à ce que le client puisse recevoir 
+//        // On désactive la temporisation de sortie de manière à ce que le client puisse recevoir
 //        // les notifications, notamment en cas d'erreur fatale.
 //        if ($this->options['debug']) {
 //            ob_end_flush();
@@ -746,7 +748,7 @@ abstract class BDSProcess
         return $ftp;
     }
 
-    // Gestion des listes de références: 
+    // Gestion des listes de références:
 
     public function setReferences($references, $object_name = null)
     {
@@ -785,7 +787,7 @@ abstract class BDSProcess
         return $this->references;
     }
 
-    // Gestion des paramètres: 
+    // Gestion des paramètres:
 
     public function getParam($param_name, $default_value = null)
     {
@@ -850,7 +852,7 @@ abstract class BDSProcess
         return $errors;
     }
 
-    // Gestion des options: 
+    // Gestion des options:
 
     public function getOption($option_name, $default_value = null)
     {

@@ -15,7 +15,7 @@ class BimpConfig
 	public $current = null;
 	public $errors = array();
 	public static $keywords = array(
-		'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'request_field', 'dol_list', 'conf', 'bimpcore_conf', 'dol_conf', 'is_module_active', 'is_module_non_active', 'verif_cond'
+		'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'request_field', 'dol_list', 'conf', 'bimpcore_conf', 'dol_conf', 'is_module_active', 'is_module_non_active', 'verif_cond', 'dict'
 	);
 	public $cache_key = '';
 	protected static $params = array();
@@ -808,6 +808,9 @@ class BimpConfig
 			if (isset($value['verif_cond'])) {
 				return BimpTools::verifCond($value['verif_cond']);
 			}
+			if (isset($value['dict'])) {
+				return $this->getDictionnaryArray($value['dict'], $path . '/dict');
+			}
 		}
 		return $value;
 	}
@@ -1282,6 +1285,31 @@ class BimpConfig
 	protected function getIsModuleActive($module, $path)
 	{
 		return (int) BimpCore::isModuleActive($module);
+	}
+
+	protected function getDictionnaryArray($dict, $path)
+	{
+		$dict_code = '';
+		$active_only = true;
+		$include_empty = false;
+		$empty_value = '';
+		$empty_label = '';
+
+		if (is_string($dict)) {
+			$dict_code = $dict;
+		} elseif (is_array($dict)) {
+			$dict_code = $this->get($path . '/code', '', true);
+			$active_only = $this->get($path . '/active_only', 1, false, 'bool');
+			$include_empty = $this->get($path . '/include_empty', 0, false, 'bool');
+			$empty_value = $this->get($path . '/empty_value', '', false);
+			$empty_label = $this->get($path . '/empty_label', '', false);
+		}
+
+		if ($dict_code) {
+			return BimpDict::getValuesArray($dict_code, $active_only, $include_empty, $empty_value, $empty_label);
+		}
+
+		return $dict;
 	}
 
 	// Gestion des objets:

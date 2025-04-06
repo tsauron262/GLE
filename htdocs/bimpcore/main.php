@@ -6,30 +6,30 @@ ini_set('display_errors', 0);
 
 if ($context == 'public') {
     define("NOLOGIN",1);
-    define("NOSESSION", 1);
-    
+//    define("NOSESSION", 1);
+
     define('XFRAMEOPTIONS_ALLOWALL', true);
-    
+
     $sessionname = '__Host-publicerp';
         session_set_cookie_params(array('SameSite' => 'None', 'Secure' => true, 'path' => '/', 'httponly' => false/*pour test cookie dans iframe*/));
 	session_name($sessionname);
-        
+
         $test = session_id();
-        
+
 //        echo '<pre>'.$test;
 //        print_r($_COOKIE);
-        
+
 //        echo '<br/>'.session_id().' finfinfin';
 //        session_id('testssessionid');
 //        session_id($test);
 	session_start();
-        
-        
+
+
 //        if(isset($_COOKIE[$sessionname]) && $_COOKIE[$sessionname] != $test && $test != ''){
 //            $_COOKIE[$sessionname] = $test;
 //            echo 'oui';
 //        }
-        
+
 //        echo '<pre>';
 //        echo session_id().'<br/>fin<br/>';
 //        print_r($_COOKIE);
@@ -42,8 +42,8 @@ if (isset($_REQUEST['ajax']) && $_REQUEST['ajax']) {
     if (!defined('NOLOGIN'))
         define('NOLOGIN', 1);
 
-    if (!defined('NOCSRFCHECK'))
-        define('NOCSRFCHECK', 1);
+//    if (!defined('NOCSRFCHECK'))
+//        define('NOCSRFCHECK', 1);
 
     require_once __DIR__ . "/../main.inc.php";
 
@@ -67,7 +67,7 @@ if (isset($_REQUEST['ajax']) && $_REQUEST['ajax']) {
         if(!defined('csp_nonce'))
             define('csp_nonce', randomPassword(10));
         $cspJs .= " 'strict-dynamic' 'nonce-".csp_nonce."'";
-        
+
     }
     header("Content-Security-Policy: default-src 'self' https://cdsassets.apple.com; script-src ".$cspJs."; style-src 'self' 'unsafe-inline'");
     header('Strict-Transport-Security: max-age=31536000; includeSubDomains');

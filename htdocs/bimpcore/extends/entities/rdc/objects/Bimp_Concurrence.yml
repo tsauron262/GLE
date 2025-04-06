@@ -1,0 +1,109 @@
+table: concurrence_rdc
+icon: fas_bolt
+
+header_list_name: default
+
+labels:
+    name: Concurrent
+    name_plur: Concurrents
+    
+parent_module: bimpcore
+parent_object: Bimp_Societe
+parent_id_property: fk_soc
+
+objects:
+    concurrent:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Concurrence
+    chiffre_affaire:
+        relation: hasOne
+        delete: 1
+        instance:
+            bimp_object: Bimp_ChiffreAffaire
+        list:
+            filters:
+                type_obj: 1
+                id_obj:
+                    callback:
+                        method: getData
+                        params:
+                            - id
+
+fields:
+    nom:
+        label: Nom
+        required: 1
+    site:
+        label: Site
+        display_name: url
+        displays:
+            default:
+                type: callback
+                method: displayUrl
+    fk_soc:
+        label: Société
+    
+forms:
+    default:
+        rows:
+            Nom:
+                field: nom
+            Site:
+                field: site
+                
+views:
+    default:
+        title: Concurent
+    ca:
+        title: Chiffre d'affaire
+        rows:
+            - cols:
+                  -   type: custom
+                      col_lg: 12
+                      col_md: 12
+                      col_sm: 12
+                      custom:
+                          callback:
+                              method: renderChildrenList
+                              params:
+                                  - chiffre_affaire
+                                  - default
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - rep
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - evol
+
+lists:
+    default:
+        title: liste des concurrents
+        n: 3
+        add_form_name: default
+        add_btn_label: Ajouter un concurrent
+        extra_btn:
+            callback: getListExtraButtons
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        cols:
+            nom:
+            site:

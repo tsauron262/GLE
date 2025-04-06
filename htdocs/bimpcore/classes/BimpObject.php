@@ -672,6 +672,7 @@ class BimpObject extends BimpCache
 				$property = 'id_parent';
 			}
 		}
+
 		return $property;
 	}
 
@@ -7339,14 +7340,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				$filters = array();
 			}
 			$parent_id_property = $this->getParentIdProperty();
-			if (!is_null($parent_id_property)) {
+			if ($parent_id_property) {
 				$id_parent = $this->getData($parent_id_property);
-				if (is_null($id_parent) || !$id_parent) {
+				if (!$id_parent) {
 					return '';
 				}
 				$filters[$parent_id_property] = $id_parent;
 			}
-
 
 			$table = $this->getTable();
 			$primary = $this->getPrimary();
@@ -7357,6 +7357,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				if ($this->db->update($table, array(
 						$this->position_field => (int) $new_position
 					), '`' . $primary . '` = ' . (int) $this->id) <= 0) {
+					$errors[] = $this->db->err();
 					$check = false;
 				}
 
@@ -7376,6 +7377,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 							if ($this->db->update($table, array(
 									$this->position_field => (int) $i
 								), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
+								$errors[] = $this->db->err();
 								$check = false;
 							}
 						}
@@ -7390,7 +7392,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				if ($this->db->update($table, array(
 						$this->position_field => (int) $this->getNextPosition()
 					), '`' . $primary . '` = ' . $this->id) <= 0) {
-					$errors[] = $this->db->err();
+					$errors[] = '1 - ' . $this->db->err();
 					$check = false;
 				}
 
@@ -7416,7 +7418,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 								if ($this->db->update($table, array(
 										$this->position_field => ((int) $item[$this->position_field] - 1)
 									), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
-									$errors[] = $this->db->err();
+									$errors[] = '2 - ' . $this->db->err();
 									$check = false;
 								}
 							}
@@ -7440,7 +7442,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 								if ($this->db->update($table, array(
 										$this->position_field => ((int) $item[$this->position_field] + 1)
 									), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
-									$errors[] = $this->db->err();
+									$errors[] = '3 - ' . $this->db->err();
 									$check = false;
 								}
 							}
@@ -7452,7 +7454,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 						if ($this->db->update($table, array(
 								$this->position_field => $new_position
 							), '`' . $primary . '` = ' . $this->id) <= 0) {
-							$errors[] = $this->db->err();
+							$errors[] = '4 - ' . $this->db->err();
 							$check = false;
 						}
 					}
@@ -7460,14 +7462,18 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 					if ($check) {
 						$this->db->db->commit();
 					} else {
+						$errors[] = 'FAIl';
 						$this->db->db->rollback();
 					}
 				}
 			}
 
 			return $check;
+		} else {
+			$errors[] = 'Pas de positions';
 		}
 
+		$errors[] = 'ICI';
 		return false;
 	}
 
@@ -8433,6 +8439,51 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		return BimpRender::renderAlerts($msg);
 	}
 
+
+
+	public function renderChildrenGraph($children_object, $list_name = 'default', $panel = false, $title = null, $icon = null, $level = 1)
+	{
+		$children_instance = $this->config->getObject('', $children_object);
+
+		if (!$this->isLoaded()) {
+			$msg = 'Impossible d\'afficher la liste des ' . $children_instance->getLabel('name_plur');
+			$msg .= ' - ID ' . $this->getLabel('of_the') . ' absent';
+			return BimpRender::renderAlerts($msg);
+		}
+
+		$children_instance->parent = $this;
+
+		if (!is_null($children_instance) && is_a($children_instance, 'BimpObject')) {
+			$title = (is_null($title) ? $this->getConf('objects/' . $children_object . '/list/title', $this->getConf('objects/' . $children_object . '/label', BimpTools::ucfirst($children_instance->getLabel('name_plur')))) : $title);
+			$icon = (is_null($icon) ? $this->getConf('objects/' . $children_object . '/list/icon', $icon) : $icon);
+
+			$list = new BC_Graph($children_instance, $list_name, $level, $this->id, $title, $icon);
+
+			$list_filters = $this->config->getCompiledParams('objects/' . $children_object . '/list/filters', array(), false, 'array');
+
+			if (is_array($list_filters) && count($list_filters)) {
+				foreach ($list_filters as $field_name => $value) {
+					$list->addFieldFilterValue($field_name, $value);
+				}
+			}
+
+			$add_form_name = $this->getConf('objects/' . $children_object . '/add_form/name', null);
+
+			if (!is_null($add_form_name)) {
+				$list->setAddFormName($add_form_name);
+			}
+
+			$add_form_values = $this->config->getCompiledParams('objects/' . $children_object . '/add_form/values', null, false, 'array');
+			if (!is_null($add_form_values) && count($add_form_values)) {
+				$list->setAddFormValues($add_form_values);
+			}
+
+			return $list->renderHtml();
+		}
+		$msg = 'Erreur technique: objets "' . $children_object . '" non trouvés pour ' . $this->getLabel('this');
+		return BimpRender::renderAlerts($msg);
+	}
+
 	public function renderChildCard($object_name, $card_name = '', $card_path = '')
 	{
 		$card = new BC_Card($this, $object_name, $card_name);
@@ -9256,7 +9307,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		if (isset($params['title']) && (string) $params['title']) {
 			$js .= '\'' . htmlentities($params['title']) . '\'';
 		} else {
-			$js .= '\'Liste des ' . htmlentities($this->getLabel('name_plur')) . '\'';
+			$js .= '\'Liste des ' . htmlentities(addslashes($this->getLabel('name_plur'))) . '\'';
 		}
 		$js .= ', ';
 
@@ -11381,6 +11432,44 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 	// Gestion statique des objets:
 
+
+	public static function createOrUpdateBimpObject($module, $object_name, $dataFiltre, $data, $deleteIfMultiple, $force_create = false, &$errors = array(), &$warnings = array(), $no_transactions_db = false, $no_html = false)
+	{
+		//atention filtre doit être unique, sinon la ligne serra recrée
+		$errors = array();
+		if (!count($dataFiltre)) {
+			$errors[] = 'Pas de filtre createOrUpdateBimpObject';
+		} else {
+			$obj = BimpCache::findBimpObjectInstance($module, $object_name, $dataFiltre, $deleteIfMultiple, $deleteIfMultiple, false);
+			if (is_null($obj) || !BimpObject::objectLoaded($obj)) {
+				$data = BimpTools::merge_array($dataFiltre, $data);
+				return static::createBimpObject($module, $object_name, $data, $force_create, $errors, $warnings, $no_transactions_db, $no_html);
+			}
+			else{
+				$maj = false;
+				foreach($data as $key => $valueAComparer1){
+					$valueAComparer2 = str_replace(' ', '', $obj->getData($key));
+					$valueAComparer1 = str_replace(' ', '', $valueAComparer1);
+					if($valueAComparer2 == 0)
+						$valueAComparer2 = '';
+					if($valueAComparer1 == 0)
+						$valueAComparer1 = '';
+					if($valueAComparer1 != $valueAComparer2){
+						$maj = true;
+						break;
+					}
+				}
+				if($maj) {
+					$errors = BimpTools::merge_array($errors, $obj->updateFields($data, $force_create, $warnings));
+				}
+				return $obj;
+			}
+
+
+		}
+		return null;
+	}
+
 	public static function createBimpObject($module, $object_name, $data, $force_create = false, &$errors = array(), &$warnings = array(), $no_transactions_db = false, $no_html = false)
 	{
 		$instance = static::getInstance($module, $object_name);
@@ -11932,7 +12021,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 					die('<script ' . BimpTools::getScriptAttribut() . '>window.location = \'' . $url . "';</script>");
 				}
 			} elseif ($btn && $url != "") {
-				return "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='" . $texteBtn . "'/><input type='hidden' name='redirectForce' value='1'/></form>";
+				return "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='" . $texteBtn . "'/><input type='hidden' name='redirectForce' value='1'/><input id='token' type='hidden' name='token' value='".newToken()."'></form>";
 			}
 		}
 		return '';

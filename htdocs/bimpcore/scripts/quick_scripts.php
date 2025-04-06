@@ -64,6 +64,7 @@ if (!$action) {
 		'aj_menu_compta'                            => 'Aj menu compta',
 		'convert_centre_sav'                        => 'Convertion des centres sav',
 		'check_ac_revals_out_of_stock'              => 'vérif des revals AC en attente hors stock',
+		'correct_stock_facture_depuis_inventaire'	=> 'Correction des stocks des factures depuis inventaire',
 	);
 
 	$path = pathinfo(__FILE__);
@@ -597,6 +598,35 @@ VALUES
 
 	case 'check_ac_revals_out_of_stock':
 //		$cfs = BimpCache::
+
+		break;
+
+	case 'correct_stock_facture_depuis_inventaire':
+		global $db, $conf;
+		$db->begin();
+		$errors = array();
+
+		$sql = $db->query("SELECT rowid FROM ".MAIN_DB_PREFIX."facture f LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafields fa ON fa.fk_object = f.rowid WHERE f.rowid NOT IN (SELECT id_facture FROM `".MAIN_DB_PREFIX."bc_vente`) AND f.rowid NOt IN (SELECT id_avoir FROM `".MAIN_DB_PREFIX."bc_vente`) AND entity = ".$conf->entity." AND fk_statut > 0 AND (f.date_valid > (SELECT MAX(date_closing) FROM `".MAIN_DB_PREFIX."bl_inventory_2` WHERE fk_warehouse = fa.entrepot) || fa.entrepot NOT IN (SELECT fk_warehouse FROM `".MAIN_DB_PREFIX."bl_inventory_2`));");
+		while($ln = $db->fetch_object($sql)){
+			$fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $ln->rowid);
+			$errorsF = $fact->reDestock();
+			if(count($errorsF)){
+				$errors = BimpTools::merge_array($errors, $errorsF);
+			}
+			else{
+				echo '<br/>'.'OK '.$fact->getLink().'<br/>';
+			}
+		}
+		if(count($errors)){
+			$db->rollback();
+			echo '<br/>ECHEC : <pre>';
+			print_r($errors);
+			echo '</pre>';
+		}
+		else{
+			$db->commit();
+			echo '<br/>OK';
+		}
 
 		break;
 

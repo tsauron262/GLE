@@ -860,6 +860,19 @@ class Bimp_ActionComm extends BimpObject
 		parent::onSave($errors, $warnings);
 	}
 
+	public function update(&$warnings = array(), $force_update = false)
+	{
+		$fk_action = BimpTools::getPostFieldValue('fk_action', 0, 'int');
+		if ($fk_action) {
+			$code = $this->db->getValue('c_actioncomm', 'code', 'id = ' . (int) $fk_action);
+			if ($code) {
+				$this->set('code', $code);
+			}
+		}
+
+		return parent::update($warnings, $force_update);
+	}
+
 	public function create(&$warnings = [], $force_create = false)
 	{
 		$errors = array();

@@ -16,6 +16,15 @@ function BimpAjax(action, data, $resultContainer, params) {
         }
     }
     var request_id = bimp_requests.length;
+
+
+	if (typeof (dol_token) !== 'undefined' && dol_token) {
+		if (typeof (data.append) == 'function')
+			data.append("token", dol_token);
+		else
+			data['token'] = dol_token;
+	}
+	
     bimp_requests[request_id] = new BimpAjaxObject(request_id, action, data, $resultContainer, params);
 }
 

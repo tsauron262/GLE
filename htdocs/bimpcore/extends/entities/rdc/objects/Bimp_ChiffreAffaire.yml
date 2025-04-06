@@ -1,0 +1,153 @@
+table: ca_rdc
+icon: fas_euro-sign
+
+header_list_name: default
+
+labels:
+    name: Chiffre d'affaire
+    name_plur: Chiffres d'affaire
+
+parent_module: bimpcore
+parent_object:
+    callback:
+        method: getObjectParentName
+parent_id_property: id_obj
+
+objects:
+    chiffre_affaire:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_ChiffreAffaire
+    
+    parent_obj:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpcore
+                name:
+                    callback:
+                        method: getObjectParentName
+                        params:
+                            - type_obj
+
+fields:
+    id_obj:
+        label: ID Objet
+        object: parent_obj
+        type: id_object
+        depends_on: type_obj
+    type_obj:
+        label: Type
+        values:
+            array:
+                callback:
+                    method: getTypesObjetsRdc
+    ca:
+        label: Chiffre d'Affaire
+        type: money
+    
+    fk_category:
+        label: Catégorie CA
+        values:
+            array:
+                callback:
+                    method: getCategoriesRdc
+    fk_period:
+        label: Période
+        values:
+            array:
+                callback:
+                    method: getPeriodsRdc
+    
+    debut_period:
+        label: Début Période
+        type: date
+        depends_on: fk_period
+        input:
+            format:
+                callback:
+                    method: getParamsPeriode
+
+forms:
+    default:
+        rows:
+            id_obj:
+                field: id_obj
+                hidden: 1
+            type_obj:
+                field: type_obj
+                hidden: 1
+            fk_category:
+                field: fk_category
+            ca:
+                field: ca
+            fk_period:
+                field: fk_period
+            debut_period:
+                field: debut_period
+
+
+
+lists:
+    default:
+        title: liste des chiffres d'affaire
+        n: 10
+        add_form_name: default
+        add_btn: 1
+        delete_btn: 1
+        cols:
+            fk_category:
+            ca:
+            fk_period:
+            debut_period:
+                
+                
+graph:
+    rep:
+        mode: doughnut
+        title: Repartition Categories
+        xDateConfig:
+            field: debut_period
+            date1: 1
+            date2: 2
+            def: 5year
+            params: unset
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                callback: getCategForGrpah
+    evol:
+        title: Evolution CA
+        options:
+            fk_category:
+                name: Categories
+                type: select
+                values:
+                    callback: getCategoriesRdc
+                value: 0
+            fk_period:
+                name: Période
+                type: select
+                values:
+                    callback: getPeriodsRdc
+                value: 0
+        xDateConfig:
+            field: debut_period
+            date1: 1
+            date2: 2
+            def: 5year
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                total_ht:
+                    title: CA ht
+                    field: ca
+                    calc: SUM
+                    filters:
+                        callback: getFiltersForGraph

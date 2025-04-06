@@ -156,7 +156,7 @@ class ActionsBimpcore
 				$tabObj = array("bimptechnique", "BT_ficheInter");
 			}
 
-			if (stripos($url, '/user/') !== false && !stripos($url, 'create') && !stripos($url, 'logout')) {
+			if (stripos($url, '/user/') !== false && !stripos($url, 'create') && !stripos($url, 'adduser') && !stripos($url, 'logout')) {
 				$tabObj = array("bimpcore", "Bimp_User");
 			}
 			if (stripos($url, '/user/group/') !== false) {
@@ -164,6 +164,9 @@ class ActionsBimpcore
 			}
 			if (stripos($url, '/contact/') !== false) {
 				$tabObj = array("bimpcore", "Bimp_Contact");
+			}
+			if (stripos($url, '/ticket/') !== false) {
+				$tabObj = array("bimpticket", "Bimp_Ticket");
 			}
 		}
 

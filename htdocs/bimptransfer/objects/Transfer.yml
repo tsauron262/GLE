@@ -8,6 +8,8 @@ header_btn:
 header_list_name: default
 header_edit_form: default
 
+entity_name: stock
+
 list_page_url: 
     controller: index
             

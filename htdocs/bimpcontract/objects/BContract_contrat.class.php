@@ -2643,7 +2643,7 @@ class BContract_contrat extends BimpDolObject
         return $html;
     }
 
-    public function renderContacts()
+    public function renderContacts($nature = 0, $code = '', $input_name = '')
     {
         $html = '';
 

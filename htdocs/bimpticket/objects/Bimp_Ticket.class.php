@@ -388,7 +388,7 @@ class Bimp_Ticket extends BimpDolObject
 		}
 
 		return array(
-			'errors' => $errors,
+			'errors'    => $errors,
 			'wanrnings' => array()
 		);
 	}
@@ -456,5 +456,130 @@ class Bimp_Ticket extends BimpDolObject
 
 		return $errors;
 
+	}
+
+	// Méthodes statiques :
+
+	public static function getTicketsForUser($id_user, $tms = '', $options = array(), &$errors = array())
+	{
+		if ((int) BimpCore::getConf('mode_eco')) {
+			return array();
+		}
+
+		$data = array(
+			'tms'      => date('Y-m-d H:i:s'),
+			'elements' => array()
+		);
+
+		$bimp_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+		if (!BimpObject::objectLoaded($bimp_user)) {
+			return $data;
+		}
+
+		$bdb = self::getBdb();
+		$bimp_user->dol_object->loadRights();
+		$filters = array();
+
+		if ($tms) {
+			$filters['tms'] = array(
+				'operator' => '>',
+				'value'    => $tms
+			);
+		}
+
+		if (isset($options['excluded_tickets']) && !empty($options['excluded_tickets'])) {
+			$filters['id'] = array(
+				'not_in' => $options['excluded_tickets']
+			);
+		}
+
+		$filters['status'] = array(
+			'operator' => '<',
+			'value'    => self::STATUS_CLOSED
+		);
+
+		$users_filters = array($id_user);
+
+//		if (...) { // todo : check droits users pour voir / assigner nouveaux tickets.
+		$users_filters = array_merge($users_filters, array(0, null));
+//		}
+
+		if ((int) BimpTools::getArrayValueFromPath($options, 'include_delegations', 1)) {
+			$users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
+
+			if (!empty($users_delegations)) {
+				foreach ($users_delegations as $id_user_delegation) {
+					if ($id_user_delegation != $id_user) {
+						$users_filters[] = $id_user_delegation;
+					}
+				}
+			}
+		}
+
+		$filters['fk_user_assign'] = $users_filters;
+
+		$i = 0;
+		$tickets = array();
+
+		$sql = 'SELECT DISTINCT a.rowid';
+		$sql .= BimpTools::getSqlFrom('ticket');
+		$sql .= BimpTools::getSqlWhere($filters);
+		$sql .= BimpTools::getSqlOrderBy('datec', 'DESC', 'a');
+		$sql .= BimpTools::getSqlLimit(50);
+
+		$rows = $bdb->executeS($sql, 'array');
+
+		if (!is_array($rows)) {
+			return array();
+		}
+
+		foreach ($rows as $r) {
+			$t = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', (int) $r['rowid']);
+			if (!BimpObject::objectLoaded($t)) {
+				continue;
+			}
+
+			$where = 'obj_type = \'bimp_object\' AND obj_module = \'bimpticket\' AND obj_name = \'Bimp_Ticket\' AND id_obj = ' . $t->id;
+			$where .= ' AND viewed = 0 AND user_create != ' . (int) $id_user;
+			$nb_msgs = (int) $bdb->getCount('bimpcore_note', $where);
+
+			$status = (int) $t->getData('fk_stat');
+			$status_icon = '<span class="' . implode(' ', self::$status_list[$status]['classes']) . ' bs-popover" style="margin-right: 8px"';
+			$status_icon .= BimpRender::renderPopoverData(self::$status_list[$status]['label']) . '>';
+			$status_icon .= BimpRender::renderIcon(self::$status_list[$status]['icon']) . '</span>';
+
+			$user_author = $t->getChildObject('user_create');
+
+			$dest = '';
+			if ((int) $t->getData('fk_user_assign') !== $id_user) {
+				$user_assign = $t->getChildObject('user_assign');
+				if (BimpObject::objectLoaded($user_assign)) {
+					$dest = $user_assign->getName();
+				}
+			}
+			$ticket = array(
+				'id'            => $t->id,
+				'sort_val'      => $t->getData('datec'),
+				'affected'      => (int) ($t->getData('fk_user_assign') > 0),
+				'status_icon'   => $status_icon,
+				'subj'          => $t->getData('subject'),
+				'src'           => $t->getData('origin_email'),
+				'txt'           => $t->displayData("message", 'default', false),
+				'date_create'   => $t->getData('datec'),
+				'url'           => DOL_URL_ROOT . '/bimpticket/index.php?fc=ticket&id=' . $t->id,
+				'can_close'     => (int) $t->canSetAction('newStatus'),
+				'can_attribute' => (int) ($t->canSetAction('assign')),
+				'can_edit'      => (int) $t->can('edit'),
+				'author'        => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : ''),
+				'dest'          => $dest,
+				'nb_msgs'       => $nb_msgs
+			);
+
+			$tickets[] = $ticket;
+		}
+
+		$data['elements'] = $tickets;
+
+		return $data;
 	}
 }

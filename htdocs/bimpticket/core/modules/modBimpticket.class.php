@@ -169,6 +169,15 @@ class modBimpticket extends DolibarrModules
 					'code'    => 'SOL',
 					'label'   => 'Soldes'
 				), true, $errors);
+
+				BimpObject::createBimpObject('bimpcore', 'BimpNotification', array(
+					'label'  => 'Tickets en cours',
+					'nom'    => 'notif_ticket',
+					'module' => 'bimpticket',
+					'class'  => 'Bimp_Ticket',
+					'method' => 'getTicketsForUser',
+					'active' => 1
+				), true, $errors);
 			}
 
 			if (count($errors)) {

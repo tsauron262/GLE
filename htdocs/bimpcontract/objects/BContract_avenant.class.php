@@ -247,7 +247,7 @@ class BContract_avenant extends BContract_contrat
 
     // Getters Array:
 
-    public function getClientContactsArray()
+    public function getClientContactsArray($with_default = true, $include_empty = false)
     {
         return $this->getParentInstance()->getClientContactsArray();
     }

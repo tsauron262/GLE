@@ -1952,7 +1952,7 @@ class BContract_contrat extends BimpDolObject
         return [0 => "Aucun", 1 => "Proposition", 2 => "Tacite"];
     }
 
-    public function getClientContactsArray()
+    public function getClientContactsArray($with_default = true, $include_empty = false)
     {
         $id_client = $this->getAddContactIdClient();
         return self::getSocieteContactsArray($id_client, false);

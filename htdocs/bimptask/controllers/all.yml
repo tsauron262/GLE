@@ -10,4 +10,5 @@ sections:
      - type: list
        list: 
            panel: 1
+           title: Toutes les tâches
            object: task

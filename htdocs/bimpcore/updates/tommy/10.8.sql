@@ -1,4 +1,4 @@
-DROP table IF EXIST llx_societe_atradius;
+DROP table IF EXISTS llx_societe_atradius;
 CREATE TABLE llx_societe_atradius (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `id_soc` int(10) UNSIGNED NOT NULL DEFAULT '0',

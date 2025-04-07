@@ -64,6 +64,8 @@ if (!$action) {
 		'aj_menu_compta'                            => 'Aj menu compta',
 		'convert_centre_sav'                        => 'Convertion des centres sav',
 		'check_ac_revals_out_of_stock'              => 'vérif des revals AC en attente hors stock',
+		'correct_stock_facture_depuis_inventaire'	=> 'Correction des stocks des factures depuis inventaire',
+		'check_attribut_entity'						=> 'Vérifier les attributs par entité',
 	);
 
 	$path = pathinfo(__FILE__);
@@ -598,6 +600,66 @@ VALUES
 	case 'check_ac_revals_out_of_stock':
 //		$cfs = BimpCache::
 
+		break;
+
+	case 'correct_stock_facture_depuis_inventaire':
+		global $db, $conf;
+		$db->begin();
+		$errors = array();
+
+		$sql = $db->query("SELECT f.rowid FROM ".MAIN_DB_PREFIX."facture f LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafields fa ON fa.fk_object = f.rowid WHERE f.rowid NOT IN (SELECT id_facture FROM `".MAIN_DB_PREFIX."bc_vente`) AND f.rowid NOt IN (SELECT id_avoir FROM `".MAIN_DB_PREFIX."bc_vente`) AND entity = ".$conf->entity." AND fk_statut > 0 AND (f.date_valid > (SELECT MAX(date_closing) FROM `".MAIN_DB_PREFIX."bl_inventory_2` WHERE fk_warehouse = fa.entrepot) || fa.entrepot NOT IN (SELECT fk_warehouse FROM `".MAIN_DB_PREFIX."bl_inventory_2`));");
+		while($ln = $db->fetch_object($sql)){
+			$fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $ln->rowid);
+			$errorsF = $fact->reDestock();
+			if(count($errorsF)){
+				$errors = BimpTools::merge_array($errors, $errorsF);
+			}
+			else{
+				echo '<br/>'.'OK '.$fact->getLink().'<br/>';
+			}
+		}
+		if(count($errors)){
+			$db->rollback();
+			echo '<br/>ECHEC : <pre>';
+			print_r($errors);
+			echo '</pre>';
+		}
+		else{
+			$db->commit();
+			echo '<br/>OK';
+		}
+
+		break;
+
+	case 'check_attribut_entity':
+		global $sql, $conf;
+		$db->query("UPDATE ".MAIN_DB_PREFIX."product_attribute_value SET entity = ".$conf->entity." WHERE entity != ".$conf->entity." AND fk_product_attribute IN (SELECT rowid FROM `".MAIN_DB_PREFIX."product_attribute` WHERE `entity` = ".$conf->entity.");");
+		$sql = $db->query("SELECT aP.rowid as id_combi, pa.rowid as id_attribute, pav.rowid as id_attribute_value, pa.ref as attribute, pav.ref as attribute_value, a.fk_product_parent, a.fk_product_child, pav.ref, pav.value, pa.* FROM `".MAIN_DB_PREFIX."product_attribute_combination2val` aP, ".MAIN_DB_PREFIX."product_attribute_combination a, ".MAIN_DB_PREFIX."product_attribute_value pav, ".MAIN_DB_PREFIX."product_attribute pa WHERE `fk_prod_combination` = a.rowid AND a.entity = ".$conf->entity." AND `fk_prod_attr_val` = pav.rowid AND pav.entity != ".$conf->entity." AND pa.rowid = pav.fk_product_attribute;");
+		echo $db->num_rows($sql).' lignes a traiter<br/>';
+		while($ln = $db->fetch_object($sql)){
+			$sql2 = $db->query("SELECT pa.rowid as id_attribute, pav.rowid as id_attribute_value, pa.ref as attribute, pav.ref as attribute_value FROM ".MAIN_DB_PREFIX."product_attribute_value pav, ".MAIN_DB_PREFIX."product_attribute pa WHERE pav.ref = '".$ln->attribute_value."' AND pa.ref = '".$ln->attribute."' AND pav.entity = ".$conf->entity." AND pa.entity = ".$conf->entity.";");
+//			if($db->num_rows($sql2) < 1){
+//				$tabSubsitute = array('SKI'=>'TAILLE');
+//				$tabSubsitute = array('TAILLE'=>'SKI');
+//				$tabSubsitute2 = array('VRT'=>'VERT');
+//				if(isset($tabSubsitute[$ln->attribute])){
+//					$ln->attribute = $tabSubsitute[$ln->attribute];
+//				}
+//				if(isset($tabSubsitute2[$ln->attribute_value])){
+//					$ln->attribute_value = $tabSubsitute2[$ln->attribute_value];
+//				}
+//				$ln->attribute_value = 'SKI'.str_replace('CM', '', $ln->attribute_value);
+//				$sql2 = $db->query("SELECT pa.rowid as id_attribute, pav.rowid as id_attribute_value, pa.ref as attribute, pav.ref as attribute_value FROM ".MAIN_DB_PREFIX."product_attribute_value pav, ".MAIN_DB_PREFIX."product_attribute pa WHERE pav.ref = '".$ln->attribute_value."' AND pa.ref = '".$ln->attribute."' AND pav.entity = ".$conf->entity." AND pa.entity = ".$conf->entity.";");
+//			}
+			if($db->num_rows($sql2) > 0){
+				$ln2 = $db->fetch_object($sql2);
+				$sql3 = $db->query("UPDATE ".MAIN_DB_PREFIX."product_attribute_combination2val SET fk_prod_attr_val = ".$ln2->id_attribute_value.", fk_prod_attr = ".$ln2->id_attribute." WHERE rowid = ".$ln->id_combi.";");
+				echo 'OK '.$ln->attribute.' : '.$ln->attribute_value.' -> '.$ln2->attribute.' : '.$ln2->attribute_value.'<br/>';
+			}
+			else{
+				echo 'ECHEC '.$ln->attribute.' : '.$ln->attribute_value.'<br/>';
+			}
+		}
 		break;
 
 	default:

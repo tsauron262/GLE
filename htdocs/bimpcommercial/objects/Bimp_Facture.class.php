@@ -4375,12 +4375,30 @@ class Bimp_Facture extends BimpComm
 				return $errors;
 			}
 
+			global $conf;
 			foreach ($lines as $line) {
 				if (round((float) $line->getTotalTTC(), 2)) {// || round((float) $line->pa_ht, 2)) {
 					$has_amounts_lines = true;
 				}
 				if (round((float) $line->getTotalTTC(), 2) < 0 && !(int) $line->id_remise_except) {
 					$neg_lines++;
+				}
+
+				if (isset($conf->global->STOCK_CALCULATE_ON_BILL) && $conf->global->STOCK_CALCULATE_ON_BILL) {
+					$this->dol_object->fetchObjectLinked();
+					if (isset($this->dol_object->linkedObjects['commande'])) {
+						$conf->global->STOCK_CALCULATE_ON_BILL = false;
+					} else {
+						if($this->getData('entrepot') < 1){
+							$errors[] = 'Entrepôt de la facture non renseigné';
+						}
+						else{
+							$product = $line->getChildObject('product');
+							if($product->isLoaded() && $product->isSerialisable()){
+								$errors[] = "Produit serialisable commande requise";
+							}
+						}
+					}
 				}
 			}
 
@@ -4893,7 +4911,7 @@ class Bimp_Facture extends BimpComm
 
 		// validation de l'avoir (sans trigger pour éviter les boucles infinies):
 		global $user;
-		if ($avoir->dol_object->validate($user/* , 0, 0, 1 */) <= 0) {//attention si no triggers, pas de blockedlog
+		if ($avoir->dol_object->validate($user, '', $avoir->getData('entrepot')/*, 1 */) <= 0) {//attention si no triggers, pas de blockedlog
 			$msg = 'Avoir créé avec succès mais échec de la validation';
 			if ($convertToReduc) {
 				$msg .= '. La conversion en remise n\'a pas été effectuée';
@@ -5445,7 +5463,7 @@ class Bimp_Facture extends BimpComm
 				}
 
 				if (!count($errors)) {
-					if ($fac_cancel->dol_object->validate($user) <= 0) {
+					if ($fac_cancel->dol_object->validate($user, '', $fac_cancel->getData('entrepot')) <= 0) {
 						$validate_errors = BimpTools::getErrorsFromDolObject($fac_cancel->dol_object);
 
 						if (empty($validate_errors)) {
@@ -7721,7 +7739,7 @@ class Bimp_Facture extends BimpComm
 							$new_fac->copyRemisesGlobalesFromOrigin($fac, $fac_warnings, true);
 
 							// Validation:
-							if ($new_fac->dol_object->validate($user, '', 0, 0) <= 0) {
+							if ($new_fac->dol_object->validate($user, '', (int) $fac->getData('entrepot'), 0) <= 0) {
 								if ($echo) {
 									echo BimpRender::renderAlerts(BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_fac->dol_object), 'Echec de la validation de la facture d\'annulation'), 'danger');
 								}
@@ -7931,5 +7949,52 @@ class Bimp_Facture extends BimpComm
 
 		$boxObj->addCamenbere('En ' . $unit . ' HT', $data2);
 		return 1;
+	}
+
+	/*
+	 * Attention dangereux vas refaire les mouvement de stock
+	 */
+	public function reDestock(){
+		global $user, $langs;
+		$errors = array();
+		$idwarehouse = $this->getData('entrepot');
+		$num = $this->getData('ref');
+		// If active (STOCK_CALCULATE_ON_BILL), we decrement the main product and its components at invoice validation
+		if ($this->dol_object->type != $this->dol_object::TYPE_DEPOSIT &&  isModEnabled('stock') && getDolGlobalString('STOCK_CALCULATE_ON_BILL') && $idwarehouse > 0) {
+			require_once DOL_DOCUMENT_ROOT . '/product/stock/class/mouvementstock.class.php';
+			$langs->load("agenda");
+
+			// Loop on each line
+			$cpt = count($this->dol_object->lines);
+			for ($i = 0; $i < $cpt; $i++) {
+				if ($this->dol_object->lines[$i]->fk_product > 0) {
+					$mouvP = new MouvementStock($this->dol_object->db);
+					$mouvP->origin = &$this->dol_object;    // deprecated
+					$mouvP->setOrigin($this->dol_object->element, $this->dol_object->id);
+
+					// We decrease stock for product
+					if ($this->dol_object->type == $this->dol_object::TYPE_CREDIT_NOTE) {
+						// TODO If warehouseid has been set into invoice line, we should use this value in priority
+						// $newidwarehouse = $this->lines[$i]->fk_warehouse ? $this->lines[$i]->fk_warehouse : $idwarehouse;
+						if($this->dol_object->lines[$i]->qty < 0)
+							$this->dol_object->lines[$i]->qty = -$this->dol_object->lines[$i]->qty;
+						$result = $mouvP->reception($user, $this->dol_object->lines[$i]->fk_product, $idwarehouse, $this->dol_object->lines[$i]->qty, 0, $langs->trans("InvoiceValidatedInDolibarr", $num), '', '', $this->dol_object->lines[$i]->batch);
+						if ($result < 0) {
+							$errors[] = $mouvP->error;
+						}
+					}
+					else {
+						// TODO If warehouseid has been set into invoice line, we should use this value in priority
+						// $newidwarehouse = $this->lines[$i]->fk_warehouse ? $this->lines[$i]->fk_warehouse : $idwarehouse;
+						$result = $mouvP->livraison($user, $this->dol_object->lines[$i]->fk_product, $idwarehouse, $this->dol_object->lines[$i]->qty, 0, $langs->trans("InvoiceValidatedInDolibarr", $num), '', '', $this->dol_object->lines[$i]->batch);
+						if ($result < 0) {
+							$errors[] = $mouvP->error;
+						}
+					}
+				}
+			}
+		}
+//		$errors[] = 'Re-destockage effectué';
+		return $errors;
 	}
 }

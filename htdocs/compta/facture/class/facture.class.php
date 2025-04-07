@@ -3284,7 +3284,7 @@ class Facture extends CommonInvoice
                     return -1;
                 }
                 /*fmoddrsi*/
-                
+
 		$this->db->begin();
 
 		// Check parameters
@@ -3331,8 +3331,8 @@ class Facture extends CommonInvoice
 				$this->date = dol_now();
 				$this->date_lim_reglement = $this->calculate_date_lim_reglement();
 			}
-                        
-                        
+
+
                         /*moddrsi (20.2)*/
                         BimpTools::lockNum("numFact");
                         /*fmoddrsi*/
@@ -3388,6 +3388,8 @@ class Facture extends CommonInvoice
 							if ($this->type == self::TYPE_CREDIT_NOTE) {
 								// TODO If warehouseid has been set into invoice line, we should use this value in priority
 								// $newidwarehouse = $this->lines[$i]->fk_warehouse ? $this->lines[$i]->fk_warehouse : $idwarehouse;
+								if($this->lines[$i]->qty < 0)
+									$this->lines[$i]->qty = -$this->lines[$i]->qty;
 								$result = $mouvP->reception($user, $this->lines[$i]->fk_product, $idwarehouse, $this->lines[$i]->qty, 0, $langs->trans("InvoiceValidatedInDolibarr", $num), '', '', $this->lines[$i]->batch);
 								if ($result < 0) {
 									$error++;
@@ -5225,12 +5227,12 @@ class Facture extends CommonInvoice
 	public function loadStateBoard()
 	{
 		global $conf, $user;
-                
+
                 $val1 = cashVal("statTotinvoices");
                  if($val1){
                      $this->nb["invoices"] = $val1;
                      return 1;
-                 } 
+                 }
 
 		$this->nb = array();
 

@@ -162,7 +162,8 @@ forms:
             - field: id_warehouse_dest
             
     default:
-        rows: 
+        rows:
+            - field: id_warehouse_source
             - field: id_warehouse_dest
             
     csv: 

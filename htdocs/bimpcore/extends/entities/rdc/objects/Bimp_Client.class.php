@@ -110,6 +110,18 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut), array('form_name' => 'formActionRdc'))
 //			'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut))
 		);
+
+		if ($this->getData('shopid') > 0) {
+			$buttons[] = array(
+				'label'   => 'Synchro Mirakl',
+				'icon'    => 'fas_rotate',
+				'onclick' => $this->getJsActionOnclick('synchroMirakl', array(), array())
+			);
+		}
+
+
+
+
 		return $buttons;
 	}
 
@@ -283,10 +295,20 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 		// on a enregistré le shopId => on met à jour le Tiers avec API Mirakl S20;
 		if ($this->getData('shopid') != $this->getInitData('shopid')) {
-//			$this->appelMiraklS20(BimpTools::getPostFieldValue('shopid'));
+//			$this->appelMiraklS20(BimpTools::getPostFieldValue('shopid'), $warnings);
 		}
 
 		return parent::update($warnings, $force_update);
+	}
+
+	public function actionSynchroMirakl($data, &$success){
+		$errors = $warnings = array();
+		$success = 'Synchro OK';
+		$this->appelMiraklS20($this->getData('shopid'), $errors);
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
 	}
 
 	public function onSave(&$errors = array(), &$warnings = array())
@@ -297,47 +319,55 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function appelMiraklS20($shopid, &$warnings = array())
 	{
-		require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
-		$api = BimpAPI::getApiInstance('mirakl');
-		$data = $api->getShopInfo($shopid);
+		if(BimpTools::isModuleDoliActif('bimpapi')) {
+			require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+			$api = BimpAPI::getApiInstance('mirakl');
+			$data = $api->getShopInfo($shopid);
 
-		$errors = array();
-		if ($data['total_count'] == 0)	{
-			$warnings[] = 'ShopId ' . $shopid . ' non trouvé sur mirakl';
-			$this->set('shopid', 0);
-		}
-		else	{
-			$shop = $data['shops'][0];
+			$errors = array();
+			if ($data['total_count'] == 0) {
+				$warnings[] = 'ShopId ' . $shopid . ' non trouvé sur mirakl';
+				$this->set('shopid', 0);
+			} else {
+				$shop = $data['shops'][0];
 
-			// traitement des données reçues : mise a jour du tiers
-			$this->set('nom', $shop['pro_details']['corporate_name']);
-			$this->set('name_alias', $shop['shop_name']);
-			$add = $shop['contact_informations']['street1'];
-			if ($shop['contact_informations']['street2'])	$add .= ' ' . $shop['contact_informations']['street2'];
-			$this->set('address', $add);
-			$this->set('zip', $shop['contact_informations']['zip_code']);
-			$this->set('town', $shop['contact_informations']['city']);
-			if ($shop['contact_informations']['country'])	{
-				$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $shop['contact_informations']['country']) . '\'';
-				if ($id_pays)	$this->set('fk_pays', $id_pays);
-			}
-			$this->set('email', $shop['contact_informations']['email']);
-			$this->set('phone', $shop['contact_informations']['phone']);
-			$this->set('url', $shop['contact_informations']['site_web']);
-
-			// traitement des données reçues : mise a jour / creation du contact
-			$contacts = $this->getChildrenObjects('contacts');
-			$nbModif = 0;
-			if (count($contacts)) {
-				foreach ($contacts as $contact) {	// tentative de mise a jour du contact (si mail et tel identiques)
-					$nbModif += $this->updateContact($contact, $shop['contact_informations']);
+				// traitement des données reçues : mise a jour du tiers
+				$this->set('nom', $shop['pro_details']['corporate_name']);
+				$this->set('name_alias', $shop['shop_name']);
+				$add = $shop['contact_informations']['street1'];
+				if ($shop['contact_informations']['street2']) {
+					$add .= ' ' . $shop['contact_informations']['street2'];
 				}
-				if (!$nbModif) { // aucun contact modifié => on en crée un
+				$this->set('address', $add);
+				$this->set('zip', $shop['contact_informations']['zip_code']);
+				$this->set('town', $shop['contact_informations']['city']);
+				if ($shop['contact_informations']['country']) {
+					$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $shop['contact_informations']['country']) . '\'';
+					if ($id_pays) {
+						$this->set('fk_pays', $id_pays);
+					}
+				}
+				$this->set('email', $shop['contact_informations']['email']);
+				$this->set('phone', $shop['contact_informations']['phone']);
+				$this->set('url', $shop['contact_informations']['site_web']);
+
+				// traitement des données reçues : mise a jour / creation du contact
+				$contacts = $this->getChildrenObjects('contacts');
+				$nbModif = 0;
+				if (count($contacts)) {
+					foreach ($contacts as $contact) {    // tentative de mise a jour du contact (si mail et tel identiques)
+						$nbModif += $this->updateContact($contact, $shop['contact_informations']);
+					}
+					if (!$nbModif) { // aucun contact modifié => on en crée un
+						$this->createContact($shop['contact_informations']);
+					}
+				} else { // pas de contact connu => on en crée un
 					$this->createContact($shop['contact_informations']);
 				}
-			} else { // pas de contact connu => on en crée un
-				$this->createContact($shop['contact_informations']);
 			}
+		}
+		else{
+			$warnings[] = 'Module API non actif';
 		}
 	}
 

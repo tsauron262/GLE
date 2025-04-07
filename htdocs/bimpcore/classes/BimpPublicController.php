@@ -389,7 +389,6 @@ class BimpPublicController extends BimpController
 
     public function displayReinitPwForm($errors = array())
     {
-        print_r($_SESSION);
         $backUrl = BimpObject::getPublicBaseUrl();
         if (isset($_SESSION['back_url']))
             $backUrl = $_SESSION['back_url'];

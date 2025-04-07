@@ -12,3 +12,4 @@ sections:
            panel: 1
            title: Toutes les tâches
            object: task
+           name: global

@@ -420,6 +420,9 @@ lists:
             txt:
             id_user_owner:
             nb_sous_taches:
+                
+    global: 
+        extends: default
     
     main:
         extends: default

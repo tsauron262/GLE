@@ -43,8 +43,6 @@ curl_close($ch);
 
 
 
-echo 'oo';
-
 //die($response);
 
 

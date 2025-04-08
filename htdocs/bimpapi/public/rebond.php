@@ -45,7 +45,7 @@ curl_close($ch);
 
 
 
-die($response);
+die($response.'fin');
 
 
 //function getRequestHeaders() {

@@ -2,7 +2,9 @@
 
 //echo 'coucouc';
 
-//print_r(file_get_contents('php://input'));
+//echo '<pre>';
+//print_r(getRequestHeaders());
+//print_r($_SERVER);die;
 
 //$arrayHeader = array(
 //	'Content-Length' =>
@@ -40,17 +42,30 @@ echo '</pre>';
 echo $response;
 
 
+//function getRequestHeaders() {
+//	$headers = array();
+//	foreach($_SERVER as $key => $value) {
+//		if (substr($key, 0, 5) <> 'HTTP_') {
+//			continue;
+//		}
+//		$header = str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower(substr($key, 5)))));
+//		$headers[$header] = $value;
+//	}
+//	return $headers;
+//}
+
+
 function getRequestHeaders() {
 	$headers = array();
-	foreach($_SERVER as $key => $value) {
-		if (substr($key, 0, 5) <> 'HTTP_') {
-			continue;
+	$tabGarde = array(
+		'CONTENT_LENGTH' => 'Content-Length',
+		'CONTENT_TYPE' => 'Content-Type',
+		'HTTP_AUTHORIZATION' => 'Authorization',
+	);
+	foreach($tabGarde as $key => $value) {
+		if (isset($_SERVER[$key])) {
+			$headers[$value] = $_SERVER[$key];
 		}
-		if(stripos($key, 'Content-Type') === false) {
-			continue;
-		}
-		$header = str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower(substr($key, 5)))));
-		$headers[$header] = $value;
 	}
 	return $headers;
 }

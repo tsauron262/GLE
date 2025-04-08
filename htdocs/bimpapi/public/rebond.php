@@ -19,7 +19,8 @@ $response = curl_exec($ch);
 curl_close($ch);
 
 
-
+echo '<h1>header</h1>';
+print_r(getRequestHeaders());
 $response_infos = curl_getinfo($ch);
 echo '<pre>';
 print_r($response_infos);

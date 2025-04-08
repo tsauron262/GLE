@@ -107,8 +107,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$buttons[] = array(
 			'label'   => 'Actions',
 			'icon'    => 'fas_edit',
-			'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut), array('form_name' => 'formActionRdc'))
-//			'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut))
+			'onclick' => $this->getJsActionOnclick('change_status_rdc', array(), array('form_name' => 'formActionRdc'))
 		);
 
 		if ($this->getData('shopid') > 0) {

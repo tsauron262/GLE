@@ -437,12 +437,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$code = 'Attribution_rdc';
 				$sujet = 'Attribution Compte';
 				$msg = 'Le compte ' . $this->getLink() . ' vient de vous être attribué par ' . $user->getNomUrl();
-				//////////////////
-				// todo: envoi du mail avec bimp UserMessage
-				$user_attr = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $attr);
-				$to = $user_attr->getData('email');
-				$res = mailSyn2($sujet, $to, '', $msg);
-				//////////////////
+				BimpUserMsg::envoiMsg($code, $sujet, $msg, $attr);
 			}
 		}
 	}

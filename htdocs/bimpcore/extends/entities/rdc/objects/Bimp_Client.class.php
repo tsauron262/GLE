@@ -24,11 +24,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 //self::BS_SAV_CANCELED_BY_USER  => array('label' => 'Annulé par utilisateur', 'icon' => 'fas_times', 'classes' => array('danger')),
 
 	public static $statut_rdc_live = 11;
-	public static $statut_rdc_prospect_array = array(1, 2, 3, 4);
+	public static $statut_rdc_prospect_array = array(3, 4);
 
 	public static $actions_selon_statut_rdc = array(
 		1 => array( // Prospection: demande entrante
-			2, 3, 4, 5, 6, 7, 8, 9, 10, 11 // les autres statuts de prospection
+			2, 3, 4, 5 // les autres statuts de prospection
 		),
 		2 => array(
 			1, 3, 4, 5
@@ -42,9 +42,9 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		5 => array(
 			1, 2, 3, 4, 11
 		),
-		11 => array( // Live
-			13, 14, // suspendu, férmé
-		),
+//		11 => array( // Live
+//			13, 14, // suspendu, férmé
+//		),
 		13 => array( // suspendu
 			12
 		),
@@ -177,6 +177,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return array();*/
 	}
 
+	public function getMiraklLink()
+	{
+		if ($this->getData('shopid') > 0) return 'mirakl-web.groupe-rueducommerce.fr/mmp/operator/shop/' . $this->getData('shopid');
+		else return '';
+	}
 	public function isShopIdEditable()
 	{
 		$id = BimpTools::getPostFieldValue('id');
@@ -191,13 +196,18 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		if (!$id) return true;
 		else return false;
 	}
+
+	public function isPriorityEditable()
+	{
+		/*todo a voir si on garde*/
+		global $user;
+		if ($user->admin) return true;
+		return $this->isUserInGroup('BD') || $this->isUserInGroup('KAM');
+	}
+
 	public function isUserInGroup($g)
 	{
 		global $user;
-		/*todo a voir si on garde*/
-		if($user->admin)
-			return 1;
-
 		$id_group = BimpCore::getConf('id_user_group_' . $g);
 		$groups = $this->db->getRow('usergroup_user', 'fk_user = ' . $user->id . ' AND fk_usergroup = ' . $id_group , array('rowid'), 'array');
 		if($groups)
@@ -205,6 +215,15 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 		return false;
 	}
+
+	public function isCommentaireStatutKoRequired()	{
+		$statut = $this->getData('fk_statut_rdc');
+		if ($statut == 5) { // KO
+			return true;
+		}
+		return false;
+	}
+
 	public function renderHeaderStatusExtra()	{
 		return '';
 	}
@@ -330,7 +349,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$this->set('shopid', 0);
 			} else {
 				$shop = $data['shops'][0];
-
+				//echo '<pre>'; print_r($shop); echo '</pre>';die;
 				// traitement des données reçues : mise a jour du tiers
 				$this->set('nom', $shop['pro_details']['corporate_name']);
 				$this->set('name_alias', $shop['shop_name']);
@@ -363,6 +382,26 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 					}
 				} else { // pas de contact connu => on en crée un
 					$this->createContact($shop['contact_informations']);
+				}
+
+				// surcharge attribution
+				if ($shop['assignees'])	{
+					$email_part = explode('@', $shop['assignees'][0]['email']);
+					$email = str_ireplace('.ext', '', $email_part[0]);
+					// $email .= '@ldlc.com' ou '@rueducommerce.fr';
+
+					$userAttr = $this->getBdb()->getRow('user', 'email LIKE \'' . $email . '%\'', array('rowid'), 'array');
+					if ($userAttr) $this->set('fk_user_attr_rdc', $userAttr['rowid']);
+					else $warnings [] = 'Utilisateur d\'attribution non trouvé. ' . $email;
+				}
+
+				// surcharge statut
+				if ($shop['shop_state'] === 'SUSPENDED' && !in_array($this->getData('fk_statut_rdc') , array(12, 13, 14))) 	{
+					$this->set('fk_statut_rdc', 13);
+					$this->set('date_changement_statut_rdc', date('Y-m-d'));
+				}
+				if ($shop['shop_state'] === 'OPEN' && $this->getData('shopid') > 0) {
+					$this->set('fk_statut_rdc', self::$statut_rdc_live);
 				}
 				$this->update($warnings);
 			}
@@ -437,9 +476,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function change_status_rdc() {
 		if ($this->getInitData('fk_statut_rdc') != $this->getData('fk_statut_rdc')) {
-			$this->set('date_changement_statut_rdc', date('Y-m-d H:i:s'));
-
-
+			$this->set('date_changement_statut_rdc', date('Y-m-d'));
 		}
 	}
 
@@ -469,20 +506,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			}
 		}
 
-		/*
-		// update de la date_ouverture (si statut_rdc = live pour la premiere fois)
-		if ((int)$data['fk_statut_rdc'] == self::$statut_rdc_live) 	{
-			if (empty($this->getData('date_ouverture'))) {
-				$this->set('date_ouverture', date('Y-m-d H:i:s'));
-				$date_p = new DateTime($this->getData('date_debut_prospect'));
-				$date_o = new DateTime();
-				$interval = $date_p->diff($date_o);
-				$delai = $interval->days;
-				$this->set('delai_ouv', $delai);
-			}
-		}
-		*/
-
 		$this->set('fk_statut_rdc', $data['status']);
 		$this->set('date_changement_statut_rdc', date('Y-m-d'));
 		$this->update($warnings, true);
@@ -490,5 +513,21 @@ class Bimp_Client_ExtEntity extends Bimp_Client
             'errors'   => $errors,
             'warnings' => $warnings
         );
+	}
+
+	public function checkPassageLive()
+	{
+		if ((int)$this->getData('fk_statut_rdc') == self::$statut_rdc_live) 	{
+			if (empty($this->getData('date_ouverture'))) {
+				$this->set('date_ouverture', date('Y-m-d'));
+				if (!empty($this->getData('date_debut_prospect'))) {
+					$date_p = new DateTime($this->getData('date_debut_prospect'));
+					$date_o = new DateTime();
+					$interval = $date_p->diff($date_o);
+					$delai = $interval->days;
+					$this->set('delai_ouv', $delai);
+				}
+			}
+		}
 	}
 }

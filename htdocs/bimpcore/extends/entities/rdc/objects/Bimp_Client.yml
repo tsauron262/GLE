@@ -92,6 +92,9 @@ fields:
     commentaire_rdc:
         label: Commentaires
         type: text
+    url:
+        label: site internet marchand
+        
     outstanding_limit: unset
     outstanding_limit_credit_check: unset
     outstanding_limit_manuel: unset
@@ -126,6 +129,7 @@ fields_tables:
             - label: Adresse
               value:
                   callback: displayFullAddress
+            - field: url
             - field: commentaire_rdc
     
     param_rdc:
@@ -136,15 +140,16 @@ fields_tables:
             - field: name_alias
               label: Nom de la boutique
               edit: 1
+            - label: Lien Mirakl
+              value:
+                  callback: getMiraklLink
             - field: date_der_contact
             - field: date_debut_prospect
             - field: date_ouverture
             - field: fk_priorite
               edit:
                   callback:
-                      method: isUserInGroup
-                      params:
-                          - BD
+                      method: isPriorityEditable
             - field: fk_statut_rdc
             - field: date_changement_statut_rdc
             - field: delai_ouverture
@@ -257,6 +262,8 @@ forms:
                 field: town
             Pays:
                 field: fk_pays
+            Site internet marchand:
+                field: url
             Shop ID:
                 field: shopid
                 edit:

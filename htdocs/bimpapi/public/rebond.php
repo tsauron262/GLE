@@ -17,6 +17,18 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, getRequestHeaders());
 curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents('php://input'));
 $response = curl_exec($ch);
 curl_close($ch);
+
+
+
+$response_infos = curl_getinfo($ch);
+echo '<pre>';
+print_r($response_infos);
+echo '</pre>';
+
+
+
+
+
 echo $response;
 
 

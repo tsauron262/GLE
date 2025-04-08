@@ -27,19 +27,19 @@ $response = curl_exec($ch);
 curl_close($ch);
 
 
-echo '<h1>header</h1>';
-print_r($headers);
-
-
-echo '<h1>body</h1>';
-echo $post;
-
-
-echo '<h1>response header</h1>';
-$response_infos = curl_getinfo($ch);
-echo '<pre>';
-print_r($response_infos);
-echo '</pre>';
+//echo '<h1>header</h1>';
+//print_r($headers);
+//
+//
+//echo '<h1>body</h1>';
+//echo $post;
+//
+//
+//echo '<h1>response header</h1>';
+//$response_infos = curl_getinfo($ch);
+//echo '<pre>';
+//print_r($response_infos);
+//echo '</pre>';
 
 
 

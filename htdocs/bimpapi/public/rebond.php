@@ -18,7 +18,7 @@ $ch = curl_init();
 
 $headers = getRequestHeaders();
 $post = file_get_contents('php://input');
-$headers['Content-Length'] = strlen($post);
+$headers[] = 'Content-Length: '.strlen($post);
 curl_setopt($ch, CURLOPT_URL, 'http://172.24.2.31/OLAP/msmdpump.dll');
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
@@ -28,7 +28,7 @@ curl_close($ch);
 
 
 echo '<h1>header</h1>';
-print_r(getRequestHeaders());
+print_r($headers);
 
 
 echo '<h1>body</h1>';
@@ -70,7 +70,7 @@ function getRequestHeaders() {
 	);
 	foreach($tabGarde as $key => $value) {
 		if (isset($_SERVER[$key])) {
-			$headers[$value] = $_SERVER[$key];
+			$headers[] = $value.': '.$_SERVER[$key];
 		}
 	}
 	$headers['Host'] = 'bimp.fr';

@@ -24,7 +24,7 @@ print_r(getRequestHeaders());
 
 
 echo '<h1>body</h1>';
-curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents('php://input'));
+file_get_contents('php://input');
 
 
 echo '<h1>response header</h1>';

@@ -73,7 +73,7 @@ function getRequestHeaders() {
 			$headers[] = $value.': '.$_SERVER[$key];
 		}
 	}
-	$headers['Host'] = 'bimp.fr';
+	$headers[] = 'Host: bimp.fr';
 	return $headers;
 }
 ?>

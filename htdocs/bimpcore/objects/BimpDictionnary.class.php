@@ -28,28 +28,8 @@ class BimpDictionnary extends BimpObject
 		$buttons = array();
 
 		if ($this->isLoaded($errors)) {
-			$values_params = $this->getData('values_params');
-
 			if ($this->canEdit()) {
-				$onclick = '';
-
-				if (isset($values_params['children'])) {
-					$child_instance = $this->getChildObject($values_params['children']);
-					$filters = (isset($values_params['filters']) ? $values_params['filters'] : array());
-					$params = array(
-						'title'     => 'Valeurs du dictionnaire ' . $this->getData('name'),
-						'id_parent' => $this->id
-					);
-
-					if (!empty($filters)) {
-						$params['extra_filters'] = $filters;
-					}
-
-					$onclick = $child_instance->getJsLoadModalList('dictionnary', $params);
-				} elseif (isset($values_params['url'])) {
-					$onclick = 'window.open(\'' . $values_params['url'] . '\');';
-				}
-
+				$onclick = $this->getLoadValuesListOnclick();
 				if ($onclick) {
 					$buttons[] = array(
 						'label'   => 'Valeurs',
@@ -61,6 +41,32 @@ class BimpDictionnary extends BimpObject
 		}
 
 		return $buttons;
+	}
+
+	public function getLoadValuesListOnclick()
+	{
+		$onclick = '';
+
+		$values_params = $this->getData('values_params');
+
+		if (isset($values_params['children'])) {
+			$child_instance = $this->getChildObject($values_params['children']);
+			$filters = (isset($values_params['filters']) ? $values_params['filters'] : array());
+			$params = array(
+				'title'     => 'Valeurs du dictionnaire ' . $this->getData('name'),
+				'id_parent' => $this->id
+			);
+
+			if (!empty($filters)) {
+				$params['extra_filters'] = $filters;
+			}
+
+			$onclick = $child_instance->getJsLoadModalList('dictionnary', $params);
+		} elseif (isset($values_params['url'])) {
+			$onclick = 'window.open(\'' . $values_params['url'] . '\');';
+		}
+
+		return $onclick;
 	}
 
 	// Getters données :

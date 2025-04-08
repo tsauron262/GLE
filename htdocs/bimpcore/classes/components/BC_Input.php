@@ -80,12 +80,12 @@ class BC_Input extends BimpComponent
 		'select'                      => array(
 			'options'      => array('data_type' => 'array', 'compile' => true, 'default' => array()),
 			'select_first' => array('data_type' => 'bool', 'default_value' => 0),
-			'dictionnary'  => array('default' => '')
+			'dictionnary'  => array()
 		),
 		'switch_options'              => array(
 			'options'  => array('data_type' => 'array', 'compile' => true, 'default' => array()),
 			'vertical' => array('data_type' => 'bool', 'default_value' => 0),
-			'dictionnary'  => array('default' => '')
+			'dictionnary'  => array()
 		),
 		'toggle'                      => array(
 			'toggle_on'  => array('default' => 'OUI'),

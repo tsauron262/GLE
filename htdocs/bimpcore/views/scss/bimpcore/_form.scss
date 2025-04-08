@@ -673,6 +673,10 @@ input[type=text].large_input {
 .selectContainer {
   display: inline-block;
   padding-right: 28px;
+
+  .iconButton {
+    margin-right: -24px;
+  }
 }
 
 /*Check lists:*/

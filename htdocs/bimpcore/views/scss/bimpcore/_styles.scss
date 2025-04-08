@@ -533,6 +533,46 @@ i.iconRight {
   }
 }
 
+.iconButton {
+  color: $gray-darker !important;
+  text-align: center;
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+  line-height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-block;
+  margin: 0 1px;
+  font-size: 12px;
+  font-weight: normal;
+
+  transition: all 0.3s ease;
+  -webkit-transition: all 0.3s ease;
+
+  i {
+    color: $gray-darker !important;
+  }
+
+  &.light_color {
+    color: $gray !important;
+
+    i {
+      color: $gray !important;
+    }
+  }
+
+  &:hover {
+    color: #fff !important;
+    background-color: $primary;
+    text-decoration: none;
+
+    i {
+      color: #fff !important;
+    }
+  }
+}
+
 /*Panels*/
 
 .panel {

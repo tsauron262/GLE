@@ -416,14 +416,23 @@ class BimpInput
 				}
 
 				if (count($options['options'])) {
+					$id_dict = 0;
 					$dictionnary = (isset($options['dictionnary']) ? $options['dictionnary'] : '');
+
+					if ($dictionnary) {
+						$id_dict = BimpDict::getDictionnaryId($dictionnary);
+						if (!$id_dict) {
+							$dictionnary = '';
+						}
+					}
+
 					if (count($options['options']) > 15) {
 						$extra_class .= ($extra_class ? ' ' : '') . 'searchable_select';
 					}
 
 					if ($dictionnary) {
-						$extra_class .= ($extra_class ? ' ' : '') . 'dictionnary_' . $dictionnary;
-						$data .= ($data ? ' ' : '') . 'data-dictionnary="' . $dictionnary . '"';
+						$extra_class .= ($extra_class ? ' ' : '') . 'has_dictionnary';
+						$data .= ($data ? ' ' : '') . 'data-dictionnary="' . $dictionnary . '" data-id_dictionnary="' . $id_dict . '"';
 						$html .= '<div class="selectContainer">';
 					}
 
@@ -434,7 +443,7 @@ class BimpInput
 					$html .= '</select>';
 
 					if ($dictionnary) {
-//						$html .= BimpDict::renderEditDictionnaryIcon($dictionnary);
+						$html .= BimpDict::renderEditDictionnaryIcon($dictionnary);
 						$html .= '</div>';
 					}
 

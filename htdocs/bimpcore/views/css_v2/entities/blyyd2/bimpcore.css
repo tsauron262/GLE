@@ -8483,6 +8483,40 @@ i.iconRight {
   margin-left: 6px;
 }
 
+.iconButton {
+  color: #282828 !important;
+  text-align: center;
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+  line-height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-block;
+  margin: 0 1px;
+  font-size: 12px;
+  font-weight: normal;
+  transition: all 0.3s ease;
+  -webkit-transition: all 0.3s ease;
+}
+.iconButton i {
+  color: #282828 !important;
+}
+.iconButton.light_color {
+  color: #B4B4B4 !important;
+}
+.iconButton.light_color i {
+  color: #B4B4B4 !important;
+}
+.iconButton:hover {
+  color: #fff !important;
+  background-color: #E94E1A;
+  text-decoration: none;
+}
+.iconButton:hover i {
+  color: #fff !important;
+}
+
 /*Panels*/
 .panel .panel_header_icon {
   display: inline-block;
@@ -9946,6 +9980,9 @@ input[type=text].large_input:focus {
 .selectContainer {
   display: inline-block;
   padding-right: 28px;
+}
+.selectContainer .iconButton {
+  margin-right: -24px;
 }
 
 /*Check lists:*/

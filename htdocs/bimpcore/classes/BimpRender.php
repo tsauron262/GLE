@@ -194,31 +194,58 @@ class BimpRender
 
 	public static function renderRowButton($label, $icon, $onclick, $class = '', $attrs = array(), $tag = 'span')
 	{
-		return self::renderIconButton($label, $icon, $onclick, $attrs, 'rowButton' . ($class ? ' ' . $class : ''), $tag);
+		return self::renderIconButton($label, $icon, $onclick, array(
+			'attrs'         => $attrs,
+			'class'         => 'rowButton',
+			'extra_classes' => ($class ? explode(' ', $class) : array()),
+			'tag'           => $tag
+		));
 	}
 
-	public static function renderIconButton($label, $icon, $onclick, $attrs = array(), $class = 'iconButton', $tag = 'span')
+	public static function renderIconButton($label, $icon, $onclick, $params = array())
 	{
+		$params = BimpTools::overrideArray(array(
+			'attrs'         => array(),
+			'class'         => 'iconButton',
+			'extra_classes' => array(),
+			'tag'           => 'span',
+			'light'         => false
+		), $params);
 		$html = '';
 
-		$html .= '<' . $tag . ' class="' . ((string) $class ? $class : 'iconButton');
+		if ($params['light']) {
+			$params['extra_classes'][] = 'light_color';
+		}
 
-		$html .= ' bs-popover"';
-		$html .= ' data-container="body"';
-		$html .= ' data-toggle="popover"';
-		$html .= ' data-trigger="hover"';
-		$html .= ' data-placement="top"';
-		$html .= ' data-content="' . $label;
+		if ($label) {
+			$params['extra_classes'][] = 'bs-popover';
+		}
+
+		$html .= '<' . $params['tag'] . ' class="' . $params['class'];
+
+		if (!empty($params['extra_classes'])) {
+			$html .= ' ' . implode(' ', $params['extra_classes']);
+		}
+
+		$html .= '"';
+
+		if ($label) {
+			$html .= ' data-container="body"';
+			$html .= ' data-toggle="popover"';
+			$html .= ' data-trigger="hover"';
+			$html .= ' data-placement="top"';
+			$html .= ' data-content="' . $label;
+		}
 
 		$html .= '" onclick="' . $onclick . '"';
 
-		if (!empty($attrs)) {
-			$html .= BimpRender::displayTagAttrs($attrs);
+		if (!empty($params['attrs'])) {
+			$html .= BimpRender::displayTagAttrs($params['attrs']);
 		}
 
 		$html .= '>';
 		$html .= '<i class="' . BimpRender::renderIconClass($icon) . '"></i>';
-		$html .= '</' . $tag . '>';
+		$html .= '</' . $params['tag'] . '>';
 
 		return $html;
 	}

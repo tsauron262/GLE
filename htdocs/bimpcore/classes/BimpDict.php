@@ -4,6 +4,22 @@ BimpObject::loadClass('bimpcore', 'BimpDictionnary');
 
 class BimpDict
 {
+	public static function getDictionnary($dict_code)
+	{
+		$dict = BimpCache::findBimpObjectInstance('bimpcore', 'BimpDictionnary', array('code' => $dict_code));
+
+		if (BimpObject::objectLoaded($dict)) {
+			return $dict;
+		}
+
+		return null;
+
+	}
+
+	public static function getDictionnaryId($dict_code) {
+		return (int) BimpCache::getBdb()->getValue('bimpcore_dictionnary', 'id', 'code = \'' . $dict_code . '\'');
+	}
+
 	public static function getValuesData($dict_code, $active_only = true)
 	{
 		$dict = BimpCache::findBimpObjectInstance('bimpcore', 'BimpDictionnary', array('code' => $dict_code));
@@ -28,9 +44,8 @@ class BimpDict
 
 	public static function addDefaultDictionnary($code, $name, $active = 1, $values_children_name = 'values', $filters = array(), &$errors = array())
 	{
-		$bdb = BimpCache::getBdb();
-
-		if ((int) $bdb->getValue('bimpcore_dictionnary', 'id', 'code = \'' . $code . '\'')) {
+		$id_dict = self::getDictionnaryId($code);
+		if ($id_dict) {
 			$errors[] = 'Un dictionnaire existe déjà pour le code "' . $code . '"';
 		} else {
 			return BimpObject::createBimpObject('bimpcore', 'BimpDictionnary', array(
@@ -52,7 +67,8 @@ class BimpDict
 		$bdb = BimpCache::getBdb();
 		$errors = array();
 
-		if ((int) $bdb->getValue('bimpcore_dictionnary', 'id', 'code = \'' . $code . '\'')) {
+		$id_dict = self::getDictionnaryId($code);
+		if ($id_dict) {
 			$errors[] = 'Un dictionnaire existe déjà pour le code "' . $code . '"';
 		} else {
 			BimpObject::createBimpObject('bimpcore', 'BimpDictionnary', array(
@@ -78,7 +94,17 @@ class BimpDict
 	{
 		$html = '';
 
-//		$html .= BimpRender::renderIconButton();
+		$dict = self::getDictionnary($dict_code);
+
+		if (BimpObject::objectLoaded($dict) && $dict->can('edit') && $dict->isEditable()) {
+			$onclick = $dict->getLoadValuesListOnclick();
+
+			if ($onclick) {
+				$html .= BimpRender::renderIconButton('Editer la liste des valeurs', 'fas_list-ol', $onclick, array(
+					'light' => true
+				));
+			}
+		}
 
 		return $html;
 	}

@@ -174,7 +174,15 @@ class BC_Field extends BimpComponent
         }
 
 		if ($this->object->config->isDefined('fields/' . $this->name .'/values/dict')) {
-			$this->params['dictionnary'] = $this->object->config->get('fields/' . $this->name .'/values/dict', '', false);
+			$dictionnary = $this->object->config->get('fields/' . $this->name .'/values/dict', '', false, 'any');
+
+			if (is_array($dictionnary) && isset($dictionnary['code'])) {
+				$dictionnary = $dictionnary['code'];
+			}
+
+			if (is_string($dictionnary)) {
+				$this->params['dictionnary'] = $dictionnary;
+			}
 		}
 
         $current_bc = $prev_bc;

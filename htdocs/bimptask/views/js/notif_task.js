@@ -63,7 +63,7 @@ class notif_task extends AbstractNotification {
             html += '</ul>';
 
             // Tab panels 
-            html += '<div class="tab-content task_panel">';
+            html += '<div class="tab-content notif_panel task_panel">';
             html += '<div role="tabpanel" class="list_notification tab-pane fade in active" id="user_notifications_affected_tasks"></div>';
             html += '<div role="tabpanel" class="list_notification tab-pane fade" id="user_notifications_unaffected_tasks"></div>';
             html += '</div>';
@@ -167,13 +167,13 @@ class notif_task extends AbstractNotification {
         element.append = 'div.tab-content > #' + element.user_type + ' > div.task_no_prio';
 
         if (element.src) {
-            html += '<div class="task_src">' + element.src + '</div>';
+            html += '<div class="notif_src">' + element.src + '</div>';
         } else if (element.author) {
-            html += '<div class="task_src">' + element.author + '</div>';
+            html += '<div class="notif_src">' + element.author + '</div>';
         }
 
         if (element.dest) {
-            html += '<div class="task_dest">Destinataire : ' + element.dest + '</div>';
+            html += '<div class="notif_dest">Destinataire : ' + element.dest + '</div>';
         }
 
         if (element.parent_task) {
@@ -182,7 +182,7 @@ class notif_task extends AbstractNotification {
             html += '</div>';
         }
 
-        html += '<div class="task_subj">';
+        html += '<div class="notif_title">';
         if (element.status_icon) {
             html += element.status_icon;
         }
@@ -198,7 +198,7 @@ class notif_task extends AbstractNotification {
         html += '</div>';
 
         if (element.txt) {
-            html += '<div class="task_txt">' + element.txt + '</div>';
+            html += '<div class="notif_desc">' + element.txt + '</div>';
         }
 
         element.class = 'single_task';

@@ -139,6 +139,7 @@ class BC_Field extends BimpComponent
         $this->params_def['nl2br'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['sync'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['data_check'] = array();
+		$this->params_def['dictionnary'] = array('default' => '');
 
         $this->edit = $edit;
         $this->force_edit = $force_edit;
@@ -171,6 +172,10 @@ class BC_Field extends BimpComponent
                 !$this->object->config->isDefined($this->config_path . '/has_total')) {
             $this->params['has_total'] = 1;
         }
+
+		if ($this->object->config->isDefined('fields/' . $this->name .'/values/dict')) {
+			$this->params['dictionnary'] = $this->object->config->get('fields/' . $this->name .'/values/dict', '', false);
+		}
 
         $current_bc = $prev_bc;
     }

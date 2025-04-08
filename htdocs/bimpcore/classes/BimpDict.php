@@ -73,4 +73,13 @@ class BimpDict
 
 		return $errors;
 	}
+
+	public static function renderEditDictionnaryIcon($dict_code)
+	{
+		$html = '';
+
+//		$html .= BimpRender::renderIconButton();
+
+		return $html;
+	}
 }

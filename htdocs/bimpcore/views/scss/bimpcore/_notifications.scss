@@ -249,76 +249,6 @@ div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_notif_tas
   font-size: 1.4em;
 }
 
-
-/* Bimp task */
-div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_notif_task"] {
-  width: auto;
-  min-width: 800px;
-
-  overflow-y: scroll;
-}
-
-div.tabs-animated {
-  width: auto;
-  max-height: auto;
-  overflow-y: scroll;
-}
-
-div.task_panel {
-  max-height: auto;
-  overflow-y: scroll;
-  padding: 0px;
-  line-height: 22px;
-  width: 800px;
-
-  .task_src {
-    font-size: 11px;
-    font-style: italic;
-    color: #006AFF;
-  }
-
-  .task_dest {
-    font-size: 11px;
-    font-style: italic;
-    color: #A00000;
-    font-weight: bold;
-  }
-
-  .parent_task {
-    margin: 5px 0;
-    font-style: italic;
-  }
-
-  .task_subj {
-    font-weight: bold;
-  }
-
-  .task_txt {
-    margin: 5px;
-    padding: 5px;
-    background-color: #FFFFE1;
-    border-color: #FFFFE1;
-    border-radius: 8px;
-    box-shadow: 0 0 2px #787878;
-  }
-}
-
-/*BimpValidation*/
-
-div.bv_demandes_panel {
-  max-height: auto;
-  overflow-y: scroll;
-  padding: 0px;
-  line-height: 22px;
-  width: 800px;
-
-  .user_demande {
-    font-size: 11px;
-    font-style: italic;
-    color: #006AFF;
-  }
-}
-
 /* Les onglets */
 ul#nav_task > li {
   width: 48%;
@@ -343,6 +273,92 @@ ul#nav_task > li.reload {
   border-right-color: rgb(255, 255, 255);
   border-bottom-color: rgb(180, 180, 180);
   border-left-color: rgb(255, 255, 255);
+}
+
+/* Styles commun */
+.bimp_notification_dropdown {
+  .notif_panel {
+    max-height: auto;
+    overflow-y: scroll;
+    padding: 0;
+    line-height: 22px;
+    width: 800px;
+  }
+
+  .notif_title {
+    font-size: 13px;
+    font-weight: bold;
+    margin: 8px;
+  }
+
+  .notif_desc {
+    display: inline-block;
+    font-size: 12px;
+    line-height: 14px;
+    margin-top: 8px;
+    padding: 10px 20px;
+    border-radius: 25px;
+    border-top-left-radius: 0;
+    background-color: #e0f3ff;
+  }
+
+  .notif_src {
+    font-size: 11px;
+    font-style: italic;
+    color: #006AFF;
+  }
+
+  .notif_dest {
+    font-size: 11px;
+    font-style: italic;
+    color: #A00000;
+    font-weight: bold;
+  }
+}
+
+/* Bimp task */
+div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_notif_task"] {
+  width: auto;
+  min-width: 800px;
+
+  overflow-y: scroll;
+}
+
+div.tabs-animated {
+  width: auto;
+  max-height: auto;
+  overflow-y: scroll;
+}
+
+div.task_panel {
+  .parent_task {
+    margin: 5px 0;
+    font-style: italic;
+  }
+
+  .task_subj {
+    font-weight: bold;
+  }
+
+  .notif_desc {
+    background-color: #FFFFE1;
+  }
+}
+
+/*BimpValidation*/
+
+div.bv_demandes_panel {
+  max-height: auto;
+  overflow-y: scroll;
+  padding: 0px;
+  line-height: 22px;
+  width: 800px;
+
+  .user_demande {
+    font-size: 11px;
+    font-style: italic;
+    color: #006AFF;
+  }
 }
 
 /* Rendez-vous agenda */
@@ -376,20 +392,9 @@ ul#nav_task > li.reload {
   .lieu {
     font-size: 12px;
   }
+}
 
-  .title {
-    font-size: 13px;
-    font-weight: bold;
-    margin: 8px;
-  }
+/* Tickets */
+.bimp_notification_dropdown.bimp_notification_dropdown {
 
-  .desc {
-    font-size: 12px;
-    line-height: 14px;
-    margin-top: 8px;
-    padding: 8px 15px;
-    border-radius: 25px;
-    border-top-left-radius: 0;
-    background-color: #e0f3ff;
-  }
 }

@@ -7648,6 +7648,28 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		return $list;
 	}
 
+	public function getNbNotesFormUser($id_user, $not_viewed_only = true)
+	{
+		if (!$this->isLoaded() || !$id_user) {
+			return 0;
+		}
+
+		BimpObject::loadClass('bimpcore', 'Bimp_UserGroup');
+		$user_groups = Bimp_UserGroup::getUserUserGroupsList($id_user);
+
+		$where = 'obj_type = \'bimp_object\' AND obj_module = \''.$this->module.'\' AND obj_name = \''.$this->object_name.'\' AND id_obj = ' . $this->id;
+		$where .= ' AND user_create != ' . (int) $id_user . ($not_viewed_only ? ' AND viewed = 0' : '');
+		$where .= ' AND (';
+		$where .= 'visibility >= 10 OR (fk_user_dest = ' . (int) $id_user . ' AND type_dest = 1)';
+
+		if (!empty($user_groups)) {
+			$where .= ' OR (fk_group_dest IN (' . implode(',', $user_groups) . ') AND type_dest = 4)';
+		}
+		$where .= ')';
+
+		return  (int) $this->db->getCount('bimpcore_note', $where);
+	}
+
 	public function renderNotesList($filter_by_user = true, $list_name = "default", $suffixe = "", $archive = false, $withLinked = true)
 	{
 		if ($this->isLoaded()) {

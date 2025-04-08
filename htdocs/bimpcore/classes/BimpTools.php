@@ -1387,17 +1387,17 @@ class BimpTools
 			}
 			$sql = ' FROM ' . MAIN_DB_PREFIX . $table . ($default_alias ? ' ' . $default_alias : '');
 
-            if (!is_null($joins) && is_array($joins) && count($joins)) {
-                foreach ($joins as $key => $join) {
-                    $alias = (isset($join['alias']) ? $join['alias'] : $key);
-                    if (isset($join['table']) && isset($join['on'])) {
+			if (!is_null($joins) && is_array($joins) && count($joins)) {
+				foreach ($joins as $key => $join) {
+					$alias = (isset($join['alias']) ? $join['alias'] : $key);
+					if (isset($join['table']) && isset($join['on'])) {
 						$sql .= ' ' . (isset($join['join_type']) ? $join['join_type'] : 'LEFT') . ' JOIN ' . MAIN_DB_PREFIX . $join['table'] . ' ' . $alias . ' ON ' . $join['on'];
-                    }
-                }
-            }
-        }
-        return $sql;
-    }
+					}
+				}
+			}
+		}
+		return $sql;
+	}
 
 	public static function getSqlWhere($filters, $default_alias = 'a', $operator = 'WHERE')
 	{
@@ -1558,69 +1558,15 @@ class BimpTools
 				} elseif (isset($filter['part_type']) && isset($filter['part'])) {
 					$sql .= self::getSqlLike($filter['part'], $filter['part_type'], (isset($filter['not']) ? $filter['not'] : 0));
 				} elseif (isset($filter['in'])) {
-					if (is_array($filter['in'])) {
-						$has_null = false;
-						foreach ($filter['in'] as $key => $in_value) {
-							if (is_null($in_value)) {
-								$has_null = true;
-								unset($filter['in'][$key]);
-							}
-						}
-
-						if (count($filter['in'])) {
-							if ($has_null) {
-								$sql = '(' . $sql_field;
-							}
-							$sql .= ' IN ("';
-							$sql .= implode('","', $filter['in']);
-							$sql .= '")';
-							if ($has_null) {
-								$sql .= ' OR ' . $sql_field . ' IS NULL)';
-							}
-						} elseif ($has_null) {
-							$sql .= ' IS NULL';
-						} else {
-							$sql .= ' = 0 AND 0';
-						}
-					} elseif ($filter['in'] == "") {
-						$sql .= ' = 0 AND 0';
-					} else {
-						$sql .= ' IN (' . $filter['in'] . ')';
-					}
+					$sql = self::getSqlIn($sql_field, $filter['in']);
 				} elseif (isset($filter['not_in'])) {
-					if (is_array($filter['not_in'])) {
-						$has_null = false;
-						foreach ($filter['not_in'] as $key => $not_in_value) {
-							if (is_null($not_in_value)) {
-								$has_null = true;
-								unset($filter['not_in'][$key]);
-							}
-						}
-
-						if (count($filter['not_in'])) {
-							if ($has_null) {
-								$sql = '(' . $sql_field;
-							}
-							$sql .= ' NOT IN ("';
-							$sql .= implode('","', $filter['not_in']);
-							$sql .= '")';
-							if ($has_null) {
-								$sql .= ' AND ' . $sql_field . ' IS NOT NULL)';
-							}
-						} elseif ($has_null) {
-							$sql .= ' IS NOT NULL';
-						} else {
-							$sql .= ' = 0 AND 0';
-						}
-					} else {
-						$sql .= ' NOT IN (' . $filter['not_in'] . ')';
-					}
-				} elseif (isset($filter['in_braces']))	{
+					$sql = self::getSqlIn($sql_field, $filter['not_in'], true);
+				} elseif (isset($filter['in_braces'])) {
 					if (is_array($filter['in_braces'])) {
 						$firstLoop = true;
 						$sql = '(';
 						foreach ($filter['in_braces'] as $key => $in_braces_value) {
-							if( !$firstLoop )	{
+							if (!$firstLoop) {
 								$sql .= ' OR ';
 							}
 							$sql .= $sql_field . self::getSqlLike($in_braces_value, 'middle', false, true);
@@ -1635,7 +1581,7 @@ class BimpTools
 						$firstLoop = true;
 						$sql = '(';
 						foreach ($filter['not_in_braces'] as $key => $in_braces_value) {
-							if( !$firstLoop )	{
+							if (!$firstLoop) {
 								$sql .= ' AND ';
 							}
 							$sql .= $sql_field . self::getSqlLike($in_braces_value, 'middle', true, true);
@@ -1646,11 +1592,11 @@ class BimpTools
 						$sql .= self::getSqlLike($filter['in_braces'], 'middle', true, true);
 					}
 				} else {
-					if (is_array($filter) && count($filter) > 0) {
-						$sql .= ' IN ("' . implode('","', $filter) . '")';
-					} elseif ((is_array($filter) && count($filter) == 0) || $filter == '') {
-						$sql .= ' = 0 AND 0';
+					if (count($filter)) {
+						$sql = self::getSqlIn($sql_field, $filter);
 					} else {
+						$sql .= ' = 0 AND 0';
+
 						BimpCore::addlog('Erreur filtre SQL invalide', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
 							'Filtre' => $filter
 						));
@@ -1724,6 +1670,47 @@ class BimpTools
 		if ($escape_char) {
 			$sql .= ' ESCAPE \'' . $escape_char . '\'';
 		}
+		return $sql;
+	}
+
+	public static function getSqlIn($sql_field, $values, $not = false)
+	{
+		$sql = '';
+
+		if (is_array($values)) {
+			$has_null = false;
+			foreach ($values as $key => $value) {
+				if (is_null($value)) {
+					$has_null = true;
+					unset($values[$key]);
+				}
+			}
+
+			if (count($values)) {
+				if ($has_null) {
+					$sql = '(';
+				}
+
+				$sql .= $sql_field;
+
+				$sql .= ($not ? ' NOT' : '') . ' IN ("';
+				$sql .= implode('","', $values);
+				$sql .= '")';
+
+				if ($has_null) {
+					$sql .= ($not ? ' AND' : ' OR') . ' ' . $sql_field . ' IS ' . ($not ? 'NOT ' : '') . 'NULL)';
+				}
+			} elseif ($has_null) {
+				$sql .= $sql_field . ' IS ' . ($not ? 'NOT ' : '') . 'NULL';
+			} else {
+				$sql .= $sql_field . ' = 0 AND 0';
+			}
+		} elseif ($values == "") {
+			$sql .= $sql_field . ' = 0 AND 0';
+		} else {
+			$sql .= $sql_field . ($not ? ' NOT' : '') . ' IN (' . $values . ')';
+		}
+
 		return $sql;
 	}
 
@@ -3519,12 +3506,11 @@ class BimpTools
 
 		if (is_array($url_params)) {
 			foreach ($url_params as $key => $value) {
-				if(is_array($value)){
-					foreach($value as $v) {
+				if (is_array($value)) {
+					foreach ($value as $v) {
 						$str .= ($str ? '&' : '') . $key . '[]=' . urlencode($v);
 					}
-				}
-				else{
+				} else {
 					$str .= ($str ? '&' : '') . $key . '=' . urlencode($value);
 				}
 			}

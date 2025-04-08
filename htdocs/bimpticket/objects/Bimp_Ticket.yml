@@ -379,4 +379,4 @@ lists:
             subject:
             datec:
             fk_soc:
-            fk_user_assigned:
+            fk_user_assign:

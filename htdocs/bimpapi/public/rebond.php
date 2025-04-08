@@ -16,9 +16,12 @@
 
 $ch = curl_init();
 
+$headers = getRequestHeaders();
+$post = file_get_contents('php://input');
+$headers['Content-Length'] = strlen($post);
 curl_setopt($ch, CURLOPT_URL, 'http://172.24.2.31/OLAP/msmdpump.dll');
-curl_setopt($ch, CURLOPT_HTTPHEADER, getRequestHeaders());
-curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents('php://input'));
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
 curl_setopt($ch, CURLOPT_POST, 1);
 $response = curl_exec($ch);
 curl_close($ch);
@@ -29,7 +32,7 @@ print_r(getRequestHeaders());
 
 
 echo '<h1>body</h1>';
-echo file_get_contents('php://input');
+echo $post;
 
 
 echo '<h1>response header</h1>';
@@ -61,7 +64,7 @@ echo $response;
 function getRequestHeaders() {
 	$headers = array();
 	$tabGarde = array(
-		'CONTENT_LENGTH' => 'Content-Length',
+//		'CONTENT_LENGTH' => 'Content-Length',
 		'CONTENT_TYPE' => 'Content-Type',
 		'HTTP_AUTHORIZATION' => 'Authorization',
 	);

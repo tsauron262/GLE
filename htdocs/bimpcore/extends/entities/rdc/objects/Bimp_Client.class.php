@@ -321,7 +321,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 			$api = BimpAPI::getApiInstance('mirakl');
 			$data = $api->getShopInfo($shopid);
-//echo '<pre>'; print_r($data); echo '</pre>'; exit;
+
 			$errors = array();
 			if ($data['total_count'] == 0) {
 				$warnings[] = 'ShopId ' . $shopid . ' non trouvé sur mirakl';

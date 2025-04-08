@@ -15,7 +15,7 @@ class BiAPI extends BimpAPI
 	public static $default_accept = 'text/xml';
 	public static $urls_bases = array(
 		'default' => array(
-			'prod' => 'http://ven-bi-1/OLAP/',
+			'prod' => 'http://172.24.2.31/OLAP/',
 			'test' => ''
 		)
 	);

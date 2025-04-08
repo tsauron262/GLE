@@ -61,17 +61,25 @@ class BiAPI extends BimpAPI
 		), $errors);
 
 
-//		$ch = curl_init($this->getParam('url'));
-//		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: text/xml'));
-//		curl_setopt($ch, CURLOPT_HEADER, 1);
-//		curl_setopt($ch, CURLOPT_USERPWD, $this->getParam('login') . ":" . $this->getParam('mdp'));
-//		curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-//		curl_setopt($ch, CURLOPT_POST, 1);
-//		curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
-//		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-//		$return = curl_exec($ch);
-//		curl_close($ch);
-		return $return;
+//		$p = xml_parser_create();
+//		xml_parse_into_struct($p, $return, $vals, $index);
+//		xml_parser_free($p);
+//		return '<pre>'.print_r($vals,1);
+
+
+
+
+		require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/XMLDoc.class.php';
+
+		$doc = new DOMDocument();
+		if (!$doc->loadXML($return)) {
+//			$this->addError('Echec du chargement du fichier xml "'  . '"');
+			unset($doc);
+			return;
+		}
+
+		$requestNode = XMLDoc::findElementsList($doc, 'row');
+		print_r($requestNode);
 	}
 
 	public function getDefaultCurlOptions($request_name, &$errors = array())

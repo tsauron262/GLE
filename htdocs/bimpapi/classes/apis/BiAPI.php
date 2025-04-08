@@ -35,7 +35,7 @@ class BiAPI extends BimpAPI
   <soap:Body>
     <Execute xmlns="urn:schemas-microsoft-com:xml-analysis">
       <Command>
-        <Statement>'.$req.'</Statement>
+        <Statement>'.str_replace('<br>', '', $req).'</Statement>
       </Command>
       <Properties>
         <PropertyList>
@@ -86,7 +86,7 @@ class BiAPI extends BimpAPI
 
 	public function testRequest(&$errors = array(), &$warnings = array())
 	{
-		$return = $this->sendReq('SUMMARIZECOLUMNS(
+		$return = $this->sendReq('EVALUATE SUMMARIZECOLUMNS(
 	Vendeurs[Nom],
 	Vendeurs[FreeShipping],
 	KEEPFILTERS( TREATAS( {2025}, Calendrier[Année] )),

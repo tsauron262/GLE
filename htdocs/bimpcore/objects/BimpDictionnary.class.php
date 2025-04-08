@@ -1,0 +1,187 @@
+<?php
+
+class BimpDictionnary extends BimpObject
+{
+
+	// Droits users :
+
+	public function canCreate()
+	{
+		global $user;
+		return (int) $user->admin;
+	}
+
+	public function canEdit()
+	{
+		return $this->canCreate();
+	}
+
+	public function canDelete()
+	{
+		return (int) BimpCore::isUserDev();
+	}
+
+	// Getters params :
+
+	public function getListsButtons()
+	{
+		$buttons = array();
+
+		if ($this->isLoaded($errors)) {
+			$values_params = $this->getData('values_params');
+
+			if ($this->canEdit()) {
+				$onclick = '';
+
+				if (isset($values_params['children'])) {
+					$child_instance = $this->getChildObject($values_params['children']);
+					$filters = (isset($values_params['filters']) ? $values_params['filters'] : array());
+					$params = array(
+						'title'     => 'Valeurs du dictionnaire ' . $this->getData('name'),
+						'id_parent' => $this->id
+					);
+
+					if (!empty($filters)) {
+						$params['extra_filters'] = $filters;
+					}
+
+					$onclick = $child_instance->getJsLoadModalList('dictionnary', $params);
+				} elseif (isset($values_params['url'])) {
+					$onclick = 'window.open(\'' . $values_params['url'] . '\');';
+				}
+
+				if ($onclick) {
+					$buttons[] = array(
+						'label'   => 'Valeurs',
+						'icon'    => 'fas_list-ol',
+						'onclick' => $onclick
+					);
+				}
+			}
+		}
+
+		return $buttons;
+	}
+
+	// Getters données :
+
+	public function getValuesData($active_only = true)
+	{
+		if ($this->isLoaded()) {
+			$code = $this->getData('code');
+			if ($code) {
+				$cache_key = 'dictionnary_values_data_' . $code;
+
+				if ($active_only) {
+					$cache_key .= '_active';
+				}
+
+				if (!isset(self::$cache[$cache_key])) {
+					$values_params = $this->getData('values_params');
+					$values = BimpCache::getCacheServeur('dictionnary_' . $code);
+
+					if (empty($values)) {
+						$values = array();
+
+						$key_field = (isset($values_params['key_field']) ? $values_params['key_field'] : 'code');
+						$position_field = (isset($values_params['position_field']) ? $values_params['position_field'] : 'position');
+						$filters = (isset($values_params['filters']) ? $values_params['filters'] : array());
+
+						if (isset($values_params['children'])) {
+							foreach ($this->getChildrenObjects($values_params['children'], $filters, 'position', 'asc') as $val) {
+								$val_data = $val->getDataArray(false);
+
+								if (isset($values_params['extra_data'])) {
+									$val_extra_data = array();
+									if (isset($val_data['extra_data'])) {
+										$val_extra_data = $val_data['extra_data'];
+										unset($val_data['extra_data']);
+									}
+
+									foreach ($values_params['extra_data'] as $data_name => $data_params) {
+										$val_data[$data_name] = (isset($val_extra_data[$data_name]) ? $val_extra_data[$data_name] : (isset($data_params['default']) ? $data_params['default'] : ''));
+									}
+								}
+
+								$values[$val_data[$key_field]] = $val_data;
+							}
+						} else {
+							$table = (isset($values_params['table']) ? $values_params['table'] : '');
+
+							if ($table) {
+								$sql = BimpTools::getSqlFullSelectQuery($table, null, $filters, array(), array(
+									'order_by' => ($position_field ? $position_field : $key_field)
+								));
+
+								$rows = $this->db->executeS($sql, 'array');
+
+								if (!empty($rows)) {
+									foreach ($rows as $r) {
+										$values[$r[$key_field]] = $r;
+									}
+								}
+							}
+						}
+
+						BimpCache::setCacheServeur('dictionnary_' . $code, $values);
+					}
+
+					if ($active_only) {
+						$active_field = (isset($values_params['key_field']) ? $values_params['key_field'] : 'active');
+						if ($active_field) {
+							foreach ($values as $code => $value) {
+								if (isset($value[$active_field]) && !(int) $value[$active_field]) {
+									unset($values[$code]);
+								}
+							}
+						}
+					}
+
+					self::$cache[$cache_key] = $values;
+				}
+
+				return self::$cache[$cache_key];
+			}
+		}
+
+		return array();
+	}
+
+	public function getValuesArray($active_only = true, $include_empty = false, $empty_value = '', $empty_label = '')
+	{
+		if ($this->isLoaded()) {
+			$code = $this->getData('code');
+			if ($code) {
+				$cache_key = 'dictionnary_values_array_' . $code;
+
+				if ($active_only) {
+					$cache_key .= '_active';
+				}
+
+				if (!isset(self::$cache[$cache_key])) {
+					$values = self::getValuesData($active_only);
+
+					if (!empty($values)) {
+						$values_params = $this->getData('values_params');
+						$label_field = (isset($values_params['label_field']) ? $values_params['label_field'] : 'label');
+						foreach ($values as $code => $value) {
+							if (isset($value['icon']) || isset($value['class'])) {
+								self::$cache[$cache_key][$code] = array(
+									'label'   => (isset($value[$label_field]) ? $value[$label_field] : $code),
+									'icon'    => (isset($value['icon']) ? $value['icon'] : ''),
+									'classes' => array((isset($value['class']) ? $value['class'] : ''))
+								);
+							} else {
+								self::$cache[$cache_key][$code] = $value[$label_field];
+							}
+						}
+					}
+				}
+
+				return self::getCacheArray($cache_key, $include_empty, $empty_value, $empty_label);
+			}
+		}
+
+		return ($include_empty ? array($empty_value => $empty_label) : array());
+	}
+}

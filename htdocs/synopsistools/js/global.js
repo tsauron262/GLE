@@ -694,7 +694,7 @@ function  ajNote(tab, i, type) {
     var idNote = 'noteAjax' + i;
     fermable = true;
     var datas = 'url=' + window.location;
-    datas = datas + '&type='+type+'&tab=' + tab;
+    datas = datas + '&type='+type+'&tab=' + tab + '&token=' + dol_token;
     jQuery.ajax({
         url: DOL_URL_ROOT + '/synopsistools/ajax/note_ajax.php',
         data: datas,
@@ -790,7 +790,7 @@ function editAjax(elem, datas, callOut) {
                 fermable = true;
                 if (callOut)
                     callOut();
-                datas = datas + '&note=' + $(".editableTextarea").val();
+                datas = datas + '&note=' + $(".editableTextarea").val() + '&token=' + dol_token;
                 jQuery.ajax({
                     url: DOL_URL_ROOT + '/synopsistools/ajax/note_ajax.php',
                     data: datas,

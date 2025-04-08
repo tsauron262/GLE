@@ -267,12 +267,12 @@ sections:
                         custom:
                             callback: renderBimpThemeMenuList
                             
-#            dictionnary:
-#                label: Dictionnaires
-#                icon: fas_book-alt
-#                sections:
-#                    -   type: list
-#                        list:
-#                            object: dictionnary
-#                            panel: 1
-#                            name: default
+            dictionnary:
+                label: Dictionnaires
+                icon: fas_book
+                sections:
+                    -   type: list
+                        list:
+                            object: dictionnary
+                            panel: 1
+                            name: default

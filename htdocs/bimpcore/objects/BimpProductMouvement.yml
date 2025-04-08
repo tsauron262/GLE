@@ -3,6 +3,10 @@ primary: rowid
 icon: fas_exchange-alt
 common_fields: 0
 
+parent_module: bimpcore
+parent_object: Bimp_Entrepot
+parent_id_property: fk_entrepot
+
 list_page_url: 
     controller: stocks
     url_params:

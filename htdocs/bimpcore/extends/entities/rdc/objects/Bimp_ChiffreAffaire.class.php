@@ -106,7 +106,7 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject {
 		$fields = array();
 		$filter = array(
 		);
-		$cmds = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filter);
+//		$cmds = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filter);
 		foreach($this->getCategoriesRdc() as $idC => $label){
 			if($idC > 0) {
 				$filter2 = array_merge($filter, array('fk_category' => $idC));

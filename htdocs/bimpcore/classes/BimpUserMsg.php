@@ -710,6 +710,12 @@ class BimpUserMsg
 			'dests'  => 'conf::emails_notify_solvabilite_client_change',
 			'module' => 'bimpcore',
 			'metier' => 'devs'
+		),
+		'Attribution_rdc'							=> array(
+			'label'  => 'Le compte XXX vient de vous être attribué',
+			'dests'  => 'object::id_user',
+			'module' => 'bimpcore',
+			'metier' => 'metier'
 		)
 
 		// todo tommy : separer mail client et mail interne :

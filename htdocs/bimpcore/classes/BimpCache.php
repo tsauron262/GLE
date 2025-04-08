@@ -2380,25 +2380,6 @@ class BimpCache
 		return self::$cache[$cache_key];
 	}
 
-	public static function getStatuts_rdc()
-	{
-		$cache_key = 'rdc_statuts_prospects';
-
-		if (!isset(self::$cache[$cache_key])) {
-			self::$cache[$cache_key] = array();
-
-			$rows = self::getBdb()->getRows('c_societe_rdc_statut', 'active = 1', null, 'array');
-
-			if (is_array($rows)) {
-				foreach ($rows as $r) {
-					self::$cache[$cache_key][$r['rowid']] = $r;
-				}
-			}
-		}
-
-		return self::$cache[$cache_key];
-	}
-
 	// Définitions des droits:
 
 	public static function getRightsDefData()

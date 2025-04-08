@@ -56,8 +56,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public static $group_allowed_actions = array(
 		1 => array('BD'),
 		2 => array('BD'),
-		3 => array('BD'), // en fait c'est BD, c juste pour le test
-		4 => array('BD'), // en fait c'est BD, c juste pour le test
+		3 => array('BD'),
+		4 => array('BD'),
 		5 => array('BD'),
 		6 => array('BD'),
 		7 => array('BD'),
@@ -129,8 +129,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	{
 		$buttons = array();
 
-		$statuts_rdc = BimpCache::getStatuts_rdc();
-
 		$statu = $this->getData('fk_statut_rdc');
 		if($statu == 0)
 			$statu = 1;
@@ -146,14 +144,14 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				}
 				if($user_in_group)
 					$buttons[$statut] = array(
-						'label'   => 'Passer le statut à ' . $statuts_rdc[$statut]['libelle'],
+						'label'   => 'Passer le statut à ' . self::$statusRdc[$statut]['label'],
 						'icon'    => 'fas_edit',
 //						'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut), array('form_name' => 'formActionRdc'))
 						'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut))
 					);
 				else
 					$buttons[$statut] = array(
-						'label'   => 'Passer le statut à ' . $statuts_rdc[$statut]['libelle'],
+						'label'   => 'Passer le statut à ' . self::$statusRdc[$statut]['label'],
 						'icon'    => 'fas_times',
 						'onclick' => '',
 						'disabled' => 1,
@@ -323,7 +321,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 			$api = BimpAPI::getApiInstance('mirakl');
 			$data = $api->getShopInfo($shopid);
-
+//echo '<pre>'; print_r($data); echo '</pre>'; exit;
 			$errors = array();
 			if ($data['total_count'] == 0) {
 				$warnings[] = 'ShopId ' . $shopid . ' non trouvé sur mirakl';

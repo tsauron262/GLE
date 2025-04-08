@@ -46,6 +46,9 @@ function getRequestHeaders() {
 		if (substr($key, 0, 5) <> 'HTTP_') {
 			continue;
 		}
+		if(stripos($key, 'Content-Type') === false) {
+			continue;
+		}
 		$header = str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower(substr($key, 5)))));
 		$headers[$header] = $value;
 	}

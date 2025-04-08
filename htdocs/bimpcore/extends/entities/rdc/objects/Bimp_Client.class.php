@@ -320,7 +320,16 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		if(BimpTools::isModuleDoliActif('bimpapi')) {
 			require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 			$api = BimpAPI::getApiInstance('mirakl');
+			if(!isset($api) || !is_object($api)) {
+				$warnings[] = 'Module API non actif';
+				return;
+			}
 			$data = $api->getShopInfo($shopid);
+
+			if(!is_array($data)) {
+				$warnings[] = 'Erreur lors de la récupération des données Mirakl';
+				return;
+			}
 
 			$errors = array();
 			if ($data['total_count'] == 0) {
@@ -340,7 +349,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$this->set('zip', $shop['contact_informations']['zip_code']);
 				$this->set('town', $shop['contact_informations']['city']);
 				if ($shop['contact_informations']['country']) {
-					$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $shop['contact_informations']['country']) . '\'';
+					$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $shop['contact_informations']['country'] . '\'');
 					if ($id_pays) {
 						$this->set('fk_pays', $id_pays);
 					}
@@ -381,10 +390,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$obj->set('address', $add);
 		$obj->set('zip', $contact['zip_code']);
 		$obj->set('town', $contact['city']);
-		if ($contact['contact_informations']['country'])	{
-			$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $contact['contact_informations']['country']) . '\'';
+		if ($contact['country'])	{
+			$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $contact['country'] . '\'');
 			if ($id_pays)	$this->set('fk_pays', $id_pays);
 		}
+//		echo '<pre>'; print_r($contact); echo '</pre>';die;
 		$obj->set('phone', $contact['phone']);
 		$obj->set('email', $contact['email']);
 		$obj->set('datec', date('Y-m-d H:i:s'));
@@ -396,18 +406,20 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function updateContact($contact, $info)
 	{
+
 		if($contact->getData('email') == $info['email'] && $contact->getData('phone') == $info['phone'])	{
 			$contact->set('civility', $this->traduct_civility($info['civility']));
 			$contact->set('lastname', $info['lastname']);
 			$contact->set('firstname', $info['firstname']);
-			$add = $info['contact_informations']['street1'];
-			if ($info['contact_informations']['street2'])	$add .= ' ' . $info['contact_informations']['street2'];
+			$add = $info['street1'];
+			if ($info['street2'])	$add .= ' ' . $info['street2'];
 			$this->set('address', $add);
 			$contact->set('zip', $info['zip_code']);
 			$contact->set('town', $info['city']);
-			if ($contact['contact_informations']['country'])	{
-				$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $contact['contact_informations']['country']) . '\'';
-				if ($id_pays)	$this->set('fk_pays', $id_pays);
+			if ($info['country'])	{
+				$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $info['country'] . '\'');
+				if ($id_pays)
+					$this->set('fk_pays', $id_pays);
 			}
 			$contact->set('phone', $info['phone']);
 			$contact->set('email', $info['email']);

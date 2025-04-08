@@ -560,8 +560,10 @@ abstract class BimpAPI
 							$curl_options_str['CURLOPT_HTTPHEADER'][] = 'Content-Length: ' . strlen($curl_options[CURLOPT_POSTFIELDS]);
 							break;
 						case 'POST':
-							$curl_options[CURLOPT_HTTPHEADER][] = 'Content-Length: ' . strlen($curl_options[CURLOPT_POSTFIELDS]);
-							$curl_options_str['CURLOPT_HTTPHEADER'][] = 'Content-Length: ' . strlen($curl_options[CURLOPT_POSTFIELDS]);
+							if(!is_array($curl_options[CURLOPT_POSTFIELDS])){
+								$curl_options[CURLOPT_HTTPHEADER][] = 'Content-Length: ' . strlen($curl_options[CURLOPT_POSTFIELDS]);
+								$curl_options_str['CURLOPT_HTTPHEADER'][] = 'Content-Length: ' . strlen($curl_options[CURLOPT_POSTFIELDS]);
+							}
 							break;
 					}
 

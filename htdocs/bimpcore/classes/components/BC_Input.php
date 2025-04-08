@@ -47,13 +47,13 @@ class BC_Input extends BimpComponent
 		),
 		'date'                        => array(
 			'display_now' => array('data_type' => 'bool', 'default' => 0),
-			'format' => array('data_type' => 'text', 'default' => '')
+			'format'      => array('data_type' => 'text', 'default' => '')
 		),
 		'datetime'                    => array(
 			'display_now'   => array('data_type' => 'bool', 'default' => 0),
 			'with_hours'    => array('data_type' => 'bool', 'default' => 1),
 			'with_secondes' => array('data_type' => 'bool', 'default' => 0),
-			'format' => array('data_type' => 'text', 'default' => '')
+			'format'        => array('data_type' => 'text', 'default' => '')
 		),
 		'timer'                       => array(
 			'with_days'     => array('data_type' => 'bool', 'default' => 1), // A implémenter
@@ -79,11 +79,13 @@ class BC_Input extends BimpComponent
 		),
 		'select'                      => array(
 			'options'      => array('data_type' => 'array', 'compile' => true, 'default' => array()),
-			'select_first' => array('data_type' => 'bool', 'default_value' => 0)
+			'select_first' => array('data_type' => 'bool', 'default_value' => 0),
+			'dictionnary'  => array('default' => '')
 		),
 		'switch_options'              => array(
 			'options'  => array('data_type' => 'array', 'compile' => true, 'default' => array()),
-			'vertical' => array('data_type' => 'bool', 'default_value' => 0)
+			'vertical' => array('data_type' => 'bool', 'default_value' => 0),
+			'dictionnary'  => array('default' => '')
 		),
 		'toggle'                      => array(
 			'toggle_on'  => array('default' => 'OUI'),
@@ -188,6 +190,8 @@ class BC_Input extends BimpComponent
 		)
 	);
 
+	public static $types_with_options = array('select', 'switch_options');
+
 	public function __construct(BimpObject $object, $data_type, $input_name, $path, $value = null, &$field_params = array(), $option = null)
 	{
 		$this->data_type = $data_type;
@@ -279,17 +283,14 @@ class BC_Input extends BimpComponent
 			}
 		}
 
-		switch ($this->params['type']) {
-			case 'select':
-			case 'switch_options':
-				if (is_null($this->params['options']) || !count($this->params['options'])) {
-					if (isset($this->field_params['values']) && !is_null($this->field_params['values'])) {
-						$this->params['options'] = $this->field_params['values'];
-					} else {
-						$this->params['options'] = array();
-					}
+		if (in_array($this->params['type'], self::$types_with_options)) {
+			if (empty($this->params['options'])) {
+				if (isset($this->field_params['values'])) {
+					$this->params['options'] = $this->field_params['values'];
+				} else {
+					$this->params['options'] = array();
 				}
-				break;
+			}
 		}
 
 		$this->input_id = $this->object->object_name;
@@ -449,11 +450,13 @@ class BC_Input extends BimpComponent
 			case 'select':
 				$options['options'] = isset($this->params['options']) ? $this->params['options'] : array();
 				$options['select_first'] = isset($this->params['select_first']) ? $this->params['select_first'] : 0;
+				$options['dictionnary'] = (isset($this->params['dictionnary']) ? $this->params['dictionnary'] : (isset($this->field_params['dictionnary']) ? $this->field_params['dictionnary'] : ''));
 				break;
 
 			case 'switch_options':
 				$options['options'] = isset($this->params['options']) ? $this->params['options'] : array();
 				$options['vertical'] = isset($this->params['vertical']) ? $this->params['vertical'] : 0;
+				$options['dictionnary'] = (isset($this->params['dictionnary']) ? $this->params['dictionnary'] : (isset($this->field_params['dictionnary']) ? $this->field_params['dictionnary'] : ''));
 				break;
 
 			case 'toggle':

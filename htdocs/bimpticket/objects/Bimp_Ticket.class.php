@@ -32,6 +32,29 @@ class Bimp_Ticket extends BimpDolObject
 
 	public static $types = array();
 
+	// Droits users :
+
+	public function canSetAction($action)
+	{
+		global $user;
+
+		switch ($action) {
+			case 'assign':
+				return $user->admin || $user->rights->bimpticket->assign;
+
+			case 'newStatus':
+				if ($user->admin || $user->rights->bimpticket->assign) {
+					return 1;
+				}
+				if ($this->getData('fk_user_assign') == $user->id) {
+					return 1;
+				}
+				return 0;
+		}
+
+		return parent::canSetAction($action);
+	}
+
 	// Getters booléens:
 
 	public function isActionAllowed($action, &$errors = array())
@@ -481,19 +504,19 @@ class Bimp_Ticket extends BimpDolObject
 		$filters = array();
 
 		if ($tms) {
-			$filters['tms'] = array(
+			$filters['a.tms'] = array(
 				'operator' => '>',
 				'value'    => $tms
 			);
 		}
 
-		if (isset($options['excluded_tickets']) && !empty($options['excluded_tickets'])) {
-			$filters['id'] = array(
+		if (!empty($options['excluded_tickets'])) {
+			$filters['a.rowid'] = array(
 				'not_in' => $options['excluded_tickets']
 			);
 		}
 
-		$filters['status'] = array(
+		$filters['a.fk_statut'] = array(
 			'operator' => '<',
 			'value'    => self::STATUS_CLOSED
 		);
@@ -527,9 +550,12 @@ class Bimp_Ticket extends BimpDolObject
 		$sql .= BimpTools::getSqlOrderBy('datec', 'DESC', 'a');
 		$sql .= BimpTools::getSqlLimit(50);
 
+//		echo 'SQL : ' . $sql .'<br/><br/>';
+
 		$rows = $bdb->executeS($sql, 'array');
 
 		if (!is_array($rows)) {
+			$errors[] = 'Echec requête SQL : ' . $bdb->err();
 			return array();
 		}
 
@@ -539,11 +565,7 @@ class Bimp_Ticket extends BimpDolObject
 				continue;
 			}
 
-			$where = 'obj_type = \'bimp_object\' AND obj_module = \'bimpticket\' AND obj_name = \'Bimp_Ticket\' AND id_obj = ' . $t->id;
-			$where .= ' AND viewed = 0 AND user_create != ' . (int) $id_user;
-			$nb_msgs = (int) $bdb->getCount('bimpcore_note', $where);
-
-			$status = (int) $t->getData('fk_stat');
+			$status = (int) $t->getData('fk_statut');
 			$status_icon = '<span class="' . implode(' ', self::$status_list[$status]['classes']) . ' bs-popover" style="margin-right: 8px"';
 			$status_icon .= BimpRender::renderPopoverData(self::$status_list[$status]['label']) . '>';
 			$status_icon .= BimpRender::renderIcon(self::$status_list[$status]['icon']) . '</span>';
@@ -557,8 +579,23 @@ class Bimp_Ticket extends BimpDolObject
 					$dest = $user_assign->getName();
 				}
 			}
+
+			$nb_msgs = 0;
+
+			foreach ($users_filters as $id_u) {
+				if ((int) $id_u) {
+					$nb_msgs += $t->getNbNotesFormUser($id_u);
+				}
+			}
+
+			$nb_msgs = $t->getNbNotesFormUser($id_user);
+
+
+			$client = $t->getChildObject('client');
+
 			$ticket = array(
 				'id'            => $t->id,
+				'ref'           => $t->getRef(),
 				'sort_val'      => $t->getData('datec'),
 				'affected'      => (int) ($t->getData('fk_user_assign') > 0),
 				'status_icon'   => $status_icon,
@@ -567,12 +604,14 @@ class Bimp_Ticket extends BimpDolObject
 				'txt'           => $t->displayData("message", 'default', false),
 				'date_create'   => $t->getData('datec'),
 				'url'           => DOL_URL_ROOT . '/bimpticket/index.php?fc=ticket&id=' . $t->id,
-				'can_close'     => (int) $t->canSetAction('newStatus'),
-				'can_attribute' => (int) ($t->canSetAction('assign')),
+				'can_begin'     => (int) ($t->canSetAction('newStatus') && $t->isActionAllowed('newStatus') && $status < self::STATUS_IN_PROGRESS && $status >= self::STATUS_READ),
+				'can_close'     => (int) ($t->canSetAction('newStatus') && $t->isActionAllowed('newStatus') && $status < self::STATUS_CLOSED && $status >= self::STATUS_IN_PROGRESS),
+				'can_attribute' => (int) ($t->canSetAction('assign') && $t->isActionAllowed('assign')),
 				'can_edit'      => (int) $t->can('edit'),
 				'author'        => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : ''),
 				'dest'          => $dest,
-				'nb_msgs'       => $nb_msgs
+				'nb_msgs'       => $nb_msgs,
+				'client'        => (BimpObject::objectLoaded($client) ? $client->getLink() : ''),
 			);
 
 			$tickets[] = $ticket;

@@ -71,17 +71,10 @@ class modBimpticket extends DolibarrModules
 		$this->rights = array();  // Permission array used by this module
 		$r = 0;
 		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Voir, créer et modifier les tickets'; // Permission label
+		$this->rights[$r][1] = 'Assigner les tickets'; // Permission label
 		$this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'read';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+		$this->rights[$r][4] = 'assign';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 		$this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-		$r++;
-
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Supprimer les tickets'; // Permission label
-		$this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'delete';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-		$this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2
 		$r++;
 
 		$this->menu = array();
@@ -118,7 +111,9 @@ class modBimpticket extends DolibarrModules
 			}
 		}
 
-		if (!(int) BimpCache::getBdb()->getValue('bimpcore_dictionnary', 'id', 'code = \'bimp_ticket_types\'')) {
+		$bdb = BimpCache::getBdb();
+
+		if (!(int) $bdb->getValue('bimpcore_dictionnary', 'id', 'code = \'bimp_ticket_types\'')) {
 			$errors = array();
 
 			$dict = BimpDict::addDefaultDictionnary('bimp_ticket_types', 'Types de ticket');
@@ -169,20 +164,22 @@ class modBimpticket extends DolibarrModules
 					'code'    => 'SOL',
 					'label'   => 'Soldes'
 				), true, $errors);
-
-				BimpObject::createBimpObject('bimpcore', 'BimpNotification', array(
-					'label'  => 'Tickets en cours',
-					'nom'    => 'notif_ticket',
-					'module' => 'bimpticket',
-					'class'  => 'Bimp_Ticket',
-					'method' => 'getTicketsForUser',
-					'active' => 1
-				), true, $errors);
 			}
+		}
 
-			if (count($errors)) {
-				setEventMessage(BimpTools::getMsgFromArray($errors), 'errors');
-			}
+		if (!(int) $bdb->getValue('bimp_notification', 'id', 'method = \'getTicketsForUser\'')) {
+			BimpObject::createBimpObject('bimpcore', 'BimpNotification', array(
+				'label'  => 'Tickets en cours',
+				'nom'    => 'notif_ticket',
+				'module' => 'bimpticket',
+				'class'  => 'Bimp_Ticket',
+				'method' => 'getTicketsForUser',
+				'active' => 1
+			), true, $errors);
+		}
+
+		if (count($errors)) {
+			setEventMessage(BimpTools::getMsgFromArray($errors), 'errors');
 		}
 
 		return $this->_init($sql, $options);

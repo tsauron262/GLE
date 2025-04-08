@@ -30,7 +30,7 @@ class notif_ticket extends AbstractNotification {
 			var html = '<a class="nav-link dropdown-toggle header-icon ' + notif_white + '" id="' + this.dropdown_id + '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
 			html += '<i class="fas fa5-ticket-alt atoplogin"></i>';
 			html += '</a>';
-			html += '<div class="dropdown-menu dropdown-menu-right notification-dropdown bimp_notification_dropdown" aria-labelledby="' + this.dropdown_id + '">';
+			html += '<div class="dropdown-menu dropdown-menu-right notification-dropdown bimp_notification_dropdown dropdown_tickets" aria-labelledby="' + this.dropdown_id + '">';
 			html += '<div class="notifications-wrap list_notification ' + ''/*this.nom */ + '">';
 
 			html += '<div class="header" style="padding: 5px 15px">';
@@ -38,7 +38,7 @@ class notif_ticket extends AbstractNotification {
 			html += '<table style="width: 100%; font-size: 15px;">';
 			html += '<tr>';
 			html += '<td style="width: 30%">';
-			html += 'Mes tickets en cours';
+			html += 'Tickets ';
 			html += this.getBoutonReload(this.dropdown_id);
 
 			html += '</td>';
@@ -60,11 +60,11 @@ class notif_ticket extends AbstractNotification {
 			// Nav tabs 
 			html += '<ul id="nav_tickets" class="nav nav-tabs" role="tablist">';
 			html += '<li role="presentation" class="active"><a href="#user_notifications_affected_tickets" aria-controls="user_notifications_affected_tickets" role="tab" data-toggle="tab">Mes tickets en cours</a></li>';
-			html += '<li role="presentation"><a href="#user_notifications_unaffected_tickets" aria-controls="user_notifications_unaffected_tickets" role="tab" data-toggle="tab">Nouveaux tickets non attribués</a></li>';
+			html += '<li role="presentation"><a href="#user_notifications_unaffected_tickets" aria-controls="user_notifications_unaffected_tickets" role="tab" data-toggle="tab">Tickets non assignés</a></li>';
 			html += '</ul>';
 
 			// Tab panels 
-			html += '<div class="tab-content task_panel">';
+			html += '<div class="tab-content notif_panel ticket_panel">';
 			html += '<div role="tabpanel" class="list_notification tab-pane fade in active" id="user_notifications_affected_tickets"></div>';
 			html += '<div role="tabpanel" class="list_notification tab-pane fade" id="user_notifications_unaffected_tickets"></div>';
 			html += '</div>';
@@ -119,32 +119,47 @@ class notif_ticket extends AbstractNotification {
 		return 1;
 	}
 
-	getbuttonClose(id_object) {
-		var onclick = '';
-		// var onclick = 'setObjectAction($(this), {module: \'bimptask\', object_name: \'BIMP_Task\', id_object: ' + id_object + '}';
-		// onclick += ', \'close\', {}, null, null, {form_name: \'close\'})';
+	getbuttonClose(element) {
+		var onclick = 'setObjectAction($(this), {module: \'bimpticket\', object_name: \'Bimp_Ticket\', id_object: ' + element.id + '}';
+		onclick += ', \'newStatus\', {new_status: 8}, null, null, {confirm_msg: \'Veuillez confirmer\'})';
 		return '<button name="close" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fas fa5-check iconLeft"></i>Terminer</button>';
 	}
 
-	getButtonAttribute(id_object) {
-		// var onclick = '';
-		// var onclick = 'setObjectAction($(this), {module: \'bimptask\', object_name: \'BIMP_Task\', id_object: ' + id_object + '}';
-		// onclick += ', \'attribute\', {}, null, null, {form_name: \'attribute\'})';
-		return '<button name="attribute" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fas fa5-user iconLeft"></i>Assigner</button>';
+	getbuttonInProgress(element) {
+		var onclick = 'setObjectAction($(this), {module: \'bimpticket\', object_name: \'Bimp_Ticket\', id_object: ' + element.id + '}';
+		onclick += ', \'newStatus\', {new_status: 3}, null, null, {confirm_msg: \'Veuillez confirmer\'})';
+		return '<button name="close" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fas fa5-check iconLeft"></i>En cours</button>';
 	}
 
-	getButtonNotViewed(id_object, not_viewed) {
+	getButtonAttribute(element) {
+		var onclick = 'setObjectAction($(this), {module: \'bimpticket\', object_name: \'Bimp_Ticket\', id_object: ' + element.id + '}';
+		onclick += ', \'assign\', {}, null, null, {form_name: \'assign\'})';
 
-		if (not_viewed == 0)
+		var html = '<button name="attribute" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fas fa5-user-plus iconLeft"></i>';
+		
+		if (element.affected) {
+			html += 'Changer l\'assignation';
+		} else {
+			html += 'Assigner';
+		}
+		html += '</button>';
+			
+		return html;
+	}
+
+	getButtonMsgs(element) {
+		if (!element.nb_msgs) {
 			return '';
+		}
 
 		var s = ''
-		if (not_viewed > 1)
+		if (element.nb_msgs > 1) {
 			s = 's';
+		}
 
-		return '<button not_viewed=' + not_viewed + ' class="btn  btn-danger btn-small" type="button" onclick="loadModalView('
-			+ '\'bimptask\', \'BIMP_Task\', ' + id_object + ', \'notes\', $(this), '
-			+ '\'Infos\')"><i class="fa fa-fas fa-comments iconLeft"></i>' + not_viewed + ' Info' + s + ' ' + not_viewed + ' Non lue' + s + '</button>';
+		return '<button class="btn btn-danger btn-small" type="button" onclick="loadModalObjectCustomContent($(this), '
+			+ '{module: \'bimpticket\', object_name: \'Bimp_Ticket\', id_object: \'' + element.id + '\'}, \'renderNotesList\', {}, \'Note(s) du ticket ' + element.ref + '\')">'
+			+ '<i class="fas fa5-sticky-note iconLeft"></i>' + element.nb_msgs + ' Note' + s + ' non lue' + s + '</button>';
 	}
 
 	getKey(element) {
@@ -158,16 +173,16 @@ class notif_ticket extends AbstractNotification {
 		element.append = 'div.tab-content > #' + element.user_type + ' > div.task_no_prio';
 
 		if (element.src) {
-			html += '<div class="ticket_src">' + element.src + '</div>';
+			html += '<div class="notif_src">' + element.src + '</div>';
 		} else if (element.author) {
-			html += '<div class="ticket_src">' + element.author + '</div>';
+			html += '<div class="notif_src">' + element.author + '</div>';
 		}
 
 		if (element.dest) {
-			html += '<div class="ticket_dest">Destinataire : ' + element.dest + '</div>';
+			html += '<div class="notif_dest">Destinataire : ' + element.dest + '</div>';
 		}
 
-		html += '<div class="ticket_subj">';
+		html += '<div class="notif_title">';
 		if (element.status_icon) {
 			html += element.status_icon;
 		}
@@ -178,8 +193,12 @@ class notif_ticket extends AbstractNotification {
 
 		html += '</div>';
 
+		if (element.client) {
+			html += '<div>Client : ' + element.client + '</div>';
+		}
+
 		if (element.txt) {
-			html += '<div class="ticket_txt">' + element.txt + '</div>';
+			html += '<div class="notif_desc">' + element.txt + '</div>';
 		}
 
 		return html;
@@ -188,11 +207,19 @@ class notif_ticket extends AbstractNotification {
 	getElementHeaderButtons(element, key) {
 		var html = '';
 
-		if (element.can_close)
-			html += this.getbuttonClose(element.id);
+		html += this.getButtonMsgs(element);
 
-		if (element.can_attribute)
-			html += this.getButtonAttribute(element.id);
+		if (element.can_begin) {
+			html += this.getbuttonInProgress(element);
+		}
+		
+		if (element.can_close) {
+			html += this.getbuttonClose(element);
+		}
+
+		if (element.can_attribute) {
+			html += this.getButtonAttribute(element);
+		}
 
 		if (element.id) {
 			html += '<span class="rowButton" onclick="loadModalView(\'bimpticket\', \'Bimp_Ticket\', ' + element.id + ', \'default\', $(this))">';
@@ -242,7 +269,7 @@ class notif_ticket extends AbstractNotification {
 			$nav.attr('nb_msgs', this.nb_affected_msgs);
 		}
 
-		var html = 'Mes tickets en cours <span class="badge badge-' + (this.nb_affected > 0 ? 'info' : 'danger') + '" style="margin-left: 6px; font-size: 10px">' + this.nb_affected + '</span>';
+		var html = 'Mes tickets à traiter <span class="badge badge-' + (this.nb_affected > 0 ? 'info' : 'danger') + '" style="margin-left: 6px; font-size: 10px">' + this.nb_affected + '</span>';
 		if (this.nb_affected_msgs) {
 			html += '&nbsp;&nbsp;<span style="font-size: 11px; font-style: italic; font-weight: normal">(' + this.nb_affected_msgs + ' message' + (this.nb_affected_msgs > 1 ? 's' : '') + ' non lu' + (this.nb_affected_msgs > 1 ? 's' : '') + ')</span>';
 		}
@@ -255,9 +282,9 @@ class notif_ticket extends AbstractNotification {
 			$nav.attr('nb_msgs', this.nb_affectd_msgs);
 		}
 
-		html = 'Tâches non attribuées <span class="badge badge-' + (this.nb_unaffected > 0 ? 'info' : 'danger') + '" style="margin-left: 6px; font-size: 10px">' + this.nb_unaffected + '</span>';
+		html = 'Tickets non assignés <span class="badge badge-' + (this.nb_unaffected > 0 ? 'info' : 'danger') + '" style="margin-left: 6px; font-size: 10px">' + this.nb_unaffected + '</span>';
 		if (this.nb_unaffectd_msgs) {
-			html += '&nbsp;&nbsp;<span style="font-size: 11px; font-style: italic; font-weight: normal">(' + this.nb_unaffectd_msgs + ' message' + (this.nb_unaffectd_msgs > 1 ? 's' : '') + ' non lu' + (this.nb_unaffectd_msgs > 1 ? 's' : '') + ')</span>';
+			html += '&nbsp;&nbsp;<span style="font-size: 11px; font-style: italic; font-weight: normal">(' + this.nb_unaffectd_msgs + ' note' + (this.nb_unaffectd_msgs > 1 ? 's' : '') + ' non lue' + (this.nb_unaffectd_msgs > 1 ? 's' : '') + ')</span>';
 		}
 		$nav.html(html);
 	}

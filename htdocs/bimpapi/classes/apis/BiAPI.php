@@ -86,7 +86,7 @@ class BiAPI extends BimpAPI
 
 	public function testRequest(&$errors = array(), &$warnings = array())
 	{
-		$return = $this->sendReq('SUMMARIZECOLUMNS(
+		$return = $this->sendReq('EVALUATE SUMMARIZECOLUMNS(
 	Vendeurs[Nom],
 	Vendeurs[FreeShipping],
 	KEEPFILTERS( TREATAS( {2025}, Calendrier[Année] )),

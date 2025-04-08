@@ -17,7 +17,8 @@ function getOldGroup() {
         type: "POST",
         url: DOL_URL_ROOT + "/bimpgroupmanager/interface.php",
         data: {
-            action: 'getOldGroup'
+            action: 'getOldGroup',
+			token: dol_token,
         },
         async: false,
         error: function () {
@@ -37,7 +38,8 @@ function updateGroup(groupId, newGroupId) {
         data: {
             action: 'updateGroup',
             groupId: groupId,
-            newGroupId: newGroupId
+            newGroupId: newGroupId,
+			token: dol_token,
         },
         error: function () {
             alert("Erreur serveur. Il est possible qu'un autre utilisateur " +
@@ -53,6 +55,7 @@ function setAllUsers() {
         url: DOL_URL_ROOT + "/bimpgroupmanager/interface.php",
         data: {
             action: 'setAllUsers',
+			token: dol_token,
         },
         async: false,
         error: function () {

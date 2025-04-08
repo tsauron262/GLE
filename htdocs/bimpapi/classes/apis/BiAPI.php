@@ -61,25 +61,34 @@ class BiAPI extends BimpAPI
 		), $errors);
 
 
-//		$p = xml_parser_create();
-//		xml_parse_into_struct($p, $return, $vals, $index);
-//		xml_parser_free($p);
-//		return '<pre>'.print_r($vals,1);
 
+		$return = '<?xml version="1.0" encoding="utf-8"?>'.str_ireplace(['SOAP-ENV:', 'SOAP:'], '', $return);
+		libxml_use_internal_errors(true);
+		$objXmlDocument = simplexml_load_string($return);
 
+		if ($objXmlDocument == FALSE) {
+			echo "There were errors parsing the XML file.\n";
+			foreach(libxml_get_errors() as $error) {
+				echo $error->message;
+			}
+			exit;
+		}
+		$objJsonDocument = json_encode($objXmlDocument->Body->ExecuteResponse->return->root);
+		$arrOutput = json_decode($objJsonDocument, TRUE);
 
-
-		require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/XMLDoc.class.php';
-
-		$doc = new DOMDocument();
-		if (!$doc->loadXML($return)) {
-//			$this->addError('Echec du chargement du fichier xml "'  . '"');
-			unset($doc);
-			return;
+		$newTab = array();
+//		$tabConvert = array(
+//			'Vendeurs_x005B_Nom_x005D_'=> 'Name',
+//			'Vendeurs_x005B_FreeShipping_x005D_'=> 'FreeShipping',
+//			'_x005B_CA_x0020_Total_x0020_HT_x005D_'=> 'ca',
+//		);
+		foreach($arrOutput['row'] as $ln){
+			$name = $ln['Vendeurs_x005B_VendeurNomSociete_x005D_'];
+			$val = $ln['_x005B_CA_x0020_Total_x0020_HT_x005D_']*10 / 10;
+			$newTab[$name] = $val;
 		}
 
-		$requestNode = XMLDoc::findElementsList($doc, 'row');
-		print_r($requestNode);
+		return $newTab;
 	}
 
 	public function getDefaultCurlOptions($request_name, &$errors = array())
@@ -105,16 +114,64 @@ class BiAPI extends BimpAPI
 
 	public function testRequest(&$errors = array(), &$warnings = array())
 	{
-		$return = $this->sendReq('EVALUATE SUMMARIZECOLUMNS(
-	Vendeurs[Nom],
-	Vendeurs[FreeShipping],
-	KEEPFILTERS( TREATAS( {2025}, Calendrier[Année] )),
-"CA Total HT", [CA Total HT]
+		$mois = array("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12");
+		$annee = array("2020", "2021", "2022", "2023", "2024", "2025");
+
+		foreach ($annee as $val) {
+			$return = $this->traiteStats($val);
+			$warnings[] = "<pre>".print_r($return,1);
+			foreach($mois as $val2){
+				$return = $this->traiteStats($val, $val2);
+				$warnings[] = "<pre>".print_r($return,1);
+			}
+		}
+	}
+
+	public function getStats($annee, $mois = 0){
+		$req = 'EVALUATE SUMMARIZECOLUMNS(
+	Vendeurs[VendeurNomSociete],';
+		$req .= 'KEEPFILTERS( TREATAS( {'.$annee.'}, Calendrier[Année] )),';
+		if($mois > 0){
+			$req .= 'KEEPFILTERS( TREATAS( {'.(int) $mois.'}, Calendrier[Mois Numéro] )),';
+		}
+		$req .= '"CA Total HT", [CA Total HT]
 )
 ORDER BY
-    Vendeurs[Nom] ASC,
-    Vendeurs[FreeShipping] ASC');
-		$warnings[] = $return;
+    Vendeurs[VendeurNomSociete] ASC';
+
+	$return = $this->sendReq($req);
+		return $return;
+	}
+
+	public function traiteStats($annee, $mois = 0){
+		$errors = $warnings = array();
+		$ok = $bad = 0;
+		$return = $this->getStats($annee, $mois);
+		foreach($return as $key => $val){
+			$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('nom' => $key));
+			if(!$soc || !$soc->isLoaded())
+				$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('name_alias' => $key));
+			if(!$soc || !$soc->isLoaded())
+				$bad++;
+			else {
+				$ok++;
+				if($mois == 0)
+					$date = $annee.'-01-01';
+				else
+					$date = $annee.'-'.$mois.'-01';
+				$dataFiltre = array(
+					'id_obj' => $soc->id,
+					'type_obj' => 0,
+					'fk_period' => ($mois == 0)? 0 : 3,
+					'debut_period' => $date,
+				);
+				$data = array(
+					'ca' => $val
+				);
+				BimpObject::createOrUpdateBimpObject('bimpcore', 'Bimp_ChiffreAffaire', $dataFiltre, $data, true, true, $errors, $warnings);
+			}
+		}
+		return $ok.' Ok'.' '.$bad.' Bad'.print_r($warnings,1).print_r($errors,1);
 	}
 
 

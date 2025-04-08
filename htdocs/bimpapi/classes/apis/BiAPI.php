@@ -35,7 +35,7 @@ class BiAPI extends BimpAPI
   <soap:Body>
     <Execute xmlns="urn:schemas-microsoft-com:xml-analysis">
       <Command>
-        <Statement>'.$req.'</Statement>
+        <Statement>'.str_replace('<br>', '', $req).'</Statement>
       </Command>
       <Properties>
         <PropertyList>

@@ -114,7 +114,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		if ($this->getData('shopid') > 0) {
 			$buttons[] = array(
 				'label'   => 'Synchro Mirakl',
-				'icon'    => 'fas_rotate',
+				'icon'    => 'fas_sync',
 				'onclick' => $this->getJsActionOnclick('synchroMirakl', array(), array())
 			);
 		}
@@ -291,11 +291,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	{
 		$this->checkAttr();	// envoi de mail si changement d'attribtion
 
-		// on a enregistré le shopId => on met à jour le Tiers avec API Mirakl S20;
-		if ($this->getData('shopid') != $this->getInitData('shopid')) {
-//			$this->appelMiraklS20(BimpTools::getPostFieldValue('shopid'), $warnings);
-		}
-
 		return parent::update($warnings, $force_update);
 	}
 
@@ -325,7 +320,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				return;
 			}
 			$data = $api->getShopInfo($shopid);
-
 			if(!is_array($data)) {
 				$warnings[] = 'Erreur lors de la récupération des données Mirakl';
 				return;
@@ -371,6 +365,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				} else { // pas de contact connu => on en crée un
 					$this->createContact($shop['contact_informations']);
 				}
+				$this->update($warnings);
 			}
 		}
 		else{
@@ -392,7 +387,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$obj->set('town', $contact['city']);
 		if ($contact['country'])	{
 			$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $contact['country'] . '\'');
-			if ($id_pays)	$this->set('fk_pays', $id_pays);
+			if ($id_pays)	$obj->set('fk_pays', $id_pays);
 		}
 //		echo '<pre>'; print_r($contact); echo '</pre>';die;
 		$obj->set('phone', $contact['phone']);
@@ -406,7 +401,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function updateContact($contact, $info)
 	{
-
 		if($contact->getData('email') == $info['email'] && $contact->getData('phone') == $info['phone'])	{
 			$contact->set('civility', $this->traduct_civility($info['civility']));
 			$contact->set('lastname', $info['lastname']);
@@ -419,7 +413,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			if ($info['country'])	{
 				$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $info['country'] . '\'');
 				if ($id_pays)
-					$this->set('fk_pays', $id_pays);
+					$contact->set('fk_pays', $id_pays);
 			}
 			$contact->set('phone', $info['phone']);
 			$contact->set('email', $info['email']);

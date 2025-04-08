@@ -17,6 +17,7 @@
 $ch = curl_init('http://172.24.2.31/OLAP/msmdpump.dll');
 curl_setopt($ch, CURLOPT_HTTPHEADER, getRequestHeaders());
 curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents('php://input'));
+curl_setopt($ch, CURLOPT_POST, 1);
 $response = curl_exec($ch);
 curl_close($ch);
 

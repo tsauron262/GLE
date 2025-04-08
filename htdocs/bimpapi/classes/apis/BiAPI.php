@@ -15,14 +15,16 @@ class BiAPI extends BimpAPI
 	public static $default_accept = 'text/xml';
 	public static $urls_bases = array(
 		'default' => array(
-			'prod' => 'http://172.24.2.31/OLAP/',
+			'prod' => 'https://erp.bimp.fr/bimp/bimpapi/public/',
+//			'prod' => 'http://172.24.2.31/OLAP/',
 			'test' => ''
 		)
 	);
 	public static $requests = array(
 		'req' => array(
 			'label'         => 'Requête',
-			'url'           => 'msmdpump.dll',
+//			'url'           => 'msmdpump.dll',
+			'url'           => 'rebond.php',
 			'content_type' 	=> 'text/xml',
 		),
 	);
@@ -70,6 +72,15 @@ class BiAPI extends BimpAPI
 //		$return = curl_exec($ch);
 //		curl_close($ch);
 		return $return;
+	}
+
+	public function getDefaultCurlOptions($request_name, &$errors = array())
+	{
+		$options = array(
+			CURLOPT_SSL_VERIFYHOST => false,
+			CURLOPT_SSL_VERIFYPEER => false
+		);
+		return $options;
 	}
 
 	public function getDefaultRequestsHeaders($request_name, &$errors = []){

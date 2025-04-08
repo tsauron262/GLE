@@ -14,7 +14,9 @@
 
 //echo '<pre>';print_r(getRequestHeaders());
 
-$ch = curl_init('http://172.24.2.31/OLAP/msmdpump.dll');
+$ch = curl_init();
+
+curl_setopt($ch, CURLOPT_URL, 'http://172.24.2.31/OLAP/msmdpump.dll');
 curl_setopt($ch, CURLOPT_HTTPHEADER, getRequestHeaders());
 curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents('php://input'));
 curl_setopt($ch, CURLOPT_POST, 1);
@@ -68,6 +70,7 @@ function getRequestHeaders() {
 			$headers[$value] = $_SERVER[$key];
 		}
 	}
+	$headers['Host'] = 'bimp.fr';
 	return $headers;
 }
 ?>

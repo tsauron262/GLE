@@ -1,6 +1,6 @@
 <?php
 
-echo 'coucouc';die;
+//echo 'coucouc';
 
 //print_r(file_get_contents('php://input'));
 

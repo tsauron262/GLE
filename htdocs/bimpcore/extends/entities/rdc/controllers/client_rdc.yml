@@ -57,6 +57,7 @@ sections:
                         
           - id: all_files
             title: Fichiers
+            icon: fas_folder-open
             struct:
                 type: list
                 list:

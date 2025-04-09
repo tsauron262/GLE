@@ -18,10 +18,27 @@ class actioncomm_event extends AbstractNotification {
 			var html = '<a class="nav-link dropdown-toggle header-icon ' + notif_white + '" id="' + this.dropdown_id + '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
 			html += '<i class="far fa5-calendar-alt atoplogin"></i></a>';
 			html += '<div class="dropdown-menu dropdown-menu-right notification-dropdown bimp_notification_dropdown dropdown_actioncomm_event" aria-labelledby="' + this.dropdown_id + '">';
-			html += '<h4 class="header">';
-			html += 'Mes rendez-vous' + this.getBoutonReload(this.dropdown_id);
-			html += '<a style="float:right" href="' + dol_url_root + '/synopsistools/agenda/vue.php"><i class="fas fa5-calendar-alt iconLeft"></i>Mon agenda</a>';
-			html += '</h4>';
+			html += '<div class="header" style="padding: 5px 15px">';
+
+			html += '<table style="width: 100%; font-size: 15px;">';
+			html += '<tr>';
+			html += '<td style="width: 30%">';
+			html += 'Mes événements';
+			html += this.getBoutonReload(this.dropdown_id);
+
+			html += '</td>';
+			html += '<td style="width: 70%; text-align: right">';
+			html += '<a href="' + dol_url_root + '/synopsistools/agenda/vue.php"><i class="fas fa5-calendar-alt iconLeft"></i>Mon agenda</a>';
+
+			var onclick = 'loadModalForm($(this), {module: \'bimpcore\', object_name: \'Bimp_ActionComm\', id_object: 0, form_name: \'add\'}, \'Nouvel événement\')';
+			html += '<span class="btn btn-default" onclick="' + onclick + '" style="margin-left: 15px">';
+			html += '<i class="fas fa5-plus-circle iconLeft"></i>Nouvel événement';
+			html += '</span>';
+			html += '</td>';
+			html += '</tr>';
+			html += '</table>';
+			html += '</div>';
+			
 			html += '<div class="notifications-wrap list_notification actioncomm_event">';
 			html += '</div>';
 			html += '</div>';

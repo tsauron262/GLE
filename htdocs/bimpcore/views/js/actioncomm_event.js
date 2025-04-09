@@ -38,7 +38,7 @@ class actioncomm_event extends AbstractNotification {
 			html += '</tr>';
 			html += '</table>';
 			html += '</div>';
-			
+
 			html += '<div class="notifications-wrap list_notification actioncomm_event">';
 			html += '</div>';
 			html += '</div>';
@@ -108,13 +108,26 @@ class actioncomm_event extends AbstractNotification {
 	}
 
 	getElementHeaderButtons(element, key) {
+		var html = ''
+		
 		if (element.close_btn) {
 			var onclick = 'setObjectAction($(this), {module: \'bimpcore\', object_name: \'Bimp_ActionComm\', id_object: ' + element.id + '}';
 			onclick += ', \'done\', {}, null, null, {display_processing: false})';
-			return '<button name="close" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fas fa5-check iconLeft"></i>Terminer</button>';	
-		}		
-		
-		return '';
+			html += '<button name="close" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fas fa5-check iconLeft"></i>Terminer</button>';
+		}
+
+		if (element.id) {
+			html += '<span class="rowButton" onclick="loadModalView(\'bimpcore\', \'Bimp_ActionComm\', ' + element.id + ', \'full\', $(this))">';
+			html += '<i class="fas fa5-eye"></i></span>';
+
+			if (element.can_edit) {
+				var data = '{module: \'bimpcore\', object_name: \'Bimp_ActionComm\', id_object: ' + element.id + ', form_name: \'edit\'}';
+				html += '<span class="rowButton" onclick="loadModalForm($(this), ' + data + ')">';
+				html += '<i class="fas fa5-edit"></i></span>';
+			}
+		}
+
+		return html;
 	}
 
 	isNew(element) {

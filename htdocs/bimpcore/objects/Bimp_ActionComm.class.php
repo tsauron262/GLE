@@ -1063,7 +1063,8 @@ class Bimp_ActionComm extends BimpObject
 				'state'     => $ac->displayState(true),
 				'lieu'      => $ac->getData('location'),
 				'desc'      => $ac->getData('note'),
-				'close_btn' => (int) ($ac->isActionAllowed('done') && $ac->canSetAction('done'))
+				'close_btn' => (int) ($ac->isActionAllowed('done') && $ac->canSetAction('done')),
+				'can_edit'  => $ac->can('edit')
 			);
 		}
 

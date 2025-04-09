@@ -388,3 +388,8 @@ lists:
             datec:
             fk_soc:
             fk_user_assign:
+                
+    client: 
+        extends: default
+        cols:
+            fk_soc: unset

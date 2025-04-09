@@ -4189,7 +4189,6 @@ function onDictionnaryChange(id_dictionnary) {
 				if (field_name) {
 					var $form = $inputContainer.findParentByClass('object_form');
 					if ($.isOk($form)) {
-						bimp_msg('here - ' + $form.attr('id'), 'info');
 						reloadObjectInput($form.attr('id'), field_name, {}, true);
 					}
 				}

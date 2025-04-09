@@ -48,12 +48,12 @@ sections:
 
           - id: tickets
             title: Tickets
-            icon: fas_calendar-check
+            icon: fas_ticket-alt
             ajax_render_method:
                 object: client
                 method: renderLinkedObjectList
                 params:
-                    - btk_tickets
+                    - bimp_tickets
                         
           - id: all_files
             title: Fichiers

@@ -1916,9 +1916,9 @@ class Bimp_Client extends Bimp_Societe
 				$list->addFieldFilterValue('id_client', (int) $this->id);
 				break;
 
-			case 'btk_tickets':
-				$list = new BC_ListTable(BimpObject::getInstance('bimpticket', 'BTK_Ticket'), 'default', 1, null, 'Tickets hotline du client "' . $client_label . '"', 'fas_headset');
-				$list->addFieldFilterValue('id_client', (int) $this->id);
+			case 'bimp_tickets':
+				$list = new BC_ListTable(BimpObject::getInstance('bimpticket', 'Bimp_Ticket'), 'client', 1, null, 'Tickets du client "' . $client_label . '"', 'fas_ticket-alt');
+				$list->addFieldFilterValue('fk_soc', (int) $this->id);
 				break;
 
             case 'sav':

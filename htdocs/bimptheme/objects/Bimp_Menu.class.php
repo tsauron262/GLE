@@ -825,10 +825,23 @@ class Bimp_Menu extends BimpObject
 					$bdb = BimpCache::getBdb();
 					$bdb->db->begin();
 
-                                        $bimpthemeVersion = BimpCore::getConf('module_version_bimptheme');
-                                        if($bimpthemeVersion < 1.9)
-                                            $bdb->execute ('ALTER TABLE `llx_menu` ADD COLUMN IF NOT EXISTS `synchronised` tinyint(1) NOT NULL DEFAULT 1;');
-                                        
+					$bimpthemeVersion = BimpCore::getConf('module_version_bimptheme');
+					if ($bimpthemeVersion < 1.9) {
+						$bdb->execute('ALTER TABLE `llx_menu` ADD COLUMN IF NOT EXISTS `synchronised` tinyint(1) NOT NULL DEFAULT 1;');
+					}
+
+					// Récup des items désactivés
+					$deactivated_items = array();
+					$rows = $bdb->getRows('menu', 'menu_handler = \'bimptheme\' AND synchronised = 1 AND active = 0', null, 'array', array(
+						'code_path'
+					));
+
+					if (is_array($rows)) {
+						foreach ($rows as $r) {
+							$deactivated_items[] = $r['code_path'];
+						}
+					}
+
 					if ($bdb->delete('menu', 'menu_handler = \'bimptheme\' AND synchronised = 1') <= 0) {
 						$errors[] = 'Echec de la suppression des éléments actuels du menu bimptheme';
 					} else {
@@ -855,6 +868,13 @@ class Bimp_Menu extends BimpObject
 
 								$item->updateField('fk_menu', $id_parent); // Sera mis à 0 si le parent a disparu ($parent_code_path n\'existe plus) => Une correction manuelle sera nécessaire.
 							}
+						}
+
+						// Désactivation des items :
+						if (!empty($deactivated_items)) {
+							$bdb->update('menu', array(
+								'active' => 0
+							), 'menu_handler = \'bimptheme\' AND synchronised = 1 AND code_path IN (\'' . implode('\',\'', $deactivated_items) . '\')');
 						}
 
 						$bdb->db->commit();

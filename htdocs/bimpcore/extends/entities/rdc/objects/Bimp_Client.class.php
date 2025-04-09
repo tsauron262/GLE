@@ -422,7 +422,21 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 					$this->createContact($shop['contact_informations']);
 				}
 
-
+				// surcharge attribution
+				if ($shop['assignees'])	{
+					$emailAssign = strtolower($shop['assignees'][0]['email']);
+					$userAttr = $this->getBdb()->getRows(
+						'user AS u',
+						'u.email LIKE \'' . $emailAssign . '\' OR LOCATE(\'' . $emailAssign . '\', ue.alias)',
+						1,'array',array('u.rowid'),null,null,array(
+							'ue' => array(
+								'table' => 'user_extrafields',
+								'on'    => 'u.rowid = ue.fk_object'
+							))
+					);
+					if (isset($userAttr[0]['rowid']) && $userAttr[0]['rowid']) $this->set('fk_user_attr_rdc', $userAttr[0]['rowid']);
+					else $warnings [] = 'Utilisateur d\'attribution non trouvé. ' . $emailAssign;
+				}
 
 				// surcharge statut
 				if ($shop['shop_state'] === 'SUSPENDED' && !in_array($this->getData('fk_statut_rdc') , array(12, 13, 14))) 	{

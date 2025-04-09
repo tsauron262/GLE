@@ -70,6 +70,14 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		14 => array(),
 	);
 
+	public function canEditCategoryMaitre()
+	{
+		/*todo a voir si on garde*/
+		global $user;
+		if ($user->admin) return true;
+		return $this->isUserInGroup('BD') || $this->isUserInGroup('KAM');
+	}
+
 	public static function getUserGroupsArray($include_empty = 1, $nom_url = 0)
 	{
 		$grouparray = array(
@@ -102,8 +110,14 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return self::getCacheArray($cache_key, $include_empty);
 	}
 
+	public function getContrefacon()
+	{
+		if ($this->getData('contrefacon')) return '<span class="danger">Oui</span>';
+		else return '<span class="success">Non</span>';
+	}
     public function getActionsButtons()
 	{
+//		echo '<pre>'; print_r($this->data); echo '</pre>';die;
 		$buttons[] = array(
 			'label'   => 'Actions',
 			'icon'    => 'fas_edit',
@@ -308,6 +322,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function update(&$warnings = array(), $force_update = false)
 	{
 		$this->checkAttr();	// envoi de mail si changement d'attribtion
+		$this->checkPassageLive();
 
 		return parent::update($warnings, $force_update);
 	}
@@ -349,7 +364,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$this->set('shopid', 0);
 			} else {
 				$shop = $data['shops'][0];
-				//echo '<pre>'; print_r($shop); echo '</pre>';die;
+//				echo '<pre>'; print_r($shop); echo '</pre>';die;
 				// traitement des données reçues : mise a jour du tiers
 				$this->set('nom', $shop['pro_details']['corporate_name']);
 				$this->set('name_alias', $shop['shop_name']);
@@ -402,6 +417,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				}
 				if ($shop['shop_state'] === 'OPEN' && $this->getData('shopid') > 0) {
 					$this->set('fk_statut_rdc', self::$statut_rdc_live);
+					$this->set('date_changement_statut_rdc', date('Y-m-d'));
 				}
 				$this->update($warnings);
 			}

@@ -94,7 +94,18 @@ fields:
         type: text
     url:
         label: site internet marchand
-        
+    commentaire_statut_ko:
+        label: Commentaire statut KO
+    potentiel_catalogue:
+        label: Potentiel catalogue
+        type: int
+    fk_categorie_maitre:
+        label: Catégorie Maitre
+        values:
+            array:
+                callback:
+                    method: getCategoriesRdc
+                    
     outstanding_limit: unset
     outstanding_limit_credit_check: unset
     outstanding_limit_manuel: unset
@@ -151,12 +162,18 @@ fields_tables:
                   callback:
                       method: isPriorityEditable
             - field: fk_statut_rdc
+            - field: commentaire_statut_ko
             - field: date_changement_statut_rdc
             - field: delai_ouverture
-            - field: fk_source_rdc
-            - field: contrefacon
+            - label: fk_source_rdc
+              # contrefacon : callback pour inversion couleur span class danger / success; Est-ce dans mirakel ?
+            - label: Suspition de contrefaçon
+              value:
+                  callback: getContrefacon
             - field: fk_group_rdc
             - field: fk_user_attr_rdc
+            - field: fk_categorie_maitre
+            - field: potentiel_catalogue
     
     commentaires:
         title: Commentaires
@@ -279,6 +296,15 @@ forms:
                 field: fk_statut_rdc
                 edit:
                     callback: isProspectionEditable
+            Commentaire statut KO:
+                field: commentaire_statut_ko
+                required:
+                    callback: isCommentaireStatutKoRequired
+                
+            Catégorie Maitre:
+                field: fk_categorie_maitre
+                edit:
+                    callback: canEditCategoryMaitre
             Source:
                 field: fk_source
             Suspition de contrefaçon:
@@ -289,6 +315,8 @@ forms:
                 field: fk_user_attr_rdc
             Commentaires:
                 field: commentaire_rdc
+            potentiel catalogue:
+                field: potentiel_catalogue
     
     formActionRdc:
         title: Choisir une action

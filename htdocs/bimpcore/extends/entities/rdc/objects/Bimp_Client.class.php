@@ -424,13 +424,18 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 				// surcharge attribution
 				if ($shop['assignees'])	{
-					$email_part = explode('@', $shop['assignees'][0]['email']);
-					$email = str_ireplace('.ext', '', $email_part[0]);
-					// $email .= '@ldlc.com' ou '@rueducommerce.fr';
-
-					$userAttr = $this->getBdb()->getRow('user', 'email LIKE \'' . $email . '%\'', array('rowid'), 'array');
-					if ($userAttr) $this->set('fk_user_attr_rdc', $userAttr['rowid']);
-					else $warnings [] = 'Utilisateur d\'attribution non trouvé. ' . $email;
+					$emailAssign = strtolower($shop['assignees'][0]['email']);
+					$userAttr = $this->getBdb()->getRows(
+						'user AS u',
+						'u.email LIKE \'' . $emailAssign . '\' OR LOCATE(\'' . $emailAssign . '\', ue.alias)',
+						1,'array',array('u.rowid'),null,null,array(
+							'ue' => array(
+								'table' => 'user_extrafields',
+								'on'    => 'u.rowid = ue.fk_object'
+							))
+					);
+					if (isset($userAttr[0]['rowid']) && $userAttr[0]['rowid']) $this->set('fk_user_attr_rdc', $userAttr[0]['rowid']);
+					else $warnings [] = 'Utilisateur d\'attribution non trouvé. ' . $emailAssign;
 				}
 
 				// surcharge statut

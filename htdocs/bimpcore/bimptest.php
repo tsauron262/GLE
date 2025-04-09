@@ -27,15 +27,6 @@ if (!$user->admin) {
 	exit;
 }
 
-global $conf;
-if ($conf->compta->enabled) {
-	echo 'OK';
-} else {
-	echo 'KO';
-	echo '<pre>' . print_r($conf, 1) . '</pre>';
-	exit;
-}
-
 echo '<br/>FIN';
 echo '</body></html>';
 

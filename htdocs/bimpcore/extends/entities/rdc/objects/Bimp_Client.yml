@@ -1,3 +1,5 @@
+# Entité RDC
+
 table: societe
 controller: client_rdc
 
@@ -49,10 +51,22 @@ fields:
         type: date
     fk_priorite:
         label: Priorité
+        type: int
         values:
-            array:
-                callback:
-                    method: getPriorities
+            dict:
+                code: societe_rdc_priorities
+                include_empty: 1
+                empty_value: 0
+                active_only: 0
+        input:
+            type: select
+            options:
+                dict:
+                    code: societe_rdc_priorities
+                    include_empty: 1
+                    empty_value: 0
+                    active_only: 1
+                    
     fk_statut_rdc:
         label: Prospection
         values:
@@ -65,10 +79,22 @@ fields:
         type: number
     fk_source_rdc:
         label: Source
+        type: int
         values:
-            array:
-                callback:
-                    method: getSourcesRdc
+            dict:
+                code: societe_rdc_sources
+                include_empty: 1
+                empty_value: 0
+                active_only: 0
+        input:
+            type: select
+            options:
+                dict:
+                    code: societe_rdc_sources
+                    include_empty: 1
+                    empty_value: 0
+                    active_only: 1
+                
     contrefacon:
         label: Suspition de contrefaçon
         type: bool
@@ -243,6 +269,7 @@ views:
 forms:
     default:
         extends: form_client_rdc
+        
     form_client_rdc:
         title: Ajout d'un client
         rows:
@@ -270,11 +297,11 @@ forms:
                     callback: isShopIdEditable
             Priorité:
                 field: fk_priorite
-                edit:
-                    callback:
-                        method: isUserInGroup
-                        params:
-                            - BD
+                edit: 1
+#                    callback:
+#                        method: isUserInGroup
+#                        params:
+#                            - BD
             Prospection:
                 field: fk_statut_rdc
                 edit:

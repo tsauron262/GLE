@@ -53,7 +53,7 @@ class BimpDictionnary extends BimpObject
 			$child_instance = $this->getChildObject($values_params['children']);
 			$filters = (isset($values_params['filters']) ? $values_params['filters'] : array());
 			$params = array(
-				'title'     => 'Valeurs du dictionnaire ' . $this->getData('name'),
+				'title'     => 'Valeurs du dictionnaire ' . addslashes($this->getData('name')),
 				'id_parent' => $this->id
 			);
 
@@ -95,7 +95,7 @@ class BimpDictionnary extends BimpObject
 
 						if (isset($values_params['children'])) {
 							foreach ($this->getChildrenObjects($values_params['children'], $filters, 'position', 'asc') as $val) {
-								$val_data = $val->getDataArray(false);
+								$val_data = $val->getDataArray(true);
 
 								if (isset($values_params['extra_data'])) {
 									$val_extra_data = array();
@@ -170,15 +170,16 @@ class BimpDictionnary extends BimpObject
 					if (!empty($values)) {
 						$values_params = $this->getData('values_params');
 						$label_field = (isset($values_params['label_field']) ? $values_params['label_field'] : 'label');
-						foreach ($values as $code => $value) {
+
+						foreach ($values as $key => $value) {
 							if (isset($value['icon']) || isset($value['class'])) {
-								self::$cache[$cache_key][$code] = array(
-									'label'   => (isset($value[$label_field]) ? $value[$label_field] : $code),
+								self::$cache[$cache_key][$key] = array(
+									'label'   => (isset($value[$label_field]) ? $value[$label_field] : $key),
 									'icon'    => (isset($value['icon']) ? $value['icon'] : ''),
 									'classes' => array((isset($value['class']) ? $value['class'] : ''))
 								);
 							} else {
-								self::$cache[$cache_key][$code] = $value[$label_field];
+								self::$cache[$cache_key][$key] = $value[$label_field];
 							}
 						}
 					}

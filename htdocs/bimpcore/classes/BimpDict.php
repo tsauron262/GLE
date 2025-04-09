@@ -42,7 +42,7 @@ class BimpDict
 		return array();
 	}
 
-	public static function addDefaultDictionnary($code, $name, $active = 1, $values_children_name = 'values', $filters = array(), &$errors = array())
+	public static function addDefaultDictionnary($code, $name, $active = 1, $values_children_name = 'values', $key_field = 'code', $filters = array(), &$errors = array())
 	{
 		$id_dict = self::getDictionnaryId($code);
 		if ($id_dict) {
@@ -53,7 +53,8 @@ class BimpDict
 				'name'          => $name,
 				'values_params' => array(
 					'children' => $values_children_name,
-					'filters'  => $filters
+					'filters'  => $filters,
+					'key_field' => $key_field
 				),
 				'active'        => $active
 			), true, $errors);

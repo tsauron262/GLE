@@ -53,9 +53,19 @@ fields:
     fk_category:
         label: Catégorie CA
         values:
-            array:
-                callback:
-                    method: getCategoriesRdc
+            dict:
+                code: ca_categories
+                include_empty: 1
+                empty_value: 0
+                active_only: 0
+            input:
+                type: select
+                options:
+                    dict:
+                        code: ca_categories
+                        include_empty: 1
+                        empty_value: 0
+                        active_only: 1
     fk_period:
         label: Période
         values:
@@ -128,7 +138,10 @@ graph:
                 name: Categories
                 type: select
                 values:
-                    callback: getCategoriesRdc
+                    dict:
+                        code: ca_categories
+                        include_empty: 0
+                        active_only: 1
                 value: 0
             fk_period:
                 name: Période

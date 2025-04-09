@@ -101,20 +101,20 @@ class modBimpticket extends DolibarrModules
 			return 0;
 		}
 
+		$errors = array();
+		$bdb = BimpCache::getBdb();
+
 		$name = 'module_version_' . strtolower($this->name);
 
 		if (BimpCore::getConf($name, '') === "") {
 			BimpCore::setConf($name, floatval($this->version));
-			$bdb = BimpCache::getBdb();
 			if (!$bdb->executeFile(DOL_DOCUMENT_ROOT . '/' . strtolower($this->name) . '/sql/install.sql')) {
 				setEventMessage('Echec exécution du fichier install.sql - ' . $bdb->err(), 'errors');
 			}
 		}
 
-		$bdb = BimpCache::getBdb();
-
 		if (!(int) $bdb->getValue('bimpcore_dictionnary', 'id', 'code = \'bimp_ticket_types\'')) {
-			$errors = array();
+
 
 			$dict = BimpDict::addDefaultDictionnary('bimp_ticket_types', 'Types de ticket');
 

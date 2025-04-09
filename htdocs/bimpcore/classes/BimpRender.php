@@ -234,10 +234,10 @@ class BimpRender
 			$html .= ' data-toggle="popover"';
 			$html .= ' data-trigger="hover"';
 			$html .= ' data-placement="top"';
-			$html .= ' data-content="' . $label;
+			$html .= ' data-content="' . addslashes($label) . '"';
 		}
 
-		$html .= '" onclick="' . $onclick . '"';
+		$html .= ' onclick="' . $onclick . '"';
 
 		if (!empty($params['attrs'])) {
 			$html .= BimpRender::displayTagAttrs($params['attrs']);

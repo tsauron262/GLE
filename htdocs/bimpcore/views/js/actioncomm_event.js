@@ -61,7 +61,7 @@ class actioncomm_event extends AbstractNotification {
 		html += '</div>';
 
 
-		html += '<div class="title">';
+		html += '<div class="notif_title">';
 		if (element.icon) {
 			html += '<span class="' + element.bg_type + '"><i class="fas fa5-' + element.icon + ' iconLeft"></i></span>';
 		}
@@ -82,7 +82,7 @@ class actioncomm_event extends AbstractNotification {
 		}
 
 		if (element.desc) {
-			html += '<div class="desc">' + element.desc + '</div>';
+			html += '<div class="notif_desc">' + element.desc + '</div>';
 		}
 
 		html += '<div/>';

@@ -4179,6 +4179,25 @@ function setFiltersInputAddFilterFormEvents($container) {
     });
 }
 
+function onDictionnaryChange(id_dictionnary) {	
+	$('body').find('.has_dictionnary').each(function() {
+		var id = $(this).data('id_dictionnary');
+		if (id && id === id_dictionnary) {
+			var $inputContainer = $(this).findParentByClass('inputContainer');
+			if ($.isOk($inputContainer)) {
+				var field_name = $inputContainer.data('field_name');
+				if (field_name) {
+					var $form = $inputContainer.findParentByClass('object_form');
+					if ($.isOk($form)) {
+						bimp_msg('here - ' + $form.attr('id'), 'info');
+						reloadObjectInput($form.attr('id'), field_name, {}, true);
+					}
+				}
+			}
+		}
+	});
+}
+
 // Outils:
 
 function BimpInputHashtags() {

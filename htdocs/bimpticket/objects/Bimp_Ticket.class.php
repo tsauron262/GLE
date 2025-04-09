@@ -32,6 +32,29 @@ class Bimp_Ticket extends BimpDolObject
 
 	public static $types = array();
 
+	// Droits users :
+
+	public function canSetAction($action)
+	{
+		global $user;
+
+		switch ($action) {
+			case 'assign':
+				return $user->admin || $user->rights->bimpticket->assign;
+
+			case 'newStatus':
+				if ($user->admin || $user->rights->bimpticket->assign) {
+					return 1;
+				}
+				if ($this->getData('fk_user_assign') == $user->id) {
+					return 1;
+				}
+				return 0;
+		}
+
+		return parent::canSetAction($action);
+	}
+
 	// Getters booléens:
 
 	public function isActionAllowed($action, &$errors = array())
@@ -388,7 +411,7 @@ class Bimp_Ticket extends BimpDolObject
 		}
 
 		return array(
-			'errors' => $errors,
+			'errors'    => $errors,
 			'wanrnings' => array()
 		);
 	}
@@ -456,5 +479,146 @@ class Bimp_Ticket extends BimpDolObject
 
 		return $errors;
 
+	}
+
+	// Méthodes statiques :
+
+	public static function getTicketsForUser($id_user, $tms = '', $options = array(), &$errors = array())
+	{
+		if ((int) BimpCore::getConf('mode_eco')) {
+			return array();
+		}
+
+		$data = array(
+			'tms'      => date('Y-m-d H:i:s'),
+			'elements' => array()
+		);
+
+		$bimp_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+		if (!BimpObject::objectLoaded($bimp_user)) {
+			return $data;
+		}
+
+		$bdb = self::getBdb();
+		$bimp_user->dol_object->loadRights();
+		$filters = array();
+
+		if ($tms) {
+			$filters['a.tms'] = array(
+				'operator' => '>',
+				'value'    => $tms
+			);
+		}
+
+		if (!empty($options['excluded_tickets'])) {
+			$filters['a.rowid'] = array(
+				'not_in' => $options['excluded_tickets']
+			);
+		}
+
+		$filters['a.fk_statut'] = array(
+			'operator' => '<',
+			'value'    => self::STATUS_CLOSED
+		);
+
+		$users_filters = array($id_user);
+
+//		if (...) { // todo : check droits users pour voir / assigner nouveaux tickets.
+		$users_filters = array_merge($users_filters, array(0, null));
+//		}
+
+		if ((int) BimpTools::getArrayValueFromPath($options, 'include_delegations', 1)) {
+			$users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
+
+			if (!empty($users_delegations)) {
+				foreach ($users_delegations as $id_user_delegation) {
+					if ($id_user_delegation != $id_user) {
+						$users_filters[] = $id_user_delegation;
+					}
+				}
+			}
+		}
+
+		$filters['fk_user_assign'] = $users_filters;
+
+		$i = 0;
+		$tickets = array();
+
+		$sql = 'SELECT DISTINCT a.rowid';
+		$sql .= BimpTools::getSqlFrom('ticket');
+		$sql .= BimpTools::getSqlWhere($filters);
+		$sql .= BimpTools::getSqlOrderBy('datec', 'DESC', 'a');
+		$sql .= BimpTools::getSqlLimit(50);
+
+//		echo 'SQL : ' . $sql .'<br/><br/>';
+
+		$rows = $bdb->executeS($sql, 'array');
+
+		if (!is_array($rows)) {
+			$errors[] = 'Echec requête SQL : ' . $bdb->err();
+			return array();
+		}
+
+		foreach ($rows as $r) {
+			$t = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', (int) $r['rowid']);
+			if (!BimpObject::objectLoaded($t)) {
+				continue;
+			}
+
+			$status = (int) $t->getData('fk_statut');
+			$status_icon = '<span class="' . implode(' ', self::$status_list[$status]['classes']) . ' bs-popover" style="margin-right: 8px"';
+			$status_icon .= BimpRender::renderPopoverData(self::$status_list[$status]['label']) . '>';
+			$status_icon .= BimpRender::renderIcon(self::$status_list[$status]['icon']) . '</span>';
+
+			$user_author = $t->getChildObject('user_create');
+
+			$dest = '';
+			if ((int) $t->getData('fk_user_assign') !== $id_user) {
+				$user_assign = $t->getChildObject('user_assign');
+				if (BimpObject::objectLoaded($user_assign)) {
+					$dest = $user_assign->getName();
+				}
+			}
+
+			$nb_msgs = 0;
+
+			foreach ($users_filters as $id_u) {
+				if ((int) $id_u) {
+					$nb_msgs += $t->getNbNotesFormUser($id_u);
+				}
+			}
+
+			$nb_msgs = $t->getNbNotesFormUser($id_user);
+
+
+			$client = $t->getChildObject('client');
+
+			$ticket = array(
+				'id'            => $t->id,
+				'ref'           => $t->getRef(),
+				'sort_val'      => $t->getData('datec'),
+				'affected'      => (int) ($t->getData('fk_user_assign') > 0),
+				'status_icon'   => $status_icon,
+				'subj'          => $t->getData('subject'),
+				'src'           => $t->getData('origin_email'),
+				'txt'           => $t->displayData("message", 'default', false),
+				'date_create'   => $t->getData('datec'),
+				'url'           => DOL_URL_ROOT . '/bimpticket/index.php?fc=ticket&id=' . $t->id,
+				'can_begin'     => (int) ($t->canSetAction('newStatus') && $t->isActionAllowed('newStatus') && $status < self::STATUS_IN_PROGRESS && $status >= self::STATUS_READ),
+				'can_close'     => (int) ($t->canSetAction('newStatus') && $t->isActionAllowed('newStatus') && $status < self::STATUS_CLOSED && $status >= self::STATUS_IN_PROGRESS),
+				'can_attribute' => (int) ($t->canSetAction('assign') && $t->isActionAllowed('assign')),
+				'can_edit'      => (int) $t->can('edit'),
+				'author'        => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : ''),
+				'dest'          => $dest,
+				'nb_msgs'       => $nb_msgs,
+				'client'        => (BimpObject::objectLoaded($client) ? $client->getLink() : ''),
+			);
+
+			$tickets[] = $ticket;
+		}
+
+		$data['elements'] = $tickets;
+
+		return $data;
 	}
 }

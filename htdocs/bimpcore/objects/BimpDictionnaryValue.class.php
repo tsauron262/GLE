@@ -16,6 +16,20 @@ class BimpDictionnaryValue extends BimpObject
 	// Getters booléens:
 
 	// Getters params:
+	public function getCreateJsCallback()
+	{
+		$id_dictionary = (int) $this->getData('id_dict');
+
+		if ($id_dictionary) {
+			return 'onDictionnaryChange(' . $id_dictionary . ')';
+		}
+
+		return '';
+	}
+
+	public function getUpdateJsCallback() {
+		return $this->getCreateJsCallback();
+	}
 
 	// Getters array:
 

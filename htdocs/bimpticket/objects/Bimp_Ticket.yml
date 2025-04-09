@@ -91,6 +91,14 @@ fields:
             dict:
                 code: bimp_ticket_types
                 include_empty: 1
+                active_only: 0
+        input: 
+            type: select
+            options:
+                dict: 
+                    code: bimp_ticket_types
+                    include_empty: 1
+                    active_only: 1
     
     origin_email:
         label: Adresse Email source
@@ -379,4 +387,4 @@ lists:
             subject:
             datec:
             fk_soc:
-            fk_user_assigned:
+            fk_user_assign:

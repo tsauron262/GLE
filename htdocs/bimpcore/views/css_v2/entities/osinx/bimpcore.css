@@ -8484,6 +8484,40 @@ i.iconRight {
   margin-left: 6px;
 }
 
+.iconButton {
+  color: #282828 !important;
+  text-align: center;
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+  line-height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-block;
+  margin: 0 1px;
+  font-size: 12px;
+  font-weight: normal;
+  transition: all 0.3s ease;
+  -webkit-transition: all 0.3s ease;
+}
+.iconButton i {
+  color: #282828 !important;
+}
+.iconButton.light_color {
+  color: #B4B4B4 !important;
+}
+.iconButton.light_color i {
+  color: #B4B4B4 !important;
+}
+.iconButton:hover {
+  color: #fff !important;
+  background-color: #BA434D;
+  text-decoration: none;
+}
+.iconButton:hover i {
+  color: #fff !important;
+}
+
 /*Panels*/
 .panel .panel_header_icon {
   display: inline-block;
@@ -9944,6 +9978,14 @@ input[type=text].large_input:focus {
   margin-top: 15px;
 }
 
+.selectContainer {
+  display: inline-block;
+  padding-right: 28px;
+}
+.selectContainer .iconButton {
+  margin-right: -24px;
+}
+
 /*Check lists:*/
 .check_list_container {
   max-height: 450px;
@@ -10133,10 +10175,6 @@ input[type=text].large_input:focus {
 }
 .bimp_form.labels_up label {
   display: block;
-}
-.bimp_form .select2 {
-  width: 100% !important;
-  max-width: 100% !important;
 }
 
 .ui-menu .ui-menu-item a {
@@ -11959,67 +11997,6 @@ div.dropdown-menu.bimp_notification_dropdown[aria-labelledby=dropdown_notif_task
   font-size: 1.4em;
 }
 
-/* Bimp task */
-div.dropdown-menu.bimp_notification_dropdown[aria-labelledby=dropdown_notif_task] {
-  width: auto;
-  min-width: 800px;
-  overflow-y: scroll;
-}
-
-div.tabs-animated {
-  width: auto;
-  max-height: auto;
-  overflow-y: scroll;
-}
-
-div.task_panel {
-  max-height: auto;
-  overflow-y: scroll;
-  padding: 0px;
-  line-height: 22px;
-  width: 800px;
-}
-div.task_panel .task_src {
-  font-size: 11px;
-  font-style: italic;
-  color: #006AFF;
-}
-div.task_panel .task_dest {
-  font-size: 11px;
-  font-style: italic;
-  color: #A00000;
-  font-weight: bold;
-}
-div.task_panel .parent_task {
-  margin: 5px 0;
-  font-style: italic;
-}
-div.task_panel .task_subj {
-  font-weight: bold;
-}
-div.task_panel .task_txt {
-  margin: 5px;
-  padding: 5px;
-  background-color: #FFFFE1;
-  border-color: #FFFFE1;
-  border-radius: 8px;
-  box-shadow: 0 0 2px #787878;
-}
-
-/*BimpValidation*/
-div.bv_demandes_panel {
-  max-height: auto;
-  overflow-y: scroll;
-  padding: 0px;
-  line-height: 22px;
-  width: 800px;
-}
-div.bv_demandes_panel .user_demande {
-  font-size: 11px;
-  font-style: italic;
-  color: #006AFF;
-}
-
 /* Les onglets */
 ul#nav_task > li {
   width: 48%;
@@ -12046,6 +12023,79 @@ ul#nav_task > li.reload {
   border-left-color: rgb(255, 255, 255);
 }
 
+/* Styles commun */
+.bimp_notification_dropdown .notif_panel {
+  max-height: auto;
+  overflow-y: scroll;
+  padding: 0;
+  line-height: 22px;
+  width: 800px;
+}
+.bimp_notification_dropdown .notif_title {
+  font-size: 13px;
+  font-weight: bold;
+  margin: 8px;
+}
+.bimp_notification_dropdown .notif_desc {
+  display: inline-block;
+  font-size: 12px;
+  line-height: 14px;
+  margin-top: 8px;
+  padding: 10px 20px;
+  border-radius: 25px;
+  border-top-left-radius: 0;
+  background-color: #e0f3ff;
+}
+.bimp_notification_dropdown .notif_src {
+  font-size: 11px;
+  font-style: italic;
+  color: #006AFF;
+}
+.bimp_notification_dropdown .notif_dest {
+  font-size: 11px;
+  font-style: italic;
+  color: #A00000;
+  font-weight: bold;
+}
+
+/* Bimp task */
+div.dropdown-menu.bimp_notification_dropdown[aria-labelledby=dropdown_notif_task] {
+  width: auto;
+  min-width: 800px;
+  overflow-y: scroll;
+}
+
+div.tabs-animated {
+  width: auto;
+  max-height: auto;
+  overflow-y: scroll;
+}
+
+div.task_panel .parent_task {
+  margin: 5px 0;
+  font-style: italic;
+}
+div.task_panel .task_subj {
+  font-weight: bold;
+}
+div.task_panel .notif_desc {
+  background-color: #FFFFE1;
+}
+
+/*BimpValidation*/
+div.bv_demandes_panel {
+  max-height: auto;
+  overflow-y: scroll;
+  padding: 0px;
+  line-height: 22px;
+  width: 800px;
+}
+div.bv_demandes_panel .user_demande {
+  font-size: 11px;
+  font-style: italic;
+  color: #006AFF;
+}
+
 /* Rendez-vous agenda */
 .bimp_notification_dropdown.dropdown_actioncomm_event {
   width: 520px !important;
@@ -12070,21 +12120,8 @@ ul#nav_task > li.reload {
 .bimp_notification_dropdown.dropdown_actioncomm_event .lieu {
   font-size: 12px;
 }
-.bimp_notification_dropdown.dropdown_actioncomm_event .title {
-  font-size: 13px;
-  font-weight: bold;
-  margin: 8px;
-}
-.bimp_notification_dropdown.dropdown_actioncomm_event .desc {
-  font-size: 12px;
-  line-height: 14px;
-  margin-top: 8px;
-  padding: 8px 15px;
-  border-radius: 25px;
-  border-top-left-radius: 0;
-  background-color: #e0f3ff;
-}
 
+/* Tickets */
 #BimpThemeWrapper {
   /*.page-wrap .app-sidebar .sidebar-content .nav-container .navigation-main .nav-item.open a::before { -moz-transform: rotate(90deg); -o-transform: rotate(90deg); -ms-transform: rotate(90deg); -webkit-transform: rotate(90deg); transform: rotate(90deg); }*/
   /************

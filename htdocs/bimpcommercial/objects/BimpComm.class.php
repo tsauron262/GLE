@@ -4675,18 +4675,21 @@ class BimpComm extends BimpDolObject
 		$client = $this->getClientFacture();
 		$cur_zone = $this->getData('zone_vente');
 		$new_zone = '';
+		$auto_update_reason = '';
 
 		if (BimpObject::objectLoaded($client)) {
 			if ($init_id_client !== (int) $client->id && in_array($this->object_name, array('Bimp_Propal', 'Bimp_Commande')) && $cur_zone != self::BC_ZONE_HORS_UE) {
 				if (BimpTools::getTypeSocieteCodeById($client->getData('fk_typent')) === 'TE_RETAIL_EX') {
 					$new_zone = self::BC_ZONE_HORS_UE;
+					$auto_update_reason = ' (Client revendeur export)';
 				}
 			}
 
 			if (!$new_zone) {
-				if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) ||
+				if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) &&
 					(BimpCore::isEntity('bimp') && ((int) $this->getData('entrepot') == 164 || $init_id_entrepot == 164))) {
 					$new_zone = $this->getZoneByCountry($client);
+					$auto_update_reason = ' (Livraison directe)';
 				}
 			}
 		}
@@ -4694,7 +4697,7 @@ class BimpComm extends BimpDolObject
 		if ($new_zone && $new_zone != $cur_zone) {
 			if ($update) {
 				$err = $this->updateField('zone_vente', $new_zone);
-				$this->addObjectLog('Zone de vente changée en auto ' . $this->displayData('zone_vente', 'default', false, true) . ' (Client revendeur export) ');
+				$this->addObjectLog('Zone de vente changée en auto ' . $this->displayData('zone_vente', 'default', false, true) . $auto_update_reason);
 			} else {
 				$this->set('zone_vente', $new_zone);
 			}

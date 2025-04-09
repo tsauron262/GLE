@@ -96,6 +96,7 @@ fields:
         label: site internet marchand
     commentaire_statut_ko:
         label: Commentaire statut KO
+        type: text
     potentiel_catalogue:
         label: Potentiel catalogue
         type: int
@@ -105,6 +106,8 @@ fields:
             array:
                 callback:
                     method: getCategoriesRdc
+    name_alias:
+        label: Nom de la boutique
                     
     outstanding_limit: unset
     outstanding_limit_credit_check: unset
@@ -149,8 +152,8 @@ fields_tables:
         rows:
             - field: shopid
             - field: name_alias
-              label: Nom de la boutique
-              edit: 1
+              edit:
+                  callback: isUserBD
             - label: Lien Mirakl
               value:
                   callback: getMiraklLink
@@ -160,7 +163,7 @@ fields_tables:
             - field: fk_priorite
               edit:
                   callback:
-                      method: isPriorityEditable
+                      method: isUserBDKAM
             - field: fk_statut_rdc
             - field: commentaire_statut_ko
             - field: date_changement_statut_rdc
@@ -289,13 +292,11 @@ forms:
                 field: fk_priorite
                 edit:
                     callback:
-                        method: isUserInGroup
-                        params:
-                            - BD
+                        method: isUserBDKAM
+                        
             Prospection:
                 field: fk_statut_rdc
-                edit:
-                    callback: isProspectionEditable
+                edit: 0
             Commentaire statut KO:
                 field: commentaire_statut_ko
                 required:
@@ -304,19 +305,27 @@ forms:
             Catégorie Maitre:
                 field: fk_categorie_maitre
                 edit:
-                    callback: canEditCategoryMaitre
+                    callback: isUserBDKAM
             Source:
-                field: fk_source
+                field: fk_source_rdc
+                edit:
+                    callback: isUserBD
             Suspition de contrefaçon:
                 field: contrefacon
             Groupe:
                 field: fk_group_rdc
+                edit:
+                    callback: isUserBDKAM
             Attribué à:
                 field: fk_user_attr_rdc
+                edit:
+                    callback: isUserBDKAM
             Commentaires:
                 field: commentaire_rdc
             potentiel catalogue:
                 field: potentiel_catalogue
+                edit:
+                    callback: isUserBDKAM
     
     formActionRdc:
         title: Choisir une action

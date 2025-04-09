@@ -70,14 +70,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		14 => array(),
 	);
 
-	public function canEditCategoryMaitre()
-	{
-		/*todo a voir si on garde*/
-		global $user;
-		if ($user->admin) return true;
-		return $this->isUserInGroup('BD') || $this->isUserInGroup('KAM');
-	}
-
 	public static function getUserGroupsArray($include_empty = 1, $nom_url = 0)
 	{
 		$grouparray = array(
@@ -193,29 +185,60 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function getMiraklLink()
 	{
-		if ($this->getData('shopid') > 0) return 'mirakl-web.groupe-rueducommerce.fr/mmp/operator/shop/' . $this->getData('shopid');
+		if ($this->getData('shopid') > 0) {
+			$url = 'https://mirakl-web.groupe-rueducommerce.fr/mmp/operator/shop/' . $this->getData('shopid');
+			return $this->getHref($url);
+		}
 		else return '';
 	}
+
+	public function getHref($url, $target="_blank")
+	{
+		$href = '<a href="' . $url . '" target="' . $target . '"><i <i class="fas fa-external-link-alt"></i></a>';
+		return $url . " " . $href;
+	}
+
 	public function isShopIdEditable()
 	{
 		$id = BimpTools::getPostFieldValue('id');
 		if (!$id) return false;
 		if ($this->getData('shopid')) return false;
-		else return true;
+		else return $this->isUserBD();
 	}
 
-	public function isProspectionEditable()
+	public function isAdmin()
 	{
-		$id = BimpTools::getPostFieldValue('id');
-		if (!$id) return true;
-		else return false;
-	}
-
-	public function isPriorityEditable()
-	{
-		/*todo a voir si on garde*/
+//		return 0;
 		global $user;
 		if ($user->admin) return true;
+		return false;
+	}
+
+	public function isUserBD()
+	{
+		/*todo a voir si on garde*/
+		if ($this->isAdmin()) return true;
+		return $this->isUserInGroup('BD');
+	}
+
+	public function isUserKAM()
+	{
+		/*todo a voir si on garde*/
+		if ($this->isAdmin()) return true;
+		return $this->isUserInGroup('KAM');
+	}
+
+	public function isUserTECH()
+	{
+		/*todo a voir si on garde*/
+		if ($this->isAdmin()) return true;
+		return $this->isUserInGroup('TECH_RDC');
+	}
+
+	public function isUserBDKAM()
+	{
+		/*todo a voir si on garde*/
+		if ($this->isAdmin()) return true;
 		return $this->isUserInGroup('BD') || $this->isUserInGroup('KAM');
 	}
 

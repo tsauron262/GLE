@@ -1300,7 +1300,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 			}
 
 			if (!empty($lines)) {
-				$rows = $this->db->getRows('bimp_propal_line a', 'id_parent_line IN (' . implode(',', $lines) . ')', null, 'array', array('DISTINCT a.id'), null, null, array());
+				$rows = $this->db->getRows('bimp_propal_line a', 'id_parent_line IN (' . implode(',', $lines) . ') AND linked_object_name IN (\'bundleCorrect\',\'bundle\')', null, 'array', array('DISTINCT a.id'), null, null, array());
 				if (is_array($rows)) {
 					foreach ($rows as $r) {
 						if (!array_key_exists($r['id'], $lines)) {

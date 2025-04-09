@@ -4686,7 +4686,7 @@ class BimpComm extends BimpDolObject
 			}
 
 			if (!$new_zone) {
-				if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) ||
+				if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) &&
 					(BimpCore::isEntity('bimp') && ((int) $this->getData('entrepot') == 164 || $init_id_entrepot == 164))) {
 					$new_zone = $this->getZoneByCountry($client);
 					$auto_update_reason = ' (Livraison directe)';

@@ -69,6 +69,7 @@ fields:
                     
     fk_statut_rdc:
         label: Prospection
+        type: int
         values:
             array: statusRdc
     date_changement_statut_rdc:
@@ -76,7 +77,7 @@ fields:
         type: date
     delai_ouverture:
         label: Délai ouverture
-        type: number
+        type: int
     fk_source_rdc:
         label: Source
         type: int
@@ -98,9 +99,11 @@ fields:
     contrefacon:
         label: Suspition de contrefaçon
         type: bool
+        
     
     fk_group_rdc:
         label: Groupe
+        type: int
         values:
             array:
                 callback:
@@ -119,7 +122,17 @@ fields:
         label: Commentaires
         type: text
     url:
-        label: site internet marchand
+        label: Site internet marchand
+    commentaire_statut_ko:
+        label: Commentaire statut KO
+    potentiel_catalogue:
+        label: Potentiel catalogue
+        type: qty
+        unsigned: 0
+    fk_categorie_maitre:
+        label: Catégorie Maitre
+        values:
+            array: categorieMaitreRdc
         
     outstanding_limit: unset
     outstanding_limit_credit_check: unset
@@ -155,7 +168,10 @@ fields_tables:
             - label: Adresse
               value:
                   callback: displayFullAddress
-            - field: url
+            - label: Site internet marchand
+              value:
+                  callback: 
+                    method: getUrlMarchand
             - field: commentaire_rdc
     
     param_rdc:
@@ -175,14 +191,19 @@ fields_tables:
             - field: fk_priorite
               edit:
                   callback:
-                      method: isPriorityEditable
+                      method: isUserBDKAM
             - field: fk_statut_rdc
+            - field: commentaire_statut_ko 
             - field: date_changement_statut_rdc
             - field: delai_ouverture
             - field: fk_source_rdc
-            - field: contrefacon
+            - label: Suspition de contrefaçon
+              value:
+                callback: getContrefacon
             - field: fk_group_rdc
             - field: fk_user_attr_rdc
+            - field: fk_categorie_maitre
+            - field: potentiel_catalogue
     
     commentaires:
         title: Commentaires
@@ -297,15 +318,21 @@ forms:
                     callback: isShopIdEditable
             Priorité:
                 field: fk_priorite
-                edit: 1
-#                    callback:
-#                        method: isUserInGroup
-#                        params:
-#                            - BD
+                edit:
+                    callback:
+                        method: isUserBDKAM
             Prospection:
                 field: fk_statut_rdc
+                edit: 0
+            Commentaire statut KO:
+                field: commentaire_statut_ko
+                required:
+                    callback: isCommentaireStatutKoRequired
+            
+            Catégorie Maitre:
+                field: fk_categorie_maitre
                 edit:
-                    callback: isProspectionEditable
+                    callback: isUserBDKAM
             Source:
                 field: fk_source
             Suspition de contrefaçon:
@@ -316,6 +343,8 @@ forms:
                 field: fk_user_attr_rdc
             Commentaires:
                 field: commentaire_rdc
+            Potenitel catalogue:
+                field: potentiel_catalogue
     
     formActionRdc:
         title: Choisir une action

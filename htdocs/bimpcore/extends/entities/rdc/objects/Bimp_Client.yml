@@ -297,11 +297,11 @@ forms:
                     callback: isShopIdEditable
             Priorité:
                 field: fk_priorite
-                edit: 1
-#                    callback:
-#                        method: isUserInGroup
-#                        params:
-#                            - BD
+                edit:
+                    callback:
+                        method: isUserInGroup
+                        params:
+                            - BD
             Prospection:
                 field: fk_statut_rdc
                 edit:

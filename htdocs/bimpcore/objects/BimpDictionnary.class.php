@@ -90,7 +90,7 @@ class BimpDictionnary extends BimpObject
 					if (empty($values) || $force_reload) {
 						$values = array();
 
-						$key_field = (isset($values_params['key_field']) ? $values_params['key_field'] : 'code');
+						$key_field = (isset($values_params['key_field']) ? $values_params['key_field'] : 'id');
 						$position_field = (isset($values_params['position_field']) ? $values_params['position_field'] : 'position');
 						$filters = (isset($values_params['filters']) ? $values_params['filters'] : array());
 
@@ -117,7 +117,7 @@ class BimpDictionnary extends BimpObject
 
 							if ($table) {
 								$sql = BimpTools::getSqlFullSelectQuery($table, null, $filters, array(), array(
-									'order_by' => ($position_field ? $position_field : $key_field)
+									'order_by' => ($position_field ? : $key_field)
 								));
 
 								$rows = $this->db->executeS($sql, 'array');
@@ -134,7 +134,7 @@ class BimpDictionnary extends BimpObject
 					}
 
 					if ($active_only) {
-						$active_field = (isset($values_params['key_field']) ? $values_params['key_field'] : 'active');
+						$active_field = (isset($values_params['active_field']) ? : 'active');
 						if ($active_field) {
 							foreach ($values as $code => $value) {
 								if (isset($value[$active_field]) && !(int) $value[$active_field]) {
@@ -172,7 +172,7 @@ class BimpDictionnary extends BimpObject
 						'code'    => $code,
 						'label'   => $label
 					), true, $errors, $warnings);
-					$values = $this->getValuesInvertedArray($active_only, false, '', '', true);
+					$values = $this->getValuesInvertedArray($active_only, false, '', true);
 					if (isset($values[$label])) {
 						return $values[$label];
 					}
@@ -224,8 +224,7 @@ class BimpDictionnary extends BimpObject
 		return ($include_empty ? array($empty_value => $empty_label) : array());
 	}
 
-	public function getValuesInvertedArray($active_only = true, $include_empty = false, $empty_label = '')
-	public function getValuesInvertedArray($active_only = true, $include_empty = false, $empty_value = '', $empty_label = '', $forceReload = false)
+	public function getValuesInvertedArray($active_only = true, $include_empty = false, $empty_label = '', $forceReload = false)
 	{
 		$empty_value = 0; // todo : gérer selon type int ou string
 		if ($this->isLoaded()) {

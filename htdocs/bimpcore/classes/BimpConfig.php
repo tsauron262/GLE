@@ -1292,7 +1292,6 @@ class BimpConfig
 		$dict_code = '';
 		$active_only = 0;
 		$include_empty = 1;
-		$empty_value = 0;
 		$empty_label = '';
 
 		if (is_string($dict)) {
@@ -1301,12 +1300,11 @@ class BimpConfig
 			$dict_code = $this->get($path . '/code', $dict_code, true);
 			$active_only = $this->get($path . '/active_only', $active_only, false, 'bool');
 			$include_empty = $this->get($path . '/include_empty', $include_empty, false, 'bool');
-			$empty_value = $this->get($path . '/empty_value', $empty_value, false);
 			$empty_label = $this->get($path . '/empty_label', $empty_label, false);
 		}
 
 		if ($dict_code) {
-			return BimpDict::getValuesArray($dict_code, $active_only, $include_empty, $empty_value, $empty_label);
+			return BimpDict::getValuesArray($dict_code, $active_only, $include_empty, $empty_label);
 		}
 
 		return $dict;

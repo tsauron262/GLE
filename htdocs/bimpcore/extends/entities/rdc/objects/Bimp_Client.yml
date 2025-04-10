@@ -53,23 +53,9 @@ fields:
         label: Priorité
         type: int
         values:
-            dict:
-                code: societe_rdc_priorities
-                include_empty: 1
-                empty_value: 0
-                active_only: 0
-        input:
-            type: select
-            options:
-                dict:
-                    code: societe_rdc_priorities
-                    include_empty: 1
-                    empty_value: 0
-                    active_only: 1
-                    
+            dict: societe_rdc_priorities                    
     fk_statut_rdc:
         label: Prospection
-        
         values:
             array: statusRdc
     date_changement_statut_rdc:
@@ -82,20 +68,7 @@ fields:
         label: Source
         type: int
         values:
-            dict:
-                code: societe_rdc_sources
-                include_empty: 1
-                empty_value: 0
-                active_only: 0
-        input:
-            type: select
-            options:
-                dict:
-                    code: societe_rdc_sources
-                    include_empty: 1
-                    empty_value: 0
-                    active_only: 1
-                
+            dict: societe_rdc_sources                
     contrefacon:
         label: Suspition de contrefaçon
         type: bool

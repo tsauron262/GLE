@@ -283,7 +283,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function isPrestataireSourceRequired()
 	{
 		$source = $this->getData('fk_source_rdc');
-		if ($source == 7) { // Prestataire/agrégateur
+		if ($source == 20) { // Prestataire/agrégateur
 			return true;
 		}
 		return false;
@@ -319,6 +319,9 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return $users;
 	}
 
+	public function getIdSourcePresta()	{
+		return array(BimpCore::getConf('id_source_presta'));
+	}
 	public function renderPageView()
 	{
 		global $user;
@@ -371,6 +374,14 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function update(&$warnings = array(), $force_update = false)
 	{
+		$errors = array();
+		if ( BimpTools::getPostFieldValue('fk_source_rdc') == BimpCore::getConf('id_source_presta', 20) && strlen(BimpTools::getPostFieldValue('presta_source')) <= 0) {
+			$errors[] = 'Le champ Prestataire/agrégateur est obligatoire';
+		}
+
+		if (count($errors))
+			return $errors;
+
 		$this->checkAttr();	// envoi de mail si changement d'attribtion
 		$this->checkPassageLive();
 

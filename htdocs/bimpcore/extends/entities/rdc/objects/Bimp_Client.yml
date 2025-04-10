@@ -134,9 +134,12 @@ fields:
             array: categorieMaitreRdc
     presta_source:
         label: Prestataire/Agrégateur
+        input:
+            extra_content: '<p style="margin-top:1em; color: red;">Obligatoire si la source est "Prestataire/Agrégateur"</p>'
     quality_score:
         label: Qualité
         type: float
+            
         
     outstanding_limit: unset
     outstanding_limit_credit_check: unset
@@ -185,7 +188,6 @@ fields_tables:
             - field: shopid
             - field: name_alias
               label: Nom de la boutique
-              edit: 1
             - label: Lien Mirakl
               value:
                   callback: getMiraklLink
@@ -350,13 +352,18 @@ forms:
                 edit:
                     callback: isUserBDKAM
             Source:
-                field: fk_source
-            Prestataire/Agrégateur:
+                field: fk_source_rdc
+                
+            presta_source:
                 field: presta_source
-                required: 
-                    callback: isPrestataireSourceRequired
-            Qualité:
-                field: quality_score
+                display_if:
+                    field_name: fk_source_rdc
+                    show_values: 
+                        callback:
+                            method: getIdSourcePresta
+            
+#            Qualité:
+#                field: quality_score
                 
             Suspition de contrefaçon:
                 field: contrefacon

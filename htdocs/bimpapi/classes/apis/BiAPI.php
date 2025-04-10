@@ -164,41 +164,50 @@ ORDER BY
 		return $return;
 	}
 
-	public function traiteStats($annee, $mois = 0, $catergorie = 0){
+	public function traiteStats($annee, $mois = 0, $catergorie = 0)
+	{
 		BimpObject::loadClass('bimpcore', 'Bimp_ChiffreAffaire');
 		$errors = $warnings = array();
 		$ok = $bad = 0;
 		$return = $this->getStats($annee, $mois, $catergorie);
 //		echo '<pre>';print_r($return);die;
-		foreach($return as $key => $tabT){
-			foreach($tabT as $cat => $val) {
-//				if(is_string($cat))
-//					$cat = Bimp_ChiffreAffaire::getCategoryId($cat);
-//				$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('nom' => $key));
-//				if (!$soc || !$soc->isLoaded()) {
-//					$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('name_alias' => $key));
-//				}
-//				if (!$soc || !$soc->isLoaded()) {
-//					$bad++;
-//				} else {
-//					$ok++;
-//					if ($mois == 0) {
-//						$date = $annee . '-01-01';
-//					} else {
-//						$date = $annee . '-' . $mois . '-01';
-//					}
-//					$dataFiltre = array(
-//						'id_obj'       => $soc->id,
-//						'fk_category'       => $cat,
-//						'type_obj'     => 0,
-//						'fk_period'    => ($mois == 0) ? 0 : 3,
-//						'debut_period' => $date,
-//					);
-//					$data = array(
-//						'ca' => $val
-//					);
-//					BimpObject::createOrUpdateBimpObject('bimpcore', 'Bimp_ChiffreAffaire', $dataFiltre, $data, true, true, $errors, $warnings);
-//				}
+
+		$dict = BimpDict::getDictionnary('ca_categories');
+
+		foreach ($return as $key => $tabT) {
+			foreach ($tabT as $cat => $val) {
+				if ($cat != 0) {
+					$code = urlencode($cat);
+					$catArray = $dict->getValue($code, true, true, $cat);
+					if(is_array($catArray)){
+						$cat = $catArray['code'];
+					}
+				}
+				$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('nom' => $key));
+				if (!$soc || !$soc->isLoaded()) {
+					$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('name_alias' => $key));
+				}
+				if (!$soc || !$soc->isLoaded()) {
+					$bad++;
+				} else {
+					$ok++;
+					if ($mois == 0) {
+						$date = $annee . '-01-01';
+					} else {
+						$date = $annee . '-' . $mois . '-01';
+					}
+					$dataFiltre = array(
+						'id_obj'       => $soc->id,
+						'fk_category'  => $cat,
+						'type_obj'     => 0,
+						'fk_period'    => ($mois == 0) ? 0 : 3,
+						'debut_period' => $date,
+					);
+					$data = array(
+						'ca' => $val
+					);
+					BimpObject::createOrUpdateBimpObject('bimpcore', 'Bimp_ChiffreAffaire', $dataFiltre, $data, true, true, $errors, $warnings);
+				}
 			}
 		}
 		return $ok.' Ok'.' '.$bad.' Bad'.print_r($warnings,1).print_r($errors,1);

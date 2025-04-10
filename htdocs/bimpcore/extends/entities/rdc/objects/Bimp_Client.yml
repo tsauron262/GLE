@@ -99,7 +99,6 @@ fields:
     contrefacon:
         label: Suspition de contrefaçon
         type: bool
-        
     
     fk_group_rdc:
         label: Groupe

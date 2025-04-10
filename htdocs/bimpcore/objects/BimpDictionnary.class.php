@@ -71,7 +71,7 @@ class BimpDictionnary extends BimpObject
 
 	// Getters données :
 
-	public function getValuesData($active_only = true)
+	public function getValuesData($active_only = true, $force_reload = false)
 	{
 		if ($this->isLoaded()) {
 			$code = $this->getData('code');
@@ -82,11 +82,11 @@ class BimpDictionnary extends BimpObject
 					$cache_key .= '_active';
 				}
 
-				if (!isset(self::$cache[$cache_key])) {
+				if (!isset(self::$cache[$cache_key]) || $force_reload) {
 					$values_params = $this->getData('values_params');
 					$values = BimpCache::getCacheServeur('dictionnary_' . $code);
 
-					if (empty($values)) {
+					if (empty($values) || $force_reload) {
 						$values = array();
 
 						$key_field = (isset($values_params['key_field']) ? $values_params['key_field'] : 'code');
@@ -151,6 +151,34 @@ class BimpDictionnary extends BimpObject
 		}
 
 		return array();
+	}
+
+	public function getValue($code, $active_only = true, $createIfNotExist = false, $labelForCreate = '')
+	{
+		if ($this->isLoaded()) {
+			$values = $this->getValuesData($active_only);
+			if (isset($values[$code])) {
+				return $values[$code];
+			} elseif ($createIfNotExist) {
+				$values_params = $this->getData('values_params');
+				$position_field = (isset($values_params['position_field']) ? $values_params['position_field'] : 'position');
+				$filters = (isset($values_params['filters']) ? $values_params['filters'] : array());
+
+				if (isset($values_params['children'])) {
+					$child_instance = BimpObject::createBimpObject($this->module, 'BimpDictionnaryValue', array(
+						'id_dict' => $this->id,
+						'code'    => $code,
+						'label'   => $labelForCreate
+					), true, $errors, $warnings);
+					$values = $this->getValuesData($active_only, true);
+					if (isset($values[$code])) {
+						return $values[$code];
+					}
+				}
+			}
+		}
+
+		return null;
 	}
 
 	public function getValuesArray($active_only = true, $include_empty = false, $empty_value = '', $empty_label = '')

@@ -115,17 +115,24 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 	{
 		$fields = array();
 		$categories = BimpDict::getValuesArray('ca_categories', true, false);
-
-		if (!empty($categories)) {
-			foreach ($categories as $idC => $label) {
-				if ($idC > 0) {
-					$fields[$idC] = array(
-						"title"   => $label,
-						'field'   => 'ca',
-						'calc'    => 'SUM',
-						'filters' => array('fk_category' => $idC)
-					);
-				}
+		$id = $this->parent->id;
+		if($id == 0){
+			$id = BimpTools::getPostFieldValue('id', 0, 'int');
+		}
+		if($id == 0){
+			echo '<pre>';print_r($_REQUEST);die;
+			$id = BimpTools::getPostFieldValue('id', 0, 'int');
+		}
+		$sql = $this->db->db->query('SELECT DISTINCT(fk_category) FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$id);
+		while($ln = $this->db->db->fetch_object($sql)){
+			$idC = $ln->fk_category;
+			if ($idC > 0) {
+				$fields[$ln->fk_category] = array(
+					"title"   => $categories[$idC]['label'],
+					'field'   => 'ca',
+					'calc'    => 'SUM',
+					'filters' => array('fk_category' => $idC)
+				);
 			}
 		}
 

@@ -102,8 +102,14 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return self::getCacheArray($cache_key, $include_empty);
 	}
 
+	public function getContrefacon()
+	{
+		if ($this->getData('contrefacon')) return '<span class="danger">Oui</span>';
+		else return '<span class="success">Non</span>';
+	}
     public function getActionsButtons()
 	{
+//		echo '<pre>'; print_r($this->data); echo '</pre>';die;
 		$buttons[] = array(
 			'label'   => 'Actions',
 			'icon'    => 'fas_edit',
@@ -179,29 +185,60 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function getMiraklLink()
 	{
-		if ($this->getData('shopid') > 0) return 'mirakl-web.groupe-rueducommerce.fr/mmp/operator/shop/' . $this->getData('shopid');
+		if ($this->getData('shopid') > 0) {
+			$url = 'https://mirakl-web.groupe-rueducommerce.fr/mmp/operator/shop/' . $this->getData('shopid');
+			return $this->getHref($url);
+		}
 		else return '';
 	}
+
+	public function getHref($url, $target="_blank")
+	{
+		$href = '<a href="' . $url . '" target="' . $target . '"><i <i class="fas fa-external-link-alt"></i></a>';
+		return $url . " " . $href;
+	}
+
 	public function isShopIdEditable()
 	{
 		$id = BimpTools::getPostFieldValue('id');
 		if (!$id) return false;
 		if ($this->getData('shopid')) return false;
-		else return true;
+		else return $this->isUserBD();
 	}
 
-	public function isProspectionEditable()
+	public function isAdmin()
 	{
-		$id = BimpTools::getPostFieldValue('id');
-		if (!$id) return true;
-		else return false;
-	}
-
-	public function isPriorityEditable()
-	{
-		/*todo a voir si on garde*/
+//		return 0;
 		global $user;
 		if ($user->admin) return true;
+		return false;
+	}
+
+	public function isUserBD()
+	{
+		/*todo a voir si on garde*/
+		if ($this->isAdmin()) return true;
+		return $this->isUserInGroup('BD');
+	}
+
+	public function isUserKAM()
+	{
+		/*todo a voir si on garde*/
+		if ($this->isAdmin()) return true;
+		return $this->isUserInGroup('KAM');
+	}
+
+	public function isUserTECH()
+	{
+		/*todo a voir si on garde*/
+		if ($this->isAdmin()) return true;
+		return $this->isUserInGroup('TECH_RDC');
+	}
+
+	public function isUserBDKAM()
+	{
+		/*todo a voir si on garde*/
+		if ($this->isAdmin()) return true;
 		return $this->isUserInGroup('BD') || $this->isUserInGroup('KAM');
 	}
 
@@ -308,6 +345,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function update(&$warnings = array(), $force_update = false)
 	{
 		$this->checkAttr();	// envoi de mail si changement d'attribtion
+		$this->checkPassageLive();
 
 		return parent::update($warnings, $force_update);
 	}
@@ -349,7 +387,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$this->set('shopid', 0);
 			} else {
 				$shop = $data['shops'][0];
-				//echo '<pre>'; print_r($shop); echo '</pre>';die;
+//				echo '<pre>'; print_r($shop); echo '</pre>';die;
 				// traitement des données reçues : mise a jour du tiers
 				$this->set('nom', $shop['pro_details']['corporate_name']);
 				$this->set('name_alias', $shop['shop_name']);
@@ -386,13 +424,18 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 				// surcharge attribution
 				if ($shop['assignees'])	{
-					$email_part = explode('@', $shop['assignees'][0]['email']);
-					$email = str_ireplace('.ext', '', $email_part[0]);
-					// $email .= '@ldlc.com' ou '@rueducommerce.fr';
-
-					$userAttr = $this->getBdb()->getRow('user', 'email LIKE \'' . $email . '%\'', array('rowid'), 'array');
-					if ($userAttr) $this->set('fk_user_attr_rdc', $userAttr['rowid']);
-					else $warnings [] = 'Utilisateur d\'attribution non trouvé. ' . $email;
+					$emailAssign = strtolower($shop['assignees'][0]['email']);
+					$userAttr = $this->getBdb()->getRows(
+						'user AS u',
+						'u.email LIKE \'' . $emailAssign . '\' OR LOCATE(\'' . $emailAssign . '\', ue.alias)',
+						1,'array',array('u.rowid'),null,null,array(
+							'ue' => array(
+								'table' => 'user_extrafields',
+								'on'    => 'u.rowid = ue.fk_object'
+							))
+					);
+					if (isset($userAttr[0]['rowid']) && $userAttr[0]['rowid']) $this->set('fk_user_attr_rdc', $userAttr[0]['rowid']);
+					else $warnings [] = 'Utilisateur d\'attribution non trouvé. ' . $emailAssign;
 				}
 
 				// surcharge statut
@@ -402,6 +445,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				}
 				if ($shop['shop_state'] === 'OPEN' && $this->getData('shopid') > 0) {
 					$this->set('fk_statut_rdc', self::$statut_rdc_live);
+					$this->set('date_changement_statut_rdc', date('Y-m-d'));
 				}
 				$this->update($warnings);
 			}

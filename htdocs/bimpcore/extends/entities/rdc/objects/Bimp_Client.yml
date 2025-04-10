@@ -69,6 +69,7 @@ fields:
                     
     fk_statut_rdc:
         label: Prospection
+        
         values:
             array: statusRdc
     date_changement_statut_rdc:

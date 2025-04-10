@@ -13,7 +13,7 @@ class BimpFile extends BimpObject
     );
     public $htmlName = 'file';
 
-    // Droits users: 
+    // Droits users:
 
     public function canClientView()
     {
@@ -68,7 +68,7 @@ class BimpFile extends BimpObject
         return parent::canEditField($field_name);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
@@ -305,7 +305,7 @@ class BimpFile extends BimpObject
         return $this->getFileUrl();
     }
 
-    // Getters - Overrides BimpObject: 
+    // Getters - Overrides BimpObject:
 
     public function getParentObjectName()
     {
@@ -325,7 +325,7 @@ class BimpFile extends BimpObject
         return $this->getData('parent_module');
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayType($text_only = 0, $icon_only = 0, $no_html = 0)
     {
@@ -394,7 +394,7 @@ class BimpFile extends BimpObject
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function uploadFile()
     {
@@ -473,7 +473,7 @@ class BimpFile extends BimpObject
             $files = array();
 
             if ($file_dir) {
-                // Récup fichiers dans dossier PROV pour les BimpComm: 
+                // Récup fichiers dans dossier PROV pour les BimpComm:
                 if (is_a($parent, 'BimpComm')) {
                     $ref = $parent->getRef();
                     if (strpos($ref, 'PROV') === false) {
@@ -576,17 +576,17 @@ class BimpFile extends BimpObject
                     }
                 }
 
-                foreach ($current_files as $id_file => $file_name) {
-                    if (!in_array($file_name, $files)) {
-                        if ($this->fetch((int) $id_file)) {
+//                foreach ($current_files as $id_file => $file_name) {
+//                    if (!in_array($file_name, $files)) {
+//                        if ($this->fetch((int) $id_file)) {
 //                            $warnings = array();
 //                            $this->true_delete = true;
 //                            $err = $this->delete($warnings, true);
 //                            $this->true_delete = false;
 //                            $this->reset();
-                        }
-                    }
-                }
+//                        }
+//                    }
+//                }
             }
         }
     }
@@ -673,7 +673,7 @@ class BimpFile extends BimpObject
         return $errors;
     }
 
-    // Actions : 
+    // Actions :
 
     public function actionResize($data, &$success = '')
     {
@@ -682,7 +682,7 @@ class BimpFile extends BimpObject
         return array('errors' => array(), 'warnings' => array());
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = null, $extra_order_by = NULL, $extra_order_way = 'ASC', $groupBy = '')
     {

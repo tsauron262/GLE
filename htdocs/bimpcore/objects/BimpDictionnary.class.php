@@ -7,8 +7,9 @@ class BimpDictionnary extends BimpObject
 
 	public function canCreate()
 	{
-		global $user;
-		return (int) $user->admin;
+		return 1;
+//		global $user;
+//		return (int) $user->admin;
 	}
 
 	public function canEdit()
@@ -209,6 +210,37 @@ class BimpDictionnary extends BimpObject
 							} else {
 								self::$cache[$cache_key][$key] = $value[$label_field];
 							}
+						}
+					}
+				}
+
+				return self::getCacheArray($cache_key, $include_empty, $empty_value, $empty_label);
+			}
+		}
+
+		return ($include_empty ? array($empty_value => $empty_label) : array());
+	}
+
+	public function getValuesInvertedArray($active_only = true, $include_empty = false, $empty_value = '', $empty_label = '')
+	{
+		if ($this->isLoaded()) {
+			$code = $this->getData('code');
+			if ($code) {
+				$cache_key = 'dictionnary_values_inverted_array_' . $code;
+
+				if ($active_only) {
+					$cache_key .= '_active';
+				}
+
+				if (!isset(self::$cache[$cache_key])) {
+					$values = self::getValuesData($active_only);
+
+					if (!empty($values)) {
+						$values_params = $this->getData('values_params');
+						$label_field = (isset($values_params['label_field']) ? $values_params['label_field'] : 'label');
+
+						foreach ($values as $key => $value) {
+							self::$cache[$cache_key][$value[$label_field]] = $key;
 						}
 					}
 				}

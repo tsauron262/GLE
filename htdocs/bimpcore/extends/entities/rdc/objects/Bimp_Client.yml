@@ -254,6 +254,16 @@ views:
                             params:
                                 - chiffre_affaire
                                 - evol
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - evol2
                   
                   - type: custom
                     col_lg: 6

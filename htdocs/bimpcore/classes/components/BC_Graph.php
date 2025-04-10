@@ -15,7 +15,7 @@ class BC_Graph extends BC_Panel
         $this->params_def['xDateConfig'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['date'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['x'] = array('data_type' => 'string', 'default' => '');
-        $this->params_def['mode'] = array('data_type' => 'string', 'default' => '');//rien ou doughnut
+        $this->params_def['mode'] = array('data_type' => 'string', 'default' => 'column');//rien ou doughnut
         $this->params_def['y'] = array('data_type' => 'string', 'default' => '');
         $this->params_def['data_callback'] = array('data_type' => 'string', 'default' => '');
         $this->params_def['yConfig'] = array('data_type' => 'array', 'default' => array());
@@ -334,7 +334,7 @@ class BC_Graph extends BC_Panel
                 $calc = 'SUM';
                 if(is_array($tabField) && isset($tabField['calc']))
                     $calc = $tabField['calc'];
-                $type = 'column';
+                $type = $this->params['mode'];
                 if(is_array($tabField) && isset($tabField['type']))
                     $type = $tabField['type'];
                 $name = '';
@@ -374,6 +374,11 @@ class BC_Graph extends BC_Panel
                     foreach($tabField['filters'] as $field_name => $value)
                         $filters = BimpTools::mergeSqlFilter($filters, $field_name, $value);
                 }
+
+				foreach($this->userOptions as $option => $value){
+					if($this->object->field_exists($option))
+						$filters[$option] = $value;
+				}
 
                 $oldValue = null;
                 if($this->userOptions['relative'] == 1){

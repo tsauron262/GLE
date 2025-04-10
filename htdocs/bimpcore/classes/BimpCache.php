@@ -103,6 +103,7 @@ class BimpCache
 	public static function getCacheArray($cache_key, $include_empty = false, $empty_value = 0, $empty_label = '')
 	{
 		if ($include_empty) {
+			$empty_value = 0;
 			$return = array(
 				$empty_value => $empty_label
 			);

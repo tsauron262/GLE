@@ -91,14 +91,22 @@ class BiAPI extends BimpAPI
 			elseif(isset($ln['_x005B_CA_x0020_Total_x0020_HT_x005D_'])){
 				$val = $ln['_x005B_CA_x0020_Total_x0020_HT_x005D_']*10 / 10;
 			}
-			if(isset($ln['FamillesProduitsSite_x005B_Level_5_Name_x005D_'])){
-				$cat = $ln['FamillesProduitsSite_x005B_Level_5_Name_x005D_'];
-			}
-			elseif(isset($ln['FamillesProduitsSite_x005B_Level_4_Name_x005D_'])){
-				$cat = $ln['FamillesProduitsSite_x005B_Level_4_Name_x005D_'];
+			if(isset($ln['FamillesProduitsSite_x005B_Level_2_Name_x005D_'])){
+				$cat = $ln['FamillesProduitsSite_x005B_Level_2_Name_x005D_'];
 			}
 
-			$newTab[$name][$cat] = $val;
+			if(isset($ln['FamillesProduitsSite_x005B_Level_3_Name_x005D_'])){
+				$cat .= '%$'.$ln['FamillesProduitsSite_x005B_Level_3_Name_x005D_'];
+			}
+			if(isset($ln['FamillesProduitsSite_x005B_Level_4_Name_x005D_'])){
+				$cat .= '%$'.$ln['FamillesProduitsSite_x005B_Level_4_Name_x005D_'];
+			}
+			if(isset($ln['FamillesProduitsSite_x005B_Level_5_Name_x005D_'])){
+				$cat .= '%$'.$ln['FamillesProduitsSite_x005B_Level_5_Name_x005D_'];
+			}
+
+			if($name != '')
+				$newTab[$name][$cat] = $val;
 		}
 
 		return $newTab;
@@ -176,13 +184,6 @@ ORDER BY
 
 		foreach ($return as $key => $tabT) {
 			foreach ($tabT as $cat => $val) {
-				if ($cat != 0) {
-					$code = urlencode($cat);
-					$catArray = $dict->getValue($code, true, true, $cat);
-					if(is_array($catArray)){
-						$cat = $catArray['code'];
-					}
-				}
 				$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('nom' => $key));
 				if (!$soc || !$soc->isLoaded()) {
 					$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('name_alias' => $key));
@@ -198,11 +199,30 @@ ORDER BY
 					}
 					$dataFiltre = array(
 						'id_obj'       => $soc->id,
-						'fk_category'  => $cat,
 						'type_obj'     => 0,
 						'fk_period'    => ($mois == 0) ? 0 : 3,
 						'debut_period' => $date,
 					);
+
+					if ($cat != 0) {
+						$tabCat = explode('%$', $cat);
+						for($i=1;$i<5;$i++){
+//						foreach($tabCat as $i => $cat){
+							if(isset($tabCat[$i-1]))
+								$cat = $tabCat[$i-1];
+							else
+								$cat = 'N/C';
+							$cat = $dict->getByValue($cat, true, true);
+							if($i == 1)
+								$dataFiltre['fk_category'] = $cat;
+							else
+								$dataFiltre['fk_category'.$i] = $cat;
+						}
+					}
+					else
+						$dataFiltre['fk_category'] = 0;
+
+
 					$data = array(
 						'ca' => $val
 					);

@@ -168,6 +168,9 @@ lists:
         delete_btn: 1
         cols:
             fk_category:
+            fk_category2:
+            fk_category3:
+            fk_category4:
             ca:
             fk_period:
             debut_period:
@@ -176,7 +179,7 @@ lists:
 graph:
     rep:
         mode: doughnut
-        title: Repartition Categories
+        title: Repartition Categories 1
         options:
             fk_period:
                 name: Période
@@ -195,6 +198,78 @@ graph:
         yConfig:
             fields:
                 callback: getCategForGrpah
+    rep2:
+        mode: doughnut
+        title: Repartition Categories 2
+        options:
+            fk_period:
+                name: Période
+                type: select
+                values:
+                    callback: getPeriodsRdc
+                value: 0
+        xDateConfig:
+            field: debut_period
+            date1: 1
+            date2: 2
+            def: 5year
+            params: unset
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                callback:
+                    method: getCategForGrpah
+                    params:
+                        - 2
+    rep3:
+        mode: doughnut
+        title: Repartition Categories 3
+        options:
+            fk_period:
+                name: Période
+                type: select
+                values:
+                    callback: getPeriodsRdc
+                value: 0
+        xDateConfig:
+            field: debut_period
+            date1: 1
+            date2: 2
+            def: 5year
+            params: unset
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                callback:
+                    method: getCategForGrpah
+                    params:
+                        - 3
+    rep4:
+        mode: doughnut
+        title: Repartition Categories 4
+        options:
+            fk_period:
+                name: Période
+                type: select
+                values:
+                    callback: getPeriodsRdc
+                value: 0
+        xDateConfig:
+            field: debut_period
+            date1: 1
+            date2: 2
+            def: 5year
+            params: unset
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                callback:
+                    method: getCategForGrpah
+                    params:
+                        - 4
     evol:
         title: Evolution CA
         mode: splineArea
@@ -225,7 +300,7 @@ graph:
                     field: ca
                     calc: SUM
     evol2:
-        title: Evolution CA
+        title: Evolution CA / cat 1
 #        mode: splineArea
         options:
             fk_category:

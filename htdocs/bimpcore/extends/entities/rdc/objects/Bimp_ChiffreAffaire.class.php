@@ -137,15 +137,19 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 			echo '<pre>';print_r($_REQUEST);die;
 			$id = BimpTools::getPostFieldValue('id', 0, 'int');
 		}
-		$sql = $this->db->db->query('SELECT DISTINCT(fk_category) FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$id);
+		if($type == 1)
+			$field = 'fk_category';
+		else
+			$field = 'fk_category'.$type;
+		$sql = $this->db->db->query('SELECT DISTINCT('.$field.') as categ FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$id);
 		while($ln = $this->db->db->fetch_object($sql)){
-			$idC = $ln->fk_category;
+			$idC = $ln->categ;
 			if ($idC > 0) {
-				$fields[$ln->fk_category] = array(
+				$fields[$idC] = array(
 					"title"   => $categories[$idC]['label'],
 					'field'   => 'ca',
 					'calc'    => 'SUM',
-					'filters' => array('fk_category' => $idC)
+					'filters' => array($field => $idC)
 				);
 			}
 		}

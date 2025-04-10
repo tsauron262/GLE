@@ -53,20 +53,7 @@ fields:
         label: Priorité
         type: int
         values:
-            dict:
-                code: societe_rdc_priorities
-                include_empty: 1
-                empty_value: 0
-                active_only: 0
-        input:
-            type: select
-            options:
-                dict:
-                    code: societe_rdc_priorities
-                    include_empty: 1
-                    empty_value: 0
-                    active_only: 1
-                    
+            dict: societe_rdc_priorities                    
     fk_statut_rdc:
         label: Prospection
         type: int
@@ -82,20 +69,7 @@ fields:
         label: Source
         type: int
         values:
-            dict:
-                code: societe_rdc_sources
-                include_empty: 1
-                empty_value: 0
-                active_only: 0
-        input:
-            type: select
-            options:
-                dict:
-                    code: societe_rdc_sources
-                    include_empty: 1
-                    empty_value: 0
-                    active_only: 1
-                
+            dict: societe_rdc_sources                
     contrefacon:
         label: Suspition de contrefaçon
         type: bool
@@ -273,6 +247,36 @@ views:
                             params:
                                 - chiffre_affaire
                                 - rep
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - rep2
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - rep3
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - rep4
                   - type: custom
                     col_lg: 6
                     col_md: 12

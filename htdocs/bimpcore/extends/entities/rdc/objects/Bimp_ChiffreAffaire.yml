@@ -51,7 +51,58 @@ fields:
         type: money
     
     fk_category:
-        label: Catégorie CA
+        label: Catégorie CA 1
+        values:
+            dict:
+                code: ca_categories
+                include_empty: 1
+                empty_value: 0
+                active_only: 0
+            input:
+                type: select
+                options:
+                    dict:
+                        code: ca_categories
+                        include_empty: 1
+                        empty_value: 0
+                        active_only: 1
+    
+    fk_category2:
+        label: Catégorie CA 2
+        values:
+            dict:
+                code: ca_categories
+                include_empty: 1
+                empty_value: 0
+                active_only: 0
+            input:
+                type: select
+                options:
+                    dict:
+                        code: ca_categories
+                        include_empty: 1
+                        empty_value: 0
+                        active_only: 1
+    
+    fk_category3:
+        label: Catégorie CA 3
+        values:
+            dict:
+                code: ca_categories
+                include_empty: 1
+                empty_value: 0
+                active_only: 0
+            input:
+                type: select
+                options:
+                    dict:
+                        code: ca_categories
+                        include_empty: 1
+                        empty_value: 0
+                        active_only: 1
+    
+    fk_category4:
+        label: Catégorie CA 4
         values:
             dict:
                 code: ca_categories
@@ -93,6 +144,12 @@ forms:
                 hidden: 1
             fk_category:
                 field: fk_category
+            fk_category2:
+                field: fk_category2
+            fk_category3:
+                field: fk_category3
+            fk_category4:
+                field: fk_category4
             ca:
                 field: ca
             fk_period:
@@ -120,6 +177,13 @@ graph:
     rep:
         mode: doughnut
         title: Repartition Categories
+        options:
+            fk_period:
+                name: Période
+                type: select
+                values:
+                    callback: getPeriodsRdc
+                value: 0
         xDateConfig:
             field: debut_period
             date1: 1
@@ -133,22 +197,20 @@ graph:
                 callback: getCategForGrpah
     evol:
         title: Evolution CA
+        mode: splineArea
         options:
             fk_category:
                 name: Categories
                 type: select
                 values:
-                    dict:
-                        code: ca_categories
-                        include_empty: 0
-                        active_only: 1
+                    callback: getCategCa
                 value: 0
             fk_period:
                 name: Période
                 type: select
                 values:
                     callback: getPeriodsRdc
-                value: 0
+                value: 3
         xDateConfig:
             field: debut_period
             date1: 1
@@ -162,5 +224,47 @@ graph:
                     title: CA ht
                     field: ca
                     calc: SUM
-                    filters:
-                        callback: getFiltersForGraph
+    evol2:
+        title: Evolution CA
+#        mode: splineArea
+        options:
+            fk_category:
+                name: Categories
+                type: select
+                values:
+                    callback: getCategCa
+                value: 0
+            fk_category2:
+                name: Categories
+                type: select
+                values:
+                    callback: getCategCa
+                value: 0
+            fk_category3:
+                name: Categories
+                type: select
+                values:
+                    callback: getCategCa
+                value: 0
+            fk_category4:
+                name: Categories
+                type: select
+                values:
+                    callback: getCategCa
+                value: 0
+            fk_period:
+                name: Période
+                type: select
+                values:
+                    callback: getPeriodsRdc
+                value: 3
+        xDateConfig:
+            field: debut_period
+            date1: 1
+            date2: 2
+            def: 5year
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                callback: getCategForGrpah

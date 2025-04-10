@@ -110,6 +110,20 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 	}
 
 
+	public function getCategCa(){
+		$result = array();
+		$categories = BimpDict::getValuesArray('ca_categories', true, false);
+		$id = $this->parent->id;
+		if($id == 0){
+			$id = BimpTools::getPostFieldValue('id', 0, 'int');
+		}
+		$sql = $this->db->db->query('SELECT DISTINCT(fk_category) FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$id);
+		while($ln = $this->db->db->fetch_object($sql)){
+			$result[$ln->fk_category] = $categories[$ln->fk_category]['label'];
+		}
+		return $result;
+	}
+
 	//graph
 	public function getCategForGrpah($type = 1, $label = '')
 	{
@@ -139,23 +153,23 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 		return $fields;
 	}
 
-	public function getFiltersForGraph()
-	{
-		$filters = array(
-			'fk_category' => 0,
-			'fk_period'   => 0,
-		);
-		$data = $this->paramsUrlToArray(BimpTools::getPostFieldValue('form'));
-
-		if (isset($data['fk_category'])) {
-			$filters['fk_category'] = $data['fk_category'];
-		}
-		if (isset($data['fk_period'])) {
-			$filters['fk_period'] = $data['fk_period'];
-		}
-
-		return $filters;
-	}
+//	public function getFiltersForGraph()
+//	{
+//		$filters = array(
+//			'fk_category' => 0,
+//			'fk_period'   => 3,
+//		);
+//		$data = $this->paramsUrlToArray(BimpTools::getPostFieldValue('form'));
+//
+//		if (isset($data['fk_category'])) {
+//			$filters['fk_category'] = $data['fk_category'];
+//		}
+//		if (isset($data['fk_period'])) {
+//			$filters['fk_period'] = $data['fk_period'];
+//		}
+//
+//		return $filters;
+//	}
 
 	public function paramsUrlToArray($str)
 	{

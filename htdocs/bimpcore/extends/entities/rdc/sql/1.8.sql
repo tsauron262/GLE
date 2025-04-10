@@ -1,0 +1,3 @@
+ALTER TABLE llx_societe
+	ADD COLUMN presta_source VARCHAR(255) NOT NULL DEFAULT '',
+	ADD COLUMN quality_score FLOAT(6,1) NOT NULL DEFAULT 0;

@@ -280,6 +280,14 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return false;
 	}
 
+	public function isPrestataireSourceRequired()
+	{
+		$source = $this->getData('fk_source_rdc');
+		if ($source == 7) { // Prestataire/agrégateur
+			return true;
+		}
+		return false;
+	}
 	public function renderHeaderStatusExtra()	{
 		return '';
 	}

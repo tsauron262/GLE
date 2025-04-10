@@ -132,6 +132,11 @@ fields:
         label: Catégorie Maitre
         values:
             array: categorieMaitreRdc
+    presta_source:
+        label: Prestataire/Agrégateur
+    quality_score:
+        label: Qualité
+        type: float
         
     outstanding_limit: unset
     outstanding_limit_credit_check: unset
@@ -196,6 +201,8 @@ fields_tables:
             - field: date_changement_statut_rdc
             - field: delai_ouverture
             - field: fk_source_rdc
+            - field: presta_source
+            - field: quality_score
             - label: Suspition de contrefaçon
               value:
                 callback: getContrefacon
@@ -334,6 +341,13 @@ forms:
                     callback: isUserBDKAM
             Source:
                 field: fk_source
+            Prestataire/Agrégateur:
+                field: presta_source
+                required: 
+                    callback: isPrestataireSourceRequired
+            Qualité:
+                field: quality_score
+                
             Suspition de contrefaçon:
                 field: contrefacon
             Groupe:

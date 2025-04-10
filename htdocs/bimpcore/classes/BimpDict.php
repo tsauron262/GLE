@@ -31,23 +31,23 @@ class BimpDict
 		return array();
 	}
 
-	public static function getValuesArray($dict_code, $active_only = true, $include_empty = false, $empty_value = '', $empty_label = '')
+	public static function getValuesArray($dict_code, $active_only = true, $include_empty = false, $empty_label = '')
 	{
 		$dict = BimpCache::findBimpObjectInstance('bimpcore', 'BimpDictionnary', array('code' => $dict_code));
 
 		if (BimpObject::objectLoaded($dict)) {
-			return $dict->getValuesArray($active_only, $include_empty, $empty_value, $empty_label);
+			return $dict->getValuesArray($active_only, $include_empty, $empty_label);
 		}
 
 		return array();
 	}
 
-	public static function getValuesInvertedArray($dict_code, $active_only = true, $include_empty = false, $empty_value = '', $empty_label = '')
+	public static function getValuesInvertedArray($dict_code, $active_only = true, $include_empty = false, $empty_label = '')
 	{
 		$dict = BimpCache::findBimpObjectInstance('bimpcore', 'BimpDictionnary', array('code' => $dict_code));
 
 		if (BimpObject::objectLoaded($dict)) {
-			return $dict->getValuesInvertedArray($active_only, $include_empty, $empty_value, $empty_label);
+			return $dict->getValuesInvertedArray($active_only, $include_empty, $empty_label);
 		}
 
 		return array();

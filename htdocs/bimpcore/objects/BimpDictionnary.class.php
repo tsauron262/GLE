@@ -182,8 +182,10 @@ class BimpDictionnary extends BimpObject
 		return null;
 	}
 
-	public function getValuesArray($active_only = true, $include_empty = false, $empty_value = '', $empty_label = '')
+	public function getValuesArray($active_only = true, $include_empty = false, $empty_label = '')
 	{
+		$empty_value = 0; // todo : gérer selon type int ou string
+
 		if ($this->isLoaded()) {
 			$code = $this->getData('code');
 			if ($code) {
@@ -221,8 +223,9 @@ class BimpDictionnary extends BimpObject
 		return ($include_empty ? array($empty_value => $empty_label) : array());
 	}
 
-	public function getValuesInvertedArray($active_only = true, $include_empty = false, $empty_value = '', $empty_label = '')
+	public function getValuesInvertedArray($active_only = true, $include_empty = false, $empty_label = '')
 	{
+		$empty_value = 0; // todo : gérer selon type int ou string
 		if ($this->isLoaded()) {
 			$code = $this->getData('code');
 			if ($code) {
@@ -245,7 +248,8 @@ class BimpDictionnary extends BimpObject
 					}
 				}
 
-				return self::getCacheArray($cache_key, $include_empty, $empty_value, $empty_label);
+
+				return self::getCacheArray($cache_key, $include_empty, $empty_label, $empty_value);
 			}
 		}
 

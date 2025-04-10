@@ -83,9 +83,9 @@ class BC_Input extends BimpComponent
 			'dictionnary'  => array()
 		),
 		'switch_options'              => array(
-			'options'  => array('data_type' => 'array', 'compile' => true, 'default' => array()),
-			'vertical' => array('data_type' => 'bool', 'default_value' => 0),
-			'dictionnary'  => array()
+			'options'     => array('data_type' => 'array', 'compile' => true, 'default' => array()),
+			'vertical'    => array('data_type' => 'bool', 'default_value' => 0),
+			'dictionnary' => array()
 		),
 		'toggle'                      => array(
 			'toggle_on'  => array('default' => 'OUI'),
@@ -286,7 +286,11 @@ class BC_Input extends BimpComponent
 		if (in_array($this->params['type'], self::$types_with_options)) {
 			if (empty($this->params['options'])) {
 				if (isset($this->field_params['values'])) {
-					$this->params['options'] = $this->field_params['values'];
+					if (!empty($this->field_params['dictionnary'])) {
+						$this->params['options'] = BimpDict::getValuesArray($this->field_params['dictionnary'], true, true);
+					} else {
+						$this->params['options'] = $this->field_params['values'];
+					}
 				} else {
 					$this->params['options'] = array();
 				}

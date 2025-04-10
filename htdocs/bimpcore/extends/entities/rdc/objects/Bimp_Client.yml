@@ -225,16 +225,31 @@ views:
                     fields_table:
                         name: param_rdc
                   
-                  -   type: custom
-                      col_lg: 12
-                      col_md: 12
-                      col_sm: 12
-                      custom:
-                          callback:
-                              method: renderChildrenList
-                              params:
-                                  - chiffre_affaire
-                                  - default
+                  - type: custom
+                    col_lg: 6
+                    col_md: 6
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenList
+                            params:
+                                - concurrence
+                                - default
+                  
+    ca:
+        title: CA
+        rows:
+              - cols:
+                  - type: custom
+                    col_lg: 12
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                      callback:
+                          method: renderChildrenList
+                          params:
+                              - chiffre_affaire
+                              - default
                   - type: custom
                     col_lg: 6
                     col_md: 12
@@ -295,17 +310,6 @@ views:
                             params:
                                 - chiffre_affaire
                                 - evol2
-                  
-                  - type: custom
-                    col_lg: 6
-                    col_md: 6
-                    col_sm: 12
-                    custom:
-                        callback:
-                            method: renderChildrenList
-                            params:
-                                - concurrence
-                                - default
 
 forms:
     default:

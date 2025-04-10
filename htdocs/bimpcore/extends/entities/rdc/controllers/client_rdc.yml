@@ -26,6 +26,19 @@ sections:
                 view:
                     object: client
                     name: default
+          - id: ca
+            title: CA
+            ajax_render_method:
+                object: client
+                method: renderView
+                params:
+                    - ca
+            icon: fas_chart-bar
+#            struct:
+#                type: view
+#                view:
+#                    object: client
+#                    name: ca
           - id: contact
             title: Contacts
             icon: fas_address-book

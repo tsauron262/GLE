@@ -137,7 +137,7 @@ class BiAPI extends BimpAPI
 	{
 		$mois = array("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12");
 		$annee = array("2020", "2021", "2022", "2023", "2024", "2025");
-		$categorie = 1;
+		$categorie = 0;
 
 		foreach ($annee as $val) {
 			$return = $this->traiteStats($val, 0, $categorie);

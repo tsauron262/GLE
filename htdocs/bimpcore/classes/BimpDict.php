@@ -42,6 +42,17 @@ class BimpDict
 		return array();
 	}
 
+	public static function getValuesInvertedArray($dict_code, $active_only = true, $include_empty = false, $empty_value = '', $empty_label = '')
+	{
+		$dict = BimpCache::findBimpObjectInstance('bimpcore', 'BimpDictionnary', array('code' => $dict_code));
+
+		if (BimpObject::objectLoaded($dict)) {
+			return $dict->getValuesInvertedArray($active_only, $include_empty, $empty_value, $empty_label);
+		}
+
+		return array();
+	}
+
 	public static function addDefaultDictionnary($code, $name, $active = 1, $values_children_name = 'values', $key_field = 'code', $filters = array(), &$errors = array())
 	{
 		$id_dict = self::getDictionnaryId($code);

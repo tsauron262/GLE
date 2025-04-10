@@ -85,9 +85,10 @@ class BimpDictionnary extends BimpObject
 
 				if (!isset(self::$cache[$cache_key]) || $force_reload) {
 					$values_params = $this->getData('values_params');
-					$values = BimpCache::getCacheServeur('dictionnary_' . $code);
 
-					if (empty($values) || $force_reload) {
+					if (!$force_reload && BimpCache::cacheServerExists('dictionnary_' . $code)) {
+						$values = BimpCache::getCacheServeur('dictionnary_' . $code);
+					} else {
 						$values = array();
 
 						$key_field = (isset($values_params['key_field']) ? $values_params['key_field'] : 'id');

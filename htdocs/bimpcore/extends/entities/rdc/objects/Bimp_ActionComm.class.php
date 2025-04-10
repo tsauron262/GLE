@@ -11,7 +11,7 @@ class Bimp_ActionComm_ExtEntity extends Bimp_ActionComm {
 		'6' => array('label' => 'Réclamation')
 	);
 
-	public static $c_actioncomm_AfficheEchange = array('1', '5'); // 'AC_EMAIL'
+	public static $c_actioncomm_AfficheEchange = array('1', '4', '14'); // 'AC_TEL', 'AC_EMAIL', 'AC_CHAT'
 
 	public function getIdsAfficheEchange()
 	{

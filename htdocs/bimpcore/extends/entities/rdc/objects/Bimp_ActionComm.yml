@@ -24,7 +24,7 @@ forms:
                 display_if:
                     field_name: fk_action
                     show_values: 
-                        callback: getIdsAfficheEchange
+                        callback: getIdsAfficheEchange            
                 
             link: unset
             users_assigned:
@@ -35,9 +35,12 @@ forms:
 fields:
     label:
         label: Sujet
-
+    fk_action:
+        label: Type d'échange
+    note:
+        label: Commentaire
     fk_motif_echange:
-        label: Motif de l'echange
+        label: Motif de l'échange
         values:
             array: motifEchange
     action_echange:

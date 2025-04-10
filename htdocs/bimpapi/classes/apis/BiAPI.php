@@ -83,9 +83,22 @@ class BiAPI extends BimpAPI
 //			'_x005B_CA_x0020_Total_x0020_HT_x005D_'=> 'ca',
 //		);
 		foreach($arrOutput['row'] as $ln){
+			$cat = 0;
 			$name = $ln['Vendeurs_x005B_VendeurNomSociete_x005D_'];
-			$val = $ln['_x005B_CA_x0020_Total_x0020_HT_x005D_']*10 / 10;
-			$newTab[$name] = $val;
+			if(isset($ln['_x005B_CA_x0020_par_x0020_Cat_x005D_'])){
+				$val = $ln['_x005B_CA_x0020_par_x0020_Cat_x005D_']*10 / 10;
+			}
+			elseif(isset($ln['_x005B_CA_x0020_Total_x0020_HT_x005D_'])){
+				$val = $ln['_x005B_CA_x0020_Total_x0020_HT_x005D_']*10 / 10;
+			}
+			if(isset($ln['FamillesProduitsSite_x005B_Level_5_Name_x005D_'])){
+				$cat = $ln['FamillesProduitsSite_x005B_Level_5_Name_x005D_'];
+			}
+			elseif(isset($ln['FamillesProduitsSite_x005B_Level_4_Name_x005D_'])){
+				$cat = $ln['FamillesProduitsSite_x005B_Level_4_Name_x005D_'];
+			}
+
+			$newTab[$name][$cat] = $val;
 		}
 
 		return $newTab;
@@ -116,20 +129,28 @@ class BiAPI extends BimpAPI
 	{
 		$mois = array("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12");
 		$annee = array("2020", "2021", "2022", "2023", "2024", "2025");
+		$categorie = 1;
 
 		foreach ($annee as $val) {
-			$return = $this->traiteStats($val);
+			$return = $this->traiteStats($val, 0, $categorie);
 			$warnings[] = "<pre>".print_r($return,1);
 			foreach($mois as $val2){
-				$return = $this->traiteStats($val, $val2);
+				$return = $this->traiteStats($val, $val2, $categorie);
 				$warnings[] = "<pre>".print_r($return,1);
 			}
 		}
 	}
 
-	public function getStats($annee, $mois = 0){
+	public function getStats($annee, $mois = 0, $catergorie = 0){
 		$req = 'EVALUATE SUMMARIZECOLUMNS(
 	Vendeurs[VendeurNomSociete],';
+		if ($catergorie){
+			$req .= '
+     FamillesProduitsSite[Level_2_Name],
+    FamillesProduitsSite[Level_3_Name],
+    FamillesProduitsSite[Level_4_Name],
+    FamillesProduitsSite[Level_5_Name],';
+		}
 		$req .= 'KEEPFILTERS( TREATAS( {'.$annee.'}, Calendrier[Année] )),';
 		if($mois > 0){
 			$req .= 'KEEPFILTERS( TREATAS( {'.(int) $mois.'}, Calendrier[Mois Numéro] )),';
@@ -143,32 +164,41 @@ ORDER BY
 		return $return;
 	}
 
-	public function traiteStats($annee, $mois = 0){
+	public function traiteStats($annee, $mois = 0, $catergorie = 0){
+		BimpObject::loadClass('bimpcore', 'Bimp_ChiffreAffaire');
 		$errors = $warnings = array();
 		$ok = $bad = 0;
-		$return = $this->getStats($annee, $mois);
-		foreach($return as $key => $val){
-			$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('nom' => $key));
-			if(!$soc || !$soc->isLoaded())
-				$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('name_alias' => $key));
-			if(!$soc || !$soc->isLoaded())
-				$bad++;
-			else {
-				$ok++;
-				if($mois == 0)
-					$date = $annee.'-01-01';
-				else
-					$date = $annee.'-'.$mois.'-01';
-				$dataFiltre = array(
-					'id_obj' => $soc->id,
-					'type_obj' => 0,
-					'fk_period' => ($mois == 0)? 0 : 3,
-					'debut_period' => $date,
-				);
-				$data = array(
-					'ca' => $val
-				);
-				BimpObject::createOrUpdateBimpObject('bimpcore', 'Bimp_ChiffreAffaire', $dataFiltre, $data, true, true, $errors, $warnings);
+		$return = $this->getStats($annee, $mois, $catergorie);
+//		echo '<pre>';print_r($return);die;
+		foreach($return as $key => $tabT){
+			foreach($tabT as $cat => $val) {
+//				if(is_string($cat))
+//					$cat = Bimp_ChiffreAffaire::getCategoryId($cat);
+//				$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('nom' => $key));
+//				if (!$soc || !$soc->isLoaded()) {
+//					$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('name_alias' => $key));
+//				}
+//				if (!$soc || !$soc->isLoaded()) {
+//					$bad++;
+//				} else {
+//					$ok++;
+//					if ($mois == 0) {
+//						$date = $annee . '-01-01';
+//					} else {
+//						$date = $annee . '-' . $mois . '-01';
+//					}
+//					$dataFiltre = array(
+//						'id_obj'       => $soc->id,
+//						'fk_category'       => $cat,
+//						'type_obj'     => 0,
+//						'fk_period'    => ($mois == 0) ? 0 : 3,
+//						'debut_period' => $date,
+//					);
+//					$data = array(
+//						'ca' => $val
+//					);
+//					BimpObject::createOrUpdateBimpObject('bimpcore', 'Bimp_ChiffreAffaire', $dataFiltre, $data, true, true, $errors, $warnings);
+//				}
 			}
 		}
 		return $ok.' Ok'.' '.$bad.' Bad'.print_r($warnings,1).print_r($errors,1);

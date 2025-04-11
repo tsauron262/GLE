@@ -551,7 +551,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$code = 'Attribution_rdc';
 				$sujet = 'Attribution Compte';
 				$msg = 'Le compte ' . $this->getLink() . ' vient de vous être attribué par ' . $user->getNomUrl();
-				BimpUserMsg::envoiMsg($code, $sujet, $msg, $attr);
+//				BimpUserMsg::envoiMsg($code, $sujet, $msg, $attr);
 			}
 		}
 	}

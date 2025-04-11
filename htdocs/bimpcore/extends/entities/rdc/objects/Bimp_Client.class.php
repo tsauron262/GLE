@@ -23,6 +23,13 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 //self::BS_SAV_CANCELED_BY_CUST  => array('label' => 'Annulé par le client', 'icon' => 'fas_times', 'classes' => array('danger')),
 //self::BS_SAV_CANCELED_BY_USER  => array('label' => 'Annulé par utilisateur', 'icon' => 'fas_times', 'classes' => array('danger')),
 
+	public static $categorieMaitreRdc = array(
+		0 => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
+		1 => array('label' => 'Catégrorie 1'),
+		2 => array('label' => 'Catégorie 2'),
+		3 => array('label' => 'Catégorie 3'),
+		4 => array('label' => 'Catégorie 4'),
+	);
 	public static $statut_rdc_live = 11;
 	public static $statut_rdc_prospect_array = array(3, 4);
 
@@ -46,7 +53,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 //			13, 14, // suspendu, férmé
 //		),
 		13 => array( // suspendu
-			12
+
 		),
 		14 => array( // Fermé
 			12
@@ -192,9 +199,21 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		else return '';
 	}
 
+	public function getUrlMarchand()	{
+		if ($this->getData('url')) {
+			$url = $this->getData('url');
+			return $this->getHref($url);
+		}
+		else return ' ';
+	}
+
 	public function getHref($url, $target="_blank")
 	{
-		$href = '<a href="' . $url . '" target="' . $target . '"><i <i class="fas fa-external-link-alt"></i></a>';
+		if (substr($url, 0, 4) != 'http')	{
+			$url = 'https://' . $url;
+		}
+//		$href = '<a href="' . $url . '" target="' . $target . '"><i class="fas fa-external-link-alt"></></a>';
+		$href = '<a href="' . $url . '" target="' . $target . '">' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
 		return $url . " " . $href;
 	}
 
@@ -261,6 +280,14 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return false;
 	}
 
+	public function isPrestataireSourceRequired()
+	{
+		$source = $this->getData('fk_source_rdc');
+		if ($source == 20) { // Prestataire/agrégateur
+			return true;
+		}
+		return false;
+	}
 	public function renderHeaderStatusExtra()	{
 		return '';
 	}
@@ -292,6 +319,9 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return $users;
 	}
 
+	public function getIdSourcePresta()	{
+		return array(BimpCore::getConf('id_source_presta'));
+	}
 	public function renderPageView()
 	{
 		global $user;
@@ -344,6 +374,14 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function update(&$warnings = array(), $force_update = false)
 	{
+		$errors = array();
+		if ( BimpTools::getPostFieldValue('fk_source_rdc') == BimpCore::getConf('id_source_presta', 20) && strlen(BimpTools::getPostFieldValue('presta_source')) <= 0) {
+			$errors[] = 'Le champ Prestataire/agrégateur est obligatoire';
+		}
+
+		if (count($errors))
+			return $errors;
+
 		$this->checkAttr();	// envoi de mail si changement d'attribtion
 		$this->checkPassageLive();
 

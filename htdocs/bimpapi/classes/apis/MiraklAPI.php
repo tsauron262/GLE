@@ -37,13 +37,29 @@ class MiraklAPI extends BimpAPI
 
 	public function testRequest(&$errors = array(), &$warnings = array())
 	{
-		$data = $this->getShopInfo('', $errors);
+//		$data = $this->getShopInfo('', $errors);
+//
+//		if(isset($data['shops']))
+//			$warnings[] = count($data['shops']).' résultats';
 
-		if(isset($data['shops']))
-			$warnings[] = count($data['shops']).' résultats';
+		$hier = new DateTime('-1 day');
+		$socs = BimpOBject::getBimpObjectObjects('bimpcore', 'Bimp_Client', array(
+			'shopid' => array('operator' => '>', 'value' => 0),
+			'date_maj_mirakl' => array(
+				'or_field' => array(
+					array('operator' => '<', 'value' => $hier->format('Y-m-d H:i:s')),
+					'IS_NULL'
+				)
+			)
+		));
+		foreach($socs as $soc){
+			$soc->appelMiraklS20($warnings);
+		}
+
+		$warnings[] = count($socs).' résultats';
 
 
-		return $data;
+//		return $data;
 	}
 
 	public function getShopInfo($shop_id, &$errors = array())

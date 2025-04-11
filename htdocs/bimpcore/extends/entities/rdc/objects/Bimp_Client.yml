@@ -94,6 +94,9 @@ fields:
         type: text
     url:
         label: site internet marchand
+    date_maj_mirakl:
+        label: Date de mise à jour Mirakl
+        type: datetime
         
     outstanding_limit: unset
     outstanding_limit_credit_check: unset
@@ -137,6 +140,7 @@ fields_tables:
         icon: fas_briefcase
         rows:
             - field: shopid
+            - field: date_maj_mirakl
             - field: name_alias
               label: Nom de la boutique
               edit: 1

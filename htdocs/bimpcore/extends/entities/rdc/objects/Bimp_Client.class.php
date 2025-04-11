@@ -353,7 +353,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function actionSynchroMirakl($data, &$success){
 		$errors = $warnings = array();
 		$success = 'Synchro OK';
-		$this->appelMiraklS20($this->getData('shopid'), $errors);
+		$this->appelMiraklS20($errors);
 		return array(
 			'errors'   => $errors,
 			'warnings' => $warnings
@@ -366,8 +366,9 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		parent::onSave($errors, $warnings);
 	}
 
-	public function appelMiraklS20($shopid, &$warnings = array())
+	public function appelMiraklS20(&$warnings = array())
 	{
+		$shopid = $this->getData('shopid');
 		if(BimpTools::isModuleDoliActif('bimpapi')) {
 			require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 			$api = BimpAPI::getApiInstance('mirakl');
@@ -447,6 +448,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 					$this->set('fk_statut_rdc', self::$statut_rdc_live);
 					$this->set('date_changement_statut_rdc', date('Y-m-d'));
 				}
+				$this->set('date_maj_mirakl', date('Y-m-d H:i:s'));
 				$this->update($warnings);
 			}
 		}

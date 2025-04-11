@@ -85,6 +85,7 @@ class BiAPI extends BimpAPI
 		foreach($arrOutput['row'] as $ln){
 			$cat = 0;
 			$name = $ln['Vendeurs_x005B_VendeurNomSociete_x005D_'];
+			$shopId = $ln['orders_x005B_shop_id_x005D_'];
 			if(isset($ln['_x005B_CA_x0020_par_x0020_Cat_x005D_'])){
 				$val = $ln['_x005B_CA_x0020_par_x0020_Cat_x005D_']*10 / 10;
 			}
@@ -106,7 +107,7 @@ class BiAPI extends BimpAPI
 			}
 
 			if($name != '')
-				$newTab[$name][$cat] = $val;
+				$newTab[$shopId][$cat] = $val;
 		}
 
 		return $newTab;
@@ -140,18 +141,19 @@ class BiAPI extends BimpAPI
 		$categorie = 0;
 
 		foreach ($annee as $val) {
-			$return = $this->traiteStats($val, 0, $categorie);
-			$warnings[] = "<pre>".print_r($return,1);
+			$return = $this->traiteStats($val, 0, $categorie, $warnings);
+//			$warnings[] = "<pre>".print_r($return,1);
 			foreach($mois as $val2){
-				$return = $this->traiteStats($val, $val2, $categorie);
-				$warnings[] = "<pre>".print_r($return,1);
+				$return = $this->traiteStats($val, $val2, $categorie, $warnings);
+//				$warnings[] = "<pre>".print_r($return,1);
 			}
 		}
 	}
 
 	public function getStats($annee, $mois = 0, $catergorie = 0){
 		$req = 'EVALUATE SUMMARIZECOLUMNS(
-	Vendeurs[VendeurNomSociete],';
+	Vendeurs[VendeurNomSociete],
+	orders[shop_id],';
 		if ($catergorie){
 			$req .= '
      FamillesProduitsSite[Level_2_Name],
@@ -172,10 +174,10 @@ ORDER BY
 		return $return;
 	}
 
-	public function traiteStats($annee, $mois = 0, $catergorie = 0)
+	public function traiteStats($annee, $mois = 0, $catergorie = 0, &$warnings = array())
 	{
 		BimpObject::loadClass('bimpcore', 'Bimp_ChiffreAffaire');
-		$errors = $warnings = array();
+		$errors = array();
 		$ok = $bad = 0;
 		$return = $this->getStats($annee, $mois, $catergorie);
 //		echo '<pre>';print_r($return);die;
@@ -184,11 +186,12 @@ ORDER BY
 
 		foreach ($return as $key => $tabT) {
 			foreach ($tabT as $cat => $val) {
-				$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('nom' => $key));
+				$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('shopId' => $key));
+//				if (!$soc || !$soc->isLoaded()) {
+//					$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('name_alias' => $key));
+//				}
 				if (!$soc || !$soc->isLoaded()) {
-					$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('name_alias' => $key));
-				}
-				if (!$soc || !$soc->isLoaded()) {
+					$warnings[] = 'Societe introuvable : ' . $key;
 					$bad++;
 				} else {
 					$ok++;
@@ -230,7 +233,8 @@ ORDER BY
 				}
 			}
 		}
-		return $ok.' Ok'.' '.$bad.' Bad'.print_r($warnings,1).print_r($errors,1);
+		if($bad > 0)
+			return $ok.' Ok'.' '.$bad.' Bad'.print_r($warnings,1).print_r($errors,1);
 	}
 
 

@@ -376,7 +376,7 @@ class BC_Graph extends BC_Panel
                 }
 
 				foreach($this->userOptions as $option => $value){
-					if($this->object->field_exists($option))
+					if($this->object->field_exists($option) && $value != 0)
 						$filters[$option] = $value;
 				}
 

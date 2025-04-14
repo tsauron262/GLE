@@ -553,7 +553,17 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$code = 'Attribution_rdc';
 				$sujet = 'Attribution Compte';
 				$msg = 'Le compte ' . $this->getLink() . ' vient de vous être attribué par ' . $user->getNomUrl();
-				BimpUserMsg::envoiMsg($code, $sujet, $msg, $attr);
+				/*todo + e 15 000 mail envoyé
+				Envoyé le
+11-04-2025 15:43:45
+De
+no-reply@bimp.fr
+Réponse-à
+no-reply@bimp.fr
+À
+maeva.ralijaona@rueducommerce.com*/
+
+//				BimpUserMsg::envoiMsg($code, $sujet, $msg, $attr);
 			}
 		}
 	}

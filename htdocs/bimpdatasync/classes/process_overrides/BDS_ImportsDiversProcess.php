@@ -109,7 +109,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 						'label'                  => 'Création des clients',
 						'on_error'               => 'continue',
 						'elements'               => array_keys($rows),
-						'nbElementsPerIteration' => 20
+						'nbElementsPerIteration' => 100
 					)
 				);
 			}
@@ -138,8 +138,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			'import_key'		=> 'Id',
 		);
 		$keys = array(
-			'nom',
-			'siren'
+			'import_key'
 		);
 		$correspondance2 = array_flip($correspondance);
 		$ok = array();
@@ -183,6 +182,12 @@ class BDS_ImportsDiversProcess extends BDSProcess
 						}
 					}
 				}
+				if($data['nom'] == 'Required Field')
+					$data['nom'] = $data['name_alias'];
+//				if(isset($data['shopid']) && $data['shopid'] > 0)
+//					$dataFiltres = array('shopid' => $data['shopid']);
+//				else
+//					$dataFiltres['shopid'] = 0;
 				$errors = $warnings = array();
 //				echo '<pre>';print_r($data);
 				$obj = BimpObject::createOrUpdateBimpObject('bimpcore', 'Bimp_Client', $dataFiltres, $data, true, true, $errors, $warnings);
@@ -233,7 +238,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 						'label'                  => 'Création des contacts',
 						'on_error'               => 'continue',
 						'elements'               => array_keys($rows),
-						'nbElementsPerIteration' => 20
+						'nbElementsPerIteration' => 200
 					)
 				);
 			}
@@ -256,9 +261,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			'import_key'		=> 'Id',
 		);
 		$keys = array(
-			'fk_soc',
-			'lastname',
-			'firstname'
+			'import_key'
 		);
 		$correspondance2 = array_flip($correspondance);
 		$ok = array();
@@ -304,7 +307,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 						$data['fk_soc'] = $fk_soc;
 						$dataFiltres['fk_soc'] = $fk_soc;
 					} else {
-						$this->Error('Société non trouvée', null, $ln['AccountId'].' ligne '.($id+1));
+						$this->Error('Société non trouvée : '.strlen($ln['LastName']), null, $ln['AccountId'].' ligne '.($id+1));
 						continue 2;
 					}
 				}

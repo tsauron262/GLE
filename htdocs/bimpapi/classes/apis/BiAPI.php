@@ -136,18 +136,40 @@ class BiAPI extends BimpAPI
 
 	public function testRequest(&$errors = array(), &$warnings = array())
 	{
-		$mois = array("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12");
-		$annee = array("2020", "2021", "2022", "2023", "2024", "2025");
-		$categorie = 0;
+		$this->majCaWithNbDay(10, $warnings, $errors);
 
+
+//		$mois = array("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12");
+//		$annee = array("2024", "2025");
+//		$categorie = 0;
+//		$this->majCa($annee, $mois, 0, $warnings, $errors);
+	}
+
+	public function majCaWithNbDay($nbDay, &$warnings = array(), &$errors = array()){
+		$date = new DateTime();
+		$date->modify('-'.$nbDay.' day');
+		$mois = array($date->format('m'));
+		$annee = array($date->format('Y'));
+		$this->majCa($annee, $mois, 0, $warnings, $errors);
+		$this->majCa($annee, $mois, 1, $warnings, $errors);
+	}
+
+	public function majCa($annee, $mois = array(), $categ = 0, &$warnings = array(), &$errors = array())
+	{
 		foreach ($annee as $val) {
-			$return = $this->traiteStats($val, 0, $categorie, $warnings);
+			$return = $this->traiteStats($val, 0, $categ, $warnings);
 //			$warnings[] = "<pre>".print_r($return,1);
 			foreach($mois as $val2){
-				$return = $this->traiteStats($val, $val2, $categorie, $warnings);
+				$return = $this->traiteStats($val, $val2, $categ, $warnings);
 //				$warnings[] = "<pre>".print_r($return,1);
 			}
 		}
+		$warnings2 = array();
+		foreach($warnings as $msg){
+			if(!in_array($msg, $warnings2))
+				$warnings2[] = $msg;
+		}
+		$warnings = $warnings2;
 	}
 
 	public function getStats($annee, $mois = 0, $catergorie = 0){

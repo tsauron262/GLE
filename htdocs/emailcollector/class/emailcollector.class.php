@@ -2898,7 +2898,8 @@ class EmailCollector extends CommonObject
 									}
 								}
 							}
-						} elseif ($operation['type'] == 'recordjoinpiece') {
+						}
+						elseif ($operation['type'] == 'recordjoinpiece') {
 							$data = [];
 							if (getDolGlobalString('MAIN_IMAP_USE_PHPIMAP')) {
 								foreach ($attachments as $attachment) {

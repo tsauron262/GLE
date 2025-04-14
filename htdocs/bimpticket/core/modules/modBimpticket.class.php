@@ -61,7 +61,7 @@ class modBimpticket extends DolibarrModules
 		$this->picto = 'generic';
 
 		$this->module_parts = array(
-			'hooks'  => array('printTopRightMenu', 'toprightmenu', "searchform"),  // Set here all hooks context you want to support)
+			'hooks'  => array('printTopRightMenu', 'toprightmenu', "searchform", "emailcolector"),  // Set here all hooks context you want to support)
 			"models" => 1
 		);
 

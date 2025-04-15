@@ -22,9 +22,43 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 		4 => 'Semaine',
 	);
 
-	// getters
-	public function getParentObject($type)
+	public function getParentFilters()
 	{
+		$return = array();
+		if (!$this->isLoaded()){
+			foreach (static::$parentObjectArray as $type => $name) {
+				if (is_a($this->parent, $name)) {
+					$return['type_obj'] = $type;
+				}
+			}
+			if(isset($this->parent->id)){
+				$return['id_obj'] = $this->parent->id;
+			}
+			$params = json_decode(BimpTools::getValue('extra_data/param_filters', '{}', 'array'), true);
+			if(isset($params['id_obj']) && !isset($return['id_obj'])){
+				$return['id_obj'] = $params['id_obj'];
+			}
+			if(isset($params['type_obj'])&& !isset($return['type_obj'])){
+				$return['type_obj'] = $params['type_obj'];
+			}
+		}
+		else {
+			$return['type_obj'] = $this->getData('type_obj');
+			$return['id_obj'] = $this->getData('id_obj');
+		}
+
+		if(!isset($return['id_obj']))
+			die('imposible de trouvé l\'id de l\'objet parent'.$this->isLoaded().'<pre>'.print_r($_REQUEST, true));
+		if(!isset($return['type_obj']))
+			die('imposible de trouvé le type de  l\'objet parent'.$this->isLoaded().'<pre>'.print_r($_REQUEST, true));
+
+		return $return;
+	}
+
+	// getters
+	public function getParentObject()
+	{
+		$type = BimpTools::getPostFieldValue('type_obj', $this->getData('type_obj'), 'int');
 		return self::$parentObjectArray[$type];
 	}
 
@@ -45,13 +79,13 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 		return static::$parentObjectArray[$type];
 	}
 
-	public function getDefaultIdParenrt()
-	{
-		$type = BimpTools::getPostFieldValue('type_obj', $this->getData('type_obj'), 'int');
-		if ($type == 0 && BimpTools::getPostFieldValue('action') == 'loadObjectForm') {
-			return BimpTools::getPostFieldValue('id', 0, 'int');
-		}
-	}
+//	public function getDefaultIdParenrt()
+//	{
+//		$type = BimpTools::getPostFieldValue('type_obj', $this->getData('type_obj'), 'int');
+//		if ($type == 0 && BimpTools::getPostFieldValue('action') == 'loadObjectForm') {
+//			return BimpTools::getPostFieldValue('id', 0, 'int');
+//		}
+//	}
 
 	public function getPeriodsRdc()
 	{
@@ -113,15 +147,12 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 	public function getCategCa($type = 1){
 		$result = array();
 		$categories = BimpDict::getValuesArray('ca_categories', true, false);
-		$id = $this->parent->id;
-		if($id == 0){
-			$id = BimpTools::getPostFieldValue('id', 0, 'int');
-		}
+		$filters = $this->getParentFilters();
 		if($type == 1)
 			$field = 'fk_category';
 		else
 			$field = 'fk_category'.$type;
-		$sql = $this->db->db->query('SELECT DISTINCT('.$field.') as fk_category FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$id);
+		$sql = $this->db->db->query('SELECT DISTINCT('.$field.') as fk_category FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$filters['id_obj'].' AND type_obj = '.$filters['type_obj']);
 		while($ln = $this->db->db->fetch_object($sql)){
 			$result[$ln->fk_category] = $categories[$ln->fk_category]['label'];
 		}
@@ -133,19 +164,13 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 	{
 		$fields = array();
 		$categories = BimpDict::getValuesArray('ca_categories', true, false);
-		$id = $this->parent->id;
-		if($id == 0){
-			$id = BimpTools::getPostFieldValue('id', 0, 'int');
-		}
-		if($id == 0){
-			echo '<pre>';print_r($_REQUEST);die;
-			$id = BimpTools::getPostFieldValue('id', 0, 'int');
-		}
+		$filters = $this->getParentFilters();
+
 		if($type == 1)
 			$field = 'fk_category';
 		else
 			$field = 'fk_category'.$type;
-		$sql = $this->db->db->query('SELECT DISTINCT('.$field.') as categ FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$id);
+		$sql = $this->db->db->query('SELECT DISTINCT('.$field.') as categ FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$filters['id_obj'].' AND type_obj = '.$filters['type_obj']);
 		while($ln = $this->db->db->fetch_object($sql)){
 			$idC = $ln->categ;
 			if ($idC > 0) {

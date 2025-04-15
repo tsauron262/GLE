@@ -66,6 +66,38 @@ class ActionsBimpticket {
 			return -1;
 		}
 	}
+
+	function addMoreActionsEmailCollector($parameters, &$object, &$action, $hookmanager)
+	{
+		$this->results['hookBimpticket'] = "Traitement Bimp_Ticket";
+		return 0;
+	}
+
+	function doCollectImapOneCollector($parameters, &$object, &$action, $hookmanager)
+	{
+		global $db;
+//		echo '<pre>';print_r($parameters['imapemail']);echo '</pre>';
+		if(isset($parameters['objectemail']) && is_a($parameters['objectemail'], 'ticket')){
+			$ticket = $parameters['objectemail'];
+			$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
+
+			$contact_static = new Contact($db);
+			$contact_static->fetch(0, null, '', $Bimp_Ticket->getData('origin_email'));
+			if($contact_static->id > 0 AND $contact_static->fk_soc == $Bimp_Ticket->getData('fk_soc')){
+				$ticket->add_contact($contact_static->id, 'SUPPORTCLI', 'external');
+			}
+//			echo $Bimp_Ticket->printData();
+//			die('yes');
+		}
+
+
+//		echo '<pre>';print_r($parameters['imapemail']->bodies['html']);echo '</pre>';
+//		echo '<pre>';print_r($parameters['imapemail']);echo '</pre>';
+//		echo '<br/><br/><br/>';
+//		echo '<pre>';print_r($object);echo '</pre>';
+//		echo '<pre>';print_r($action);echo '</pre>';
+		return 1;
+	}
 }
 
 

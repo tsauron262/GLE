@@ -412,7 +412,7 @@ class GSX_Repair extends BimpObject
 
         $sav = $this->getChildObject('sav');
         if (BimpObject::objectLoaded($sav)) {
-            $dir = '/bimpcore/sav/' . $sav->id;
+            $dir = $this->getFilesDir();
             $fileName = str_replace('/', '_', 'Etiquette_' . $partNumber . '_' . $returnOrderNumber . '_' . $sequenceNumber . '.pdf');
             $filePath = DOL_DATA_ROOT . $dir . '/' . $fileName;
 
@@ -459,6 +459,7 @@ class GSX_Repair extends BimpObject
             }
 
             if (file_exists($filePath)) {
+				$fileUrl = $this->getFileUrl($fileName);
                 $fileUrl = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . 'sav/' . $sav->id . '/' . $fileName;
             }
         } else {

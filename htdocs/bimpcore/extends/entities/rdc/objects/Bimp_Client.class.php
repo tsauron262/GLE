@@ -19,12 +19,19 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		13 => array('label' => 'Suspendu', 'icon' => 'fas_thumbs-down', 'classes' => array('danger')),
 		14 => array('label' => 'Fermé', 'icon' => 'fas_thumbs-down', 'classes' => array('danger'))
 	);
+
+	const PENDING_SUBMISSION = 1;
+	const PENDING_APPROVAL = 2;
+	const APPROVED = 3;
+	const REFUSED = 4;
 	public static $statut_kyc_list = array(
 		0 => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
-		1 => array('label' => 'En attente de soumission KYC', 'icon' => 'fas_hourglass', 'classes' => array('important')),
-		2 => array('label' => 'Vérification KYC en cours', 'icon' => 'fas_spinner' , 'classes' => array('important')),
-		3 => array('label' => 'KYC validé', 'icon' => 'fas_check', 'classes' => array('success')),
+		self::PENDING_SUBMISSION => array('label' => 'En attente de soumission KYC', 'icon' => 'fas_hourglass', 'classes' => array('important')),
+		self::PENDING_APPROVAL => array('label' => 'Vérification KYC en cours', 'icon' => 'fas_spinner' , 'classes' => array('important')),
+		self::APPROVED => array('label' => 'KYC validé', 'icon' => 'fas_check', 'classes' => array('success')),
+		self::REFUSED => array('label' => 'KYC non valide', 'icon' => 'fas_times', 'classes' => array('danger')),
 	);
+
 
 //self::BS_SAV_RESERVED          => array('label' => 'Réservé par le client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
 //self::BS_SAV_CANCELED_BY_CUST  => array('label' => 'Annulé par le client', 'icon' => 'fas_times', 'classes' => array('danger')),
@@ -378,6 +385,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function getIdSourcePresta()	{
 		return array(BimpCore::getConf('id_source_presta'));
 	}
+
 	public function renderPageView()
 	{
 		global $user;
@@ -482,8 +490,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$this->set('shopid', 0);
 			} else {
 				$shop = $data['shops'][0];
-//				echo '<pre>'; print_r($shop); echo '</pre>';die;
+//				echo '<pre>'; print_r($shop); echo '</pre>';
 				// traitement des données reçues : mise a jour du tiers
+				$kyc = constant('self::' . $shop['kyc']['status']);
+				if ($kyc)
+					$this->set('fk_statut_kyc', $kyc);
 				$this->set('nom', $shop['pro_details']['corporate_name']);
 				$this->set('name_alias', $shop['shop_name']);
 				$add = $shop['contact_informations']['street1'];
@@ -516,7 +527,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				} else { // pas de contact connu => on en crée un
 					$this->createContact($shop['contact_informations']);
 				}
-
 				// surcharge attribution
 				if ($shop['assignees'])	{
 					$emailAssign = strtolower($shop['assignees'][0]['email']);

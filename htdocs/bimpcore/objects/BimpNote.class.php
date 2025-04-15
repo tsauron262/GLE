@@ -793,7 +793,6 @@ class BimpNote extends BimpObject
                 }
                 $parent = $this->getParentInstance();
                 $sujet = 'Message ' . $parent->getRef();
-                die($sujet);
 
                 $bimpMail = new BimpMail($this->getParentInstance(), 'Nouveau message', $mail, $this->getMailFrom(), $html);
                 $bimpMail->send($errors);

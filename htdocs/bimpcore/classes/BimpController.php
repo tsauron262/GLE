@@ -1959,18 +1959,32 @@ class BimpController
                             $html = BimpRender::renderAlerts('Erreur de configuration - contenu du champ personnalisé non défini');
                         }
                     } elseif ($object->config->isDefined('fields/' . $field_name)) {
-                        $field = new BC_Field($object, $field_name, true, 'fields', $force_edit);
-                        $field->name_prefix = $field_prefix;
-                        $field->display_card_mode = 'visible';
+						$form = new BC_Form($object, $id_parent, $form_name, 1, true);
+						$form->fields_prefix = $field_prefix;
+						if (!is_null($form->config_path)) {
+							foreach ($form->params['rows'] as $row) {
+								if ($object->config->isDefined($form->config_path . '/rows/' . $row . '/field')) {
+									$form_field = $object->getConf($form->config_path . '/rows/' . $row . '/field', '');
+									if ($form_field && $form_field === $field_name) {
+										$row_params = BimpComponent::fetchParamsStatic($object->config, $form->config_path . '/rows/' . $row, BC_Form::$row_params);
+										$html = $form->renderFieldRow($field_name, $row_params, 3, true);
+									}
+								}
+							}
+						}
 
-                        if ($field->params['type'] === 'id_object' || ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')) {
-                            if ($field->params['create_form'])
-                                $html .= BC_Form::renderLoadFormObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], $field->params['create_form_label'], true);
-                            if ($field->params['edit_form'])
-                                $html .= BC_Form::renderLoadFormObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['edit_form'], $field->params['edit_form_values'], $field->params['edit_form_label'], true, null, '', -1);
-                        }
-                        $html .= $field->renderHtml();
-                        unset($field);
+//                        $field = new BC_Field($object, $field_name, true, 'fields', $force_edit);
+//                        $field->name_prefix = $field_prefix;
+//                        $field->display_card_mode = 'visible';
+//
+//                        if ($field->params['type'] === 'id_object' || ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')) {
+//                            if ($field->params['create_form'])
+//                                $html .= BC_Form::renderLoadFormObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], $field->params['create_form_label'], true);
+//                            if ($field->params['edit_form'])
+//                                $html .= BC_Form::renderLoadFormObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['edit_form'], $field->params['edit_form_values'], $field->params['edit_form_label'], true, null, '', -1);
+//                        }
+//                        $html .= $field->renderHtml();
+//                        unset($field);
                     } elseif ($object->config->isDefined('associations/' . $field_name)) {
                         $form = new BC_Form($object, $id_parent, $form_name, 1, true);
                         $bimpAsso = new BimpAssociation($object, $field_name);

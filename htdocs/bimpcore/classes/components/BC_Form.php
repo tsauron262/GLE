@@ -32,7 +32,7 @@ class BC_Form extends BC_Panel
 		'edit'               => array('data_type' => 'bool', 'default' => 1),
 		'display_if'         => array('data_type' => 'array', 'compile' => 1, 'default' => null),
 		'value'              => array('data_type' => 'any', 'default' => null),
-		'reload_icon'        => array('data_type' => 'bool', 'default' => 0)
+		'reload_btn'         => array('data_type' => 'bool', 'default' => 0)
 	);
 	public static $association_params = array(
 		'display_if' => array('data_type' => 'array'),
@@ -363,7 +363,7 @@ class BC_Form extends BC_Panel
 		return $html;
 	}
 
-	public function renderFieldRow($field_name, $params = array(), $label_cols = 3)
+	public function renderFieldRow($field_name, $params = array(), $label_cols = 3, $content_only = false)
 	{
 //        if (in_array($field_name, $this->object->params['fields']) && !$this->object->isFieldActivated($field_name)) {
 //            return '';
@@ -424,24 +424,26 @@ class BC_Form extends BC_Panel
 
 		$html = '';
 
-		$html .= '<div class="row formRow' . (($input_type === 'hidden' || (int) $params['hidden']) ? ' hidden' : '') . ($display_if ? ' display_if' : '') . '"';
-		if ($display_if) {
-			if (!is_null($params['display_if'])) {
-				$html .= BC_Field::renderDisplayifDataStatic($params['display_if'], $this->fields_prefix);
-			} else {
-				$html .= $field->renderDisplayIfData();
+		if (!$content_only) {
+			$html .= '<div class="row formRow' . (($input_type === 'hidden' || (int) $params['hidden']) ? ' hidden' : '') . ($display_if ? ' display_if' : '') . '"';
+			if ($display_if) {
+				if (!is_null($params['display_if'])) {
+					$html .= BC_Field::renderDisplayifDataStatic($params['display_if'], $this->fields_prefix);
+				} else {
+					$html .= $field->renderDisplayIfData();
+				}
 			}
-		}
-		$html .= '>';
+			$html .= '>';
 
-		$html .= '<div class="inputLabel col-xs-12 col-sm-' . (int) $label_cols . '">';
-		$html .= $label;
-		if ($required) {
-			$html .= '&nbsp;*';
-		}
-		$html .= '</div>';
+			$html .= '<div class="inputLabel col-xs-12 col-sm-' . (int) $label_cols . '">';
+			$html .= $label;
+			if ($required) {
+				$html .= '&nbsp;*';
+			}
+			$html .= '</div>';
 
-		$html .= '<div class="formRowInput field col-xs-12 col-sm-' . (12 - (int) $label_cols) . '">';
+			$html .= '<div class="formRowInput field col-xs-12 col-sm-' . (12 - (int) $label_cols) . '">';
+		}
 
 		if ($field->edit && $field->isEditable()) {
 			if ($field->params['type'] === 'id_object' ||
@@ -470,12 +472,14 @@ class BC_Form extends BC_Panel
 			$html .= self::renderReloadInputBtn($this->fields_prefix . $field->name);
 		}
 
-		$html .= '</div>';
-		$html .= '</div>';
+		if (!$content_only) {
+			$html .= '</div>';
+			$html .= '</div>';
 
-		if ($depends_on) {
-			$force_keep_new_value = (isset($this->params['values']['fields'][$field_name]) ? 1 : 0);
-			$html .= $field->renderDependsOnScript($this->identifier, $force_keep_new_value);
+			if ($depends_on) {
+				$force_keep_new_value = (isset($this->params['values']['fields'][$field_name]) ? 1 : 0);
+				$html .= $field->renderDependsOnScript($this->identifier, $force_keep_new_value);
+			}
 		}
 
 		$current_bc = $prev_bc;

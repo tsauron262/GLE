@@ -4,26 +4,26 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 {
 	public static $statusRdc = array(
 		0 => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
-		1 => array('label' => 'Prospection: demande entrante'),
-		2 => array('label' => 'Prospection: lead identifié'),
-		3 => array('label' => 'Prospection: prise de contact'),
-		4 => array('label' => 'Prospection: contact et présentation ok'),
-		5 => array('label' => 'Prospect KO'),
-		6 => array('label' => 'KYC en cours'),
-		7 => array('label' => 'MANGOPAY en cours'),
-		8 => array('label' => 'En attente onboarding catalogue'),
-		9 => array('label' => 'Onboarding catalogue KO'),
-		10 => array('label' => 'Onboarding catalogue OK'),
-		11 => array('label' => 'Live'),
-		12 => array('label' => 'Résilié'),
-		13 => array('label' => 'Suspendu'),
-		14 => array('label' => 'Fermé')
+		1 => array('label' => 'Prospection: demande entrante', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		2 => array('label' => 'Prospection: lead identifié', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		3 => array('label' => 'Prospection: prise de contact', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		4 => array('label' => 'Prospection: contact et présentation ok', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		5 => array('label' => 'Prospect KO', 'icon' => 'fas_suitcase', 'classes' => array('danger')),
+				6 => array('label' => 'KYC en cours'),
+				7 => array('label' => 'MANGOPAY en cours'),
+		8 => array('label' => 'En attente onboarding catalogue', 'icon' => 'fas_handshake', 'classes' => array('important')),
+		9 => array('label' => 'Onboarding catalogue KO', 'icon' => 'fas_handshake', 'classes' => array('danger')),
+		10 => array('label' => 'Onboarding catalogue OK', 'icon' => 'fas_handshake', 'classes' => array('success')),
+		11 => array('label' => 'Live', 'icon' => 'fas_thumbs-up', 'classes' => array('success')),
+		12 => array('label' => 'Résilié', 'icon' => 'fas_thumbs-down', 'classes' => array('danger')),
+		13 => array('label' => 'Suspendu', 'icon' => 'fas_thumbs-down', 'classes' => array('danger')),
+		14 => array('label' => 'Fermé', 'icon' => 'fas_thumbs-down', 'classes' => array('danger'))
 	);
 	public static $statut_kyc_list = array(
 		0 => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
-		1 => array('label' => 'En attente de soumission KYC'),
-		2 => array('label' => 'Vérification KYC en cours'),
-		3 => array('label' => 'KYC validé')
+		1 => array('label' => 'En attente de soumission KYC', 'icon' => 'fas_hourglass', 'classes' => array('important')),
+		2 => array('label' => 'Vérification KYC en cours', 'icon' => 'fas_spinner' , 'classes' => array('important')),
+		3 => array('label' => 'KYC validé', 'icon' => 'fas_check', 'classes' => array('success')),
 	);
 
 //self::BS_SAV_RESERVED          => array('label' => 'Réservé par le client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
@@ -310,7 +310,40 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	}
 
 	public function renderHeaderStatusExtra()	{
-		return '';
+		$html = '';
+		$tab = self::$statusRdc[$this->getData('fk_statut_rdc')];
+		$classes = '';
+		if (isset($tab['classes'])) {
+			foreach ($tab['classes'] as $class) {
+				$classes .= ($classes!='' ? ', ' : '') . $class;
+			}
+		}
+		$html .= '<div><span class="' .$classes . '">Statut de prospection&nbsp;: ';
+		$icon = '';
+		if(isset($tab['icon'])) {
+			$icon = BimpRender::renderIcon($tab['icon'], 'iconLeft');
+		}
+		$html .= $icon . $tab['label'];
+		$html .= '</span>';
+		$html .= '<br />Dernier changement de statut le&nbsp;: ' . date('d / m / Y', strtotime($this->getData('date_changement_statut_rdc')));
+		$html .= '</div><div>&nbsp;</div>';
+
+		$tab = self::$statut_kyc_list[$this->getData('fk_statut_kyc')];
+		$classes = '';
+		if (isset($tab['classes'])) {
+			foreach ($tab['classes'] as $class) {
+				$classes .= ($classes!='' ? ', ' : '') . $class;
+			}
+		}
+		$html .= '<div class="' .$classes . '">Statut KYC&nbsp;: ';
+		$icon = '';
+		if(isset($tab['icon'])) {
+			$icon = BimpRender::renderIcon($tab['icon'], 'iconLeft');
+		}
+		$html .= $icon . $tab['label'];
+		$html .= '</div><div>&nbsp;</div>';
+
+		return $html;
 	}
 
 	public function getStatusProperty()	{

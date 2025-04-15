@@ -148,7 +148,6 @@ fields_tables:
             - field: date_maj_mirakl
             - field: name_alias
               label: Nom de la boutique
-              edit: 1
             - label: Lien Mirakl
               value:
                   callback: getMiraklLink
@@ -159,9 +158,9 @@ fields_tables:
               edit:
                   callback:
                       method: isPriorityEditable
-            - field: fk_statut_rdc
-            - field: date_changement_statut_rdc
-            - field: fk_statut_kyc
+#            - field: fk_statut_rdc
+#            - field: date_changement_statut_rdc
+#            - field: fk_statut_kyc
             - field: delai_ouverture
             - field: fk_source_rdc
             - label: Suspition de contrefaçon

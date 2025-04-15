@@ -1973,6 +1973,7 @@ class BimpController
 							}
 						}
 
+						// Ancienne méthode :
 //                        $field = new BC_Field($object, $field_name, true, 'fields', $force_edit);
 //                        $field->name_prefix = $field_prefix;
 //                        $field->display_card_mode = 'visible';

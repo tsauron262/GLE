@@ -325,7 +325,9 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		}
 		$html .= $icon . $tab['label'];
 		$html .= '</span>';
-		$html .= '<br />Dernier changement de statut le&nbsp;: ' . date('d / m / Y', strtotime($this->getData('date_changement_statut_rdc')));
+		if ($this->getData('date_changement_statut_rdc')) {
+			$html .= '<br />Dernier changement de statut le&nbsp;: ' . date('d / m / Y', strtotime($this->getData('date_changement_statut_rdc')));
+		}
 		$html .= '</div><div>&nbsp;</div>';
 
 		$tab = self::$statut_kyc_list[$this->getData('fk_statut_kyc')];

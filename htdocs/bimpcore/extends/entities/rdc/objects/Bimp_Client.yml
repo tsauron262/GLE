@@ -68,7 +68,12 @@ fields:
         label: Source
         type: int
         values:
-            dict: societe_rdc_sources                
+            dict: societe_rdc_sources
+    fk_statut_kyc:
+        label: Statut KYC
+        type: int
+        values:
+            array: statut_kyc_list
     contrefacon:
         label: Suspition de contrefaçon
         type: bool
@@ -156,9 +161,12 @@ fields_tables:
                       method: isPriorityEditable
             - field: fk_statut_rdc
             - field: date_changement_statut_rdc
+            - field: fk_statut_kyc
             - field: delai_ouverture
             - field: fk_source_rdc
-            - field: contrefacon
+            - label: Suspition de contrefaçon
+              value:
+                  callback: getContrefacon
             - field: fk_group_rdc
             - field: fk_user_attr_rdc
     
@@ -320,14 +328,13 @@ forms:
             Priorité:
                 field: fk_priorite
                 edit:
-                    callback:
-                        method: isUserInGroup
-                        params:
-                            - BD
+                    callback: isUserBDKAM
             Prospection:
                 field: fk_statut_rdc
-                edit:
-                    callback: isProspectionEditable
+                edit: 0
+            Statut KYC:
+                field: fk_statut_kyc
+                edit: 0
             Source:
                 field: fk_source
             Suspition de contrefaçon:

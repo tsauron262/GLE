@@ -18,7 +18,14 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		12 => array('label' => 'Résilié'),
 		13 => array('label' => 'Suspendu'),
 		14 => array('label' => 'Fermé')
-);
+	);
+	public static $statut_kyc_list = array(
+		0 => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
+		1 => array('label' => 'En attente de soumission KYC'),
+		2 => array('label' => 'Vérification KYC en cours'),
+		3 => array('label' => 'KYC validé')
+	);
+
 //self::BS_SAV_RESERVED          => array('label' => 'Réservé par le client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
 //self::BS_SAV_CANCELED_BY_CUST  => array('label' => 'Annulé par le client', 'icon' => 'fas_times', 'classes' => array('danger')),
 //self::BS_SAV_CANCELED_BY_USER  => array('label' => 'Annulé par utilisateur', 'icon' => 'fas_times', 'classes' => array('danger')),
@@ -34,30 +41,42 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public static $statut_rdc_prospect_array = array(3, 4);
 
 	public static $actions_selon_statut_rdc = array(
+		0 => array( // N/C
+			1, 2, 3, 4
+		),
 		1 => array( // Prospection: demande entrante
-			2, 3, 4, 5 // les autres statuts de prospection
+			2, 3, 4, 5, 8
 		),
-		2 => array(
-			1, 3, 4, 5
+		2 => array( // Prospection: lead identifié
+			3, 4, 5, 8
 		),
-		3 => array(
-			1, 2, 4, 5
+		3 => array( // prospection: prise de contact
+			4, 5, 8
 		),
-		4 => array(
-			1, 2, 3, 5
+		4 => array( // Prospection: contact et présentation ok
+			5, 8
 		),
-		5 => array(
-			1, 2, 3, 4, 11
+		5 => array( // Prospect KO
+			8, 3
+		),
+		8 => array( // En attente onboarding catalogue
+			9, 10, 5
+		),
+		9 => array( // Onboarding catalogue KO
+			10, 5
+		),
+		10 => array( // Onboarding catalogue OK
+			5
 		),
 //		11 => array( // Live
 //			13, 14, // suspendu, férmé
 //		),
-		13 => array( // suspendu
-
-		),
-		14 => array( // Fermé
-			12
-		),
+//		13 => array( // suspendu
+//
+//		),
+//		14 => array( // Fermé
+//			12
+//		),
 	);
 
 	public static $group_allowed_actions = array(
@@ -76,6 +95,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		13 => array(),
 		14 => array(),
 	);
+
 
 	public static function getUserGroupsArray($include_empty = 1, $nom_url = 0)
 	{
@@ -142,8 +162,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$buttons = array();
 
 		$statu = $this->getData('fk_statut_rdc');
-		if($statu == 0)
-			$statu = 1;
+//		if($statu == 0)
+//			$statu = 1;
 		if (isset(self::$actions_selon_statut_rdc[$statu])) {
 			foreach (self::$actions_selon_statut_rdc[$statu] as $statut) {
 				$listGroup_allowed = self::$group_allowed_actions[$statut];
@@ -288,6 +308,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		}
 		return false;
 	}
+
 	public function renderHeaderStatusExtra()	{
 		return '';
 	}

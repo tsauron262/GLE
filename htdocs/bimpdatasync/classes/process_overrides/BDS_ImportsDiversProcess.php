@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_ImportsDiversProcess extends BDSProcess
 {
 
-    public static $current_version = 4;
+    public static $current_version = 5;
     public static $default_public_title = 'Imports Divers';
 
     // Imports AppleCare:
@@ -120,6 +120,10 @@ class BDS_ImportsDiversProcess extends BDSProcess
 	public function traiteLn($entre){
 		$entre = substr($entre,1,-1);
 		return explode('","',$entre);
+	}
+	public function traiteLnDoubleQuote($entre){
+		$entre = substr($entre,1,-1);
+		return explode('"",""',$entre);
 	}
 	public function executeImportClientRDC($step_name, &$errors = array(), $extra_data = array())
 	{
@@ -319,11 +323,175 @@ class BDS_ImportsDiversProcess extends BDSProcess
 				foreach ($warnings as $warning) {
 					$this->Alert($warning, null, $ln['LastName'].' ligne '.($id+1));
 				}
-				$ok[] = $ln['Name'].' - '.$obj->id;
+				$ok[] = $ln['LastName'].' - '.$obj->id;
 //				if(!count($errors))
 //					$this->Success('OK<pre>' . print_r($data, true).'</pre>', null, $ln['Name']);
 			} else {
 				$this->Error('Ligne invalide: <pre>' . print_r($ln, true).'</pre>', null, $ln['FirstName'] . "/" . $ln['LastName'] . "/" . $ln['Email'] .' ligne '.($id+1));
+			}
+			$this->incIgnored();
+		}
+		if(count($ok)){
+			$this->Success('OK<pre>' . print_r($ok, true).'</pre>', null, '');
+			if(isset($id) && $id > 0)
+				$this->updateParameter('elem_ok', $id);
+		}
+	}
+
+
+	public function initImportCasesRDC(&$data, &$errors = array())	{
+		$file = $this->getOption('csv_file4', '');
+		if ($file) {
+			$this->updateParameter('csv_file', $file);
+			$this->updateParameter('elem_ok', 0);
+		}
+		else{
+			$file = $this->getParam('csv_file', '');
+		}
+		if (!$file) {
+			$errors[] = 'Fichier absent';
+		} else {
+			$rows = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+			$this->data_persistante['header'] = $this->traiteLnDoubleQuote($rows[0]);
+			unset($rows[0]);
+
+			if (empty($rows)) {
+				$errors[] = 'Fichier vide';
+			} else {
+				$data['steps'] = array(
+					'import' => array(
+						'label'                  => 'Création des tickets',
+						'on_error'               => 'continue',
+						'elements'               => array_keys($rows),
+						'nbElementsPerIteration' => 20
+					)
+				);
+			}
+		}
+	}
+
+	public function executeImportCasesRDC($step_name, &$errors = array(), $extra_data = array())
+	{
+		$correspondance = array(
+			'import_key'       => 'CaseNumber',        // colonne D
+			'fk_soc'           => 'AccountId',        // colonne F
+			'origin_mail'      => 'SuppliedEmail',   // colonne N
+			'type'             => 'Type',            // colonne Q
+			'fk_status'        => 'Status',            // colonne S
+			'subject'          => 'Subject',            // colonne X
+			'message'          => 'Description',        // colonne Z
+			'date_close'       => 'ClosedDate',        // colonne AB
+			'datec'            => 'CreatedDate',        // colonne AM
+			'date_update'      => 'LastModifiedDate',// colone AO
+		);
+		$keys = array(
+			'import_key'
+		);
+		$correspondance2 = array_flip($correspondance);
+		$ok = array();
+		$file = $this->getParam('csv_file', '');
+		$rows = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+		$traite = $this->getParam('elem_ok', 0);
+		$bticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket');
+		$labelArr = array_flip(array_column($bticket::$status_list, 'label'));
+
+		foreach ($this->references as $id) {
+			if ($id <= $traite) {
+				$this->incIgnored();
+				continue;
+			}
+			$line = $rows[$id];
+			$this->incProcessed();
+//			echo '<pre>'; print_r($line); echo '</pre>';
+			$data = $this->traiteLnDoubleQuote($line);
+//			echo '<pre>'; print_r($data); echo '</pre>';
+//			echo '<pre>'; print_r($this->data_persistante['header']); echo '</pre>';
+//			exit;
+//			echo '<pre>'; var_dump(count($data), count($this->data_persistante['header'])); echo '</pre>';
+			if (count($data) != count($this->data_persistante['header'])) {
+				$this->Error('Erreur Nb colonnes: <pre>' . print_r($data, true) . '</pre>', null, 'Ligne ' . ($id + 1));
+//				var_dump(count($data), count($this->data_persistante['header']));
+				continue;
+			}
+			$ln = array_combine($this->data_persistante['header'], $data);
+//			 echo '<pre>'; print_r($ln); echo '</pre>';
+//			 exit(var_dump($id, $ln['Subject']));
+			if (strlen($ln['Subject'])) {
+				$data = $dataFiltres = array();
+				$errors = $warnings = array();
+
+				foreach ($ln as $key => $value) {
+					$value = utf8_encode($value);
+					if ($correspondance2[$key]) {
+						if (stripos($value, '<script') !== false) {
+							if (stripos($ln['Description'], '<script') === false) {
+								$this->Error('Script détecté', null, $ln['Description'] . ' ligne ' . ($id + 1));
+								continue 2;
+							} else {
+								$this->Error('Script détecté', null, 'Non cachée ligne ' . ($id + 1));
+								continue 2;
+							}
+						}
+						$data[$correspondance2[$key]] = $value;
+						if (in_array($correspondance2[$key], $keys)) {
+							$dataFiltres[$correspondance2[$key]] = $value;
+						}
+					}
+				}
+
+				$type = $this->db->getValue('bimpcore_dictionnary_value', 'id', 'id_dict = 1 AND label LIKE \'' . $data['type'] . '\'');
+				if ($type) $data['type'] = $type; else $data['type'] = 0;
+
+				// traiter fk_status
+				$fk_status = -1;
+				$fk_status = $labelArr[$data['fk_status']];
+				if ($fk_status < 0)	{
+					/*
+					 // TODO : Finaliser le traitement des status par rapport à la liste définitive RDC
+					// todo : je crois qu'il me manque import_key
+
+					switch ($data['fk_status']) {
+						case 'En cours SM':
+						case 'En attente de vérification':
+							$fk_status = 3;
+							break;
+						case 'En attente de retour Marchand':
+							$fk_status = 4;
+							break;
+						case 'New':
+							$fk_status = 0;
+							break;
+						case 'Closed':
+							$fk_status = 6;
+							break;
+						case 'On Hold':
+							$fk_status = 5;
+							break;
+					}
+					*/
+					$fk_status = 3;
+				} // render statut extra
+
+				// retrouver le fk_soc selon le AccountId
+				if ($ln['AccountId'] !== '000000000000000AAA') {
+					$fk_soc = $this->db->getValue('societe', 'rowid', 'import_key = \'' . $ln['AccountId'] . '\'');
+					if ($fk_soc) {
+						$data['fk_soc'] = $fk_soc;
+						$dataFiltres['fk_soc'] = $fk_soc;
+					} else {
+						$this->Alert('Société non trouvée : ' . strlen($ln['CaseNumber']), null, $ln['AccountId'] . ' ligne ' . ($id + 1));
+//						continue;
+					}
+				}
+				$obj = BimpObject::createOrUpdateBimpObject('bimpticket', 'Bimp_Ticket', $dataFiltres, $data, true, true, $errors, $warnings);
+//		echo '<pre>'; print_r($obj); echo '</pre>'; die;
+				foreach ($errors as $error) {
+					$this->Error($error, null, $ln['CaseNumber']);
+				}
+				foreach ($warnings as $warning) {
+					$this->Alert($warning, null, $ln['CaseNumber']);
+				}
+				$ok[] = $ln['CaseNumber'] . ' - ' . $obj->id;
 			}
 			$this->incIgnored();
 		}
@@ -445,6 +613,29 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			if (BimpObject::objectLoaded($op)) {
 				$errors = array_merge($errors, $op->addOptions(array('csv_file3')));
 			}
+		}
+
+		if ($cur_version < 5) {
+			// Opération "Import cases rdc -> transformation en ticket":
+			BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+				'id_process'    => (int) $id_process,
+				'label'         => 'Fichier CSV',
+				'name'          => 'csv_file4',
+				'info'          => '',
+				'type'          => 'file',
+				'default_value' => '',
+				'required'      => 0
+			), true, $errors, $warnings);
+			$op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+				'id_process'    => (int) $id_process,
+				'title'         => 'Import Cases RDC -> Ticket',
+				'name'          => 'importCasesRDC',
+				'description'   => '',
+				'warning'       => 'Fichier CSV : ',
+				'active'        => 1,
+				'use_report'    => 1,
+				'reports_delay' => 15
+			), true, $errors, $warnings);
 		}
 
         return $errors;

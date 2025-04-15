@@ -168,6 +168,7 @@ forms:
             -   field: fk_user_assign
                 label: Assigner à
             -   field: type_code
+                reload_icon: 1
             -   field: fk_soc
             -   custom: 1
                 label: Contact client suivi

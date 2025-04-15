@@ -85,7 +85,7 @@ class BimpController
 
     public function __construct($module, $controller = 'index')
     {
-        $this->initErrorsHandler();
+        static::initErrorsHandler();
         global $main_controller;
 
         if (is_null($main_controller)) {
@@ -170,17 +170,17 @@ class BimpController
         }
     }
 
-    public function initErrorsHandler()
+    public static function initErrorsHandler()
     {
         if (!defined('BIMP_CONTOLLER_ERRORS_HANDLER_INIT')) {
             define('BIMP_CONTOLLER_ERRORS_HANDLER_INIT', 1);
 
-            register_shutdown_function(array($this, 'onExit'));
-            set_error_handler(array($this, 'handleError'), E_ALL);
+			register_shutdown_function(function(){ BimpController::onExit(); });
+            set_error_handler('BimpController::handleError');
         }
     }
 
-    public function handleError($level, $msg, $file, $line)
+    public static function handleError($level, $msg, $file, $line)
     {
         global $bimp_errors_handle_locked;
 
@@ -339,7 +339,7 @@ class BimpController
         return true;
     }
 
-    public function onExit()
+    public static function onExit()
     {
         global $no_force_current_object_unlock;
         if (is_null($no_force_current_object_unlock) || !(int) $no_force_current_object_unlock) {
@@ -354,10 +354,29 @@ class BimpController
             if ((int) $no_force_current_object_unlock) {
                 BimpCore::forceUnlockCurrentObject();
             }
-            $this->handleError(E_ERROR, $error['message'], $error['file'], $error['line']);
+            static::handleError(E_ERROR, $error['message'], $error['file'], $error['line']);
         } else {
             BimpConfig::saveCacheServeur();
         }
+
+		//juste avant de coupé le script
+		global $db;
+		$lastError = error_get_last();
+		$asErrorFatal = (is_array($lastError) && $lastError['type'] == 1);
+		if ($db->transaction_opened > 0) {
+			$db->transaction_opened = 0;
+			if (!$asErrorFatal)
+				BimpCore::addlog('Fin de script Transaction non fermée');
+		}
+		$file = array();
+		$nb = BimpTools::deloqueAll($file);
+		if ($nb > 0 && !$asErrorFatal)
+			BimpCore::addlog('Fin de script fichier non debloqué ' . $nb . ' ' . print_r($file, 1), Bimp_Log::BIMP_LOG_ALERTE);
+		if (class_exists('BimpDebug')) {
+			BimpDebug::testLogDebug();
+		}
+		session_write_close();
+		define('BIMP_READY_FOR_CLOSE_DB', true);
     }
 
     public function getConf($path, $default_value = null, $required = false, $data_type = 'string')
@@ -3668,22 +3687,7 @@ class BimpController
     }
 
     public static function bimp_shutdown()
-    {//juste avant de coupé le script
-        global $db;
-        $lastError = error_get_last();
-        $asErrorFatal = (is_array($lastError) && $lastError['type'] == 1);
-        if ($db->transaction_opened > 0) {
-            $db->transaction_opened = 0;
-            if (!$asErrorFatal)
-                BimpCore::addlog('Fin de script Transaction non fermée');
-        }
-        $file = array();
-        $nb = BimpTools::deloqueAll($file);
-        if ($nb > 0 && !$asErrorFatal)
-            BimpCore::addlog('Fin de script fichier non debloqué ' . $nb . ' ' . print_r($file, 1), Bimp_Log::BIMP_LOG_ALERTE);
-        if (class_exists('BimpDebug')) {
-            BimpDebug::testLogDebug();
-        }
-        session_write_close();
+    {
+		static::onExit();
     }
 }

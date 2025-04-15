@@ -22,9 +22,43 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 		4 => 'Semaine',
 	);
 
-	// getters
-	public function getParentObject($type)
+	public function getParentFilters()
 	{
+		$return = array();
+		if (!$this->isLoaded()){
+			foreach (static::$parentObjectArray as $type => $name) {
+				if (is_a($this->parent, $name)) {
+					$return['type_obj'] = $type;
+				}
+			}
+			if(isset($this->parent->id)){
+				$return['id_obj'] = $this->parent->id;
+			}
+			$params = json_decode(BimpTools::getValue('extra_data/param_filters', '{}', 'array'), true);
+			if(isset($params['id_obj']) && !isset($return['id_obj'])){
+				$return['id_obj'] = $params['id_obj'];
+			}
+			if(isset($params['type_obj'])&& !isset($return['type_obj'])){
+				$return['type_obj'] = $params['type_obj'];
+			}
+		}
+		else {
+			$return['type_obj'] = $this->getData('type_obj');
+			$return['id_obj'] = $this->getData('id_obj');
+		}
+
+		if(!isset($return['id_obj']))
+			die('imposible de trouvé l\'id de l\'objet parent'.$this->isLoaded().'<pre>'.print_r($_REQUEST, true));
+		if(!isset($return['type_obj']))
+			die('imposible de trouvé le type de  l\'objet parent'.$this->isLoaded().'<pre>'.print_r($_REQUEST, true));
+
+		return $return;
+	}
+
+	// getters
+	public function getParentObject()
+	{
+		$type = BimpTools::getPostFieldValue('type_obj', $this->getData('type_obj'), 'int');
 		return self::$parentObjectArray[$type];
 	}
 
@@ -45,13 +79,13 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 		return static::$parentObjectArray[$type];
 	}
 
-	public function getDefaultIdParenrt()
-	{
-		$type = BimpTools::getPostFieldValue('type_obj', $this->getData('type_obj'), 'int');
-		if ($type == 0 && BimpTools::getPostFieldValue('action') == 'loadObjectForm') {
-			return BimpTools::getPostFieldValue('id', 0, 'int');
-		}
-	}
+//	public function getDefaultIdParenrt()
+//	{
+//		$type = BimpTools::getPostFieldValue('type_obj', $this->getData('type_obj'), 'int');
+//		if ($type == 0 && BimpTools::getPostFieldValue('action') == 'loadObjectForm') {
+//			return BimpTools::getPostFieldValue('id', 0, 'int');
+//		}
+//	}
 
 	public function getPeriodsRdc()
 	{
@@ -110,28 +144,41 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 	}
 
 
+	public function getCategCa($type = 1){
+		$result = array();
+		$categories = BimpDict::getValuesArray('ca_categories', true, false);
+		$filters = $this->getParentFilters();
+		if($type == 1)
+			$field = 'fk_category';
+		else
+			$field = 'fk_category'.$type;
+		$sql = $this->db->db->query('SELECT DISTINCT('.$field.') as fk_category FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$filters['id_obj'].' AND type_obj = '.$filters['type_obj']);
+		while($ln = $this->db->db->fetch_object($sql)){
+			$result[$ln->fk_category] = $categories[$ln->fk_category]['label'];
+		}
+		return $result;
+	}
+
 	//graph
 	public function getCategForGrpah($type = 1, $label = '')
 	{
 		$fields = array();
 		$categories = BimpDict::getValuesArray('ca_categories', true, false);
-		$id = $this->parent->id;
-		if($id == 0){
-			$id = BimpTools::getPostFieldValue('id', 0, 'int');
-		}
-		if($id == 0){
-			echo '<pre>';print_r($_REQUEST);die;
-			$id = BimpTools::getPostFieldValue('id', 0, 'int');
-		}
-		$sql = $this->db->db->query('SELECT DISTINCT(fk_category) FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$id);
+		$filters = $this->getParentFilters();
+
+		if($type == 1)
+			$field = 'fk_category';
+		else
+			$field = 'fk_category'.$type;
+		$sql = $this->db->db->query('SELECT DISTINCT('.$field.') as categ FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$filters['id_obj'].' AND type_obj = '.$filters['type_obj']);
 		while($ln = $this->db->db->fetch_object($sql)){
-			$idC = $ln->fk_category;
+			$idC = $ln->categ;
 			if ($idC > 0) {
-				$fields[$ln->fk_category] = array(
+				$fields[$idC] = array(
 					"title"   => $categories[$idC]['label'],
 					'field'   => 'ca',
 					'calc'    => 'SUM',
-					'filters' => array('fk_category' => $idC)
+					'filters' => array($field => $idC)
 				);
 			}
 		}
@@ -139,23 +186,23 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 		return $fields;
 	}
 
-	public function getFiltersForGraph()
-	{
-		$filters = array(
-			'fk_category' => 0,
-			'fk_period'   => 0,
-		);
-		$data = $this->paramsUrlToArray(BimpTools::getPostFieldValue('form'));
-
-		if (isset($data['fk_category'])) {
-			$filters['fk_category'] = $data['fk_category'];
-		}
-		if (isset($data['fk_period'])) {
-			$filters['fk_period'] = $data['fk_period'];
-		}
-
-		return $filters;
-	}
+//	public function getFiltersForGraph()
+//	{
+//		$filters = array(
+//			'fk_category' => 0,
+//			'fk_period'   => 3,
+//		);
+//		$data = $this->paramsUrlToArray(BimpTools::getPostFieldValue('form'));
+//
+//		if (isset($data['fk_category'])) {
+//			$filters['fk_category'] = $data['fk_category'];
+//		}
+//		if (isset($data['fk_period'])) {
+//			$filters['fk_period'] = $data['fk_period'];
+//		}
+//
+//		return $filters;
+//	}
 
 	public function paramsUrlToArray($str)
 	{

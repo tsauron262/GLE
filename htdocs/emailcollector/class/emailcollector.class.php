@@ -3019,7 +3019,9 @@ class EmailCollector extends CommonObject
 									$hookmanager = new HookManager($this->db);
 								}
 								$hookmanager->initHooks(array('emailcolector'));
-								$parameters = array('arrayobject' => $arrayobject);
+								// mod drsi
+								$parameters = array('arrayobject' => $arrayobject, 'data' => $data);
+								// fmod drsi
 								$reshook = $hookmanager->executeHooks('addmoduletoeamailcollectorjoinpiece', $parameters);    // Note that $action and $object may have been modified by some hooks
 								if ($reshook > 0) {
 									$arrayobject = $hookmanager->resArray;

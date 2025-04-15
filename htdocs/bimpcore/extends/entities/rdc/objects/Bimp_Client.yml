@@ -53,20 +53,7 @@ fields:
         label: Priorité
         type: int
         values:
-            dict:
-                code: societe_rdc_priorities
-                include_empty: 1
-                empty_value: 0
-                active_only: 0
-        input:
-            type: select
-            options:
-                dict:
-                    code: societe_rdc_priorities
-                    include_empty: 1
-                    empty_value: 0
-                    active_only: 1
-                    
+            dict: societe_rdc_priorities                    
     fk_statut_rdc:
         label: Prospection
         values:
@@ -81,20 +68,7 @@ fields:
         label: Source
         type: int
         values:
-            dict:
-                code: societe_rdc_sources
-                include_empty: 1
-                empty_value: 0
-                active_only: 0
-        input:
-            type: select
-            options:
-                dict:
-                    code: societe_rdc_sources
-                    include_empty: 1
-                    empty_value: 0
-                    active_only: 1
-                
+            dict: societe_rdc_sources                
     contrefacon:
         label: Suspition de contrefaçon
         type: bool
@@ -120,6 +94,9 @@ fields:
         type: text
     url:
         label: site internet marchand
+    date_maj_mirakl:
+        label: Date de mise à jour Mirakl
+        type: datetime
         
     outstanding_limit: unset
     outstanding_limit_credit_check: unset
@@ -163,6 +140,7 @@ fields_tables:
         icon: fas_briefcase
         rows:
             - field: shopid
+            - field: date_maj_mirakl
             - field: name_alias
               label: Nom de la boutique
               edit: 1
@@ -224,16 +202,31 @@ views:
                     fields_table:
                         name: param_rdc
                   
-                  -   type: custom
-                      col_lg: 12
-                      col_md: 12
-                      col_sm: 12
-                      custom:
-                          callback:
-                              method: renderChildrenList
-                              params:
-                                  - chiffre_affaire
-                                  - default
+                  - type: custom
+                    col_lg: 6
+                    col_md: 6
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenList
+                            params:
+                                - concurrence
+                                - default
+                  
+    ca:
+        title: CA
+        rows:
+              - cols:
+                  - type: custom
+                    col_lg: 12
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                      callback:
+                          method: renderChildrenList
+                          params:
+                              - chiffre_affaire
+                              - default
                   - type: custom
                     col_lg: 6
                     col_md: 12
@@ -253,18 +246,47 @@ views:
                             method: renderChildrenGraph
                             params:
                                 - chiffre_affaire
-                                - evol
-                  
+                                - rep2
                   - type: custom
                     col_lg: 6
-                    col_md: 6
+                    col_md: 12
                     col_sm: 12
                     custom:
                         callback:
-                            method: renderChildrenList
+                            method: renderChildrenGraph
                             params:
-                                - concurrence
-                                - default
+                                - chiffre_affaire
+                                - rep3
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - rep4
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - evol
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - evol2
 
 forms:
     default:
@@ -297,11 +319,11 @@ forms:
                     callback: isShopIdEditable
             Priorité:
                 field: fk_priorite
-                edit: 1
-#                    callback:
-#                        method: isUserInGroup
-#                        params:
-#                            - BD
+                edit:
+                    callback:
+                        method: isUserInGroup
+                        params:
+                            - BD
             Prospection:
                 field: fk_statut_rdc
                 edit:

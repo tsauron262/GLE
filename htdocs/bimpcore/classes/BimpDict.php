@@ -16,7 +16,8 @@ class BimpDict
 
 	}
 
-	public static function getDictionnaryId($dict_code) {
+	public static function getDictionnaryId($dict_code)
+	{
 		return (int) BimpCache::getBdb()->getValue('bimpcore_dictionnary', 'id', 'code = \'' . $dict_code . '\'');
 	}
 
@@ -31,18 +32,55 @@ class BimpDict
 		return array();
 	}
 
-	public static function getValuesArray($dict_code, $active_only = true, $include_empty = false, $empty_value = '', $empty_label = '')
+	public static function getValuesArray($dict_code, $active_only = true, $include_empty = false, $empty_label = '')
 	{
 		$dict = BimpCache::findBimpObjectInstance('bimpcore', 'BimpDictionnary', array('code' => $dict_code));
 
 		if (BimpObject::objectLoaded($dict)) {
-			return $dict->getValuesArray($active_only, $include_empty, $empty_value, $empty_label);
+			return $dict->getValuesArray($active_only, $include_empty, $empty_label);
 		}
 
 		return array();
 	}
 
-	public static function addDefaultDictionnary($code, $name, $active = 1, $values_children_name = 'values', $key_field = 'code', $filters = array(), &$errors = array())
+	public static function getValuesInvertedArray($dict_code, $active_only = true, $include_empty = false, $empty_label = '')
+	{
+		$dict = BimpCache::findBimpObjectInstance('bimpcore', 'BimpDictionnary', array('code' => $dict_code));
+
+		if (BimpObject::objectLoaded($dict)) {
+			return $dict->getValuesInvertedArray($active_only, $include_empty, $empty_label);
+		}
+
+		return array();
+	}
+
+	public static function addDefaultDictionnary($code, $name, $active = 1, $values_children_name = 'values', $key_field = 'id', $filters = array(), &$errors = array())
+	{
+		$id_dict = self::getDictionnaryId($code);
+		if ($id_dict) {
+			$errors[] = 'Un dictionnaire existe déjà pour le code "' . $code . '"';
+		} else {
+			$values_params = array(
+				'children' => $values_children_name,
+				'filters'  => $filters
+			);
+
+			if ($key_field !== 'id') {
+				$values_params['key_field'] = $key_field;
+			}
+
+			return BimpObject::createBimpObject('bimpcore', 'BimpDictionnary', array(
+				'code'          => $code,
+				'name'          => $name,
+				'values_params' => $values_params,
+				'active'        => $active
+			), true, $errors);
+		}
+
+		return null;
+	}
+
+	public static function addDictionnary($code, $name, $table, $id_dol_dict, $filters, $fields, $key_field, $label_field, $active_field = '', $position_field = '', $active = 1, &$errors = array())
 	{
 		$id_dict = self::getDictionnaryId($code);
 		if ($id_dict) {
@@ -52,43 +90,20 @@ class BimpDict
 				'code'          => $code,
 				'name'          => $name,
 				'values_params' => array(
-					'children' => $values_children_name,
-					'filters'  => $filters,
-					'key_field' => $key_field
-				),
-				'active'        => $active
-			), true, $errors);
-		}
-
-		return null;
-	}
-
-	public static function addDictionnary($code, $name, $table, $filters, $fields, $key_field, $label_field, $active_field = '', $position_field = '', $active = 1)
-	{
-		$bdb = BimpCache::getBdb();
-		$errors = array();
-
-		$id_dict = self::getDictionnaryId($code);
-		if ($id_dict) {
-			$errors[] = 'Un dictionnaire existe déjà pour le code "' . $code . '"';
-		} else {
-			BimpObject::createBimpObject('bimpcore', 'BimpDictionnary', array(
-				'code'          => $code,
-				'name'          => $name,
-				'values_params' => array(
 					'table'          => $table,
 					'filters'        => $filters,
 					'fields'         => $fields,
 					'key_field'      => $key_field,
 					'label_field'    => $label_field,
 					'active_field'   => $active_field,
-					'position_field' => $position_field
+					'position_field' => $position_field,
+					'id_dol_dict'    => $id_dol_dict
 				),
 				'active'        => $active
 			), true, $errors);
 		}
 
-		return $errors;
+		return null;
 	}
 
 	public static function renderEditDictionnaryIcon($dict_code)

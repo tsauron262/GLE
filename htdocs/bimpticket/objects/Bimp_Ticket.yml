@@ -85,20 +85,10 @@ fields:
         type: percent
         default_value: 0
     
-    type:
+    type_code:
         label: Type
         values:
-            dict:
-                code: bimp_ticket_types
-                include_empty: 1
-                active_only: 0
-        input: 
-            type: select
-            options:
-                dict: 
-                    code: bimp_ticket_types
-                    include_empty: 1
-                    active_only: 1
+            dict: bimp_ticket_types
     
     origin_email:
         label: Adresse Email source
@@ -168,7 +158,7 @@ fields:
 forms:
     default:
         rows:
-            -   field: type
+            -   field: type_code
             -   field: fk_soc
             -   field: subject
             -   field: message
@@ -177,7 +167,7 @@ forms:
         rows:
             -   field: fk_user_assign
                 label: Assigner à
-            -   field: type
+            -   field: type_code
             -   field: fk_soc
             -   custom: 1
                 label: Contact client suivi
@@ -302,7 +292,7 @@ fields_tables:
         title: Informations
         icon: info-circle
         rows:
-            -   field: type
+            -   field: type_code
             -   field: subject
             -   field: message
     
@@ -354,7 +344,7 @@ views:
 filters_panels:
     default:
         filters:
-            type:
+            type_code:
             fk_soc:
             fk_statut:
             fk_user_assigned:
@@ -383,7 +373,7 @@ lists:
         cols:
             ref:
             fk_statut:
-            type:
+            type_code:
             subject:
             datec:
             fk_soc:

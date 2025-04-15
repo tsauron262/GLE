@@ -213,13 +213,16 @@ fields:
         label: RPPS
         dol_extra_field: 1
         
+    import_key:
+        label: Clé d'import
+        type: string
+        
 #Champs non gérés:
 #    ref_ext
 #    statut
 #    photo
 #    priv
 #    canvas
-#    import_key
 #    default_lang
 #    no_email
 

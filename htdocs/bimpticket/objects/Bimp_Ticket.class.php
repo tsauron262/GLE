@@ -6,6 +6,8 @@ class Bimp_Ticket extends BimpDolObject
 	/* @var Ticket */
 	public $dol_object;
 
+	public static $dol_module = 'ticket';
+
 	public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
 	const STATUS_DRAFT = 0;
@@ -27,7 +29,7 @@ class Bimp_Ticket extends BimpDolObject
 		self::STATUS_WAITING        => array('label' => 'En attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
 		self::STATUS_CLOSED         => array('label' => 'Terminé', 'icon' => 'fas_check', 'classes' => array('success')),
 		self::STATUS_CANCELED       => array('label' => 'Annulé', 'icon' => 'fas_times', 'classes' => array('danger')),
-		self::STATUS_TRANSFERED     => array('label' => 'Trtansféré', 'icon' => 'fas_sign-out-alt', 'classes' => array('important')),
+		self::STATUS_TRANSFERED     => array('label' => 'Transféré', 'icon' => 'fas_sign-out-alt', 'classes' => array('important')),
 	);
 
 	public static $types = array();
@@ -165,6 +167,17 @@ class Bimp_Ticket extends BimpDolObject
 
 		return $options;
 	}
+
+	public function getDirOutput()
+	{
+		global $conf;
+		$ref = dol_sanitizeFileName($this->dol_object->ref);
+		if ($this->isLoaded() && $this->dol_object->entity > 0)
+			return $conf->ticket->multidir_output[$this->dol_object->entity] . '/';
+		else
+			return $conf->ticket->dir_output . '/';
+	}
+
 
 	// Rendus HTML :
 

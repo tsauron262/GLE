@@ -56,6 +56,7 @@ fields:
             dict: societe_rdc_priorities                    
     fk_statut_rdc:
         label: Prospection
+        type: int
         values:
             array: statusRdc
     date_changement_statut_rdc:
@@ -63,7 +64,7 @@ fields:
         type: date
     delai_ouverture:
         label: Délai ouverture
-        type: number
+        type: int
     fk_source_rdc:
         label: Source
         type: int
@@ -98,10 +99,30 @@ fields:
         label: Commentaires
         type: text
     url:
-        label: site internet marchand
+        label: Site internet marchand
     date_maj_mirakl:
         label: Date de mise à jour Mirakl
         type: datetime
+    commentaire_statut_ko:
+        label: Commentaire statut KO
+    potentiel_catalogue:
+        label: Potentiel catalogue
+        type: qty
+        unsigned: 0
+    fk_categorie_maitre:
+        label: Catégorie Maitre
+        values:
+            array: categorieMaitreRdc
+    presta_source:
+        label: Prestataire/Agrégateur
+        input:
+            extra_content: '<p style="margin-top:1em; color: red;">Obligatoire si la source est "Prestataire/Agrégateur"</p>'
+    quality_score:
+        label: Qualité
+        type: float
+    name_alias:
+        label: Nom de la boutique
+    
         
     outstanding_limit: unset
     outstanding_limit_credit_check: unset
@@ -147,7 +168,6 @@ fields_tables:
             - field: shopid
             - field: date_maj_mirakl
             - field: name_alias
-              label: Nom de la boutique
             - label: Lien Mirakl
               value:
                   callback: getMiraklLink
@@ -157,17 +177,21 @@ fields_tables:
             - field: fk_priorite
               edit:
                   callback:
-                      method: isPriorityEditable
+                      method: isUserBDKAM
 #            - field: fk_statut_rdc
 #            - field: date_changement_statut_rdc
 #            - field: fk_statut_kyc
             - field: delai_ouverture
             - field: fk_source_rdc
+            - field: presta_source
+#            - field: quality_score
             - label: Suspition de contrefaçon
               value:
                   callback: getContrefacon
             - field: fk_group_rdc
             - field: fk_user_attr_rdc
+            - field: fk_categorie_maitre
+            - field: potentiel_catalogue
     
     commentaires:
         title: Commentaires
@@ -304,6 +328,8 @@ forms:
         rows:
             Nom:
                 field: nom
+            boutique:
+                field: name_alias
             Filiale:
                 field: is_subsidiary
             Téléphone:
@@ -331,20 +357,44 @@ forms:
             Prospection:
                 field: fk_statut_rdc
                 edit: 0
-            Statut KYC:
-                field: fk_statut_kyc
-                edit: 0
+            Commentaire statut KO:
+                field: commentaire_statut_ko
+                required:
+                    callback: isCommentaireStatutKoRequired
+            
+            Catégorie Maitre:
+                field: fk_categorie_maitre
+                edit:
+                    callback: isUserBDKAM
             Source:
-                field: fk_source
+                field: fk_source_rdc
+                edit:
+                    callback: isUserBD
+            Agrégateur:
+                field: presta_source
+                display_if:
+                    field_name: fk_source_rdc
+                    show_values:
+                        callback:
+                            method: getIdSourcePresta                
             Suspition de contrefaçon:
                 field: contrefacon
             Groupe:
                 field: fk_group_rdc
+                edit:
+                    callback: isUserBDKAM
             Attribué à:
                 field: fk_user_attr_rdc
+                edit:
+                    callback: isUserBDKAM
             Commentaires:
                 field: commentaire_rdc
-    
+            Potenitel catalogue:
+                field: potentiel_catalogue
+                edit:
+                    callback: isUserBDKAM
+                
+                
     formActionRdc:
         title: Choisir une action
         rows:

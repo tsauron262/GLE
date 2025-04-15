@@ -2535,6 +2535,14 @@ class GSX_Repair extends BimpObject
 				$errors = $this->fetchPartReturnLabel($partNumber, $returnOrderNumber, $returnType, $sequenceNumber, $fileUrl, $shipTo, $filePath);
 				if (!count($errors)) {
 					$warnings[] = 'CHEM : "' . $filePath . '" - URL : "' . $fileUrl . '"';
+
+					$files = scandir($this->getFilesDir());
+
+					$warnings[] = 'Fichiers : <pre>' . print_r($files, 1) . '</pre>';
+
+					if (!file_exists($filePath)) {
+						$errors[] = 'Fichier absent';
+					}
 					if ($fileUrl) {
 						$cb = 'window.open(\'' . $fileUrl . '\');';
 					} else {

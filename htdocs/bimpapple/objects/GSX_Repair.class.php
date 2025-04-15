@@ -414,7 +414,7 @@ class GSX_Repair extends BimpObject
         if (BimpObject::objectLoaded($sav)) {
             $dir = $this->getFilesDir();
             $fileName = str_replace('/', '_', 'Etiquette_' . $partNumber . '_' . $returnOrderNumber . '_' . $sequenceNumber . '.pdf');
-            $filePath = $dir . '/' . $fileName;
+            $filePath = $dir . $fileName;
 
             if (!file_exists($filePath)) {
                 if (!(string) $this->getData('repair_number')) {
@@ -460,7 +460,7 @@ class GSX_Repair extends BimpObject
 
             if (file_exists($filePath)) {
 				$fileUrl = $this->getFileUrl($fileName);
-                $fileUrl = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . 'sav/' . $sav->id . '/' . $fileName;
+//                $fileUrl = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . 'sav/' . $sav->id . '/' . $fileName;
             }
         } else {
             $errors[] = 'ID du SAV absent';

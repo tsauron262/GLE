@@ -781,8 +781,10 @@ class BimpObject extends BimpCache
 		$more = '';
 
 		$entity = $this->getData('entity');
-		if ($this->getEntity_name()/* && $entity */){
+		if ($this->getEntity_name() && $entity) {
 			$more .= 'entity=' . $entity . '&';
+		} elseif (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+			$more .= 'entity=1&';
 		}
 
 		return DOL_URL_ROOT . '/' . $page . '.php?' . $more . 'modulepart=bimpcore&file=' . urlencode($file);

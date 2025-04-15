@@ -63,8 +63,8 @@ class BimpDictionnary extends BimpObject
 			}
 
 			$onclick = $child_instance->getJsLoadModalList('dictionnary', $params);
-		} elseif (isset($values_params['url'])) {
-			$onclick = 'window.open(\'' . $values_params['url'] . '\');';
+		} elseif (isset($values_params['id_dol_dict']) && (int) $values_params['id_dol_dict']) {
+			$onclick = 'window.open(\'' . DOL_URL_ROOT . '//admin/dict.php?id=' . $values_params['id_dol_dict'] . '\');';
 		}
 
 		return $onclick;

@@ -414,7 +414,7 @@ class GSX_Repair extends BimpObject
         if (BimpObject::objectLoaded($sav)) {
             $dir = $this->getFilesDir();
             $fileName = str_replace('/', '_', 'Etiquette_' . $partNumber . '_' . $returnOrderNumber . '_' . $sequenceNumber . '.pdf');
-            $filePath = DOL_DATA_ROOT . $dir . '/' . $fileName;
+            $filePath = $dir . '/' . $fileName;
 
             if (!file_exists($filePath)) {
                 if (!(string) $this->getData('repair_number')) {
@@ -1356,6 +1356,7 @@ class GSX_Repair extends BimpObject
     public function displayGsxStatus()
     {
         if ($this->use_gsx_v2) {
+			$status = '';
             if (isset($this->repairLookUp['repairStatus'])) {
                 $status .= $this->repairLookUp['repairStatus'];
             }
@@ -2026,6 +2027,8 @@ class GSX_Repair extends BimpObject
         if ($this->use_gsx_v2) {
             return '';
         }
+
+		$html = '';
 
         $buttons = array();
 

@@ -779,8 +779,10 @@ class BimpObject extends BimpCache
 		$file = $this->module . '/' . $this->object_name . '/' . $this->id . '/' . $file_name;
 
 		$more = '';
-		if ($this->getEntity_name() && $this->getData('entity')) {
-			$more .= 'entity=' . $this->getData('entity') . '&';
+
+		$entity = $this->getData('entity');
+		if ($this->getEntity_name()/* && $entity */){
+			$more .= 'entity=' . $entity . '&';
 		}
 
 		return DOL_URL_ROOT . '/' . $page . '.php?' . $more . 'modulepart=bimpcore&file=' . urlencode($file);

@@ -80,26 +80,42 @@ class BimpDict
 		return null;
 	}
 
-	public static function addDictionnary($code, $name, $table, $id_dol_dict, $filters, $fields, $key_field, $label_field, $active_field = '', $position_field = '', $active = 1, &$errors = array())
+	public static function addDolDictionnary($code, $name, $table, $id_dol_dict, $fields, $extra_values_params = array(), &$errors = array())
 	{
 		$id_dict = self::getDictionnaryId($code);
 		if ($id_dict) {
 			$errors[] = 'Un dictionnaire existe déjà pour le code "' . $code . '"';
 		} else {
+			$values_params = BimpTools::overrideArray(array(
+				'table'          => $table,
+				'id_dol_dict'    => $id_dol_dict,
+				'fields'         => $fields,
+				'key_field'      => 'rowid',
+				'key_data_type'  => 'int',
+				'label_field'    => 'label',
+				'active_field'   => 'active',
+				'position_field' => 'position',
+				'filters'        => array()
+			), $extra_values_params);
+
+			foreach (array(
+						 'key_field'      => 'id',
+						 'key_data_type'  => 'int',
+						 'label_field'    => 'label',
+						 'active_field'   => 'active',
+						 'position_field' => 'position',
+						 'filters'        => array()
+					 ) as $params_name => $def_value) {
+				if ($values_params[$params_name] === $def_value) {
+					unset($values_params[$params_name]);
+				}
+			}
+
 			return BimpObject::createBimpObject('bimpcore', 'BimpDictionnary', array(
 				'code'          => $code,
 				'name'          => $name,
-				'values_params' => array(
-					'table'          => $table,
-					'filters'        => $filters,
-					'fields'         => $fields,
-					'key_field'      => $key_field,
-					'label_field'    => $label_field,
-					'active_field'   => $active_field,
-					'position_field' => $position_field,
-					'id_dol_dict'    => $id_dol_dict
-				),
-				'active'        => $active
+				'values_params' => $values_params,
+				'active'        => 1
 			), true, $errors);
 		}
 

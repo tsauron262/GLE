@@ -376,13 +376,14 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			'import_key'       => 'CaseNumber',        // colonne D
 			'fk_soc'           => 'AccountId',        // colonne F
 			'origin_mail'      => 'SuppliedEmail',   // colonne N
-			'type'             => 'Type',            // colonne Q
+			'type_code'        => 'Type',            // colonne Q
 			'fk_status'        => 'Status',            // colonne S
 			'subject'          => 'Subject',            // colonne X
 			'message'          => 'Description',        // colonne Z
 			'date_close'       => 'ClosedDate',        // colonne AB
 			'datec'            => 'CreatedDate',        // colonne AM
 			'date_update'      => 'LastModifiedDate',// colone AO
+			'IdContact' 		   => 'ContactId',	// colonne E (ne pas mettre contact_id en key pour eviter les effets de bord par rapport à la class de base)
 		);
 		$keys = array(
 			'import_key'
@@ -402,20 +403,14 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			}
 			$line = $rows[$id];
 			$this->incProcessed();
-//			echo '<pre>'; print_r($line); echo '</pre>';
 			$data = $this->traiteLnDoubleQuote($line);
-//			echo '<pre>'; print_r($data); echo '</pre>';
-//			echo '<pre>'; print_r($this->data_persistante['header']); echo '</pre>';
-//			exit;
-//			echo '<pre>'; var_dump(count($data), count($this->data_persistante['header'])); echo '</pre>';
+
 			if (count($data) != count($this->data_persistante['header'])) {
 				$this->Error('Erreur Nb colonnes: <pre>' . print_r($data, true) . '</pre>', null, 'Ligne ' . ($id + 1));
-//				var_dump(count($data), count($this->data_persistante['header']));
 				continue;
 			}
 			$ln = array_combine($this->data_persistante['header'], $data);
-//			 echo '<pre>'; print_r($ln); echo '</pre>';
-//			 exit(var_dump($id, $ln['Subject']));
+//			 echo '<pre>'; print_r($ln); echo '</pre>'; die;
 			if (strlen($ln['Subject'])) {
 				$data = $dataFiltres = array();
 				$errors = $warnings = array();
@@ -438,17 +433,19 @@ class BDS_ImportsDiversProcess extends BDSProcess
 						}
 					}
 				}
-
-				$type = $this->db->getValue('bimpcore_dictionnary_value', 'id', 'id_dict = 1 AND label LIKE \'' . $data['type'] . '\'');
-				if ($type) $data['type'] = $type; else $data['type'] = 0;
+//echo '<pre>'; print_r($data); echo '</pre>';
+				$data['type_code'] = null;
 
 				// traiter fk_status
-				$fk_status = -1;
+
 				$fk_status = $labelArr[$data['fk_status']];
-				if ($fk_status < 0)	{
+				var_dump($fk_status);
+				if (is_null($fk_status))	{
 					/*
-					 // TODO : Finaliser le traitement des status par rapport à la liste définitive RDC
-					// todo : je crois qu'il me manque import_key
+					// TODO 1 : Finaliser le traitement des status par rapport à la liste définitive RDC
+
+					// TODO 2 : il n'y a pas import_key dans le insert into de ticket.class.php (utliser TICKET_CREATE + isset $this->import_key)
+					// TODO 2b : il va faloir utiliser TICKET_CREATE + $this->import_key pour le ContactId (dolibarr utilise la variable global $user)
 
 					switch ($data['fk_status']) {
 						case 'En cours SM':
@@ -471,6 +468,13 @@ class BDS_ImportsDiversProcess extends BDSProcess
 					*/
 					$fk_status = 3;
 				} // render statut extra
+				if ($fk_status >= 0) {
+					$data['fk_status'] = $fk_status;
+					$dataFiltres['fk_status'] = $fk_status;
+				} else {
+					$this->Error('Statut non trouvé : ' . strlen($ln['CaseNumber']), null, $ln['CaseNumber'] . ' ligne ' . ($id + 1));
+					continue;
+				}
 
 				// retrouver le fk_soc selon le AccountId
 				if ($ln['AccountId'] !== '000000000000000AAA') {
@@ -483,8 +487,9 @@ class BDS_ImportsDiversProcess extends BDSProcess
 //						continue;
 					}
 				}
+//echo '<pre>'; print_r($data); echo '</pre>'; die;
 				$obj = BimpObject::createOrUpdateBimpObject('bimpticket', 'Bimp_Ticket', $dataFiltres, $data, true, true, $errors, $warnings);
-//		echo '<pre>'; print_r($obj); echo '</pre>'; die;
+echo '<pre>'; print_r($obj); echo '</pre>'; die;
 				foreach ($errors as $error) {
 					$this->Error($error, null, $ln['CaseNumber']);
 				}

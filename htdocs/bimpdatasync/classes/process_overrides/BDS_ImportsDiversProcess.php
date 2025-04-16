@@ -121,10 +121,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 		$entre = substr($entre,1,-1);
 		return explode('","',$entre);
 	}
-	public function traiteLnDoubleQuote($entre){
-		$entre = substr($entre,1,-1);
-		return explode('"",""',$entre);
-	}
+
 	public function executeImportClientRDC($step_name, &$errors = array(), $extra_data = array())
 	{
 		$correspondance = array(
@@ -352,7 +349,8 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			$errors[] = 'Fichier absent';
 		} else {
 			$rows = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-			$this->data_persistante['header'] = $this->traiteLnDoubleQuote($rows[0]);
+			$this->data_persistante['header'] = explode(';', $rows[0]);
+//			echo '<pre>'; print_r($this->data_persistante); echo '</pre>'; die;
 			unset($rows[0]);
 
 			if (empty($rows)) {
@@ -363,7 +361,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 						'label'                  => 'Création des tickets',
 						'on_error'               => 'continue',
 						'elements'               => array_keys($rows),
-						'nbElementsPerIteration' => 20
+						'nbElementsPerIteration' => 100
 					)
 				);
 			}
@@ -383,7 +381,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			'date_close'       => 'ClosedDate',        // colonne AB
 			'datec'            => 'CreatedDate',        // colonne AM
 			'date_update'      => 'LastModifiedDate',// colone AO
-			'IdContact' 		   => 'ContactId',	// colonne E (ne pas mettre contact_id en key pour eviter les effets de bord par rapport à la class de base)
+			'IdContact' 	   => 'ContactId',	// colonne E (ne pas mettre contact_id en key pour eviter les effets de bord par rapport à la class de base)
 		);
 		$keys = array(
 			'import_key'
@@ -393,8 +391,6 @@ class BDS_ImportsDiversProcess extends BDSProcess
 		$file = $this->getParam('csv_file', '');
 		$rows = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 		$traite = $this->getParam('elem_ok', 0);
-		$bticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket');
-		$labelArr = array_flip(array_column($bticket::$status_list, 'label'));
 
 		foreach ($this->references as $id) {
 			if ($id <= $traite) {
@@ -402,21 +398,24 @@ class BDS_ImportsDiversProcess extends BDSProcess
 				continue;
 			}
 			$line = $rows[$id];
+			$data = explode(';', $line);
 			$this->incProcessed();
-			$data = $this->traiteLnDoubleQuote($line);
 
+//			echo '<pre>'; print_r($this->data_persistante['header']); echo '</pre>';
+//			echo '<pre>'; print_r($data); echo '</pre>';
+//			die(var_dump(count($data), count($this->data_persistante['header'])));
 			if (count($data) != count($this->data_persistante['header'])) {
 				$this->Error('Erreur Nb colonnes: <pre>' . print_r($data, true) . '</pre>', null, 'Ligne ' . ($id + 1));
 				continue;
 			}
 			$ln = array_combine($this->data_persistante['header'], $data);
-//			 echo '<pre>'; print_r($ln); echo '</pre>'; die;
+//			echo '<pre>'; print_r($ln); echo '</pre>'; die;
 			if (strlen($ln['Subject'])) {
 				$data = $dataFiltres = array();
 				$errors = $warnings = array();
 
 				foreach ($ln as $key => $value) {
-					$value = utf8_encode($value);
+//					$value = utf8_encode($value);
 					if ($correspondance2[$key]) {
 						if (stripos($value, '<script') !== false) {
 							if (stripos($ln['Description'], '<script') === false) {
@@ -433,68 +432,70 @@ class BDS_ImportsDiversProcess extends BDSProcess
 						}
 					}
 				}
-//echo '<pre>'; print_r($data); echo '</pre>';
 				$data['type_code'] = null;
+				if ($data['fk_status'] == 'En cours SM') $data['fk_status'] = 3; else $data['fk_status'] = 8;
 
-				// traiter fk_status
-
-				$fk_status = $labelArr[$data['fk_status']];
-				var_dump($fk_status);
-				if (is_null($fk_status))	{
-					/*
-					// TODO 1 : Finaliser le traitement des status par rapport à la liste définitive RDC
-
-					// TODO 2 : il n'y a pas import_key dans le insert into de ticket.class.php (utliser TICKET_CREATE + isset $this->import_key)
-					// TODO 2b : il va faloir utiliser TICKET_CREATE + $this->import_key pour le ContactId (dolibarr utilise la variable global $user)
-
-					switch ($data['fk_status']) {
-						case 'En cours SM':
-						case 'En attente de vérification':
-							$fk_status = 3;
-							break;
-						case 'En attente de retour Marchand':
-							$fk_status = 4;
-							break;
-						case 'New':
-							$fk_status = 0;
-							break;
-						case 'Closed':
-							$fk_status = 6;
-							break;
-						case 'On Hold':
-							$fk_status = 5;
-							break;
-					}
-					*/
-					$fk_status = 3;
-				} // render statut extra
-				if ($fk_status >= 0) {
-					$data['fk_status'] = $fk_status;
-					$dataFiltres['fk_status'] = $fk_status;
-				} else {
-					$this->Error('Statut non trouvé : ' . strlen($ln['CaseNumber']), null, $ln['CaseNumber'] . ' ligne ' . ($id + 1));
-					continue;
-				}
 
 				// retrouver le fk_soc selon le AccountId
 				if ($ln['AccountId'] !== '000000000000000AAA') {
 					$fk_soc = $this->db->getValue('societe', 'rowid', 'import_key = \'' . $ln['AccountId'] . '\'');
 					if ($fk_soc) {
 						$data['fk_soc'] = $fk_soc;
-						$dataFiltres['fk_soc'] = $fk_soc;
 					} else {
 						$this->Alert('Société non trouvée : ' . strlen($ln['CaseNumber']), null, $ln['AccountId'] . ' ligne ' . ($id + 1));
-//						continue;
 					}
-				}
-//echo '<pre>'; print_r($data); echo '</pre>'; die;
+				} else $data['fk_soc'] = 0;
+				// retoruver le contact selon le ContactId
+				if ($ln['ContactId'] !== '000000000000000AAA') {
+					$fk_contact = $this->db->getValue('socpeople', 'rowid', 'import_key = \'' . $ln['ContactId'] . '\'');
+					if ($fk_contact) {
+						$data['fk_contact'] = $fk_contact;
+					} else {
+						$this->Alert('Contact non trouvé : ' . strlen($ln['CaseNumber']), null, $ln['ContactId'] . ' ligne ' . ($id + 1));
+					}
+				} else $data['fk_contact'] = 0;
+				$data['datec'] = $this->convertDate($data['datec']);
+				$data['date_close'] = $this->convertDate($data['date_close']);
+				$data['date_update'] = $this->convertDate($data['date_update']);
+//				echo '<pre>'; print_r($data); echo '</pre>'; die;
+				$obj = BimpCache::findBimpObjectInstance('bimpticket', 'Bimp_Ticket', $dataFiltres, true, true, false);
+				$action = is_null($obj) || !BimpObject::objectLoaded($obj) ? 'create' : 'update';
 				$obj = BimpObject::createOrUpdateBimpObject('bimpticket', 'Bimp_Ticket', $dataFiltres, $data, true, true, $errors, $warnings);
-echo '<pre>'; print_r($obj); echo '</pre>'; die;
 				foreach ($errors as $error) {
 					$this->Error($error, null, $ln['CaseNumber']);
 				}
 				foreach ($warnings as $warning) {
 					$this->Alert($warning, null, $ln['CaseNumber']);
+				}
+				$upValues = array(
+					'import_key' => $ln['CaseNumber'],
+					'datec'      => $data['datec']
+				);
+				if ($data['date_close']){
+					$upValues['date_close'] = $data['date_close'];
+				}
+				if ($data['date_update']){
+					$upValues['date_update'] = $data['date_update'];
+				}
+				$upValues['fk_statut'] = $data['fk_status'];
+//				echo '<pre>'; print_r($upValues); echo '</pre>';
+				$this->db->update('ticket', $upValues, 'rowid = ' . $obj->id);
+				if ($data['fk_contact'])	{
+					// verif si deja dans la table llx_element_contact
+					$role = $this->db->getValue('c_type_contact', 'rowid', 'element = \'ticket\' AND code = \'SUPPORTCLI\'');
+					if ($role) {
+						$fk_element = $this->db->getValue('element_contact', 'rowid', 'element_id = ' . $obj->id . ' AND fk_c_type_contact = ' . $role . ' AND fk_socpeople = ' . $data['fk_contact']);
+						if (!$fk_element) {
+							// insert dans la table llx_element_contact
+							$this->db->insert('element_contact', array(
+								'statut'            => 4,
+								'element_id'        => $obj->id,
+								'fk_c_type_contact' => $role,
+								'fk_socpeople'      => $data['fk_contact'],
+								'datecreate'        => date('Y-m-d H:i:s')
+							));
+						}
+					}
 				}
 				$ok[] = $ln['CaseNumber'] . ' - ' . $obj->id;
 			}
@@ -507,6 +508,13 @@ echo '<pre>'; print_r($obj); echo '</pre>'; die;
 		}
 	}
 
+	public function convertDate($date){
+		$datetime = DateTime::createFromFormat('d/m/Y H:i', $date);
+		if ($datetime) {
+			return $datetime->format('Y-m-d H:i:s');
+		}
+		return null;
+	}
     // Install / updates:
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')

@@ -288,7 +288,8 @@ forms:
     assign: 
         rows:
             -   field: type_code
-                required: 1
+                show: 
+                    callback: isLoaded
             -   field: fk_user_assign
                 required: 1
                 label: Assigner à

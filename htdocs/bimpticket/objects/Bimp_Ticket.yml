@@ -90,6 +90,7 @@ fields:
         label: Type
         values:
             dict: bimp_ticket_types
+        default_value: ''
     
     origin_email:
         label: Adresse Email source
@@ -286,7 +287,10 @@ forms:
                     
     assign: 
         rows:
+            -   field: type_code
+                required: 1
             -   field: fk_user_assign
+                required: 1
                 label: Assigner à
 
 fields_tables:

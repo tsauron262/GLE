@@ -114,10 +114,14 @@ class modBimpticket extends DolibarrModules
 		}
 
 		if (!(int) $bdb->getValue('bimpcore_dictionnary', 'id', 'code = \'bimp_ticket_types\'')) {
-			$dict = BimpDict::addDictionnary('bimp_ticket_types', 'Types de ticket', 'c_ticket_type', 45, array(), array(
+			$dict = BimpDict::addDolDictionnary('bimp_ticket_types', 'Types de ticket', 'c_ticket_type', 45, array(
 				'use_default' => array('type' => 'bool', 'default' => 0),
 				'description' => array('default' => '')
-			), 'code', 'label', 'active', 'pos');
+			), array(
+				'key_field' => 'code',
+				'key_data_type' => 'string',
+				'position_field' => 'pos',
+			), $errors);
 
 			if (BimpObject::objectLoaded($dict)) {
 				$bdb->delete('c_ticket_type', '1', true);

@@ -223,6 +223,8 @@ class BimpDictionnary extends BimpObject
 						}
 					}
 				}
+
+				return self::getCacheArray($cache_key, $include_empty, $empty_value, $empty_label);
 			}
 		}
 

@@ -770,6 +770,7 @@ class BimpNote extends BimpObject
 		}
 		return '';
 	}
+
 	public function getMailToContacts()
 	{
 		$parent = $this->getParentInstance();
@@ -778,7 +779,8 @@ class BimpNote extends BimpObject
 				return $parent->getMailToContacts();
 			}
 		}
-		return '';
+
+		return array();
 	}
 
     public function create(&$warnings = array(), $force_create = false)

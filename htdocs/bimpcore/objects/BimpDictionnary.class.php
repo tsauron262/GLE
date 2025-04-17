@@ -63,8 +63,8 @@ class BimpDictionnary extends BimpObject
 			}
 
 			$onclick = $child_instance->getJsLoadModalList('dictionnary', $params);
-		} elseif (isset($values_params['url'])) {
-			$onclick = 'window.open(\'' . $values_params['url'] . '\');';
+		} elseif (isset($values_params['id_dol_dict']) && (int) $values_params['id_dol_dict']) {
+			$onclick = 'window.open(\'' . DOL_URL_ROOT . '//admin/dict.php?id=' . $values_params['id_dol_dict'] . '\');';
 		}
 
 		return $onclick;
@@ -197,11 +197,17 @@ class BimpDictionnary extends BimpObject
 					$cache_key .= '_active';
 				}
 
+				$values_params = $this->getData('values_params');
+				$key_data_type = (isset($values_params['key_data_type']) ? $values_params['key_data_type'] : 'int');
+
+				if ($key_data_type == 'string') {
+					$empty_value = '';
+				}
+
 				if (!isset(self::$cache[$cache_key])) {
 					$values = self::getValuesData($active_only);
 
 					if (!empty($values)) {
-						$values_params = $this->getData('values_params');
 						$label_field = (isset($values_params['label_field']) ? $values_params['label_field'] : 'label');
 
 						foreach ($values as $key => $value) {

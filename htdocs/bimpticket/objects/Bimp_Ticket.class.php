@@ -29,7 +29,7 @@ class Bimp_Ticket extends BimpDolObject
 		self::STATUS_WAITING        => array('label' => 'En attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
 		self::STATUS_CLOSED         => array('label' => 'Terminé', 'icon' => 'fas_check', 'classes' => array('success')),
 		self::STATUS_CANCELED       => array('label' => 'Annulé', 'icon' => 'fas_times', 'classes' => array('danger')),
-		self::STATUS_TRANSFERED     => array('label' => 'Trtansféré', 'icon' => 'fas_sign-out-alt', 'classes' => array('important')),
+		self::STATUS_TRANSFERED     => array('label' => 'Transféré', 'icon' => 'fas_sign-out-alt', 'classes' => array('important')),
 	);
 
 	public static $types = array();
@@ -318,6 +318,10 @@ class Bimp_Ticket extends BimpDolObject
 			$fk_user_assign = BimpTools::getArrayValueFromPath($data, 'fk_user_assign', 0);
 
 			$errors = $this->updateField('fk_user_assign', $fk_user_assign);
+
+			if (BimpTools::isPostFieldSubmit('type_code')) {
+				$errors = BimpTools::merge_array($errors, $this->updateField('type_code', BimpTools::getPostFieldValue('type_code', $this->getData('type_code'), 'alphanohtml')));
+			}
 
 			if (!count($errors)) {
 				$this->checkUserAssigned(true, $init_user_assign);

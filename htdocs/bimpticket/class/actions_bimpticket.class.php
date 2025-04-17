@@ -80,8 +80,9 @@ class ActionsBimpticket
 		global $db;
 
 		$msg = $parameters['imapemail']->bodies['html'];
-		if($msg == '')
+		if ($msg == '') {
 			$msg = $parameters['imapemail']->bodies['text'];
+		}
 
 		$traite = 0;
 
@@ -136,9 +137,9 @@ class ActionsBimpticket
 				if (!$traite && isset($parameters['objectemail']) && is_a($parameters['objectemail'], 'ticket')) {
 					$ticket = $parameters['objectemail'];
 					$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
-				$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
-				$Bimp_Ticket->addObjectLog($Bimp_Ticket->getData('message'));
-				$Bimp_Ticket->updateField("message", $msg);
+					$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
+					$Bimp_Ticket->addObjectLog($Bimp_Ticket->getData('message'));
+					$Bimp_Ticket->updateField("message", $msg);
 
 					$contact_static = new Contact($db);
 					$contact_static->fetch(0, null, '', $Bimp_Ticket->getData('origin_email'));
@@ -161,7 +162,7 @@ class ActionsBimpticket
 
 		if (count($errors)) {
 			BimpCore::addLog('Erreurs collecte e-mail', 3, 'bimpcore', $parameters['objectemail'], array(
-				'hook' => $action,
+				'hook'    => $action,
 				'Erreurs' => $errors
 			));
 		}

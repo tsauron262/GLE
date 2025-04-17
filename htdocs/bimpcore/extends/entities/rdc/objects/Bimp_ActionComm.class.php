@@ -3,15 +3,28 @@
 class Bimp_ActionComm_ExtEntity extends Bimp_ActionComm {
 	public static $motifEchange = array(
 		'0' => array('label' => 'N/A', 'classes' => array('danger')),
-		'1' => array('label' => 'Résolution de problème'),
-		'2' => array('label' => 'Offre commerciale'),
-		'3' => array('label' => 'Suivi'),
-		'4' => array('label' => 'Qualité'),
-		'5' => array('label' => 'Contrefaçon'),
-		'6' => array('label' => 'Réclamation')
+		'1' => array('label' => 'Prospection'),
+		'2' => array('label' => 'Résolution de problème'),
+		'3' => array('label' => 'Offre commerciale'),
+		'4' => array('label' => 'Suivi'),
+		'5' => array('label' => 'Qualité'),
+		'6' => array('label' => 'Contrefaçon'),
+		'7' => array('label' => 'Réclamation')
 	);
 
 	public static $c_actioncomm_AfficheEchange = array('1', '4', '14'); // 'AC_TEL', 'AC_EMAIL', 'AC_CHAT'
+
+	public function getMotifEchange()
+	{
+		$id = BimpTools::getPostFieldValue('id');
+		$soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id);
+
+		if ($soc->isLoaded() && $soc->getData('fk_statut_rdc') > $soc::$statut_rdc_live) {
+			unset(self::$motifEchange[1]);
+		}
+
+		return self::$motifEchange;
+	}
 
 	public function getIdsAfficheEchange()
 	{
@@ -40,6 +53,43 @@ class Bimp_ActionComm_ExtEntity extends Bimp_ActionComm {
 		return self::getCacheArray($cache_key, $include_empty);
 	}
 
+	//todo : voir si encore besoin
+	public function displayState($badge = false)
+	{
+		if ($this->isLoaded()) {
+			$percent = (float) $this->getData('percent');
+
+			if ($percent < 0) {
+				$date_begin = $this->getData('datep');
+				$date_now = date('Y-m-d') . ' 00:00:00';
+
+				if ($date_now < $date_begin) {
+					return '<span class="' . ($badge ? 'badge badge-' : '') . 'warning">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'A venir</span>';
+				} else {
+					return '<span class="' . ($badge ? 'badge badge-' : '') . 'success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Terminé</span>';
+				}
+			} else {
+				if (!$percent) {
+					return '<span class="' . ($badge ? 'badge badge-' : '') . 'warning">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'A faire</span>';
+				} elseif ($percent < 100) {
+					return '<span class="' . ($badge ? 'badge badge-' : '') . 'info">' . BimpRender::renderIcon('fas_cogs', 'iconLeft') . 'En cours (' . $percent . ' %)</span>';
+				} else {
+					return '<span class="' . ($badge ? 'badge badge-' : '') . 'success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Terminé</span>';
+				}
+			}
+		}
+
+		return '';
+	}
+	public function create(&$warnings = array(), $force_create = false)
+	{
+		$this->set('datep', date('Y-m-d', strtotime($this->getData('datep'))) . date('H:i:s') );
+		if(!$this->getData('datep2')) {
+			$this->set('datep2', $this->getData('datep'));
+		}
+		return parent::create($warnings, $force_create);
+	}
+
 	public function onSave(&$errors = [], &$warnings = [])
 	{
 		$id = BimpTools::getPostFieldValue('id');
@@ -57,5 +107,18 @@ class Bimp_ActionComm_ExtEntity extends Bimp_ActionComm {
 		}
 
 		parent::onSave($errors, $warnings);
+	}
+
+	public function onCr_echange($data, &$warnings = array())
+	{
+		$warnings = array();
+		$errors = array();
+		$success = 'Compte rendu enregistré';
+exit('OK : ' . $success);
+		$this->create($warnings, false);
+		return array(
+			'errors' => $errors,
+			'warnings' => $warnings
+		);
 	}
 }

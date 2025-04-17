@@ -144,6 +144,14 @@ class Bimp_Client_ExtEntity extends Bimp_Client
     public function getActionsButtons()
 	{
 //		echo '<pre>'; print_r($this->data); echo '</pre>';die;
+		$actioncomm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm');
+		$buttons[] = array(
+			'label'   => 'CR échange',
+			'icon'    => 'fas_comment',
+			'onclick' => $actioncomm->getJsActionOnclick('cr_echange', array('fk_soc' => $this->id), array('form_name' => 'formCREchange'))
+			// 	'onclick' => $actioncomm->getJsLoadModalForm('formCREchange', 'Compte rendu d\'échange', array('fk_soc' => $this->id))
+		);
+
 		$buttons[] = array(
 			'label'   => 'Actions',
 			'icon'    => 'fas_edit',
@@ -392,7 +400,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 		$tabs[] = array(
 			'id' => 'default',
-			'title' => 'Actions commerciales',
+			'title' => 'Compte rendu d\'échange',
 			'content' => $this->renderActionsCommView('manuel')
 		);
 		$tabs[] = array(
@@ -416,7 +424,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		switch ($type)	{
 			case 'manuel':
 				$filtre_type = 'not_in';
-				$titre = 'Actions commerciales';
+				$titre = 'Liste des échanges';
 				break;
 			case 'auto':
 				$filtre_type = 'in';
@@ -433,6 +441,12 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return $list->renderHtml();
 	}
 
+	public function create(&$warnings = array(), $force_create = false)
+	{
+		$this->checkAttr();
+		return parent::create($warnings, $force_create);
+	}
+
 	public function update(&$warnings = array(), $force_update = false)
 	{
 		$errors = array();
@@ -443,7 +457,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		if (count($errors))
 			return $errors;
 
-		$this->checkAttr();	// envoi de mail si changement d'attribtion
+		$this->checkAttr();
 		$this->checkPassageLive();
 
 		return parent::update($warnings, $force_update);
@@ -459,11 +473,12 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		);
 	}
 
+	/*
 	public function onSave(&$errors = array(), &$warnings = array())
 	{
-		if (!BimpTools::getPostFieldValue('id'))	$this->checkAttr(true);
 		parent::onSave($errors, $warnings);
 	}
+	*/
 
 	public function appelMiraklS20(&$warnings = array())
 	{
@@ -608,24 +623,15 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		}
 		return 1;
 	}
-	public function checkAttr($onSave = false) {
+
+	public function checkAttr() {
 		global $user;
 		$attr = $this->getData('fk_user_attr_rdc');
 		if ($attr != $user->id)	{
-			if ($attr && ($this->getInitData('fk_user_attr_rdc') != $attr || $onSave)) { // si changement d'attribution ou onSave (creation)
+			if ($attr && ($this->getInitData('fk_user_attr_rdc') != $attr)) { // si changement d'attribution
 				$code = 'Attribution_rdc';
 				$sujet = 'Attribution Compte';
 				$msg = 'Le compte ' . $this->getLink() . ' vient de vous être attribué par ' . $user->getNomUrl();
-				/*todo + e 15 000 mail envoyé
-				Envoyé le
-11-04-2025 15:43:45
-De
-no-reply@bimp.fr
-Réponse-à
-no-reply@bimp.fr
-À
-maeva.ralijaona@rueducommerce.com*/
-
 //				BimpUserMsg::envoiMsg($code, $sujet, $msg, $attr);
 			}
 		}

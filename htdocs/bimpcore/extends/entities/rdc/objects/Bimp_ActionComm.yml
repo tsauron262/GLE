@@ -31,6 +31,59 @@ forms:
                 input:
                     help: unset
             fk_project: unset    
+            
+    formCREchange:
+        rows:
+            from:
+                field: datep
+                required: 1
+            label:
+                field: label
+                required: 1
+            users_assigned:
+                custom: 1
+                label: Evénement assigné à
+                input_name: users_assigned
+                input:
+                    multiple: 1
+                    sortable: 1
+                    type: search_user
+                    help:
+                        callback: displayExternalUsers
+                value:
+                    callback: getUsersAssigned
+            type:
+                field: fk_action
+                required: 1
+            fk_motif_echange:
+                field: fk_motif_echange
+                required: 1
+            societe:
+                field: fk_soc
+                show: 0
+            contacts_assigned:
+                custom: 1
+                label: Contact(s) tiers
+                input_name: contacts_assigned
+                input:
+                    type: select
+                    multiple: 1
+                    options:
+                        callback:
+                            method: getSocieteContactsArray
+                            params:
+                                - field_value: fk_soc
+                                - 1
+                                - ''
+                                - 1
+                depends_on: fk_soc
+                display_if:
+                    field_name: fk_soc
+                    hide_values: 0,
+                value:
+                    callback: getContactsAssigned
+            
+
 
 fields:
     label:
@@ -42,7 +95,7 @@ fields:
     fk_motif_echange:
         label: Motif de l'échange
         values:
-            array: motifEchange
+            callback: getMotifEchange
     action_echange:
         label: Action
         type: text

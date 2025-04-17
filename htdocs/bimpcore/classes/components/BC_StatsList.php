@@ -180,7 +180,7 @@ class BC_StatsList extends BC_List
                 $this->colspan++;
             }
 
-            // Main Cols:            
+            // Main Cols:
             $section = false;
             if (!empty($this->groupBy)) {
                 foreach ($this->groupBy as $gb) {
@@ -339,7 +339,7 @@ class BC_StatsList extends BC_List
         $obj_fields = array();
         $stats_fields = array();
 
-        // On sépare les champs calculés des champs ordinaires: 
+        // On sépare les champs calculés des champs ordinaires:
         foreach ($search_fields as $field_name => $value) {
             if ($this->object->field_exists($field_name)) {
                 $obj_fields[$field_name] = $value;
@@ -348,19 +348,19 @@ class BC_StatsList extends BC_List
             }
         }
 
-        // Champs de base de l'objet: 
+        // Champs de base de l'objet:
         $filters = $this->object->getSearchFilters($this->params['joins'], $obj_fields, 'a');
         foreach ($filters as $filter_key => $filter) {
             $this->mergeFilter($filter_key, $filter);
         }
 
-        // Champs des objets enfants: 
+        // Champs des objets enfants:
         $filters = $this->object->getSearchFilters($this->params['joins']);
         foreach ($filters as $filter_key => $filter) {
             $this->mergeFilter($filter_key, $filter);
         }
 
-        // Champs calculés: 
+        // Champs calculés:
         foreach ($stats_fields as $name => $value) {
             if ((isset($value['min']) && (string) $value['min'] !== '') || (isset($value['max']) && (string) $value['max'] !== '')) {
                 $this->statFieldsFilters = BimpTools::mergeSqlFilter($this->statFieldsFilters, $name, $value);
@@ -389,18 +389,18 @@ class BC_StatsList extends BC_List
         $table = $this->object->getTable();
         $primary = $this->object->getPrimary();
 
-        // Jointures: 
+        // Jointures:
         $joins = $this->params['joins'];
 
         // Filtres:
-        // Filtres de base: 
+        // Filtres de base:
         if (count($this->params['list_filters'])) {
             foreach ($this->params['list_filters'] as $list_filter) {
                 $this->mergeFilter($list_filter['name'], $list_filter['filter']);
             }
         }
 
-        // Panneau filtres: 
+        // Panneau filtres:
         if (!is_null($this->bc_filtersPanel)) {
             $panelFilters = array();
             $filters_errors = $this->bc_filtersPanel->getSqlFilters($panelFilters, $joins);
@@ -418,19 +418,19 @@ class BC_StatsList extends BC_List
             }
         }
 
-        // Filtres sous-liste: 
+        // Filtres sous-liste:
         foreach ($this->subListFilters as $field => $filter) {
             $this->mergeFilter($field, $filter);
         }
 
-        // Joins sous-liste: 
+        // Joins sous-liste:
         foreach ($this->subListJoins as $join_alias => $join) {
             if (!isset($joins[$join_alias])) {
                 $joins[$join_alias] = $join;
             }
         }
 
-        // ID Parent: 
+        // ID Parent:
         if (!is_null($this->id_parent) && $this->id_parent != 0) {
             $parent_id_property = $this->object->getParentIdProperty();
             if ($parent_id_property) {
@@ -444,7 +444,7 @@ class BC_StatsList extends BC_List
             return array();
         }
 
-        // Groups By: 
+        // Groups By:
 
         $groups_by = array();
 
@@ -473,7 +473,7 @@ class BC_StatsList extends BC_List
             return array();
         }
 
-        // Trie: 
+        // Trie:
         $order_by = $primary;
         $order_way = 'desc';
         $extra_order_by = null;
@@ -531,7 +531,7 @@ class BC_StatsList extends BC_List
         $this->final_filters = $filters;
         $this->final_joins = $joins;
 
-        // Requête principale:         
+        // Requête principale:
         $sql = '';
 
         $request_fields = array();
@@ -541,7 +541,7 @@ class BC_StatsList extends BC_List
             $request_fields[] = $group_by['key'] . ' as ' . $group_by['alias'];
         }
 
-        // SQL Filtres sur les champs calculés: 
+        // SQL Filtres sur les champs calculés:
 //        $having_sql = '';
 //        if (!empty($this->statFieldsFilters)) {
 //            foreach ($this->statFieldsFilters as $col_name => $filter) {
@@ -614,15 +614,15 @@ class BC_StatsList extends BC_List
 
         if (!empty($request_fields)) {
             $sql = BimpTools::getSqlSelect($request_fields, 'a');
-            
-            
+
+
             if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
                 $newJoins = array();
                 if($this->object->getEntityFilter($newJoins, $filters)){
                     $joins = BimpTools::merge_array($joins, $newJoins);
                 }
             }
-            
+
             $sql .= BimpTools::getSqlFrom($table, $joins, 'a');
             $sql .= BimpTools::getSqlWhere($filters, 'a');
             $sql .= ' GROUP BY ';
@@ -644,7 +644,7 @@ class BC_StatsList extends BC_List
 
             $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, '', $extra_order_by, $extra_order_way);
 
-            if (empty($this->statFieldsFilters)) { // On récupère la totalité des lignes pour appliquer les filtres sur les champs calculés après coup. 
+            if (empty($this->statFieldsFilters)) { // On récupère la totalité des lignes pour appliquer les filtres sur les champs calculés après coup.
                 $sql .= BimpTools::getSqlLimit($n, $p);
             }
 
@@ -717,7 +717,7 @@ class BC_StatsList extends BC_List
             $joins = $this->final_joins;
             $filters = $this->final_filters;
         }
-        
+
         if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
             $newJoins = array();
             if($this->object->getEntityFilter($newJoins, $filters)){
@@ -766,7 +766,7 @@ class BC_StatsList extends BC_List
         }
 
 
-        // Application des filtres sur les champs calculés: 
+        // Application des filtres sur les champs calculés:
         if (!empty($this->statFieldsFilters)) {
             $this->totals = array();
             if ($this->params['total_row'] && !empty($total_fields)) {
@@ -829,7 +829,7 @@ class BC_StatsList extends BC_List
             }
         }
 
-        // Calcul du nombre de pages: 
+        // Calcul du nombre de pages:
         $this->nbTotalPages = 1;
 
         if ($n > 0) {
@@ -943,7 +943,7 @@ class BC_StatsList extends BC_List
         return $rows;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderSubStatsListParams()
     {
@@ -1091,13 +1091,13 @@ class BC_StatsList extends BC_List
 
             foreach ($this->params['group_by_options'] as $groupByOption) {
                 if (is_string($groupByOption)) {
-//                    if ($this->object->field_exists($groupByOption)) {
+                    if ($this->object->field_exists($groupByOption)) {
                         $label = $this->object->getConf('fields/' . $groupByOption . '/label', $groupByOption);
                         $group_by_options[$groupByOption] = array(
                             'label' => $label,
                             'data'  => $data
                         );
-//                    }
+                    }
                 }
             }
 
@@ -1783,7 +1783,7 @@ class BC_StatsList extends BC_List
             )
         );
 
-        // On récup. les params du champ: 
+        // On récup. les params du champ:
         $field = BimpTools::getArrayValueFromPath($col_params, 'field', '');
         if ($field && $this->object->field_exists($field)) {
             $input_options['data']['decimals'] = $this->object->getConf('fields/' . $field . '/decimals', ($data_type === 'int' ? 0 : 2));
@@ -1792,7 +1792,7 @@ class BC_StatsList extends BC_List
             $input_options['data']['unsigned'] = $this->object->getConf('fields/' . $field . '/unsigned', 0);
         }
 
-        // On surchage avec les paramètres de la colonne: 
+        // On surchage avec les paramètres de la colonne:
         if (isset($col_params['decimals'])) {
             $input_options['data']['decimals'] = (int) $col_params['decimals'];
         }
@@ -1918,12 +1918,12 @@ class BC_StatsList extends BC_List
 
 
                                 $field = new BC_Field($obj, $fieldName);
-                                
+
                                 if ($fieldName === $obj->getPrimary()) {
                                     $field->params['type'] = 'id_object';
                                     $field->params['object'] = $obj;
                                 }
-                                
+
                                 $content = $field->getNoHtmlValue($option);
                             }
                         }

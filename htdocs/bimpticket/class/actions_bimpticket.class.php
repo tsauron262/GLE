@@ -69,25 +69,78 @@ class ActionsBimpticket {
 
 	function addMoreActionsEmailCollector($parameters, &$object, &$action, $hookmanager)
 	{
-		$this->results['hookBimpticket'] = "Traitement Bimp_Ticket";
+		$this->results['hookBimpticketResponse'] = "Traitement response Bimp_Ticket";
+		$this->results['hookBimpticketInitial'] = "Traitement initial Bimp_Ticket";
 		return 0;
 	}
 
 	function doCollectImapOneCollector($parameters, &$object, &$action, $hookmanager)
 	{
 		global $db;
-//		echo '<pre>';print_r($parameters['imapemail']);echo '</pre>';
-		if(isset($parameters['objectemail']) && is_a($parameters['objectemail'], 'ticket')){
-			$ticket = $parameters['objectemail'];
-			$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
 
-			$contact_static = new Contact($db);
-			$contact_static->fetch(0, null, '', $Bimp_Ticket->getData('origin_email'));
-			if($contact_static->id > 0 AND $contact_static->fk_soc == $Bimp_Ticket->getData('fk_soc')){
-				$ticket->add_contact($contact_static->id, 'SUPPORTCLI', 'external');
+		$traite = 0;
+
+		$matches = array();
+		preg_match_all('/([^: ]+): (.+?(?:\r\n\s(?:.+?))*)(\r\n|\s$)/m', $parameters['header'], $matches);
+		$headers = array_combine($matches[1], $matches[2]);
+
+		if($action == 'hookBimpticketResponse') {
+			if (isset($headers['References']) && $headers['References'] != '' && $headers['References'] != '<>') {
+				/*
+				 * on purifie le message
+				 */
+				$msg = $parameters['imapemail']->bodies['html'];
+				$tabT = explode('lineBreakAtBeginningOfMessage', $msg);
+				if (isset($tabT[1])) {
+					$msg = $tabT[0] . '">';
+				}
+
+
+				/*
+				 * On retrouve le ticket et on lui ajoute le note
+				 */
+				$refs = explode('> <', $headers['References']);
+				foreach ($refs as $ref) {
+					if (strlen($ref) > 8) {
+						$bimp_ticket = BimpObject::findBimpObjectInstance('bimpticket', 'Bimp_Ticket', array('email_msgid' => str_replace(array('<', '>'), '', $ref)));
+						if ($bimp_ticket->id > 0) {
+							$userAttribut = $bimp_ticket->getData('fk_user_assign');
+							$errors = $bimp_ticket->addNote($msg, 20, 0, 0, $parameters['from'], 2, ($userAttribut) ? 1 : 0, 0, $userAttribut);
+							if (!count($errors)) {
+								$traite = 1;
+							} else {
+								die(print_r($errors, 1));
+							}
+						} else {
+							//				die('Pas de ticket trouvé pour '.str_replace(array('<', '>'), '', $headers['References']));
+						}
+					}
+				}
 			}
+		}
+
+
+
+
+		if($action == 'hookBimpticketInitial') {
+//		echo '<pre>';print_r($parameters['from'].$bimp_ticket->id);echo '</pre>';die;
+			if (!$traite && isset($parameters['objectemail']) && is_a($parameters['objectemail'], 'ticket')) {
+				$ticket = $parameters['objectemail'];
+				$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
+
+				$contact_static = new Contact($db);
+				$contact_static->fetch(0, null, '', $Bimp_Ticket->getData('origin_email'));
+				if ($contact_static->id > 0 and $contact_static->fk_soc == $Bimp_Ticket->getData('fk_soc')) {
+					$ticket->add_contact($contact_static->id, 'SUPPORTCLI', 'external');
+				}
+				$traite = 1;
 //			echo $Bimp_Ticket->printData();
 //			die('yes');
+			}
+		}
+
+		if(!$traite){
+			echo '<pre>';print_r($parameters);echo '</pre>';die('pas de traitement trouvé');
 		}
 
 

@@ -156,6 +156,9 @@ fields:
     date_close:
         label: Date de clôture
         type: datetime
+        
+    email_msgid:
+        label: ID message
 
 forms:
     default:

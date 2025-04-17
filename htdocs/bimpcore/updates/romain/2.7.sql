@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_notification` (
 
 INSERT INTO `llx_bimp_notification` (`id`, `label`, `nom`, `module`, `class`, `method`, `user_create`, `user_update`, `date_create`, `date_update`) VALUES
 (1, 'Demande de validation', 'demande_valid_comm', 'bimpvalidateorder', 'DemandeValidComm', 'getDemandeForUser', 330, 330, '2020-12-01 00:00:00', '2020-12-01 00:00:00'),
-(2, 'Note', 'bimp_note', 'bimpcore', 'BimpNote', 'getNoteForUser', 330, 330, '2020-12-08 00:00:00', '2020-12-08 00:00:00'),
+(2, 'Note', 'bimp_note', 'bimpcore', 'BimpNote', 'getNotesForUser', 330, 330, '2020-12-08 00:00:00', '2020-12-08 00:00:00'),
 (3, 'Tâche', 'notif_task', 'bimptask', 'BIMP_Task', 'getTaskForUser', 330, 330, '2021-01-15 00:00:00', '2021-01-15 00:00:00');
 
 --

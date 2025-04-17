@@ -638,4 +638,22 @@ class Bimp_Ticket extends BimpDolObject
 
 		return $data;
 	}
+
+	public function getMailToContacts(){
+		$contacts = $return = array();
+		$contacts = $this->dol_object->liste_contact(-1, 'external');
+		foreach($contacts as $contact){
+				$return[$contact['email']] = $contact['lastname']. ' '.$contact['firstname'].' ('.$contact['email'].')';
+		}
+//		echo '<pre>';print_r($contacts);
+		return $return;
+	}
+
+	public function getMailFrom(){
+		return BimpCore::getConf('mailReponse', '', 'bimpticket');
+	}
+
+	public function getObjectMail(){
+		return 'Rép. : '.$this->getData('subject');
+	}
 }

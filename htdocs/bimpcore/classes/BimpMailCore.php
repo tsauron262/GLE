@@ -25,9 +25,10 @@ class BimpMailCore
 	public $url = '';
 	public $files = array();
 	public $parent;
+	public $email_msgid = '';
 	public static $defaultType = '';
 
-	function __construct($parent, $subject, $to, $from, $msg = '', $reply_to = '', $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $errors_to = '')
+	function __construct($parent, $subject, $to, $from, $msg = '', $reply_to = '', $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $errors_to = '', $messageID = '')
 	{
 		global $dolibarr_main_url_root, $conf, $user;
 
@@ -132,6 +133,7 @@ class BimpMailCore
 		$this->reply_to = $reply_to;
 		$this->errors_to = $errors_to;
 		$this->deliveryreceipt = $deliveryreceipt;
+		$this->email_msgid = $messageID;
 		$this->primary = BimpCore::getParam('public_email/primary', '807F7F');
 
 		if (static::$defaultType != '') {
@@ -226,7 +228,7 @@ class BimpMailCore
 		$bcc = BimpTools::cleanEmailsStr($this->bcc);
 		$replyTo = BimpTools::cleanEmailsStr($this->reply_to);
 
-		$cmail = new CMailFile($this->subject, $to, $from, $html, $filename_list, $mimetype_list, $mimefilename_list, $cc, $bcc, $this->deliveryreceipt, 1, $this->errors_to, '', '', '', $this->send_context, $replyTo);
+		$cmail = new CMailFile($this->subject, $to, $from, $html, $filename_list, $mimetype_list, $mimefilename_list, $cc, $bcc, $this->deliveryreceipt, 1, $this->errors_to, '', $this->getTrackId(), $this->getMoreinheader(), $this->send_context, $replyTo);
 		$result = $cmail->sendfile();
 
 		if (!$result) {
@@ -293,5 +295,40 @@ class BimpMailCore
 		}
 
 		return $result;
+	}
+
+
+	public function getTrackId()
+	{
+		return '';
+	}
+
+	public function getMoreinheader()
+	{
+		$moreinheader = 'X-Dolibarr-Info: sendBimpMail'."\r\n";
+		if (!empty($this->email_msgid)) {
+			// We must also add 1 entry In-Reply-To: <$this->email_msgid> with Message-ID we respond from (See RFC5322).
+			$moreinheader .= 'In-Reply-To: <'.$this->email_msgid.'>'."\r\n";
+			$moreinheader .= 'Origin-messageId: <'.$this->email_msgid.'>'."\r\n";
+			// TODO We should now be able to give the in_reply_to as a dedicated parameter of new CMailFile() instead of into $moreinheader.
+		}
+
+		// We should add here also a header 'References:'
+		// According to RFC5322, we should add here all the References fields of the initial message concatenated with
+		// the Message-ID of the message we respond from (but each ID must be once).
+		$references = '';
+//		if (!empty($this->origin_references)) {		// $this->origin_references should be '<'.$this->origin_references.'>'
+//			$references .= (empty($references) ? '' : ' ').$this->origin_references;
+//		}
+		if (!empty($this->email_msgid) && !preg_match('/'.preg_quote($this->email_msgid, '/').'/', $references)) {
+			$references .= (empty($references) ? '' : ' ').'<'.$this->email_msgid.'>';
+		}
+
+		if ($references) {
+			$moreinheader .= 'References: '.$references."\r\n";
+			// TODO We should now be able to give the references as a dedicated parameter of new CMailFile() instead of into $moreinheader.
+		}
+
+		return $moreinheader;
 	}
 }

@@ -18,9 +18,8 @@ class BimpNotification extends BimpObject
 		return $this->canCreate();
 	}
 
-	public function getUserNotifications($id_user, $notif_data = array())
+	public function getUserNotifications($id_user, $notif_data = array(), &$errors = array())
 	{
-		$errors = array();
 		$obj_name = $this->getData('class');
 		BimpObject::loadClass($this->getData('module'), $this->getData('class'));
 
@@ -33,7 +32,7 @@ class BimpNotification extends BimpObject
 		} else {
 			$errors[] = "Méthode " . $methode . " introuvable dans " . $obj_name;
 		}
-
+		
 		return array();
 	}
 
@@ -51,7 +50,7 @@ class BimpNotification extends BimpObject
 
 	// Méthodes statiques :
 
-	public static function getNotificationsForUser($id_user, $notifs_data)
+	public static function getNotificationsForUser($id_user, $notifs_data, &$errors = array())
 	{
 		$notifs = array();
 
@@ -61,7 +60,7 @@ class BimpNotification extends BimpObject
 				$bn = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification', $n['id_notification']);
 
 				if (BimpObject::objectLoaded($bn)) {
-					$notifs[$n['id_notification']] = $bn->getUserNotifications($id_user, $n);
+					$notifs[$n['id_notification']] = $bn->getUserNotifications($id_user, $n, $errors);
 				}
 			}
 		}

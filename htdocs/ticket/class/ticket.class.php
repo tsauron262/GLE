@@ -1226,6 +1226,7 @@ class Ticket extends CommonObject
 
 				$dir = DOL_DATA_ROOT.'/'.$this->element.'/'.$this->ref;
 				// For remove dir
+				require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 				if (dol_is_dir($dir)) {
 					if (!dol_delete_dir_recursive($dir)) {
 						$this->errors[] = $this->error;

@@ -2092,6 +2092,7 @@ class Equipment extends BimpObject
                 if ($this->isLoaded()) {
                     $where .= ' AND `id` != ' . (int) $this->id;
                 }
+				$where .= ' AND entity IN (' . getEntity('product') . ')';
 
                 $id = (int) $this->db->getValue($this->getTable(), 'id', $where);
                 if ($id) {

@@ -66,6 +66,94 @@ class ActionsBimpticket {
 			return -1;
 		}
 	}
+
+	function addMoreActionsEmailCollector($parameters, &$object, &$action, $hookmanager)
+	{
+		$this->results['hookBimpticketResponse'] = "Traitement response Bimp_Ticket";
+		$this->results['hookBimpticketInitial'] = "Traitement initial Bimp_Ticket";
+		return 0;
+	}
+
+	function doCollectImapOneCollector($parameters, &$object, &$action, $hookmanager)
+	{
+		global $db;
+
+		$msg = $parameters['imapemail']->bodies['html'];
+		if($msg == '')
+			$msg = $parameters['imapemail']->bodies['text'];
+
+		$traite = 0;
+
+		$matches = array();
+		preg_match_all('/([^: ]+): (.+?(?:\r\n\s(?:.+?))*)(\r\n|\s$)/m', $parameters['header'], $matches);
+		$headers = array_combine($matches[1], $matches[2]);
+
+		if($action == 'hookBimpticketResponse') {
+			$bimp_ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $parameters['objectemail']->id);
+			if ($bimp_ticket->id > 0) {
+				/*
+				 * on purifie le message
+				 */
+				$tabT = explode('lineBreakAtBeginningOfMessage', $msg);
+				if (isset($tabT[1])) {
+					$msg = $tabT[0] . '">';
+				}
+				$tabT = explode('appendonsend', $msg);
+				if (isset($tabT[1])) {
+					$msg = $tabT[0] . '">';
+				}
+
+
+
+
+
+				$userAttribut = $bimp_ticket->getData('fk_user_assign');
+				$errors = $bimp_ticket->addNote($msg, 20, 0, 0, $parameters['from'], 2, ($userAttribut) ? 1 : 0, 0, $userAttribut);
+				if (!count($errors)) {
+					$traite = 1;
+				} else {
+					die(print_r($errors, 1));
+				}
+			} else {
+				die('Pas de ticket trouvé pour '.str_replace(array('<', '>'), '', $headers['References']));
+			}
+		}
+
+
+
+
+		if($action == 'hookBimpticketInitial') {
+//		echo '<pre>';print_r($parameters['from'].$bimp_ticket->id);echo '</pre>';die;
+			if (!$traite && isset($parameters['objectemail']) && is_a($parameters['objectemail'], 'ticket')) {
+				$ticket = $parameters['objectemail'];
+				$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
+
+				$Bimp_Ticket->addObjectLog($Bimp_Ticket->getData('message'));
+				$Bimp_Ticket->updateField("message", $msg);
+
+				$contact_static = new Contact($db);
+				$contact_static->fetch(0, null, '', $Bimp_Ticket->getData('origin_email'));
+				if ($contact_static->id > 0 and $contact_static->fk_soc == $Bimp_Ticket->getData('fk_soc')) {
+					$ticket->add_contact($contact_static->id, 'SUPPORTCLI', 'external');
+				}
+				$traite = 1;
+//			echo $Bimp_Ticket->printData();
+//			die('yes');
+			}
+		}
+
+		if(!$traite){
+			echo '<pre>';print_r($parameters);echo '</pre>';die('pas de traitement trouvé');
+		}
+
+
+//		echo '<pre>';print_r($parameters['imapemail']->bodies['html']);echo '</pre>';
+//		echo '<pre>';print_r($parameters['imapemail']);echo '</pre>';
+//		echo '<br/><br/><br/>';
+//		echo '<pre>';print_r($object);echo '</pre>';
+//		echo '<pre>';print_r($action);echo '</pre>';
+		return 1;
+	}
 }
 
 

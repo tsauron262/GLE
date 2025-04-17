@@ -165,13 +165,23 @@ forms:
               label: Destinataire
               input_name: mail_dest
               input:
-                type: text
+                  type: text
               value:
                   callback: getMailTo
               edit: 0
-              display_if: 
-                field_name: type_dest
-                show_values: 2
+              display_if:
+                  field_name: type_dest
+                  show_values: 2
+            - custom: 1
+              label: Destinataire
+              input_name: mail_dest_contact
+              input:
+                  type: select
+                  options:
+                      callback: getMailToContacts
+              display_if:
+                  field_name: type_dest
+                  show_values: 5
             - field: content
             
     edit: 

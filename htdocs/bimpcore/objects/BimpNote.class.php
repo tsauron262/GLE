@@ -35,14 +35,16 @@ class BimpNote extends BimpObject
 
     const BN_DEST_NO = 0;
     const BN_DEST_USER = 1;
-    const BN_DEST_SOC = 2;
+	const BN_DEST_SOC = 2;
+	const BN_DEST_CONTACT = 5;
     const BN_DEST_GROUP = 4;
 
     public static $types_dest = array(
         self::BN_DEST_NO    => 'Aucun',
         self::BN_DEST_USER  => 'Utilisateur',
         self::BN_DEST_GROUP => 'Groupe',
-        self::BN_DEST_SOC   => 'Tiers (par mail)'
+		self::BN_DEST_SOC   => 'Tiers (par mail)',
+		self::BN_DEST_CONTACT   => 'Contact (par mail)'
     );
 
     // Droits users:
@@ -87,7 +89,7 @@ class BimpNote extends BimpObject
             case 'setAsViewed':
                 if ($this->isLoaded()) {
                     global $user;
-                    if ($this->getData('user_create') == $user->id) {
+                    if ($this->getData('user_create') == $user->id && $this->getData('type_author') == self::BN_AUTHOR_USER) {
                         $errors[] = 'L\'utilisateur connecté est l\'auteur';
                         return 0;
                     }
@@ -470,8 +472,10 @@ class BimpNote extends BimpObject
             case self::BN_DEST_GROUP:
                 return $this->displayData('fk_group_dest', 'nom_url', $display_input_value, $no_html);
 
-            case self::BN_DEST_SOC:
-                return 'Tier (par mail)';
+			case self::BN_DEST_SOC:
+				return 'Tier (par mail)';
+			case self::BN_DEST_CONTACT:
+				return 'Contact (par mail)';
         }
 
         return '';
@@ -715,7 +719,11 @@ class BimpNote extends BimpObject
 
                 case self::BN_AUTHOR_SOC:
                     if (!(int) $this->getData('id_societe')) {
-                        $errors[] = 'Société à l\'origine de la note absente';
+						$parent = $this->getParentInstance();
+						if($parent->isLoaded() && $parent->field_exists('fk_soc') && $parent->getData('fk_soc') > 0)
+							$this->set('id_societe', $parent->getData('fk_soc'));
+						else
+							$errors[] = 'Société à l\'origine de la note absente';
                     }
                     break;
 
@@ -745,30 +753,45 @@ class BimpNote extends BimpObject
         return BimpCore::getConf('mailReponse', null, 'bimptask');
     }
 
-    public function getMailTo()
-    {
-        $parent = $this->getParentInstance();
-        if ($parent && $parent->isLoaded()) {
-            if (method_exists($parent, 'getMailTo')) {
-                return $parent->getMailTo();
-            } elseif ($parent->getData('email') != '') {
-                return $parent->getData('email');
-            } else {
-                $client = $parent->getChildObject('client');
-                if ($client && $client->isLoaded()) {
-                    return $client->getData('email');
-                }
-            }
-        }
-        return '';
-    }
+	public function getMailTo()
+	{
+		$parent = $this->getParentInstance();
+		if ($parent && $parent->isLoaded()) {
+			if (method_exists($parent, 'getMailTo')) {
+				return $parent->getMailTo();
+			} elseif ($parent->getData('email') != '') {
+				return $parent->getData('email');
+			} else {
+				$client = $parent->getChildObject('client');
+				if ($client && $client->isLoaded()) {
+					return $client->getData('email');
+				}
+			}
+		}
+		return '';
+	}
+	public function getMailToContacts()
+	{
+		$parent = $this->getParentInstance();
+		if ($parent && $parent->isLoaded()) {
+			if (method_exists($parent, 'getMailToContacts')) {
+				return $parent->getMailToContacts();
+			}
+		}
+		return '';
+	}
 
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
-        if ($this->getData('type_dest') == self::BN_DEST_SOC) {
+        if ($this->getData('type_dest') == self::BN_DEST_SOC || $this->getData('type_dest') == self::BN_DEST_CONTACT) {
             $this->set('visiblity', self::BN_ALL);
-            $mail = BimpTools::getPostFieldValue('mail_dest', '', 'email');
+			if ($this->getData('type_dest') == self::BN_DEST_SOC) {
+				$mail = BimpTools::getPostFieldValue('mail_dest', '', 'email');
+			}
+			if ($this->getData('type_dest') == self::BN_DEST_CONTACT) {
+				$mail = BimpTools::getPostFieldValue('mail_dest_contact', '', 'email');
+			}
             $content = $this->getData('content');
             if ($mail == '') {
                 BimpTools::displayBacktrace();
@@ -780,9 +803,9 @@ class BimpNote extends BimpObject
         if (!count($errors)) {
             $errors = parent::create($warnings, $force_create);
 
-            if ($this->getData('type_dest') == self::BN_DEST_SOC) {
+            if ($this->getData('type_dest') == self::BN_DEST_SOC || $this->getData('type_dest') == self::BN_DEST_CONTACT) {
                 $sep = "<br/>---------------------<br/>";
-                $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . BimpCore::getConf('marqueur_mail_note') . $this->id . '<br/>' . $sep . '<br/><br/>';
+//                $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . BimpCore::getConf('marqueur_mail_note') . $this->id . '<br/>' . $sep . '<br/><br/>';
 
                 if ($this->getData('id_parent_note') > 0)
                     $html .= 'Réponse à votre message : <br/>';
@@ -794,7 +817,14 @@ class BimpNote extends BimpObject
                 $parent = $this->getParentInstance();
                 $sujet = 'Message ' . $parent->getRef();
 
-                $bimpMail = new BimpMail($this->getParentInstance(), 'Nouveau message', $mail, $this->getMailFrom(), $html);
+				$messageId = '';
+				if( $parent->isLoaded() && $parent->field_exists('email_msgid') && $parent->getData('email_msgid'))
+					$messageId = $parent->getData('email_msgid');
+				$object = 'Nouveau message';
+				if( $parent->isLoaded() && method_exists($parent, 'getObjectMail'))
+					$object = $parent->getObjectMail();
+
+                $bimpMail = new BimpMail($this->getParentInstance(), $object, $mail, $this->getMailFrom(), $html, '', '', '', 0, '', $messageId);
                 $bimpMail->send($errors);
             }
 

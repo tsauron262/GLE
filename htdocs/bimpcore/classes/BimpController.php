@@ -3423,7 +3423,7 @@ class BimpController
 
         if (!empty($notifs_data) && is_array($notifs_data)) {
             BimpObject::loadClass('bimpcore', 'BimpNotification');
-            $notifs_for_user = BimpNotification::getNotificationsForUser((int) $user->id, $notifs_data);
+            $notifs_for_user = BimpNotification::getNotificationsForUser((int) $user->id, $notifs_data, $errors);
         }
 
         return array(

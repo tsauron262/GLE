@@ -126,7 +126,7 @@ class bimp_note extends AbstractNotification {
             return 0;
         }
 
-        if (typeof element.author === undefined || id_user === parseInt(element.author.id) || parseInt(element.is_viewed) === 1) {
+        if (typeof element.author === undefined || parseInt(element.is_user_author) === 1 || parseInt(element.is_viewed) === 1) {
             return 0;
         }
 

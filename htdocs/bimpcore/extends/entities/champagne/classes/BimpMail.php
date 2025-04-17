@@ -8,7 +8,7 @@ class BimpMail extends BimpMailCore
     public $from_name = 'LDLC 7';
     public $url = 'www.ldlc.com';
 
-    function __construct($parent, $subject, $to, $from, $msg = '', $reply_to = '', $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $errors_to = '')
+    function __construct($parent, $subject, $to, $from, $msg = '', $reply_to = '', $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $errors_to = '', $messageId = '')
     {
         $type = '';
 
@@ -20,7 +20,7 @@ class BimpMail extends BimpMailCore
 
         $this->setFromType($type);
 
-        parent::__construct($parent, $subject, $to, $from, $msg, $reply_to, $addr_cc, $addr_bcc, $deliveryreceipt, $errors_to);
+        parent::__construct($parent, $subject, $to, $from, $msg, $reply_to, $addr_cc, $addr_bcc, $deliveryreceipt, $errors_to, $messageId = '');
     }
 
     public function setFromType($type)

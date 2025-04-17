@@ -256,8 +256,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	{
 //		return 0;
 		global $user;
-		if ($user->admin) return true;
-		return false;
+		return $user->admin;
 	}
 
 	public function isUserBD()
@@ -283,9 +282,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function isUserBDKAM()
 	{
-		/*todo a voir si on garde*/
-		if ($this->isAdmin()) return true;
-		return $this->isUserInGroup('BD') || $this->isUserInGroup('KAM');
+		return $this->isUserBD() || $this->isUserKAM();
 	}
 
 	public function isUserInGroup($g)
@@ -659,10 +656,15 @@ maeva.ralijaona@rueducommerce.com*/
         $errors = array();
 		$success = 'Changement de statut effectué';
 
-		// update de la date_debut_prospect (si statut_rdc dans la liste des statuts de début de prospection)
-		if (in_array($data['status'], self::$statut_rdc_prospect_array)) {
-			if (empty($this->getData('date_debut_prospect'))) {
-				$this->set('date_debut_prospect', date('Y-m-d'));
+		if (!$data['status'])	{
+			$errors[] = 'Aucun statut sélectionné';
+		}
+		else {
+			// update de la date_debut_prospect (si statut_rdc dans la liste des statuts de début de prospection)
+			if (in_array($data['status'], self::$statut_rdc_prospect_array)) {
+				if (empty($this->getData('date_debut_prospect'))) {
+					$this->set('date_debut_prospect', date('Y-m-d'));
+				}
 			}
 		}
 

@@ -95,6 +95,13 @@ class ActionsBimpticket {
 				if (isset($tabT[1])) {
 					$msg = $tabT[0] . '">';
 				}
+				$tabT = explode('appendonsend', $msg);
+				if (isset($tabT[1])) {
+					$msg = $tabT[0] . '">';
+				}
+
+
+
 
 
 				$userAttribut = $bimp_ticket->getData('fk_user_assign');

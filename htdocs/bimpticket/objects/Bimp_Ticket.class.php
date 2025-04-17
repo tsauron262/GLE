@@ -480,6 +480,9 @@ class Bimp_Ticket extends BimpDolObject
 			}
 		}
 
+		if($this->getData('email_msgid') == '')
+			$this->updateField('email_msgid', randomPassword('35').'@bimpticket');
+
 		return $errors;
 	}
 

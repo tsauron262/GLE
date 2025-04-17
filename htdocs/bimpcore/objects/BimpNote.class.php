@@ -805,7 +805,7 @@ class BimpNote extends BimpObject
 
             if ($this->getData('type_dest') == self::BN_DEST_SOC || $this->getData('type_dest') == self::BN_DEST_CONTACT) {
                 $sep = "<br/>---------------------<br/>";
-                $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . BimpCore::getConf('marqueur_mail_note') . $this->id . '<br/>' . $sep . '<br/><br/>';
+//                $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . BimpCore::getConf('marqueur_mail_note') . $this->id . '<br/>' . $sep . '<br/><br/>';
 
                 if ($this->getData('id_parent_note') > 0)
                     $html .= 'Réponse à votre message : <br/>';

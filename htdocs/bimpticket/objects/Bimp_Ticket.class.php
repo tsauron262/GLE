@@ -319,6 +319,10 @@ class Bimp_Ticket extends BimpDolObject
 
 			$errors = $this->updateField('fk_user_assign', $fk_user_assign);
 
+			if (BimpTools::isPostFieldSubmit('type_code')) {
+				$errors = BimpTools::merge_array($errors, $this->updateField('type_code', BimpTools::getPostFieldValue('type_code', $this->getData('type_code'), 'alphanohtml')));
+			}
+
 			if (!count($errors)) {
 				$this->checkUserAssigned(true, $init_user_assign);
 			}

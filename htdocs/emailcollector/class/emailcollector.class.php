@@ -3202,7 +3202,10 @@ class EmailCollector extends CommonObject
 													foreach ($attachments as $attachment) {
 														// $attachment->save($destdir.'/');
 														$typeattachment = (string) $attachment->getDisposition();
-														$filename = $attachment->getFilename();
+														/*mod drsi*/
+//														$filename = $attachment->getFilename();
+														$filename = $attachment->getName();
+														/*fmod drsi*/
 														$content = $attachment->getContent();
 														$this->saveAttachment($destdir, $filename, $content);
 													}
@@ -3358,7 +3361,10 @@ class EmailCollector extends CommonObject
 													foreach ($attachments as $attachment) {
 														// $attachment->save($destdir.'/');
 														$typeattachment = (string) $attachment->getDisposition();
-														$filename = $attachment->getFilename();
+														/*mod drsi*/
+//														$filename = $attachment->getFilename();
+														$filename = $attachment->getName();
+														/*fmod drsi*/
 														$content = $attachment->getContent();
 														$this->saveAttachment($destdir, $filename, $content);
 													}

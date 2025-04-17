@@ -85,7 +85,8 @@ class ActionsBimpticket {
 		$headers = array_combine($matches[1], $matches[2]);
 
 		if($action == 'hookBimpticketResponse') {
-			if (isset($headers['References']) && $headers['References'] != '' && $headers['References'] != '<>') {
+			$bimp_ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $parameters['objectemail']->id);
+			if ($bimp_ticket->id > 0) {
 				/*
 				 * on purifie le message
 				 */
@@ -96,26 +97,15 @@ class ActionsBimpticket {
 				}
 
 
-				/*
-				 * On retrouve le ticket et on lui ajoute le note
-				 */
-				$refs = explode('> <', $headers['References']);
-				foreach ($refs as $ref) {
-					if (strlen($ref) > 8) {
-						$bimp_ticket = BimpObject::findBimpObjectInstance('bimpticket', 'Bimp_Ticket', array('email_msgid' => str_replace(array('<', '>'), '', $ref)));
-						if ($bimp_ticket->id > 0) {
-							$userAttribut = $bimp_ticket->getData('fk_user_assign');
-							$errors = $bimp_ticket->addNote($msg, 20, 0, 0, $parameters['from'], 2, ($userAttribut) ? 1 : 0, 0, $userAttribut);
-							if (!count($errors)) {
-								$traite = 1;
-							} else {
-								die(print_r($errors, 1));
-							}
-						} else {
-							//				die('Pas de ticket trouvé pour '.str_replace(array('<', '>'), '', $headers['References']));
-						}
-					}
+				$userAttribut = $bimp_ticket->getData('fk_user_assign');
+				$errors = $bimp_ticket->addNote($msg, 20, 0, 0, $parameters['from'], 2, ($userAttribut) ? 1 : 0, 0, $userAttribut);
+				if (!count($errors)) {
+					$traite = 1;
+				} else {
+					die(print_r($errors, 1));
 				}
+			} else {
+				die('Pas de ticket trouvé pour '.str_replace(array('<', '>'), '', $headers['References']));
 			}
 		}
 

@@ -3342,6 +3342,13 @@ class EmailCollector extends CommonObject
 											$this->error = 'Failed to create ticket: '.$langs->trans($tickettocreate->error);
 											$this->errors = $tickettocreate->errors;
 										} else {
+											/*
+											 * mod drsi v20.0
+											 */
+											$objectemail = $tickettocreate;
+											/*
+											 * fmoddrsi
+											 */
 											if ($attachments) {
 												$destdir = $conf->ticket->dir_output.'/'.$tickettocreate->ref;
 												if (!dol_is_dir($destdir)) {

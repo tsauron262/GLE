@@ -812,10 +812,10 @@ class BimpNote extends BimpObject
                 if ($this->getData('id_parent_note') > 0)
                     $html .= 'Réponse à votre message : <br/>';
                 $html .= $content;
-                if ($this->getData('id_parent_note') > 0) {
-                    $oldNote = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $this->getData('id_parent_note'));
-                    $html .= '<br/><br/>Rappel du message initial : <br/>' . $oldNote->getData('content');
-                }
+//                if ($this->getData('id_parent_note') > 0) {
+//                    $oldNote = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $this->getData('id_parent_note'));
+//                    $html .= '<br/><br/>Rappel du message initial : <br/>' . $oldNote->getData('content');
+//                }
                 $parent = $this->getParentInstance();
                 $sujet = 'Message ' . $parent->getRef();
 

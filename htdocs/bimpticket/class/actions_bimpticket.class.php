@@ -79,6 +79,8 @@ class ActionsBimpticket
 	{
 		global $db;
 
+		$errors = array();
+
 		$msg = $parameters['imapemail']->bodies['html'];
 		if ($msg == '') {
 			$msg = $parameters['imapemail']->bodies['text'];
@@ -95,7 +97,6 @@ class ActionsBimpticket
 				$bimp_ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $parameters['objectemail']->id);
 				if ($bimp_ticket->id > 0) {
 					// on purifie le message
-					$msg = $parameters['imapemail']->bodies['html'];
 
 					$tabT = explode('lineBreakAtBeginningOfMessage', $msg);
 					if (isset($tabT[1])) {
@@ -105,6 +106,11 @@ class ActionsBimpticket
 					$tabT = explode('appendonsend', $msg);
 					if (isset($tabT[1])) {
 						$msg = $tabT[0] . '">';
+					}
+
+					$tabT = explode('<blockquote type="cite"', $msg);
+					if (isset($tabT[1])) {
+						$msg = $tabT[0];
 					}
 
 					$userAttribut = (int) $bimp_ticket->getData('fk_user_assign');
@@ -146,6 +152,7 @@ class ActionsBimpticket
 					if ($contact_static->id > 0 and $contact_static->fk_soc == $Bimp_Ticket->getData('fk_soc')) {
 						$ticket->add_contact($contact_static->id, 'SUPPORTCLI', 'external');
 					}
+
 					$traite = 1;
 //					echo $Bimp_Ticket->printData();
 //					die('yes');

@@ -412,3 +412,15 @@ lists:
         object: client
         add_btn_label: Nouvelle société
         add_form_name: form_client_rdc
+
+
+stats_lists:
+    default:
+        group_by_options:
+            - fk_categorie_maitre
+            - fk_statut_rdc
+            - fk_priorite
+            - fk_source_rdc
+            - fk_statut_kyc
+            - fk_group_rdc
+            - fk_user_attr_rdc

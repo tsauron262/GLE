@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_ImportsDiversProcess extends BDSProcess
 {
 
-    public static $current_version = 4;
+    public static $current_version = 5;
     public static $default_public_title = 'Imports Divers';
 
     // Imports AppleCare:
@@ -121,6 +121,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 		$entre = substr($entre,1,-1);
 		return explode('","',$entre);
 	}
+
 	public function executeImportClientRDC($step_name, &$errors = array(), $extra_data = array())
 	{
 		$correspondance = array(
@@ -319,7 +320,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 				foreach ($warnings as $warning) {
 					$this->Alert($warning, null, $ln['LastName'].' ligne '.($id+1));
 				}
-				$ok[] = $ln['Name'].' - '.$obj->id;
+				$ok[] = $ln['LastName'].' - '.$obj->id;
 //				if(!count($errors))
 //					$this->Success('OK<pre>' . print_r($data, true).'</pre>', null, $ln['Name']);
 			} else {
@@ -334,6 +335,186 @@ class BDS_ImportsDiversProcess extends BDSProcess
 		}
 	}
 
+
+	public function initImportCasesRDC(&$data, &$errors = array())	{
+		$file = $this->getOption('csv_file4', '');
+		if ($file) {
+			$this->updateParameter('csv_file', $file);
+			$this->updateParameter('elem_ok', 0);
+		}
+		else{
+			$file = $this->getParam('csv_file', '');
+		}
+		if (!$file) {
+			$errors[] = 'Fichier absent';
+		} else {
+			$rows = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+			$this->data_persistante['header'] = explode(';', $rows[0]);
+//			echo '<pre>'; print_r($this->data_persistante); echo '</pre>'; die;
+			unset($rows[0]);
+
+			if (empty($rows)) {
+				$errors[] = 'Fichier vide';
+			} else {
+				$data['steps'] = array(
+					'import' => array(
+						'label'                  => 'Création des tickets',
+						'on_error'               => 'continue',
+						'elements'               => array_keys($rows),
+						'nbElementsPerIteration' => 100
+					)
+				);
+			}
+		}
+	}
+
+	public function executeImportCasesRDC($step_name, &$errors = array(), $extra_data = array())
+	{
+		$correspondance = array(
+			'import_key'       => 'CaseNumber',        // colonne D
+			'fk_soc'           => 'AccountId',        // colonne F
+			'origin_mail'      => 'SuppliedEmail',   // colonne N
+			'type_code'        => 'Type',            // colonne Q
+			'fk_status'        => 'Status',            // colonne S
+			'subject'          => 'Subject',            // colonne X
+			'message'          => 'Description',        // colonne Z
+			'date_close'       => 'ClosedDate',        // colonne AB
+			'datec'            => 'CreatedDate',        // colonne AM
+			'date_update'      => 'LastModifiedDate',// colone AO
+			'IdContact' 	   => 'ContactId',	// colonne E (ne pas mettre contact_id en key pour eviter les effets de bord par rapport à la class de base)
+		);
+		$keys = array(
+			'import_key'
+		);
+		$correspondance2 = array_flip($correspondance);
+		$ok = array();
+		$file = $this->getParam('csv_file', '');
+		$rows = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+		$traite = $this->getParam('elem_ok', 0);
+
+		foreach ($this->references as $id) {
+			if ($id <= $traite) {
+				$this->incIgnored();
+				continue;
+			}
+			$line = $rows[$id];
+			$data = explode(';', $line);
+			$this->incProcessed();
+
+//			echo '<pre>'; print_r($this->data_persistante['header']); echo '</pre>';
+//			echo '<pre>'; print_r($data); echo '</pre>';
+//			die(var_dump(count($data), count($this->data_persistante['header'])));
+			if (count($data) != count($this->data_persistante['header'])) {
+				$this->Error('Erreur Nb colonnes: <pre>' . print_r($data, true) . '</pre>', null, 'Ligne ' . ($id + 1));
+				continue;
+			}
+			$ln = array_combine($this->data_persistante['header'], $data);
+//			echo '<pre>'; print_r($ln); echo '</pre>'; die;
+			if (strlen($ln['Subject'])) {
+				$data = $dataFiltres = array();
+				$errors = $warnings = array();
+
+				foreach ($ln as $key => $value) {
+//					$value = utf8_encode($value);
+					if ($correspondance2[$key]) {
+						if (stripos($value, '<script') !== false) {
+							if (stripos($ln['Description'], '<script') === false) {
+								$this->Error('Script détecté', null, $ln['Description'] . ' ligne ' . ($id + 1));
+								continue 2;
+							} else {
+								$this->Error('Script détecté', null, 'Non cachée ligne ' . ($id + 1));
+								continue 2;
+							}
+						}
+						$data[$correspondance2[$key]] = $value;
+						if (in_array($correspondance2[$key], $keys)) {
+							$dataFiltres[$correspondance2[$key]] = $value;
+						}
+					}
+				}
+				$data['type_code'] = null;
+				if ($data['fk_status'] == 'En cours SM') $data['fk_status'] = 3; else $data['fk_status'] = 8;
+
+
+				// retrouver le fk_soc selon le AccountId
+				if ($ln['AccountId'] !== '000000000000000AAA') {
+					$fk_soc = $this->db->getValue('societe', 'rowid', 'import_key = \'' . $ln['AccountId'] . '\'');
+					if ($fk_soc) {
+						$data['fk_soc'] = $fk_soc;
+					} else {
+						$this->Alert('Société non trouvée : ' . strlen($ln['CaseNumber']), null, $ln['AccountId'] . ' ligne ' . ($id + 1));
+					}
+				} else $data['fk_soc'] = 0;
+				// retoruver le contact selon le ContactId
+				if ($ln['ContactId'] !== '000000000000000AAA') {
+					$fk_contact = $this->db->getValue('socpeople', 'rowid', 'import_key = \'' . $ln['ContactId'] . '\'');
+					if ($fk_contact) {
+						$data['fk_contact'] = $fk_contact;
+					} else {
+						$this->Alert('Contact non trouvé : ' . strlen($ln['CaseNumber']), null, $ln['ContactId'] . ' ligne ' . ($id + 1));
+					}
+				} else $data['fk_contact'] = 0;
+				$data['datec'] = $this->convertDate($data['datec']);
+				$data['date_close'] = $this->convertDate($data['date_close']);
+				$data['date_update'] = $this->convertDate($data['date_update']);
+//				echo '<pre>'; print_r($data); echo '</pre>'; die;
+				$obj = BimpCache::findBimpObjectInstance('bimpticket', 'Bimp_Ticket', $dataFiltres, true, true, false);
+				$action = is_null($obj) || !BimpObject::objectLoaded($obj) ? 'create' : 'update';
+				$obj = BimpObject::createOrUpdateBimpObject('bimpticket', 'Bimp_Ticket', $dataFiltres, $data, true, true, $errors, $warnings);
+				foreach ($errors as $error) {
+					$this->Error($error, null, $ln['CaseNumber']);
+				}
+				foreach ($warnings as $warning) {
+					$this->Alert($warning, null, $ln['CaseNumber']);
+				}
+				$upValues = array(
+					'import_key' => $ln['CaseNumber'],
+					'datec'      => $data['datec']
+				);
+				if ($data['date_close']){
+					$upValues['date_close'] = $data['date_close'];
+				}
+				if ($data['date_update']){
+					$upValues['date_update'] = $data['date_update'];
+				}
+				$upValues['fk_statut'] = $data['fk_status'];
+//				echo '<pre>'; print_r($upValues); echo '</pre>';
+				$this->db->update('ticket', $upValues, 'rowid = ' . $obj->id);
+				if ($data['fk_contact'])	{
+					// verif si deja dans la table llx_element_contact
+					$role = $this->db->getValue('c_type_contact', 'rowid', 'element = \'ticket\' AND code = \'SUPPORTCLI\'');
+					if ($role) {
+						$fk_element = $this->db->getValue('element_contact', 'rowid', 'element_id = ' . $obj->id . ' AND fk_c_type_contact = ' . $role . ' AND fk_socpeople = ' . $data['fk_contact']);
+						if (!$fk_element) {
+							// insert dans la table llx_element_contact
+							$this->db->insert('element_contact', array(
+								'statut'            => 4,
+								'element_id'        => $obj->id,
+								'fk_c_type_contact' => $role,
+								'fk_socpeople'      => $data['fk_contact'],
+								'datecreate'        => date('Y-m-d H:i:s')
+							));
+						}
+					}
+				}
+				$ok[] = $ln['CaseNumber'] . ' - ' . $obj->id;
+			}
+			$this->incIgnored();
+		}
+		if(count($ok)){
+			$this->Success('OK<pre>' . print_r($ok, true).'</pre>', null, '');
+			if(isset($id) && $id > 0)
+				$this->updateParameter('elem_ok', $id);
+		}
+	}
+
+	public function convertDate($date){
+		$datetime = DateTime::createFromFormat('d/m/Y H:i', $date);
+		if ($datetime) {
+			return $datetime->format('Y-m-d H:i:s');
+		}
+		return null;
+	}
     // Install / updates:
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
@@ -445,6 +626,29 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			if (BimpObject::objectLoaded($op)) {
 				$errors = array_merge($errors, $op->addOptions(array('csv_file3')));
 			}
+		}
+
+		if ($cur_version < 5) {
+			// Opération "Import cases rdc -> transformation en ticket":
+			BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+				'id_process'    => (int) $id_process,
+				'label'         => 'Fichier CSV',
+				'name'          => 'csv_file4',
+				'info'          => '',
+				'type'          => 'file',
+				'default_value' => '',
+				'required'      => 0
+			), true, $errors, $warnings);
+			$op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+				'id_process'    => (int) $id_process,
+				'title'         => 'Import Cases RDC -> Ticket',
+				'name'          => 'importCasesRDC',
+				'description'   => '',
+				'warning'       => 'Fichier CSV : ',
+				'active'        => 1,
+				'use_report'    => 1,
+				'reports_delay' => 15
+			), true, $errors, $warnings);
 		}
 
         return $errors;

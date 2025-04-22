@@ -347,7 +347,8 @@ if ($id_sav) {
                         echo '</div>';
                         echo '<div class="row">';
                         echo '<div class="col-lg-10 col-lg-offset-1">';
-                        echo '<input type="submit" value="Rechercher" class="butAction pull-right"/>';
+						echo '<input type="hidden" value="'.getToken().'" name="token"/>';
+						echo '<input type="submit" value="Rechercher" class="butAction pull-right"/>';
                         echo '</div>';
                         echo '</div>';
                         echo '</form>';

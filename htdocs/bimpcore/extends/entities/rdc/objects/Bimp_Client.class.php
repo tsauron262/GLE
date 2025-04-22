@@ -109,7 +109,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$grouparray = array(
 			BimpCore::getUserGroupId('BD'),
 			BimpCore::getUserGroupId('KAM'),
-			BimpCore::getUserGroupId('TECH_RDC'),
+//			BimpCore::getUserGroupId('TECH_RDC'),
 		);
 
 		$cache_key = 'users_groups';
@@ -269,22 +269,21 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function isUserBD()
 	{
-		/*todo a voir si on garde*/
-		if ($this->isAdmin()) return true;
 		return $this->isUserInGroup('BD');
 	}
 
 	public function isUserKAM()
 	{
-		/*todo a voir si on garde*/
-		if ($this->isAdmin()) return true;
 		return $this->isUserInGroup('KAM');
+	}
+
+	public function isUserManager()
+	{
+		return $this->isUserInGroup('MANAGER');
 	}
 
 	public function isUserTECH()
 	{
-		/*todo a voir si on garde*/
-		if ($this->isAdmin()) return true;
 		return $this->isUserInGroup('TECH_RDC');
 	}
 
@@ -296,6 +295,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function isUserInGroup($g)
 	{
 		global $user;
+		/*todo a voir si on garde*/
+		if ($this->isAdmin()) return true;
 		$id_group = BimpCore::getConf('id_user_group_' . $g);
 		$groups = $this->db->getRow('usergroup_user', 'fk_user = ' . $user->id . ' AND fk_usergroup = ' . $id_group , array('rowid'), 'array');
 		if($groups)

@@ -11,6 +11,10 @@ params:
         label: id du Group TECH RDC
         def: 0
         cat: groups
+    isUserManager_MANAGER:
+        label: isUserManager_MANAGER
+        def: 0
+        cat: groups
 
     id_source_presta:
         label: id de la source Partenaire/agrégateur

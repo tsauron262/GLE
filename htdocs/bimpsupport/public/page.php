@@ -103,7 +103,6 @@ if (isset($_GET['savs'])) {
     }
 }
 
-$savs = array();
 if ($serial && $userName) {
     if(is_numeric($serial) && strlen($serial) < 10)//C'est l'id
         $savs = array($serial);

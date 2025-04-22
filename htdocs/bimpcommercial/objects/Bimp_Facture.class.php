@@ -6863,6 +6863,14 @@ class Bimp_Facture extends BimpComm
 			}
 		}
 
+		$id_contact = $this->getIdContact('external', 'CLIFINAL');
+		if ($id_contact > 0) {
+			$id_client = (int) $this->db->getValue('socpeople', 'fk_soc', 'rowid = ' . $id_contact);
+			if ($id_client && $id_client !== (int) $this->getData('fk_soc')) {
+				$this->updateField('id_client_final', $id_client);
+			}
+		}
+
 		return $errors;
 	}
 

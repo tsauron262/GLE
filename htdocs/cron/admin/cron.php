@@ -116,6 +116,7 @@ print '</table>';
 
 print dol_get_fiche_end();
 
+$form = new Form($db);
 if (!getDolGlobalString('CRON_DISABLE_KEY_CHANGE')) {
 	print $form->buttonsSaveCancel("Save", '');
 }

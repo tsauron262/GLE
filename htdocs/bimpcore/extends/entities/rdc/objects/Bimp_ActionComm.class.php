@@ -53,6 +53,27 @@ class Bimp_ActionComm_ExtEntity extends Bimp_ActionComm {
 		return self::getCacheArray($cache_key, $include_empty);
 	}
 
+	public function getUsersAssigned()
+	{
+		global $user;
+		$users = array();
+		foreach ($this->dol_object->userassigned as $userassigned) {
+			$users[] = $userassigned['id'];
+		}
+		if (!count($users)) {
+			$users = BimpTools::getPostFieldValue('param_values/fields/users_assigned', array(), 'array');
+			if (!count($users)) {
+				$id = BimpTools::getPostFieldValue('id');
+				$soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id);
+				if ($soc->isLoaded() &&  $soc->getData('fk_user_attr_rdc')) {
+					$users[] = $soc->getData('fk_user_attr_rdc');
+				}
+				else $users[] = $user->id;
+			}
+		}
+		return $users;
+	}
+
 	//todo : voir si encore besoin
 	public function displayState($badge = false)
 	{
@@ -83,10 +104,10 @@ class Bimp_ActionComm_ExtEntity extends Bimp_ActionComm {
 	}
 	public function create(&$warnings = array(), $force_create = false)
 	{
-		$this->set('datep', date('Y-m-d', strtotime($this->getData('datep'))) . date('H:i:s') );
-		if(!$this->getData('datep2')) {
+		if (!$this->getData('datep2')) {
 			$this->set('datep2', $this->getData('datep'));
 		}
+
 		return parent::create($warnings, $force_create);
 	}
 
@@ -109,16 +130,4 @@ class Bimp_ActionComm_ExtEntity extends Bimp_ActionComm {
 		parent::onSave($errors, $warnings);
 	}
 
-	public function onCr_echange($data, &$warnings = array())
-	{
-		$warnings = array();
-		$errors = array();
-		$success = 'Compte rendu enregistré';
-exit('OK : ' . $success);
-		$this->create($warnings, false);
-		return array(
-			'errors' => $errors,
-			'warnings' => $warnings
-		);
-	}
 }

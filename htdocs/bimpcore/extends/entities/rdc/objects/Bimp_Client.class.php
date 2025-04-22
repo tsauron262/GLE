@@ -148,8 +148,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$buttons[] = array(
 			'label'   => 'CR échange',
 			'icon'    => 'fas_comment',
-			'onclick' => $actioncomm->getJsActionOnclick('cr_echange', array('fk_soc' => $this->id), array('form_name' => 'formCREchange'))
-			// 	'onclick' => $actioncomm->getJsLoadModalForm('formCREchange', 'Compte rendu d\'échange', array('fk_soc' => $this->id))
+//			'onclick' => $actioncomm->getJsActionOnclick('cr_echange', array('fk_soc' => $this->id), array('form_name' => 'formCREchange'))
+			'onclick' => $actioncomm->getJsLoadModalForm('formCREchange', 'Compte rendu d\\\'échange', array('fields' => array('fk_soc' => $this->id)))
 		);
 
 		$buttons[] = array(

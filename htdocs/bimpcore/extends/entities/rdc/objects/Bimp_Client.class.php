@@ -254,8 +254,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function isShopIdEditable()
 	{
-		$id = BimpTools::getPostFieldValue('id');
-		if (!$id) return false;
+//		$id = BimpTools::getPostFieldValue('id');
+//		if (!$id) return false;
 		if ($this->getData('shopid')) return false;
 		else return $this->isUserBD();
 	}
@@ -563,6 +563,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				if ($shop['shop_state'] === 'OPEN' && $this->getData('shopid') > 0) {
 					$this->set('fk_statut_rdc', self::$statut_rdc_live);
 					$this->set('date_changement_statut_rdc', date('Y-m-d'));
+					if(!$this->getData('date_ouverture'))
+						$this->set('date_ouverture', date('Y-m-d', strtotime($shop['date_created'])));
 				}
 				$this->set('date_maj_mirakl', date('Y-m-d H:i:s'));
 				$this->update($warnings);

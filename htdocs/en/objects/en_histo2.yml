@@ -18,6 +18,18 @@ objects:
                 name: en_cmd
             id_object: 
                 field_value: cmd_id
+                
+forms:
+    createTables:
+        title: Créer les tables
+        rows:
+            base:
+                label: Base
+                value: jeedom_home
+                custom: 1
+                input:
+                    type: text
+                input_name: base
                     
 fields: 
     cmd_id:

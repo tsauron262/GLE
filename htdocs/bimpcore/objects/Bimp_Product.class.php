@@ -1238,7 +1238,7 @@ class Bimp_Product extends BimpObject
                 'form_name'  => 'bulk_edit_field',
                 'extra_data' => array(
                     'field_name'   => 'entity',
-                    'update_mode'  => 'update_field',
+                    'update_mode'  => 'update_object',
                     'force_update' => 1
                 )
             );

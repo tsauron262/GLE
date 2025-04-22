@@ -1384,7 +1384,7 @@ WHERE a___parent.entity IN (' . getEntity('propal') . ')';
 		if($data['du'])
 			$req .= ' AND a___parent.datep >= \''.$data['du'].'\'';
 		if($data['au'])
-			$req .= ' AND a___parent.datep <= \''.$data['au'].'\'';
+			$req .= ' AND a___parent.datep <= \''.$data['au'].' 23:59:59\'';
 $req .= 'GROUP BY a___parent.fk_paiement, a___facture___bimp_entrepot.lieu  , dateP
 ORDER BY dateP, `a___facture___bimp_entrepot`.`lieu` ASC;
 		';
@@ -1408,8 +1408,15 @@ ORDER BY dateP, `a___facture___bimp_entrepot`.`lieu` ASC;
 			$str .= "\n";
 		}
 
-		mkdir(DOL_DATA_ROOT . '/bimpcore');
-		if (file_put_contents(DOL_DATA_ROOT . '/bimpcore/export_tmp.csv', $str)) {
+		$more = '';
+		global $conf;
+		if (BimpCore::isModuleActive('multicompany') && $conf->entity > 1) {
+			$more .= '/' . $conf->entity;
+		}
+		$dir = DOL_DATA_ROOT .$more .'/bimpcore';
+
+		mkdir($dir);
+		if (file_put_contents($dir.'/export_tmp.csv', $str)) {
 			$url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode('export_tmp.csv');
 			$success_callback = 'window.open(\'' . $url . '\');';
 		}

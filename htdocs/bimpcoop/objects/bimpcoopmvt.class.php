@@ -120,7 +120,7 @@ class Bimpcoopmvt extends BimpObject
 FROM '.MAIN_DB_PREFIX.'facturedet a
 LEFT JOIN '.MAIN_DB_PREFIX.'facture f ON f.rowid = a.fk_facture
 LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a_product_ef ON a_product_ef.fk_object = a.fk_product
-WHERE f.type IN ("0","1","2") AND f.remain_to_pay < f.total_ttc'.
+WHERE f.type IN ("0","1","2") AND f.remain_to_pay != f.total_ttc'.
 			(BimpTools::getPostFieldValue('dateD', null)? ' AND f.datef >= "'.BimpTools::getPostFieldValue('dateD').'" ':'').
 			(BimpTools::getPostFieldValue('dateF', null)? ' AND f.datef < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
 			' GROUP BY categorie

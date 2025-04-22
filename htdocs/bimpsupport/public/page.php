@@ -29,6 +29,7 @@ global $db;
 
 
 function getSavsBySerial($serial) {
+	$savs = array();
     $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
     $rows = $equipment->getList(array(
         'serial' => $serial

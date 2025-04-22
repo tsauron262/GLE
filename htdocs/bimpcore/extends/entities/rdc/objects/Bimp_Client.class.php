@@ -558,7 +558,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				// surcharge statut
 				if ($shop['shop_state'] === 'SUSPENDED' && !in_array($this->getData('fk_statut_rdc') , array(12, 13, 14))) 	{
 					$this->set('fk_statut_rdc', 13);
-					$this->set('date_changement_statut_rdc', date('Y-m-d'));
+					$this->set('date_changement_statut_rdc', date('Y-m-d', strtotime($shop['closed_form'])));
 				}
 				if ($shop['shop_state'] === 'OPEN' && $this->getData('shopid') > 0) {
 					$this->set('fk_statut_rdc', self::$statut_rdc_live);

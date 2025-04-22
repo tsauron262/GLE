@@ -34,6 +34,12 @@ function getSavsBySerial($serial) {
     $rows = $equipment->getList(array(
         'serial' => $serial
     ));
+	if(!count($rows) && strlen($serial) >= 10){
+		$rows = $equipment->getList(array(
+			'old_serial' => array('operator'=> 'like', 'value' => '%'.$serial.'%')
+		));
+	}
+
 
     foreach ($rows as $row) {
         $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');

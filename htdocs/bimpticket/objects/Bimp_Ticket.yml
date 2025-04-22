@@ -411,5 +411,7 @@ stats_lists:
         group_by_options:
             - fk_statut
             - type_code
+            - fk_soc
+            - fk_user_assign
         cols:
             nb_tickets:

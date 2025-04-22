@@ -82,6 +82,7 @@ lists:
         title: Déclinaisons
         checkboxes: 1
         page_btn: 0
+        configurable: 1
         edit_btn: 1
         delete_btn: 1
         sort_field: id

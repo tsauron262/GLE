@@ -11112,7 +11112,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 					}
 
 					if (!count($errors)) {
-						$mode = BimpTools::getArrayValueFromPath($data, 'update_mode', 'udpate_object');
+						$mode = BimpTools::getArrayValueFromPath($data, 'update_mode', 'update_object');
 						$force_update = BimpTools::getArrayValueFromPath($data, 'force_update', false);
 						$not_validate = BimpTools::getArrayValueFromPath($data, 'validate', false);
 
@@ -11410,7 +11410,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 					break;
 				}
 
-				$mode = BimpTools::getArrayValueFromPath($action_extra_data, 'update_mode', 'udpate_object');
+				$mode = BimpTools::getArrayValueFromPath($action_extra_data, 'update_mode', 'update_object');
 				$force_update = BimpTools::getArrayValueFromPath($action_extra_data, 'force_update', false);
 				$not_validate = BimpTools::getArrayValueFromPath($action_extra_data, 'validate', false);
 

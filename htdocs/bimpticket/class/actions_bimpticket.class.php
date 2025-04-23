@@ -1,6 +1,7 @@
 <?php
 
-class ActionsBimpticket {
+class ActionsBimpticket
+{
 	// Class properties and methods go here
 	function addmoduletoeamailcollectorjoinpiece($parameters, &$object, &$action, $hookmanager)
 	{
@@ -31,23 +32,23 @@ class ActionsBimpticket {
 			}
 //			exit (var_dump( $folder));
 
-/*
-			$folder = DOL_DATA_ROOT.'/ticket/'.$obj->ref;
+			/*
+						$folder = DOL_DATA_ROOT.'/ticket/'.$obj->ref;
 
-			echo $folder . '<pre>';
-			print_r($obj); // oui, ca c'est le bon ticket
-			echo '</pre>';
+						echo $folder . '<pre>';
+						print_r($obj); // oui, ca c'est le bon ticket
+						echo '</pre>';
 
-			foreach ($parameters['data'] as $key => $value) {
-				var_dump($folder . '/' . $key, file_put_contents($folder . '/' . $key,
-					$value));
-				exit;
-//				echo $key . '<pre>';
-//				print_r($value);
-//				echo '</pre>';
-//				exit;
-			}
-*/
+						foreach ($parameters['data'] as $key => $value) {
+							var_dump($folder . '/' . $key, file_put_contents($folder . '/' . $key,
+								$value));
+							exit;
+			//				echo $key . '<pre>';
+			//				print_r($value);
+			//				echo '</pre>';
+			//				exit;
+						}
+			*/
 //			echo '<pre>';
 //			print_r($parameters['data']); // ca contient les fichiers joints
 //			echo '</pre>';
@@ -69,7 +70,7 @@ class ActionsBimpticket {
 
 	function addMoreActionsEmailCollector($parameters, &$object, &$action, $hookmanager)
 	{
-		$this->results['hookBimpticketResponse'] = "Traitement response Bimp_Ticket";
+		$this->results['hookBimpticketResponse'] = "Traitement réponse Bimp_Ticket";
 		$this->results['hookBimpticketInitial'] = "Traitement initial Bimp_Ticket";
 		return 0;
 	}
@@ -78,9 +79,12 @@ class ActionsBimpticket {
 	{
 		global $db;
 
+		$errors = array();
+
 		$msg = $parameters['imapemail']->bodies['html'];
-		if($msg == '')
+		if ($msg == '') {
 			$msg = $parameters['imapemail']->bodies['text'];
+		}
 
 		$traite = 0;
 
@@ -88,64 +92,87 @@ class ActionsBimpticket {
 		preg_match_all('/([^: ]+): (.+?(?:\r\n\s(?:.+?))*)(\r\n|\s$)/m', $parameters['header'], $matches);
 		$headers = array_combine($matches[1], $matches[2]);
 
-		if($action == 'hookBimpticketResponse') {
-			$bimp_ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $parameters['objectemail']->id);
-			if ($bimp_ticket->id > 0) {
-				/*
-				 * on purifie le message
-				 */
-				$tabT = explode('lineBreakAtBeginningOfMessage', $msg);
-				if (isset($tabT[1])) {
-					$msg = $tabT[0] . '">';
-				}
-				$tabT = explode('appendonsend', $msg);
-				if (isset($tabT[1])) {
-					$msg = $tabT[0] . '">';
-				}
+		switch ($action) {
+			case 'hookBimpticketResponse':
+				$bimp_ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $parameters['objectemail']->id);
+				if ($bimp_ticket->id > 0) {
+					// on purifie le message
 
+					$tabT = explode('lineBreakAtBeginningOfMessage', $msg);
+					if (isset($tabT[1])) {
+						$msg = $tabT[0] . '">';
+					}
 
+					$tabT = explode('appendonsend', $msg);
+					if (isset($tabT[1])) {
+						$msg = $tabT[0] . '">';
+					}
 
+					$tabT = explode('<blockquote type="cite"', $msg);
+					if (isset($tabT[1])) {
+						$msg = $tabT[0];
+					}
 
+					$userAttribut = (int) $bimp_ticket->getData('fk_user_assign');
+					$errors = $bimp_ticket->addNote($msg, 20, 0, 0, $parameters['from'], 2, ($userAttribut) ? 1 : 0, 0, $userAttribut);
+					if (!count($errors)) {
+						$traite = 1;
 
-				$userAttribut = $bimp_ticket->getData('fk_user_assign');
-				$errors = $bimp_ticket->addNote($msg, 20, 0, 0, $parameters['from'], 2, ($userAttribut) ? 1 : 0, 0, $userAttribut);
-				if (!count($errors)) {
-					$traite = 1;
+						if (!empty($parameters['attachments'])) {
+							$destdir = $bimp_ticket->getFilesDir();
+							if (!dol_is_dir($destdir)) {
+								dol_mkdir($destdir);
+							}
+
+							foreach ($parameters['attachments'] as $attachment) {
+								$filename = $attachment->getName();
+								$content = $attachment->getContent();
+								if (!file_put_contents($destdir . $filename, $content)) {
+									$errors[] = 'Echec de l\'enregistrement de la pièce jointe ' . $filename;
+								}
+							}
+						}
+					}
 				} else {
-					die(print_r($errors, 1));
+					$errors[] = 'Pas de ticket trouvé pour ' . str_replace(array('<', '>'), '', $headers['References']);
 				}
-			} else {
-				die('Pas de ticket trouvé pour '.str_replace(array('<', '>'), '', $headers['References']));
-			}
-		}
+				break;
 
+			case 'hookBimpticketInitial':
+				//		echo '<pre>';print_r($parameters['from'].$bimp_ticket->id);echo '</pre>';die;
+				if (!$traite && isset($parameters['objectemail']) && is_a($parameters['objectemail'], 'ticket')) {
+					$ticket = $parameters['objectemail'];
+					$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
+					$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
+					$Bimp_Ticket->addObjectLog($Bimp_Ticket->getData('message'));
+					$Bimp_Ticket->updateField("message", $msg);
 
+					$contact_static = new Contact($db);
+					$contact_static->fetch(0, null, '', $Bimp_Ticket->getData('origin_email'));
+					if ($contact_static->id > 0 and $contact_static->fk_soc == $Bimp_Ticket->getData('fk_soc')) {
+						$ticket->add_contact($contact_static->id, 'SUPPORTCLI', 'external');
+					}
 
-
-		if($action == 'hookBimpticketInitial') {
-//		echo '<pre>';print_r($parameters['from'].$bimp_ticket->id);echo '</pre>';die;
-			if (!$traite && isset($parameters['objectemail']) && is_a($parameters['objectemail'], 'ticket')) {
-				$ticket = $parameters['objectemail'];
-				$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
-
-				$Bimp_Ticket->addObjectLog($Bimp_Ticket->getData('message'));
-				$Bimp_Ticket->updateField("message", $msg);
-
-				$contact_static = new Contact($db);
-				$contact_static->fetch(0, null, '', $Bimp_Ticket->getData('origin_email'));
-				if ($contact_static->id > 0 and $contact_static->fk_soc == $Bimp_Ticket->getData('fk_soc')) {
-					$ticket->add_contact($contact_static->id, 'SUPPORTCLI', 'external');
+					$traite = 1;
+//					echo $Bimp_Ticket->printData();
+//					die('yes');
 				}
-				$traite = 1;
-//			echo $Bimp_Ticket->printData();
-//			die('yes');
-			}
+				break;
+
+			default:
+				// todo : pour tests à suppr:
+				echo '<pre>';
+				print_r($parameters);
+				echo '</pre>';
+				die('pas de traitement trouvé');
 		}
 
-		if(!$traite){
-			echo '<pre>';print_r($parameters);echo '</pre>';die('pas de traitement trouvé');
+		if (count($errors)) {
+			BimpCore::addLog('Erreurs collecte e-mail', 3, 'bimpcore', $parameters['objectemail'], array(
+				'hook'    => $action,
+				'Erreurs' => $errors
+			));
 		}
-
 
 //		echo '<pre>';print_r($parameters['imapemail']->bodies['html']);echo '</pre>';
 //		echo '<pre>';print_r($parameters['imapemail']);echo '</pre>';

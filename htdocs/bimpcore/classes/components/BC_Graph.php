@@ -246,7 +246,7 @@ class BC_Graph extends BC_Panel
         if($this->params['use_k']){
             foreach($dataGraphe as $tmp1){
                 foreach($tmp1['dataPoints'] as $tmp2){
-                    if($tmp2['y'] > 200000 || $tmp2['y'] < -200000){
+                    if($tmp2['y'] > 100000 || $tmp2['y'] < -100000){
                         $useK = true;
                         $options['axisY']["title"] = 'k'.$options['axisY']["title"];
                         break 2;
@@ -254,13 +254,19 @@ class BC_Graph extends BC_Panel
                 }
             }
         }
-        if($useK){
-            foreach($dataGraphe as $id1 => $tmp1){
-                foreach($tmp1['dataPoints'] as $id2 =>$tmp2){
-                    $dataGraphe[$id1]['dataPoints'][$id2]['y'] = round($tmp2['y'] / 1000);
-                }
-            }
-        }
+		foreach($dataGraphe as $id1 => $tmp1){
+			if($tmp1['round'] > -1){
+				foreach($tmp1['dataPoints'] as $id2 =>$tmp2)
+					$dataGraphe[$id1]['dataPoints'][$id2]['y'] = round($tmp2['y'], $tmp1['round']);
+			}
+		}
+		if($useK){
+			foreach($dataGraphe as $id1 => $tmp1){
+				foreach($tmp1['dataPoints'] as $id2 =>$tmp2){
+					$dataGraphe[$id1]['dataPoints'][$id2]['y'] = round($tmp2['y'] / 1000, $tmp1['roundK']);
+				}
+			}
+		}
 
         $tmpDataStatic = array();
         $tmpDataStatic["type"] = "line";
@@ -368,6 +374,8 @@ class BC_Graph extends BC_Panel
                         'dataPoints'=> array()
                     );
                 }
+				$data['round'] = (isset($tabField['round']) && $tabField['round'] > -1)? $tabField['round'] : -1;
+				$data['roundK'] = (isset($tabField['roundK']) && $tabField['roundK'] > -1)? $tabField['roundK'] : $data['round']+2;
 
                 $filters = $this->params['filters'];
                 if(isset($tabField['filters']) && is_array($tabField['filters'])){
@@ -385,7 +393,7 @@ class BC_Graph extends BC_Panel
                     $filtersOldValue = $filters;
                     if(isset($this->userOptions['date1']))
                         $filtersOldValue[$this->fieldX] = array('operator' => '<', 'value' => $this->userOptions['date1']);
-                    $resultOldValue = $this->object->getList($filtersOldValue, 1, 1, $this->fieldX, 'DESC', 'array', $return_fields, $joins, null, 'ASC');
+                    $resultOldValue = $this->object->getList($filtersOldValue, 1, 1, $this->fieldX, 'DESC', 'array', $return_fields, $joins, null, 'ASC', $groupBy);
                     if(isset($resultOldValue[0]))
                         $oldValue = $resultOldValue[0]['y'];
                 }

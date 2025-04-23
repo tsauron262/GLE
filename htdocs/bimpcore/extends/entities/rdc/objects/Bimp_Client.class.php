@@ -276,7 +276,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			case 'shopid':
 				if ($this->getData('shopid')) return false;
 				else return $this->isUserBD();
-				break;
 		}
 		return parent::isFieldEditable($field, $force_edit);
 	}

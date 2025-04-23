@@ -80,8 +80,6 @@ forms:
             fk_motif_echange:
                 field: fk_motif_echange
                 required: 1
-                values:
-                    callback: getMotifEchange
             action_echange:
                 field: action_echange
                 display_if:
@@ -117,8 +115,9 @@ fields:
         label: Commentaire
     fk_motif_echange:
         label: Motif de l'échange
+        type: int
         values:
-            callback: getMotifEchange
+            array: motifEchange
     action_echange:
         label: Action
         type: text

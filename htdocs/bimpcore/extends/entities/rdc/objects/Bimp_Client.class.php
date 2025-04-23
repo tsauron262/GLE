@@ -252,17 +252,37 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return $url . " " . $href;
 	}
 
-	public function isShopIdEditable()
+	public function canEditField($field_name)
 	{
-//		$id = BimpTools::getPostFieldValue('id');
-//		if (!$id) return false;
-		if ($this->getData('shopid')) return false;
-		else return $this->isUserBD();
+		switch ($field_name) {
+			case 'fk_categorie_maitre':
+			case 'fk_priorite':
+			case 'potentiel_catalogue':
+				return $this->isUserBDKAM();
+			case 'fk_source_rdc':
+				return $this->isUserBD();
+			case 'fk_group_rdc':
+			case 'fk_user_attr_rdc':
+				return $this->isUserManager();
+			case 'fk_statut_rdc':
+				return 0;
+		}
+		return parent::canEditField($field_name);
+	}
+
+	public function isFieldEditable($field, $force_edit = false)
+	{
+		switch ($field) {
+			case 'shopid':
+				if ($this->getData('shopid')) return false;
+				else return $this->isUserBD();
+				break;
+		}
+		return parent::isFieldEditable($field, $force_edit);
 	}
 
 	public function isAdmin()
 	{
-//		return 0;
 		global $user;
 		return $user->admin;
 	}
@@ -308,15 +328,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function isCommentaireStatutKoRequired()	{
 		$statut = $this->getData('fk_statut_rdc');
 		if ($statut == 5) { // KO
-			return true;
-		}
-		return false;
-	}
-
-	public function isPrestataireSourceRequired()
-	{
-		$source = $this->getData('fk_source_rdc');
-		if ($source == 20) { // Prestataire/agrégateur
 			return true;
 		}
 		return false;
@@ -394,10 +405,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function renderPageView()
 	{
-		global $user;
-
 		$tabs = array();
-		$isAdmin = $user->admin;
 
 		$tabs[] = array(
 			'id' => 'default',

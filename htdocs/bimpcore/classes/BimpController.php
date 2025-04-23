@@ -1947,6 +1947,7 @@ class BimpController
                         if (!is_null($form_row)) {
                             $form = new BC_Form($object, $id_parent, $form_name, 1, true);
                             $form->fields_prefix = $field_prefix;
+							$form->identifier = $form_id;
                             if (!is_null($value)) {
                                 $form->setValues(array(
                                     'fields' => array(

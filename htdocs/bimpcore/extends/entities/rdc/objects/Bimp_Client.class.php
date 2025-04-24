@@ -109,7 +109,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$grouparray = array(
 			BimpCore::getUserGroupId('BD'),
 			BimpCore::getUserGroupId('KAM'),
-			BimpCore::getUserGroupId('TECH_RDC'),
+//			BimpCore::getUserGroupId('TECH_RDC'),
 		);
 
 		$cache_key = 'users_groups';
@@ -144,6 +144,14 @@ class Bimp_Client_ExtEntity extends Bimp_Client
     public function getActionsButtons()
 	{
 //		echo '<pre>'; print_r($this->data); echo '</pre>';die;
+		$actioncomm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm');
+		$buttons[] = array(
+			'label'   => 'CR échange',
+			'icon'    => 'fas_comment',
+//			'onclick' => $actioncomm->getJsActionOnclick('cr_echange', array('fk_soc' => $this->id), array('form_name' => 'formCREchange'))
+			'onclick' => $actioncomm->getJsLoadModalForm('formCREchange', 'Compte rendu d\\\'échange', array('fields' => array('fk_soc' => $this->id)))
+		);
+
 		$buttons[] = array(
 			'label'   => 'Actions',
 			'icon'    => 'fas_edit',
@@ -244,39 +252,57 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return $url . " " . $href;
 	}
 
-	public function isShopIdEditable()
+	public function canEditField($field_name)
 	{
-//		$id = BimpTools::getPostFieldValue('id');
-//		if (!$id) return false;
-		if ($this->getData('shopid')) return false;
-		else return $this->isUserBD();
+		switch ($field_name) {
+			case 'fk_categorie_maitre':
+			case 'fk_priorite':
+			case 'potentiel_catalogue':
+				return $this->isUserBDKAM();
+			case 'fk_source_rdc':
+				return $this->isUserBD();
+			case 'fk_group_rdc':
+			case 'fk_user_attr_rdc':
+				return $this->isUserManager();
+			case 'fk_statut_rdc':
+				return 0;
+		}
+		return parent::canEditField($field_name);
+	}
+
+	public function isFieldEditable($field, $force_edit = false)
+	{
+		switch ($field) {
+			case 'shopid':
+				if ($this->getData('shopid')) return false;
+				else return $this->isUserBD();
+		}
+		return parent::isFieldEditable($field, $force_edit);
 	}
 
 	public function isAdmin()
 	{
-//		return 0;
 		global $user;
 		return $user->admin;
 	}
 
 	public function isUserBD()
 	{
-		/*todo a voir si on garde*/
-		if ($this->isAdmin()) return true;
 		return $this->isUserInGroup('BD');
 	}
 
 	public function isUserKAM()
 	{
-		/*todo a voir si on garde*/
-		if ($this->isAdmin()) return true;
 		return $this->isUserInGroup('KAM');
+	}
+
+	public function isUserManager()
+	{
+		return $this->isUserInGroup('MANAGER');
 	}
 
 	public function isUserTECH()
 	{
-		/*todo a voir si on garde*/
-		if ($this->isAdmin()) return true;
 		return $this->isUserInGroup('TECH_RDC');
 	}
 
@@ -288,6 +314,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function isUserInGroup($g)
 	{
 		global $user;
+		/*todo a voir si on garde*/
+		if ($this->isAdmin()) return true;
 		$id_group = BimpCore::getConf('id_user_group_' . $g);
 		$groups = $this->db->getRow('usergroup_user', 'fk_user = ' . $user->id . ' AND fk_usergroup = ' . $id_group , array('rowid'), 'array');
 		if($groups)
@@ -299,15 +327,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function isCommentaireStatutKoRequired()	{
 		$statut = $this->getData('fk_statut_rdc');
 		if ($statut == 5) { // KO
-			return true;
-		}
-		return false;
-	}
-
-	public function isPrestataireSourceRequired()
-	{
-		$source = $this->getData('fk_source_rdc');
-		if ($source == 20) { // Prestataire/agrégateur
 			return true;
 		}
 		return false;
@@ -385,14 +404,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function renderPageView()
 	{
-		global $user;
-
 		$tabs = array();
-		$isAdmin = $user->admin;
 
 		$tabs[] = array(
 			'id' => 'default',
-			'title' => 'Actions commerciales',
+			'title' => 'Compte rendu d\'échange',
 			'content' => $this->renderActionsCommView('manuel')
 		);
 		$tabs[] = array(
@@ -416,7 +432,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		switch ($type)	{
 			case 'manuel':
 				$filtre_type = 'not_in';
-				$titre = 'Actions commerciales';
+				$titre = 'Liste des échanges';
 				break;
 			case 'auto':
 				$filtre_type = 'in';
@@ -433,6 +449,12 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return $list->renderHtml();
 	}
 
+	public function create(&$warnings = array(), $force_create = false)
+	{
+		$this->checkAttr();
+		return parent::create($warnings, $force_create);
+	}
+
 	public function update(&$warnings = array(), $force_update = false)
 	{
 		$errors = array();
@@ -443,7 +465,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		if (count($errors))
 			return $errors;
 
-		$this->checkAttr();	// envoi de mail si changement d'attribtion
+		$this->checkAttr();
 		$this->checkPassageLive();
 
 		return parent::update($warnings, $force_update);
@@ -459,11 +481,12 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		);
 	}
 
+	/*
 	public function onSave(&$errors = array(), &$warnings = array())
 	{
-		if (!BimpTools::getPostFieldValue('id'))	$this->checkAttr(true);
 		parent::onSave($errors, $warnings);
 	}
+	*/
 
 	public function appelMiraklS20(&$warnings = array())
 	{
@@ -543,7 +566,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				// surcharge statut
 				if ($shop['shop_state'] === 'SUSPENDED' && !in_array($this->getData('fk_statut_rdc') , array(12, 13, 14))) 	{
 					$this->set('fk_statut_rdc', 13);
-					$this->set('date_changement_statut_rdc', date('Y-m-d'));
+					$this->set('date_changement_statut_rdc', date('Y-m-d', strtotime($shop['closed_form'])));
 				}
 				if ($shop['shop_state'] === 'OPEN' && $this->getData('shopid') > 0) {
 					$this->set('fk_statut_rdc', self::$statut_rdc_live);
@@ -610,24 +633,15 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		}
 		return 1;
 	}
-	public function checkAttr($onSave = false) {
+
+	public function checkAttr() {
 		global $user;
 		$attr = $this->getData('fk_user_attr_rdc');
 		if ($attr != $user->id)	{
-			if ($attr && ($this->getInitData('fk_user_attr_rdc') != $attr || $onSave)) { // si changement d'attribution ou onSave (creation)
+			if ($attr && ($this->getInitData('fk_user_attr_rdc') != $attr)) { // si changement d'attribution
 				$code = 'Attribution_rdc';
 				$sujet = 'Attribution Compte';
 				$msg = 'Le compte ' . $this->getLink() . ' vient de vous être attribué par ' . $user->getNomUrl();
-				/*todo + e 15 000 mail envoyé
-				Envoyé le
-11-04-2025 15:43:45
-De
-no-reply@bimp.fr
-Réponse-à
-no-reply@bimp.fr
-À
-maeva.ralijaona@rueducommerce.com*/
-
 //				BimpUserMsg::envoiMsg($code, $sujet, $msg, $attr);
 			}
 		}

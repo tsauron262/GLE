@@ -326,10 +326,6 @@ class BimpInput
 						} else {
 							$html .= '<span class="danger">Objet invalide</span>';
 						}
-					} else {
-						$html .= 'Options<pre>';
-						$html .= print_r($options, true);
-						$html .= '</pre>';
 					}
 				}
 

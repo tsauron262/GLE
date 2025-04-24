@@ -4,13 +4,13 @@ icon: fas_sticky-note
 
 mode_archive: 0
 
-labels: 
+labels:
     name: note
     is_female: 1
-    
-parent_module: 
+
+parent_module:
     field_value: obj_module
-parent_object: 
+parent_object:
     field_value: obj_name
 parent_id_property: id_obj
 
@@ -18,8 +18,8 @@ objects:
     user_group:
         relation: hasOne
         delete: 0
-        instance: 
-            dol_object: 
+        instance:
+            dol_object:
                 module: user
                 file: usergroup
                 class: UserGroup
@@ -28,273 +28,305 @@ objects:
     author_group:
         relation: hasOne
         delete: 0
-        instance: 
-            dol_object: 
+        instance:
+            dol_object:
                 module: user
                 file: usergroup
                 class: UserGroup
             id_object:
                 field_value: fk_group_author
-    
+
 fields:
-    obj_type: 
+    obj_type:
         label: Type objet
-        input: 
+        input:
             type: hidden
-    obj_module: 
+    obj_module:
         label: Module
-        input: 
+        input:
             type: hidden
-    obj_name: 
+    obj_name:
         label: Nom objet
-        input: 
+        input:
             type: hidden
-    id_obj: 
+    id_obj:
         label: ID objet
-        input: 
+        input:
             type: hidden
-    id_parent_note: 
+    id_parent_note:
         label: Note Parente
         type: id
         default_value: 0
-    type_author: 
+    type_author:
         label: Type Auteur
         type: int
-        values: 
+        values:
             array: types_author
         default_value: 1
-    id_societe: 
+    id_societe:
         label: Société
         type: id_object
         object: societe
-        input: 
+        input:
             type: search_societe
-        display_if: 
+        display_if:
             field_name: type_author
             show_values: 2
-    email: 
+    email:
         label: E-mail
-        display_if: 
+        display_if:
             field_name: type_author
             show_values: 3
-    visibility: 
+    visibility:
         label: Visibilité
         type: int
-        values: 
+        values:
             array: visibilities
         default_value: 10
-    content: 
+    content:
         label: Texte
         type: html
         hashtags: 1
         no_strip_tags: 1
-        input: 
+        input:
+            field_path: 1
+            field_path_module:
+                field_value: obj_module
+            field_path_object_name:
+                field_value: obj_name
             hashtags: 1
             auto_expand: 1
             rows: 3
             note: 1
-    viewed: 
+        default_value:
+            callback: getContentDefaultValue
+        depends_on: note_modele,obj_module,obj_name,id_obj
+    viewed:
         label: Vue
         type: bool
         default_value: 0
-    type_dest: 
+    type_dest:
         label: Type Destinataire
         type: int
-        values: 
+        values:
             array: types_dest
         default_value: 0
     fk_user_dest:
         label: Destinataire user
         type: id_object
         object: user
-        input: 
+        input:
             type: search_user
             include_empty: 1
-        display_if: 
+        display_if:
             field_name: type_dest
             show_values: 1
     fk_group_dest:
         label: Destinataire groupe
         type: id_object
         object: user_group
-        input: 
+        input:
             type: search_group
             include_empty: 1
-        display_if: 
+        display_if:
             field_name: type_dest
             show_values: 4
         values:
             array: userGroups
-             
+    
     auto:
         label: Note Auto
         type: bool
         default_value: 0
-        
-    delete_on_view: 
+    
+    delete_on_view:
         label: Suppression après vue
         type: boold
         default_value: 0
-        
+    
     fk_group_author:
         label: Group
         type: id_object
         object: author_group
-        display_if: 
+        display_if:
             field_name: type_author
             show_values: 4
         values:
             array: userUserGroups
-        
-forms: 
-    default: 
-        rows: 
-            - field: obj_type
-            - field: obj_module
-            - field: obj_name
-            - field: id_obj
-            - field: type_author
-            - field: fk_group_author
-            - field: id_societe
-            - field: email
-            - field: visibility
-            - field: type_dest
-            - field: fk_user_dest
-            - field: fk_group_dest
-            - custom: 1
-              label: Destinataire
-              input_name: mail_dest
-              input:
-                  type: text
-              value:
-                  callback: getMailTo
-              edit: 0
-              display_if:
-                  field_name: type_dest
-                  show_values: 2
-            - custom: 1
-              label: Destinataire
-              input_name: mail_dest_contact
-              input:
-                  type: select
-                  options:
-                      callback: getMailToContacts
-              display_if:
-                  field_name: type_dest
-                  show_values: 5
-            - field: content
-            
-    edit: 
-        rows: 
-            - field: visibility
-            - field: content
-            
-    msg: 
-        rows: 
-            - field: obj_type
-            - field: obj_module
-            - field: obj_name
-            - field: id_obj
-            - field: type_author
-              hidden: 1
-            - field: type_dest
-            - field: fk_user_dest
-            - field: fk_group_dest
-            - field: content
-            
-    rep: 
-        rows: 
-            - field: obj_type
-            - field: obj_module
-            - field: obj_name
-            - field: id_obj
-#            - field: type_dest
-            - custom: 1
-              label: Type auteur
-              input_name: type_author
-              input:
-                type: select
-                options: 
-                    1: Utilisateur
-                    4: Group
-              value: 
-                callback:
-                    method: getInitData
-                    params:
-                        - type_dest
-            - field: fk_group_author
-              value: 
-                callback:
-                    method: getInitData
-                    params:
-                        - fk_group_dest
-            - field: type_dest
-#              hidden: 1
-            - field: fk_group_dest
-#              edit: 0
-            - field: fk_user_dest
-              edit: 0
-            - custom: 1
-              label: Destinataire
-              input_name: mail_dest
-              input:
-                type: text
-              default_value:
-                  callback: getMailTo
-              edit: 0
-              display_if: 
-                field_name: type_dest
-                show_values: 2
-#            - field: content
-            - custom: 1
-              label: Texte
-              input_name: content
-              input: 
-                  auto_expand: 1
-                  hashtags: 1
-                  type: textarea
-                  rows: 3
-        after_content:
-                  callback: getHisto
-            
-#            - custom: 1
-#              label: Historique
-#              value: 
-#                  callback: getHisto
 
-                  
-lists_cols: 
+forms:
+    default:
+        rows:
+            -   field: obj_type
+            -   field: obj_module
+            -   field: obj_name
+            -   field: id_obj
+            -   field: type_author
+            -   field: fk_group_author
+            -   field: id_societe
+            -   field: email
+            -   field: visibility
+            -   field: type_dest
+            -   field: fk_user_dest
+            -   field: fk_group_dest
+            -   custom: 1
+                label: Destinataire
+                input_name: mail_dest
+                input:
+                    type: text
+                value:
+                    callback: getMailTo
+                edit: 0
+                display_if:
+                    field_name: type_dest
+                    show_values: 2
+            -   custom: 1
+                label: Destinataire
+                input_name: mail_dest_contact
+                input:
+                    type: select
+                    options:
+                        callback: getMailToContacts
+                display_if:
+                    field_name: type_dest
+                    show_values: 5
+            -   custom: 1
+                label: Modèle
+                show:
+                    conf: use_notes_models
+                input_name: note_modele
+                data_type: int
+                content:
+                    callback: renderModelInput
+            -   field: content
+    
+    edit:
+        rows:
+            -   field: visibility
+            -   field: content
+    
+    msg:
+        rows:
+            -   field: obj_type
+            -   field: obj_module
+            -   field: obj_name
+            -   field: id_obj
+            -   field: type_author
+                hidden: 1
+            -   field: type_dest
+            -   field: fk_user_dest
+            -   field: fk_group_dest
+            -   custom: 1
+                label: Modèle
+                show:
+                    conf: use_notes_models
+                input_name: note_modele
+                data_type: int
+                content:
+                    callback: renderModelInput
+            -   field: content
+    
+    rep:
+        rows:
+            -   field: obj_type
+            -   field: obj_module
+            -   field: obj_name
+            -   field: id_obj
+            #            - field: type_dest
+            -   custom: 1
+                label: Type auteur
+                input_name: type_author
+                input:
+                    type: select
+                    options:
+                        1: Utilisateur
+                        4: Group
+                value:
+                    callback:
+                        method: getInitData
+                        params:
+                            - type_dest
+            -   field: fk_group_author
+                value:
+                    callback:
+                        method: getInitData
+                        params:
+                            - fk_group_dest
+            -   field: type_dest
+            #              hidden: 1
+            -   field: fk_group_dest
+            #              edit: 0
+            -   field: fk_user_dest
+                edit: 0
+            -   custom: 1
+                label: Destinataire
+                input_name: mail_dest
+                input:
+                    type: text
+                value:
+                    callback: getMailTo
+                edit: 0
+                display_if:
+                    field_name: type_dest
+                    show_values: 2
+            #            - field: content
+            -   custom: 1
+                label: Modèle
+                show:
+                    conf: use_notes_models
+                input_name: note_modele
+                data_type: int
+                content:
+                    callback: renderModelInput
+            -   custom: 1
+                label: Texte
+                input_name: content
+                input:
+                    auto_expand: 1
+                    hashtags: 1
+                    type: textarea
+                    rows: 3
+        after_content:
+            callback: getHisto
+            
+            #            - custom: 1
+            #              label: Historique
+            #              value: 
+            #                  callback: getHisto
+
+
+lists_cols:
     date_create:
         label: Date
     author:
         label: Auteur
-        value: 
+        value:
             callback: displayAuthor
     to:
         label: Destinataire(s)
-        value: 
+        value:
             callback: displayDestinataire
     chatmsg:
         label: Destinataire(s)
-        value: 
+        value:
             callback: displayChatmsg
     parent:
         label: Objet lié
         value:
             callback: getParentLink
-                    
+
 lists:
-    default: 
+    default:
         title: Notes
         icon: fas_sticky-note
         filters_panel: default
         checkboxes: 1
-        bulk_actions: 
-            - label: Supprimer les notes sélectionnées
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this));
-              btn_class: deleteSelectedObjects
-        extra_bulk_actions: 
+        bulk_actions:
+            -   label: Supprimer les notes sélectionnées
+                icon: fas_trash-alt
+                onclick: deleteSelectedObjects('list_id', $(this));
+                btn_class: deleteSelectedObjects
+        extra_bulk_actions:
             callback: getListsExtraBulkActions
         sort_field: date_create
         sort_way: desc
@@ -303,7 +335,9 @@ lists:
         edit_form: edit
         delete_btn: 1
         add_form_name: default
-        extra_btn: 
+        header_buttons:
+            callback: getListHeaderButtons
+        extra_btn:
             callback: getListExtraBtn
         cols:
             date_create:
@@ -316,18 +350,18 @@ lists:
             viewed:
                 edit: 1
             user_update:
-                show: 
+                show:
                     callback: iAmAdmin
             date_update:
-                show: 
+                show:
                     callback: iAmAdmin
-                
-    global: 
+    
+    global:
         extends: default
         add_form_name: unset
         add_btn: 0
-                
-    public: 
+    
+    public:
         title: Suivi
         icon: fas_history
         checkboxes: 0
@@ -337,56 +371,56 @@ lists:
         sort_way: asc
         n: 50
         cols:
-            author: 
-            date_create: 
+            author:
+            date_create:
             content:
                 label: Message
                 edit: 1
-             
+    
     message:
         extends: default
         title: Messages
         add_form_name: msg
-        add_form_values: 
+        add_form_values:
             fields:
                 type_author: 1
                 type_dest: 1
         cols:
             visibilite: unset
-            
+    
     chat:
         title: Messages
         n: 100
         add_form_name: msg
-        add_form_values: 
+        add_form_values:
             fields:
                 type_author: 1
                 type_dest: 1
         cols:
             chatmsg:
                 label: Destinataire(s)
-                value: 
+                value:
                     callback: displayChatmsg
-                    
+    
     bal:
         extends: default
         cols:
             parent:
-                
+    
     linked:
         extends: default
         cols:
             parent:
         add_form_name: unset
-            
-searches: 
-    default: 
-        fields_search: 
+
+searches:
+    default:
+        fields_search:
             - a.id
-        fields_return: 
+        fields_return:
             - a.id
         label_syntaxe: 'Note #<a.id>'
-        
+
 filters_panels:
     default:
         filters:

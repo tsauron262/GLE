@@ -7661,7 +7661,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		BimpObject::loadClass('bimpcore', 'Bimp_UserGroup');
 		$user_groups = Bimp_UserGroup::getUserUserGroupsList($id_user);
 
-		$where = 'obj_type = \'bimp_object\' AND obj_module = \''.$this->module.'\' AND obj_name = \''.$this->object_name.'\' AND id_obj = ' . $this->id;
+		$where = 'obj_type = \'bimp_object\' AND obj_module = \'' . $this->module . '\' AND obj_name = \'' . $this->object_name . '\' AND id_obj = ' . $this->id;
 		$where .= ' AND user_create != ' . (int) $id_user . ($not_viewed_only ? ' AND viewed = 0' : '');
 		$where .= ' AND (';
 		$where .= 'visibility >= 10 OR (fk_user_dest = ' . (int) $id_user . ' AND type_dest = 1)';
@@ -7671,7 +7671,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		}
 		$where .= ')';
 
-		return  (int) $this->db->getCount('bimpcore_note', $where);
+		return (int) $this->db->getCount('bimpcore_note', $where);
 	}
 
 	public function renderNotesList($filter_by_user = true, $list_name = "default", $suffixe = "", $archive = false, $withLinked = true)
@@ -7682,6 +7682,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			} else {
 				$note = BimpObject::getInstance('bimpcore', 'BimpNote');
 			}
+
+			$note->set('obj_type', 'bimp_object');
+			$note->set('obj_module', $this->module);
+			$note->set('obj_name', $this->object_name);
+			$note->set('id_obj', $this->id);
 
 			$list = new BC_ListTable($note, $list_name);
 			$list->addIdentifierSuffix($suffixe);
@@ -8470,7 +8475,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		$msg = 'Erreur technique: objets "' . $children_object . '" non trouvés pour ' . $this->getLabel('this');
 		return BimpRender::renderAlerts($msg);
 	}
-
 
 
 	public function renderChildrenGraph($children_object, $list_name = 'default', $panel = false, $title = null, $icon = null, $level = 1)
@@ -9506,43 +9510,44 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			$options .= ($options ? ', ' : '') . 'display_processing: ' . ((int) $params['display_processing'] ? 1 : 0);
 		}
 
-        $js = 'setObjectAction(';
-        if (!isset($params['no_button']) || !$params['no_button']) {
-            $js .= '$(this), ';
-        } else {
-            $js .= 'null, ';
-        }
-        $js .= $this->getJsObjectData();
-        $js .= ', \'' . $action . '\', {';
-        $fl = true;
-        foreach ($data as $key => $value) {
-            if (!$fl) {
-                $js .= ', ';
-            } else {
-                $fl = false;
-            }
-			$js .= $key .': ';
+		$js = 'setObjectAction(';
+		if (!isset($params['no_button']) || !$params['no_button']) {
+			$js .= '$(this), ';
+		} else {
+			$js .= 'null, ';
+		}
+		$js .= $this->getJsObjectData();
+		$js .= ', \'' . $action . '\', {';
+		$fl = true;
+		foreach ($data as $key => $value) {
+			if (!$fl) {
+				$js .= ', ';
+			} else {
+				$fl = false;
+			}
+			$js .= $key . ': ';
 			if (isset($value['js_function'])) {
 				$js .= $value['js_function'];
 			} else {
-				$js .= (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . /* htmlentities(addslashes(* */$value/* )) */ . '\''));
+				$js .= (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . /* htmlentities(addslashes(* */
+					$value/* )) */ . '\''));
 			}
-        }
-        $js .= '}, ';
-        if (isset($params['result_container'])) {
-            $js .= $params['result_container'];
-        } else {
-            $js .= 'null';
-        }
-        $js .= ', ';
-        if (isset($params['success_callback'])) {
-            $js .= $params['success_callback'];
-        } else {
-            $js .= 'null';
-        }
-        $js .= ', ';
-        $js .= '{' . $options . '}';
-        $js .= ');';
+		}
+		$js .= '}, ';
+		if (isset($params['result_container'])) {
+			$js .= $params['result_container'];
+		} else {
+			$js .= 'null';
+		}
+		$js .= ', ';
+		if (isset($params['success_callback'])) {
+			$js .= $params['success_callback'];
+		} else {
+			$js .= 'null';
+		}
+		$js .= ', ';
+		$js .= '{' . $options . '}';
+		$js .= ');';
 
 		return $js;
 	}
@@ -11476,22 +11481,23 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			if (is_null($obj) || !BimpObject::objectLoaded($obj)) {
 				$data = BimpTools::merge_array($dataFiltre, $data);
 				return static::createBimpObject($module, $object_name, $data, $force_create, $errors, $warnings, $no_transactions_db, $no_html);
-			}
-			else{
+			} else {
 				$maj = false;
-				foreach($data as $key => $valueAComparer1){
+				foreach ($data as $key => $valueAComparer1) {
 					$valueAComparer2 = str_replace(' ', '', $obj->getData($key));
 					$valueAComparer1 = str_replace(' ', '', $valueAComparer1);
-					if($valueAComparer2 == 0)
+					if ($valueAComparer2 == 0) {
 						$valueAComparer2 = '';
-					if($valueAComparer1 == 0)
+					}
+					if ($valueAComparer1 == 0) {
 						$valueAComparer1 = '';
-					if($valueAComparer1 != $valueAComparer2){
+					}
+					if ($valueAComparer1 != $valueAComparer2) {
 						$maj = true;
 						break;
 					}
 				}
-				if($maj) {
+				if ($maj) {
 					$errors = BimpTools::merge_array($errors, $obj->updateFields($data, $force_create, $warnings));
 				}
 				return $obj;
@@ -11902,6 +11908,60 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		return $text;
 	}
 
+	public function replaceFieldsValues($text, $no_html = false, &$errors = array())
+	{
+		if (is_string($text)) {
+			if (preg_match_all('/__(.+)__/U', $text, $matches, PREG_SET_ORDER)) {
+
+//				return '<pre>' . print_r($matches, 1) . '</pre>';
+				foreach ($matches as $match) {
+					$data = explode(':', $match[1]);
+					$field = array_pop($data);
+
+					if (!(string) $field) {
+						$errors[] = 'Référence de champ "' . $match[1] . '" invalide (nom du champ absent)';
+						continue;
+					}
+
+					$obj = $this;
+
+					while (!empty($data)) {
+						if (!is_a($obj, 'BimpObject') || !BimpObject::objectLoaded($obj)) {
+							break;
+						}
+
+						$child_name = array_shift($data);
+						$obj = $obj->getChildObject($child_name);
+					}
+
+					if (!is_a($obj, 'BimpObject') || !BimpObject::objectLoaded($obj)) {
+						$errors[] = 'Référence de champ "' . $match[1] . '" invalide (objet lié absent)';
+						continue;
+					}
+
+					if (!$obj->field_exists($field)) {
+						$errors[] = 'Référence de champ "' . $match[1] . '" invalide (le champ "' . $field . '" n\'existe pas pour les ' . $obj->getLabel('name_plur') . ')';
+						continue;
+					}
+
+					$field_value = $obj->displayDataDefault($field, $no_html, true);
+
+					$text = str_replace('__' . $match[1] . '__', $field_value, $text);
+				}
+			}
+		}
+
+		if (count($errors)) {
+			$msg = '********************' . "\n";
+			$msg .= BimpTools::getMsgFromArray($errors, 'Erreurs de remplacement des références de champ', true);
+			$msg .= "\n" . '********************' . "\n\n";
+
+			$text = $msg . $text;
+		}
+
+		return $text;
+	}
+
 	// Divers:
 
 	public static function testMail($mail)
@@ -12053,7 +12113,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 					die('<script ' . BimpTools::getScriptAttribut() . '>window.location = \'' . $url . "';</script>");
 				}
 			} elseif ($btn && $url != "") {
-				return "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='" . $texteBtn . "'/><input type='hidden' name='redirectForce' value='1'/><input id='token' type='hidden' name='token' value='".newToken()."'></form>";
+				return "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='" . $texteBtn . "'/><input type='hidden' name='redirectForce' value='1'/><input id='token' type='hidden' name='token' value='" . newToken() . "'></form>";
 			}
 		}
 		return '';
@@ -12146,11 +12206,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				}
 			}
 
-            $id_entrepot = (int) $this->getData('id_entrepot');
-            if (!$id_entrepot) {
-                $id_entrepot = BimpTools::getValue('id_entrepot', 0, 'int');
-            }
-            if ($id_entrepot) {
+			$id_entrepot = (int) $this->getData('id_entrepot');
+			if (!$id_entrepot) {
+				$id_entrepot = BimpTools::getValue('id_entrepot', 0, 'int');
+			}
+			if ($id_entrepot) {
 //                global $tabCentre;
 //                foreach ($tabCentre as $code_centre => $centre) {
 //                    if ((int) $centre[8] === $id_entrepot) {
@@ -12158,13 +12218,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 //                    }
 //                }
 				$lescentres = BimpCache::getCentresData();
-				foreach ($lescentres as $centre)	{
-					if((int) $centre['id_entrepot'] === $id_entrepot)	{
+				foreach ($lescentres as $centre) {
+					if ((int) $centre['id_entrepot'] === $id_entrepot) {
 						return $centre['code'];
 					}
 				}
-            }
-        }
+			}
+		}
 //        global $tabCentre;
 //        if (count($tabCentre) == 1) {
 //            foreach ($tabCentre as $code_centre => $centre) {

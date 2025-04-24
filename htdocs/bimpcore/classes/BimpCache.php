@@ -643,6 +643,29 @@ class BimpCache
 		return $result;
 	}
 
+	public static function getObjectFieldsArray(BimpObject $object, $include_empty = false) {
+		if (!is_null($object) && is_a($object, 'BimpObject')) {
+			$cache_key = $object->module . '_' . $object->object_name . '_fields_array';
+			if (!isset(self::$cache[$cache_key])) {
+				self::$cache[$cache_key] = array();
+
+				if (isset($object->params['fields'])) {
+					foreach ($object->params['fields'] as $field_name) {
+						if ($object->isFieldActivated($field_name)) {
+							if ($object->getConf('fields/' . $field_name . '/viewable', 1, false, 'bool')) {
+								self::$cache[$cache_key][$field_name] = $object->getConf('fields/' . $field_name . '/label', $field_name, true);
+							}
+						}
+					}
+				}
+			}
+
+			return self::getCacheArray($cache_key, $include_empty, '', '');
+		}
+
+		return ($include_empty ? array('' => '') : array());
+	}
+
 	public static function getExtraFieldsArray($element)
 	{
 		$entitys = getEntity($element, 0);
@@ -913,7 +936,7 @@ class BimpCache
 			return self::getCacheArray($cache_key, $include_empty, '', '');
 		}
 
-		return array();
+		return ($include_empty ? array('' => '') : array());
 	}
 
 	public static function getObjectStatsListColsArray(BimpObject $object, $list_name)

@@ -17,13 +17,13 @@ objects:
         instance:
             bimp_object: Bimp_Concurrence
     chiffre_affaire:
-        relation: hasOne
+        relation: hasMany
         delete: 1
         instance:
             bimp_object: Bimp_ChiffreAffaire
         list:
             filters:
-                type_obj: 0
+                type_obj: Bimp_Societe
                 id_obj:
                     callback:
                         method: getData

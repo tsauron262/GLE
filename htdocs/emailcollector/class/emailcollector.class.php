@@ -3478,8 +3478,10 @@ class EmailCollector extends CommonObject
 							if (!is_object($hookmanager)) {
 								include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
 								$hookmanager = new HookManager($this->db);
-								$hookmanager->initHooks(['emailcolector']);
+								/*mod drsi v20.0*/
 							}
+							$hookmanager->initHooks(['emailcolector']);
+							/*f mod drsi*/
 
 							$parameters = array(
 								'connection' =>  $connection,

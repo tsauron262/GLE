@@ -75,19 +75,25 @@ class BC_Field extends BimpComponent
 			'currency' => array('default' => 'EUR')
 		),
 		'string'         => array(
-			'hashtags'        => array('data_type' => 'bool', 'default' => 0),
-			'size'            => array('data_type' => 'int', 'default' => 128),
-			'forbidden_chars' => array('default' => ''),
-			'regexp'          => array('default' => ''),
-			'invalid_msg'     => array('default' => ''),
-			'uppercase'       => array('data_type' => 'bool', 'default' => 0),
-			'lowercase'       => array('data_type' => 'bool', 'default' => 0),
+			'hashtags'          => array('data_type' => 'bool', 'default' => 0),
+			'size'              => array('data_type' => 'int', 'default' => 128),
+			'forbidden_chars'   => array('default' => ''),
+			'regexp'            => array('default' => ''),
+			'invalid_msg'       => array('default' => ''),
+			'uppercase'         => array('data_type' => 'bool', 'default' => 0),
+			'lowercase'         => array('data_type' => 'bool', 'default' => 0),
+			'field_path'        => array('data_type' => 'bool', 'default' => 0),
+			'field_path_object' => array('default' => '')
 		),
 		'text'           => array(
-			'hashtags' => array('data_type' => 'bool', 'default' => 0)
+			'hashtags'   => array('data_type' => 'bool', 'default' => 0),
+			'field_path' => array('data_type' => 'bool', 'default' => 0),
+			'field_path_object' => array('default' => '')
 		),
 		'html'           => array(
-			'hashtags' => array('data_type' => 'bool', 'default' => 0)
+			'hashtags'   => array('data_type' => 'bool', 'default' => 0),
+			'field_path' => array('data_type' => 'bool', 'default' => 0),
+			'field_path_object' => array('default' => '')
 		),
 		'object_filters' => array(
 			'obj_module' => array('default' => ''),
@@ -183,6 +189,11 @@ class BC_Field extends BimpComponent
 			if (is_string($dictionnary)) {
 				$this->params['dictionnary'] = $dictionnary;
 			}
+		}
+
+		if ((int) $this->params['field_path']) {
+			$this->params['field_path_module'] = $this->object->getConf('fields/' . $this->name . '/field_path_module', $this->object->module, false, 'string');
+			$this->params['field_path_object_name'] = $this->object->getConf('fields/' . $this->name . '/field_path_object_name', $this->object->object_name, false, 'string');
 		}
 
 		$current_bc = $prev_bc;

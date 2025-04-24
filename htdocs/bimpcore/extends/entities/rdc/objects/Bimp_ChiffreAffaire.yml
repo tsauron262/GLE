@@ -9,8 +9,7 @@ labels:
 
 parent_module: bimpcore
 parent_object:
-    callback:
-        method: getObjectParentName
+    field_value: type_obj
 parent_id_property: id_obj
 
 objects:

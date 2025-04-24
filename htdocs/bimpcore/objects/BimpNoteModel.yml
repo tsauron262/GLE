@@ -1,0 +1,99 @@
+table: bimpcore_note_model
+icon: far_file-alt
+
+common_fields: 0
+
+labels:
+    name: modèle de note
+    name_plur: modèles de note
+
+fields:
+    obj_module:
+        label: Module
+        required: 1
+        input:
+            type: hidden
+    
+    obj_name:
+        label: Objet
+        required: 1
+        input:
+            type: hidden
+    
+    name:
+        label: Nom
+        required: 1
+    
+    content:
+        label: Contenu
+        type: text
+        input: 
+            field_path: 1
+            field_path_module:
+                field_value: obj_module
+            field_path_object_name:
+                field_value: obj_name
+    
+    active:
+        label: Actif
+        type: bool
+        default_value: 1
+
+forms:
+    default:
+        rows:
+            -   field: obj_module
+                hidden: 1
+            -   field: obj_name
+                hidden: 1
+            -   field: name
+            -   field: content
+            -   field: active
+    
+    edit:
+        rows:
+            -   field: name
+            -   field: content
+            -   field: active
+
+filters_panels:
+    default:
+        filters:
+            obj_module:
+            obj_name:
+            active:
+
+lists_cols:
+    obj:
+        label: Objet
+        value:
+            callback: displayObj
+lists:
+    default:
+        title: Modèles de notes
+        icon: far_file-alt
+        checkboxes: 1
+        bulk_actions:
+            -   label: Supprimer les modèles sélectionnés
+                icon: fas_trash-alt
+                onclick: deleteSelectedObjects('list_id', $(this))
+        filters_panel: default
+        sort_field:
+        sort_way: desc
+        n: 10
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        cols:
+            obj:
+            name: 
+            content:
+            active:
+                edit: 1
+    
+    obj:
+        extends: default
+        filters_panel: unset
+        add_form_name: default
+        cols:
+            obj: unset

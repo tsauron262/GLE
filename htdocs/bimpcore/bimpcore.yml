@@ -235,6 +235,11 @@ params:
                       def: ''    
     
     # Debugs: 
+    bimpdebug_times_backtraces: 
+        label: Inclure les backtraces dans les timers
+        type: bool
+        def: 0
+        cat: debug
     js_debug_local_storage: 
         label: Activer le debug JS du stockage local
         type: bool

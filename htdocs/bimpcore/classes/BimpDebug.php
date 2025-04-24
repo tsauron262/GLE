@@ -4,7 +4,8 @@ class BimpDebug
 {
 
     public static $active = true;
-    protected static $user_checked = null;
+	public static $conf_params = null;
+	protected static $user_checked = null;
     public static $maxDebugPerType = 1000;
     public static $debugs = array();
     public static $time_begin = 0;
@@ -101,6 +102,20 @@ class BimpDebug
 
         return 1;
     }
+
+	public static function getConfParam($param) {
+		if (is_null(self::$conf_params)) {
+			self::$conf_params = array(
+				'times_backtraces' => BimpCore::getConf('bimpdebug_times_backtraces', 0),
+			);
+		}
+
+		if (isset(self::$conf_params[$param])) {
+			return self::$conf_params[$param];
+		}
+
+		return null;
+	}
 
     public static function addDebug($type, $title, $content, $params = array())
     {
@@ -337,13 +352,19 @@ class BimpDebug
     public static function addDebugTime($label)
     {
         $mem = memory_get_usage();
-        self::$times[] = array(
+		$data = array(
             'l' => $label,
             't' => round(microtime(1), 4),
             'm' => $mem,
             'd' => $mem - self::$curMem
         );
-        self::$curMem = $mem;
+
+		if ((int) self::getConfParam('times_backtraces')) {
+			$data['bt'] = debug_backtrace(null, 10);
+		}
+
+		self::$times[] = $data;
+		self::$curMem = $mem;
     }
 
     public static function renderDebugTimes()
@@ -401,6 +422,16 @@ class BimpDebug
                 }
                 $html .= ')</td>';
                 $html .= '</tr>';
+
+				if (isset($time['bt'])) {
+					$html .= '<tr>';
+					$html .= '<td colspan="3">';
+					$html .= BimpRender::renderFoldableContainer('Backtrace', BimpRender::renderBacktrace(BimpTools::getBacktraceArray($time['bt'])), array(
+						'open' => false
+					));
+					$html .= '</td>';
+					$html .= '</tr>';
+				}
 
                 $prev_time = $time['t'];
                 $prev_mem = $time['m'];

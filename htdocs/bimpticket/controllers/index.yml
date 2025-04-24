@@ -1,4 +1,3 @@
-
 title: Tickets
 bootstrap: 1
 
@@ -9,13 +8,22 @@ objects:
             bimp_object: Bimp_Ticket
 
 sections:
-    - type: tabs
-      tabs:
-          default:
-              label: Tous les tickets
-              sections:
-                  - type: list
-                    list:
-                        panel: 1
-                        object: ticket
-                        name: default
+    -   type: tabs
+        tabs:
+            default:
+                label: Tous les tickets
+                sections:
+                    -   type: list
+                        list:
+                            panel: 1
+                            object: ticket
+                            name: default
+                            
+            stats:
+                label: Statistiques
+                sections:
+                    -   type: stats_list
+                        stats_list:
+                            panel: 1
+                            object: ticket
+                            name: default

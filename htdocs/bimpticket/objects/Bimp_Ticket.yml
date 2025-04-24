@@ -393,3 +393,25 @@ lists:
         extends: default
         cols:
             fk_soc: unset
+
+stats_lists_cols:
+    nb_tickets:
+        label: Nb tickets
+        type: count
+        data_type: int
+        
+    avg_resolution:
+        label: Délai de résolution (en jours / moyenne)
+        type: avg
+        field: resolution
+
+stats_lists:
+    default:
+        filters_panel: default
+        group_by_options:
+            - fk_statut
+            - type_code
+            - fk_soc
+            - fk_user_assign
+        cols:
+            nb_tickets:

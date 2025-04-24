@@ -14,20 +14,20 @@ class EtiquetteSac1 extends BimpEtiquettePDF {
         $this->prefName = "Etiquette_Sac_";
     }
 
-    public function writeContent($content = '') {
+    public function writeContent($content = '', $params = array(), $debug = false) {
         $debug = false;
 //        $html = "";
-        
+
         $ids = array();
         if(isset($this->object) && is_array($this->object))
             $ids = $this->object;
-        
+
         $objects = array();
         foreach($ids as $id){
             $objTmp = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Sac', $id);
             $objects[] = $objTmp;
         }
-        
+
         $i = 0;
         foreach($objects as $object){
             $i++;
@@ -67,7 +67,7 @@ class EtiquetteSac1 extends BimpEtiquettePDF {
             $longeur = (strlen($codeBar) < $maxLn)? strlen($codeBar) : $maxLn;
             $this->pdf->write1DBarcode($codeBar, 'C128', 22-($longeur), 13, 7+($longeur*2), 5, '', array('text'=> true));
 
-            
+
             require_once(DOL_DOCUMENT_ROOT . "/synopsisphpqrcode/qrlib.php");
             $dir = DOL_DATA_ROOT . "/bimpcore/sav/tmp/";
             if (!is_dir($dir))
@@ -77,8 +77,8 @@ class EtiquetteSac1 extends BimpEtiquettePDF {
                 , $file
                 , "L", 4, 2);
             $this->pdf->Image($file, 45, 9, 0, 24);
-            
-            
+
+
 
 
 //            $this->pdf->setXY(32,29);

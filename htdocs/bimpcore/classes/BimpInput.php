@@ -125,6 +125,15 @@ class BimpInput
 						$onclick .= 'BIS.openModal($input);';
 						$html .= BimpRender::renderRowButton('Scanner code-barres / Qr-Code', 'fas_camera', $onclick);
 					}
+
+					if (BimpCore::isContextPrivate() && isset($options['field_path']) && (int) $options['field_path']) {
+						$field_path_module = (isset($options['field_path_module']) ? $options['field_path_module'] : '');
+						$field_path_object_name = (isset($options['field_path_object_name']) ? $options['field_path_object_name'] : '');
+
+						if ($field_path_module && $field_path_object_name) {
+							$html .= self::renderAddObjectFieldReferenceForm($field_path_module, $field_path_object_name, $field_name);
+						}
+					}
 				}
 
 				if (isset($options['min_label']) && $options['min_label']) {
@@ -307,6 +316,21 @@ class BimpInput
 						$html .= 'Vous pouvez utiliser le symbole # pour inclure un lien objet';
 						$html .= '</p>';
 					}
+
+					if (isset($options['field_path']) && (int) $options['field_path']) {
+						$field_path_module = (isset($options['field_path_module']) ? $options['field_path_module'] : '');
+						$field_path_object_name = (isset($options['field_path_object_name']) ? $options['field_path_object_name'] : '');
+
+						if ($field_path_module && $field_path_object_name) {
+							$html .= self::renderAddObjectFieldReferenceForm($field_path_module, $field_path_object_name, $field_name);
+						} else {
+							$html .= '<span class="danger">Objet invalide</span>';
+						}
+					} else {
+						$html .= 'Options<pre>';
+						$html .= print_r($options, true);
+						$html .= '</pre>';
+					}
 				}
 
 				$html .= '<textarea id="' . $input_id . '" rows="' . $options['rows'] . '" name="' . $field_name . '"';
@@ -365,6 +389,15 @@ class BimpInput
 					$html .= '<p class="inputHelp" style="display: inline-block">';
 					$html .= 'Vous pouvez utiliser le symbole # pour inclure un lien objet';
 					$html .= '</p>';
+				}
+
+				if (BimpCore::isContextPrivate() && isset($options['field_path']) && (int) $options['field_path']) {
+					$field_path_module = (isset($options['field_path_module']) ? $options['field_path_module'] : '');
+					$field_path_object_name = (isset($options['field_path_object_name']) ? $options['field_path_object_name'] : '');
+
+					if ($field_path_module && $field_path_object_name) {
+						$html .= self::renderAddObjectFieldReferenceForm($field_path_module, $field_path_object_name, $field_name);
+					}
 				}
 
 				$html .= $doleditor->Create(1);
@@ -699,11 +732,11 @@ class BimpInput
 			case 'search_projet':
 				$socid = -1;
 
-				if (is_null($formproject)) {
-					require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
-					global $db;
-					$formproject = new FormProjets($db);
-				}
+//				if (is_null($formproject)) {
+				require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
+				global $db;
+				$formproject = new FormProjets($db);
+//				}
 				$html .= $formproject->select_projects(0, $value, $field_name, 30, 0, 1, 0, 0, 0, 0, '', 1);
 //                $html .= $form->selectProjects($value, $field_name, '', 0, 1, '', 0, array(), $socid, '1', 0, '', null, 1);
 				break;
@@ -1071,6 +1104,86 @@ class BimpInput
 
 				$html .= '<input type="hidden" name="' . $field_name . '" value=""/>';
 				$html .= '</div>';
+				break;
+
+			case 'object_field':
+				$content_only = (isset($options['content_only']) ? (int) $options['content_only'] : 0);
+				$obj_module = (isset($options['module']) ? $options['module'] : '');
+				$obj_name = (isset($options['object_name']) ? $options['object_name'] : '');
+				$children = explode(':', $value);
+				$val = array_pop($children);
+
+				if (!$content_only) {
+					$html .= '<div class="object_field_select_container" data-module="' . $obj_module . '" data-object_name="' . $obj_name . '">';
+				}
+
+				if (!$obj_module || !$obj_name) {
+					$html .= '<span class="danger">Type d\'objet absent</span>';
+				} else {
+					$obj = BimpObject::getInstance($obj_module, $obj_name);
+					$parent_path = '';
+
+					$html .= '<div style="display: flex; align-items: center; padding: 3px 0">';
+					$html .= '<b>Objet&nbsp;:&nbsp;&nbsp;</b>' . BimpTools::ucfirst($obj->getLabel());
+
+					$fl = true;
+					while (1) {
+						if (!is_a($obj, 'BimpObject')) {
+							break;
+						}
+
+						$child_name = array_shift($children);
+						$linked_objects_array = array($parent_path => '');
+						foreach (BimpCache::getObjectLinkedObjectsArray($obj, false) as $name => $label) {
+							$linked_objects_array[$parent_path . $name . ':'] = $label;
+						}
+
+						if (!$fl) {
+							$html .= '</div><div style="display: flex; align-items: center; padding: 3px 0">';
+						} else {
+							$fl = false;
+						}
+
+						$html .= '&nbsp;&nbsp;>&nbsp;&nbsp';
+						$html .= self::renderInput('select', $obj->object_name . '_child_select', $parent_path . ($child_name ? $child_name . ':' : ''), array(
+							'extra_class' => 'object_child_select',
+							'options'     => $linked_objects_array
+						));
+
+						if ($child_name) {
+							$obj = $obj->getChildObject($child_name);
+							$parent_path .= $child_name . ':';
+						} else {
+							break;
+						}
+					}
+
+					$html .= '</div>';
+					$html .= '<div style="display: flex; align-items: center; padding: 3px 0">';
+					$html .= '<b>Champ : </b>';
+
+					if (is_a($obj, 'BimpObject')) {
+						$fields = array($parent_path => '');
+
+						foreach (BimpCache::getObjectFieldsArray($obj, false) as $name => $label) {
+							$fields[$parent_path . $name] = $label;
+						}
+
+						$html .= self::renderInput('select', $field_name, $parent_path . $val, array(
+							'extra_class' => 'object_field_input',
+							'options'     => $fields
+						));
+					} else {
+						$html .= '<span class="danger">Objet invalide</span>';
+						$html .= '<input type="hidden" name="' . $field_name . '" value="' . $parent_path . $val . '" class="object_field_input"/>';
+					}
+
+					$html .= '</div>';
+				}
+
+				if (!$content_only) {
+					$html .= '</div>';
+				}
 				break;
 
 			default:
@@ -1646,7 +1759,7 @@ class BimpInput
 			}
 		}
 
-		$html .= '<div class="inputMultipleValuesContainer" data-field_name="' . $field_name . '" data-sortable="' . (int) $sortable . '"';
+		$html = '<div class="inputMultipleValuesContainer" data-field_name="' . $field_name . '" data-sortable="' . (int) $sortable . '"';
 		if ($autosave) {
 			$html .= ' data-module="' . $object->module . '"';
 			$html .= ' data-object_name="' . $object->object_name . '"';
@@ -2022,7 +2135,7 @@ class BimpInput
 
 	public static function renderFiltersInputAddFilterInput($module = '', $object_name = '', $has_depends_on = false)
 	{
-		$html .= '';
+		$html = '';
 
 		$html .= '<div class="filters_input_add_filter_form"' . ((!$module || !$object_name) ? ' style="display: none"' : '') . '>';
 		if ($module && $object_name) {
@@ -2078,6 +2191,29 @@ class BimpInput
 		return BimpRender::renderPanel(BimpRender::renderIcon('fas_filter') . 'Filtres ajoutés', $html, '', array(
 			'foldable' => 1,
 			'type'     => 'secondary'
+		));
+	}
+
+	public static function renderAddObjectFieldReferenceForm($module, $object_name, $input_name)
+	{
+		$html = '';
+
+		$html .= '<div class="add_object_field_reference_form" style="margin-bottom: 10px; padding: 8px; border: 1px solid #595959">';
+
+		$html .= self::renderInput('object_field', $input_name . '_add_object_field', '', array(
+			'module'      => $module,
+			'object_name' => $object_name
+		));
+
+		$html .= '<div style="text-align: right">';
+		$html .= '<span class="btn btn-small btn-primary" onclick="addInputObjectFieldReference($(this))">';
+		$html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
+		$html .= '</span>';
+		$html .= '</div>';
+		$html .= '</div>';
+
+		return BimpRender::renderFoldableContainer('Ajouter une référence de champ', $html, array(
+			'open' => false
 		));
 	}
 }

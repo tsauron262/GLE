@@ -1,70 +1,70 @@
 bootstrap: 1
 title: BimpCore Admin
 
-objects:            
-    entrepots: 
-        instance: 
+objects:
+    entrepots:
+        instance:
             bimp_object: Bimp_Entrepot
-            
-    hashtags: 
-        instance: 
+    
+    hashtags:
+        instance:
             bimp_object: BimpHashtag
-            
-    signature: 
-        instance: 
+    
+    signature:
+        instance:
             bimp_object: BimpSignature
-
-    correctifs: 
-        instance: 
+    
+    correctifs:
+        instance:
             bimp_object: BimpCorrectif
-            
+    
     droitUser:
-        instance: 
+        instance:
             bimp_object: Bimp_User_Rights
-            
+    
     droitGroupUser:
-        instance: 
+        instance:
             bimp_object: Bimp_UserGroup_Rights
-            
-    lists_configs: 
-        instance: 
-            bimp_object: 
+    
+    lists_configs:
+        instance:
+            bimp_object:
                 module: bimpuserconfig
                 name: ListTableConfig
-                
-    lists_filters: 
-        instance: 
-            bimp_object: 
+    
+    lists_filters:
+        instance:
+            bimp_object:
                 module: bimpuserconfig
                 name: ListFilters
-    files: 
-        instance: 
-            bimp_object: 
+    files:
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: BimpFile
-    remote_token: 
-        instance: 
-            bimp_object: 
+    remote_token:
+        instance:
+            bimp_object:
                 module: bimpsupport
                 name: BS_Remote_Token
-    alert: 
-        instance: 
-            bimp_object: 
+    alert:
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: BimpAlert
-    mail_log: 
-        instance: 
-            bimp_object: 
+    mail_log:
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: BimpMailLog
-    session: 
-        instance: 
-            bimp_object: 
+    session:
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: BimpSession
-    secuIp: 
-        instance: 
-            bimp_object: 
+    secuIp:
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: BimpSecuIp
     cgv:
@@ -72,166 +72,180 @@ objects:
             bimp_object:
                 module: bimpcore
                 name: BimpCGV
-    dictionnaries: 
-        instance: 
-            bimp_object: 
+    dictionnaries:
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: BimpDictionnary
     
-                
-sections:
-    - type: tabs
-      tabs: 
-        default: 
-            label: Entrepôts
-            sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: entrepots
-                      name: default
-        hashtags: 
-            label: Hashtags
-            sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: hashtags
-                      name: default
-                      
-        signatures: 
-            label: Signatures
-            sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: signature
-                      name: default
-                      
-        correctifs: 
-            label: Correctifs
-            sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: correctifs
-                      name: default
-#        stats: 
-#            label: Test stats
-#            sections: 
-#                - type: stats_list
-#                  stats_list: 
-#                      panel: 1
-#                      object: vente
-#                      name: default
-                      
-        files: 
-            label: Tous les Fichiers
-            sections: 
-                - type: list
-                  list: 
-                      object: files
-                      name: globale
-                            
-        lists_configs: 
-            label: Configuration des listes
-            sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: lists_configs
-                      name: globale
-                        
-        lists_filters: 
-            label: Filtres listes
-            sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: lists_filters
-                      name: globale
-                      
-        remote_token:
-            label: Remote token
-            sections:
-                - type: list
-                  list: 
-                      panel: 1
-                      object: remote_token
-                      
-        testSpeed:
-            label: Test SPEED
-            sections:
-                - type: custom
-                  custom: 
-                      callback: 
-                          method: renderTabs
-                          params: 
-                            - renderTestTab
-                            - testSpeed
-        
-        alert:
-            label: Alert
-            sections:
-                - type: list
-                  list: 
-                      panel: 1
-                      object: alert
-                      
-        mail_log:
-            label: Log Mail
-            sections:
-                - type: list
-                  list: 
-                      panel: 1
-                      object: mail_log
-        session:
-            label: Session
-            sections:
-                - type: list
-                  list: 
-                      panel: 1
-                      object: session
-        secuIp:
-            label: Echec IP
-            sections:
-                - type: list
-                  list: 
-                      panel: 1
-                      object: secuIp
-                      
-#        test: 
-#            label: Tests views list
-#            sections: 
-#                - type: views_list
-#                  views_list: 
-#                      object: users
-        droit:
-            label: Droits
-            sections:
-                - type: custom
-                  custom: 
-                      callback: 
-                          method: renderTabs
-                          params: 
-                            - renderRightsTab
-                            - droit
-           
-                            
-        cgv:
-            label: CGV
-            sections:
-                - type: list
-                  list:
-                      panel: 1
-                      object: cgv
-                      name: default
+    note_model:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpNoteModel
 
-        dictionnaries:
-            label: Dictionnaires
-            sections:
-                - type: list
-                  list:
-                      panel: 1
-                      object: dictionnaries
-                      name: default
+sections:
+    -   type: tabs
+        tabs:
+            default:
+                label: Entrepôts
+                sections:
+                    -   type: list
+                        list:
+                            panel: 1
+                            object: entrepots
+                            name: default
+            hashtags:
+                label: Hashtags
+                sections:
+                    -   type: list
+                        list:
+                            panel: 1
+                            object: hashtags
+                            name: default
+            
+            signatures:
+                label: Signatures
+                sections:
+                    -   type: list
+                        list:
+                            panel: 1
+                            object: signature
+                            name: default
+            
+            correctifs:
+                label: Correctifs
+                sections:
+                    -   type: list
+                        list:
+                            panel: 1
+                            object: correctifs
+                            name: default
+                            #        stats: 
+                            #            label: Test stats
+                            #            sections: 
+                            #                - type: stats_list
+                            #                  stats_list: 
+                            #                      panel: 1
+                            #                      object: vente
+                            #                      name: default
+            
+            files:
+                label: Tous les Fichiers
+                sections:
+                    -   type: list
+                        list:
+                            object: files
+                            name: globale
+            
+            lists_configs:
+                label: Configuration des listes
+                sections:
+                    -   type: list
+                        list:
+                            panel: 1
+                            object: lists_configs
+                            name: globale
+            
+            lists_filters:
+                label: Filtres listes
+                sections:
+                    -   type: list
+                        list:
+                            panel: 1
+                            object: lists_filters
+                            name: globale
+            
+            remote_token:
+                label: Remote token
+                sections:
+                    -   type: list
+                        list:
+                            panel: 1
+                            object: remote_token
+            
+            testSpeed:
+                label: Test SPEED
+                sections:
+                    -   type: custom
+                        custom:
+                            callback:
+                                method: renderTabs
+                                params:
+                                    - renderTestTab
+                                    - testSpeed
+            
+            alert:
+                label: Alert
+                sections:
+                    -   type: list
+                        list:
+                            panel: 1
+                            object: alert
+            
+            mail_log:
+                label: Log Mail
+                sections:
+                    -   type: list
+                        list:
+                            panel: 1
+                            object: mail_log
+            session:
+                label: Session
+                sections:
+                    -   type: list
+                        list:
+                            panel: 1
+                            object: session
+            secuIp:
+                label: Echec IP
+                sections:
+                    -   type: list
+                        list:
+                            panel: 1
+                            object: secuIp
+            
+            #        test: 
+            #            label: Tests views list
+            #            sections: 
+            #                - type: views_list
+            #                  views_list: 
+            #                      object: users
+            droit:
+                label: Droits
+                sections:
+                    -   type: custom
+                        custom:
+                            callback:
+                                method: renderTabs
+                                params:
+                                    - renderRightsTab
+                                    - droit
+            
+            
+            cgv:
+                label: CGV
+                sections:
+                    -   type: list
+                        list:
+                            panel: 1
+                            object: cgv
+                            name: default
+            
+            dictionnaries:
+                label: Dictionnaires
+                sections:
+                    -   type: list
+                        list:
+                            panel: 1
+                            object: dictionnaries
+                            name: default
+            
+            note_models:
+                label: Modèles de notes
+                sections:
+                    -   type: list
+                        list:
+                            panel: 1
+                            object: note_model
+                            name: default

@@ -423,6 +423,37 @@ class BimpNote extends BimpObject
 		);
 	}
 
+	public function getListHeaderButtons()
+	{
+		$buttons = array();
+
+		if ((int) BimpCore::getConf('use_notes_models')) {
+			$parent = $this->getParentInstance();
+
+			if (is_a($parent, 'BimpObject')) {
+				$model = BimpObject::getInstance('bimpcore', 'BimpNoteModel');
+				$model->set('obj_module', $parent->module);
+				$model->set('obj_name', $parent->object_name);
+
+				if ($model->can('view')) {
+					$buttons[] = array(
+						'label'   => 'Modèles',
+						'icon'    => 'far_file-alt',
+						'onclick' => $model->getJsLoadModalList('obj', array(
+							'title'         => 'Modèles de notes des ' . $parent->getLabel('name_plur'),
+							'extra_filters' => array(
+								'obj_module' => $parent->module,
+								'obj_name'   => $parent->object_name
+							)
+						))
+					);
+				}
+			}
+		}
+
+		return $buttons;
+	}
+
 	public function getListExtraBtn()
 	{
 		return $this->getActionsButtons();
@@ -467,6 +498,37 @@ class BimpNote extends BimpObject
 				'form_name' => 'rep'
 			)
 		);
+	}
+
+	public function getContentDefaultValue()
+	{
+		$id_model = (int) BimpTools::getPostFieldValue('note_modele', 0, 'int');
+
+		if ($id_model) {
+			$model = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNoteModel', $id_model);
+			if (BimpObject::objectLoaded($model)) {
+				$content = $model->getData('content');
+
+				$module = $this->getData('obj_module');
+				$obj_name = $this->getData('obj_name');
+				$id_obj = (int) $this->getData('id_obj');
+
+				if ($module && $obj_name && $id_obj) {
+					$obj = BimpCache::getBimpObjectInstance($module, $obj_name, $id_obj);
+					if (BimpObject::objectLoaded($obj)) {
+						$content = $obj->replaceFieldsValues($content, true);
+					}
+				}
+
+				return $content;
+			}
+		}
+
+		if (isset($this->data['content'])) { // pas de getData sinon boucle infinie.
+			return $this->data['content'];
+		}
+
+		return '';
 	}
 
 	// Affichage:
@@ -541,6 +603,68 @@ class BimpNote extends BimpObject
 		if ($checkview && !(int) $this->getData('viewed') && $this->isUserDest()) {
 			$this->updateField('viewed', 1);
 		}
+		return $html;
+	}
+
+	// Rendus HTML :
+
+	public function renderModelInput()
+	{
+		$html = '';
+
+		$modeles = array(
+			0 => ''
+		);
+
+		$module = $this->getData('obj_module');
+		$obj_name = $this->getData('obj_name');
+
+		if ($module && $obj_name) {
+			$filters = array(
+				'obj_module' => $module,
+				'obj_name'   => $obj_name
+			);
+
+			if ($active_only) {
+				$filters['active'] = 1;
+			}
+
+			foreach (BimpCache::getBimpObjectObjects('bimpcore', 'BimpNoteModel', $filters) as $modele) {
+				$modeles[$modele->id] = $modele->getData('name');
+			}
+		}
+
+		$html .= BimpInput::renderInput('select', 'note_modele', 0, array(
+			'options' => $modeles
+		));
+
+		$model = BimpObject::getInstance('bimpcore', 'BimpNoteModel');
+		$model = BimpObject::getInstance('bimpcore', 'BimpNoteModel');
+		$model->set('obj_module', $module);
+		$model->set('obj_name', $obj_name);
+
+		if ($model->can('view')) {
+			$html .= '<div class="buttonsContainer" style="text-align: right; margin-top: 10px">';
+
+			$obj = BimpObject::getInstance($module, $obj_name);
+			$onclick = $model->getJsLoadModalList('obj', array(
+				'title'         => 'Modèles de notes des ' . $obj->getLabel('name_plur'),
+				'extra_filters' => array(
+					'obj_module' => $module,
+					'obj_name'   => $obj_name
+				)
+			));
+			$html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+			$html .= BimpRender::renderIcon('far_file-alt', 'iconLeft') . 'Gérer les modèles';
+			$html .= '</span>';
+
+			$onclick = 'reloadObjectInput($(this).findParentByClass(\'object_form\').attr(\'id\'), \'note_modele\', {obj_module: \'' . $module . '\', obj_name: \'' . $obj_name . '\'});';
+			$html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+			$html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+			$html .= '</span>';
+			$html .= '</div>';
+		}
+
 		return $html;
 	}
 
@@ -727,6 +851,16 @@ class BimpNote extends BimpObject
 		$errors = parent::validate();
 
 		if (!count($errors)) {
+			$parent = $this->getParentInstance();
+
+			if (BimpObject::objectLoaded($parent)) {
+				$content = $this->getData('content');
+				$content = $parent->replaceFieldsValues($content, true, $errors);
+				$this->set('content', $content);
+			} else {
+				$errors[] = 'Objet parent absent ou invalide';
+			}
+
 			switch ((int) $this->getData('type_author')) {
 				case self::BN_AUTHOR_USER:
 					break;
@@ -799,9 +933,7 @@ class BimpNote extends BimpObject
 		return array();
 	}
 
-	public function getParentMsgId() {
-
-	}
+	public function getParentMsgId() {}
 
 	public function create(&$warnings = array(), $force_create = false)
 	{
@@ -830,6 +962,7 @@ class BimpNote extends BimpObject
 			if ($this->getData('type_dest') == self::BN_DEST_SOC || $this->getData('type_dest') == self::BN_DEST_CONTACT) {
 				$sep = "<br/>---------------------<br/>";
 //                $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . BimpCore::getConf('marqueur_mail_note') . $this->id . '<br/>' . $sep . '<br/><br/>';
+				$html = '';
 
 				if ($this->getData('id_parent_note') > 0) {
 					$html .= 'Réponse à votre message : <br/>';

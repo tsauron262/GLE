@@ -81,9 +81,9 @@ class HookManager
 	public $resNbOfHooks = 0;
 
         /*moddrsi (20.2)*/
-        // Correctif pour gros bug Dolibarr : $ResPrint peut être écrasé si 2 executehook() emboîté l'un dans l'autre (vu que $hookmanager est une instance unique globale) 
+        // Correctif pour gros bug Dolibarr : $ResPrint peut être écrasé si 2 executehook() emboîté l'un dans l'autre (vu que $hookmanager est une instance unique globale)
 //        public $resPrintsArray = array(); => Obsolète : le bug semble réglé
-        /*fmoddrsi*/ 
+        /*fmoddrsi*/
 	/**
 	 * Constructor
 	 *
@@ -275,7 +275,7 @@ class HookManager
 		}
 
 		// Init return properties
-                
+
 		$localResPrint = '';
 		$localResArray = array();
 

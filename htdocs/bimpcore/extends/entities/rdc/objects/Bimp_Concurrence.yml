@@ -12,13 +12,6 @@ parent_object: Bimp_Societe
 parent_id_property: fk_soc
 
 objects:
-    concurrent:
-        relation: hasMany
-        delete: 1
-        instance:
-            bimp_object:
-                module: bimpcore
-                name: Bimp_Concurrence
     chiffre_affaire:
         relation: hasOne
         delete: 1
@@ -26,7 +19,7 @@ objects:
             bimp_object: Bimp_ChiffreAffaire
         list:
             filters:
-                type_obj: 1
+                type_obj: Bimp_Concurrence
                 id_obj:
                     callback:
                         method: getData

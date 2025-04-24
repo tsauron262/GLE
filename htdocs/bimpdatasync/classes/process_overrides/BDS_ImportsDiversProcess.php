@@ -380,7 +380,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			'message'          => 'Description',        // colonne Z
 			'date_close'       => 'ClosedDate',        // colonne AB
 			'datec'            => 'CreatedDate',        // colonne AM
-			'date_update'      => 'LastModifiedDate',// colone AO
+			'date_update'      => 'LastModifiedDate',// colone AO,
 			'IdContact' 	   => 'ContactId',	// colonne E (ne pas mettre contact_id en key pour eviter les effets de bord par rapport à la class de base)
 		);
 		$keys = array(
@@ -433,7 +433,13 @@ class BDS_ImportsDiversProcess extends BDSProcess
 					}
 				}
 				$data['type_code'] = null;
-				if ($data['fk_status'] == 'En cours SM') $data['fk_status'] = 3; else $data['fk_status'] = 8;
+				$data['datec'] = $this->convertDate($data['datec']);
+				$data['date_close'] = $this->convertDate($data['date_close']);
+				$data['date_update'] = $this->convertDate($data['date_update']);
+				if ($data['fk_status'] == 'En cours SM') $data['fk_status'] = 3; else {
+					$data['fk_status'] = 8;
+					$data['resolution'] = BimpTools::getDatesIntervalData($data['datec'], $data['date_close'])['full_days'];
+				}
 
 
 				// retrouver le fk_soc selon le AccountId
@@ -454,9 +460,12 @@ class BDS_ImportsDiversProcess extends BDSProcess
 						$this->Alert('Contact non trouvé : ' . strlen($ln['CaseNumber']), null, $ln['ContactId'] . ' ligne ' . ($id + 1));
 					}
 				} else $data['fk_contact'] = 0;
-				$data['datec'] = $this->convertDate($data['datec']);
-				$data['date_close'] = $this->convertDate($data['date_close']);
-				$data['date_update'] = $this->convertDate($data['date_update']);
+
+				// retrouver l'user selon le OwnerId
+				$owner = $this->db->getValue('user', 'rowid', 'import_key = \'' . $ln['OwnerId'] . '\'');
+				if ($owner) $data['fk_user_assign'] = $owner;
+
+
 //				echo '<pre>'; print_r($data); echo '</pre>'; die;
 				$obj = BimpCache::findBimpObjectInstance('bimpticket', 'Bimp_Ticket', $dataFiltres, true, true, false);
 				$action = is_null($obj) || !BimpObject::objectLoaded($obj) ? 'create' : 'update';

@@ -7713,6 +7713,10 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 				$sup = '';
 				if ($withLinked && $withLinked !== 'false' && !is_a($this, 'Bimp_Societe') && !is_a($this, 'Bimp_Product')) {
+					global $modeCSV;
+					$prev_modeCSV = $modeCSV;
+					$modeCSV = true; // Pour éviter certains process trop lourds.
+
 					$linkedObjects = $this->getFullLinkedObjetsArray(false);
 					if (count($linkedObjects) > 0) {
 						$filterLinked = array('linked' => array('or' => array()));
@@ -7739,6 +7743,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 						$list2->addFieldFilterValue('custom', $filterLinked['linked']);
 						$sup .= $list2->renderHtml();
 					}
+
+					$modeCSV = $prev_modeCSV;
 				}
 			}
 

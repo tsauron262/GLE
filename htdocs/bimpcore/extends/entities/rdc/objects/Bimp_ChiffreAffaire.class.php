@@ -3,16 +3,16 @@
 class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 {
 	public static $parentObjectArray = array(
-		0 => 'Bimp_Societe',
-		1 => 'Bimp_Concurrence',
+		'Bimp_Societe' => 'Bimp_Societe',
+		'Bimp_Concurrence' => 'Bimp_Concurrence',
 	);
 	public static $parentIdProperty = array(
 		0 => 'fk_soc',
 		1 => 'id',
 	);
 	public static $objLabelArray = array(
-		0 => 'CA société',
-		1 => 'CA concurrence',
+		'Bimp_Societe'    => 'CA société',
+		'Bimp_Concurrence' => 'CA concurrence',
 	);
 	public static $periodsRdcArray = array(
 		0 => 'Annee',
@@ -75,7 +75,7 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 
 	public function getObjectParentName()
 	{
-		$type = BimpTools::getPostFieldValue('type_obj', $this->getData('type_obj'), 'int');
+		$type = BimpTools::getPostFieldValue('type_obj', $this->getData('type_obj', 0), 'int');
 		return static::$parentObjectArray[$type];
 	}
 
@@ -152,7 +152,7 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 			$field = 'fk_category';
 		else
 			$field = 'fk_category'.$type;
-		$sql = $this->db->db->query('SELECT DISTINCT('.$field.') as fk_category FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$filters['id_obj'].' AND type_obj = '.$filters['type_obj']);
+		$sql = $this->db->db->query('SELECT DISTINCT('.$field.') as fk_category FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$filters['id_obj'].' AND type_obj = "'.$filters['type_obj'].'"');
 		while($ln = $this->db->db->fetch_object($sql)){
 			$result[$ln->fk_category] = $categories[$ln->fk_category]['label'];
 		}
@@ -170,7 +170,7 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 			$field = 'fk_category';
 		else
 			$field = 'fk_category'.$type;
-		$sql = $this->db->db->query('SELECT DISTINCT('.$field.') as categ FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$filters['id_obj'].' AND type_obj = '.$filters['type_obj']);
+		$sql = $this->db->db->query('SELECT DISTINCT('.$field.') as categ FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$filters['id_obj'].' AND type_obj = "'.$filters['type_obj'].'"');
 		while($ln = $this->db->db->fetch_object($sql)){
 			$idC = $ln->categ;
 			if ($idC > 0) {

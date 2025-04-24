@@ -17,13 +17,13 @@ objects:
         instance:
             bimp_object: Bimp_Concurrence
     chiffre_affaire:
-        relation: hasOne
+        relation: hasMany
         delete: 1
         instance:
             bimp_object: Bimp_ChiffreAffaire
         list:
             filters:
-                type_obj: 0
+                type_obj: Bimp_Societe
                 id_obj:
                     callback:
                         method: getData
@@ -111,8 +111,12 @@ fields:
         unsigned: 0
     fk_categorie_maitre:
         label: Catégorie Maitre
+        type: items_list
         values:
-            array: categorieMaitreRdc
+            dict: societe_rdc_cat_maitre
+        items_data_type: int
+        items_braces: 1
+
     presta_source:
         label: Prestataire/Agrégateur
         input:
@@ -175,9 +179,6 @@ fields_tables:
             - field: date_debut_prospect
             - field: date_ouverture
             - field: fk_priorite
-              edit:
-                  callback:
-                      method: isUserBDKAM
 #            - field: fk_statut_rdc
 #            - field: date_changement_statut_rdc
 #            - field: fk_statut_kyc
@@ -188,7 +189,7 @@ fields_tables:
             - label: Suspition de contrefaçon
               value:
                   callback: getContrefacon
-            - field: fk_group_rdc
+#            - field: fk_group_rdc
             - field: fk_user_attr_rdc
             - field: fk_categorie_maitre
             - field: potentiel_catalogue
@@ -348,28 +349,18 @@ forms:
                 field: url
             Shop ID:
                 field: shopid
-                edit:
-                    callback: isShopIdEditable
             Priorité:
                 field: fk_priorite
-                edit:
-                    callback: isUserBDKAM
             Prospection:
                 field: fk_statut_rdc
-                edit: 0
             Commentaire statut KO:
                 field: commentaire_statut_ko
                 required:
                     callback: isCommentaireStatutKoRequired
-            
-            Catégorie Maitre:
+            fk_categorie_maitre:
                 field: fk_categorie_maitre
-                edit:
-                    callback: isUserBDKAM
             Source:
                 field: fk_source_rdc
-                edit:
-                    callback: isUserBD
             Agrégateur:
                 field: presta_source
                 display_if:
@@ -381,18 +372,12 @@ forms:
                 field: contrefacon
             Groupe:
                 field: fk_group_rdc
-                edit:
-                    callback: isUserBDKAM
             Attribué à:
                 field: fk_user_attr_rdc
-                edit:
-                    callback: isUserBDKAM
             Commentaires:
                 field: commentaire_rdc
             Potenitel catalogue:
                 field: potentiel_catalogue
-                edit:
-                    callback: isUserBDKAM
                 
                 
     formActionRdc:

@@ -197,6 +197,284 @@ if (!(int) $bdb->getValue('bimpcore_dictionnary', 'id', 'code = \'societe_rdc_pr
 	}
 }
 
+if (!(int) $bdb->getValue('bimpcore_dictionnary', 'id', 'code = \'societe_rdc_cat_maitre\'')) {
+	$dict = BimpDict::addDefaultDictionnary('societe_rdc_cat_maitre', 'Catégories maître', 1, 'values', 'id', array(), $errors);
+
+	if (BimpObject::objectLoaded($dict)) {
+		echo 'OK societe_rdc_cat_maitre <br/>';
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'ORDI',
+			'label'   => 'Oridinateur'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'APP_ELEC',
+			'label'   => 'Appareils électroniques'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'COMP',
+			'label'   => 'Composants'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'GEM',
+			'label'   => 'GEM'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'PEM',
+			'label'   => 'PEM'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'PERIPH',
+			'label'   => 'Périphériques'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'MAT_JADIN',
+			'label'   => 'Matériel et équipement de jardinerie'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'MEUBLE',
+			'label'   => 'Meubles et rangements'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'TELEFON',
+			'label'   => 'Téléphones'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'PHOTO',
+			'label'   => 'Photo'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'LIVR',
+			'label'   => 'Livres'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'BRICO',
+			'label'   => 'Bricolage'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'GENE',
+			'label'   => 'Généraliste'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'ACCE',
+			'label'   => 'Accessoires et consommables'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'CULT',
+			'label'   => 'Culture'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'JEUXVIDEO',
+			'label'   => 'Jeux vidéo'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'PISC',
+			'label'   => 'Piscine'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'LOGI',
+			'label'   => 'Logiciel'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'CONS',
+			'label'   => 'Console'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'LUMI',
+			'label'   => 'Luminaires'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'PLOM',
+			'label'   => 'Plomberie et sanitaire'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'DECO',
+			'label'   => 'Décoration'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'HIGHTECH',
+			'label'   => 'High Tech'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'MAISON',
+			'label'   => 'Maison'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'ELECTRO',
+			'label'   => 'Electroménager'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'LINGMAISON',
+			'label'   => 'Linge de maison'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'MODE',
+			'label'   => 'Mode'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'JARD',
+			'label'   => 'Jardin'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'SPORT',
+			'label'   => 'Sports'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'LOISIR',
+			'label'   => 'Loisirs'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'EROTIQ',
+			'label'   => 'Accessoires érotiques'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'PUER',
+			'label'   => 'Puériculture'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'FOURNBURO',
+			'label'   => 'Fournitures de Bureau'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'CIGA',
+			'label'   => 'Cigarettes Electroniques'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'GASTRO',
+			'label'   => 'Gastronomie'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'ANIM',
+			'label'   => 'Animalerie'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'LING',
+			'label'   => 'Lingerie'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'BEAU',
+			'label'   => 'Beauté'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'SANT',
+			'label'   => 'Santé'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'AUTO',
+			'label'   => 'Auto'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'MOTO',
+			'label'   => 'Moto'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'BIJOUX',
+			'label'   => 'bijoux'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'MONTRE',
+			'label'   => 'Montres'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'JEUX',
+			'label'   => 'Jeux'
+		), true, $errors);
+
+		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+			'id_dict' => $dict->id,
+			'code'    => 'JOUET',
+			'label'   => 'Jouets'
+		), true, $errors);
+	}
+}
+
 echo 'Erreurs : <pre>' . print_r($errors, 1) . '</pre>';
 
 echo '<br/>FIN';

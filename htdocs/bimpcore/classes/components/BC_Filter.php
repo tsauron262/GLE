@@ -1328,6 +1328,7 @@ class BC_Filter extends BimpComponent
             }
         } else {
             $bc_input = new BC_Input($this->object, $this->params['data_type'], $input_name, $input_path, null, $field_params);
+			$bc_input->input_only = true;
             $bc_input->addInputExtraClass('bimp_filter_input');
             $html .= $bc_input->renderHtml();
             $html .= $add_btn_html;

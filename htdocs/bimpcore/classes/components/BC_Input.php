@@ -17,17 +17,18 @@ class BC_Input extends BimpComponent
 	public $extraData = array();
 	public $name_prefix = '';
 	public $display_card_mode = 'none'; // hint / visible
+	public $input_only = false;
 	protected $input_extra_classes = array();
 	protected $input_extra_data = array();
 	public static $type_params_def = array(
 		'text'                        => array(
-			'values'          => array('data_type' => 'array', 'compile' => true, 'default' => array()),
-			'allow_custom'    => array('data_type' => 'bool', 'default' => 1),
-			'hashtags'        => array('data_type' => 'bool', 'default' => 0),
-			'scanner'         => array('data_type' => 'bool', 'default' => 0),
-			'no_autocorrect'  => array('data_type' => 'bool', 'default' => 0),
-			'possible_values' => array('data_type' => 'array', 'default' => array()),
-			'strip_tags'      => array('data_type' => 'bool', 'default' => 1),
+			'values'                 => array('data_type' => 'array', 'compile' => true, 'default' => array()),
+			'allow_custom'           => array('data_type' => 'bool', 'default' => 1),
+			'hashtags'               => array('data_type' => 'bool', 'default' => 0),
+			'scanner'                => array('data_type' => 'bool', 'default' => 0),
+			'no_autocorrect'         => array('data_type' => 'bool', 'default' => 0),
+			'possible_values'        => array('data_type' => 'array', 'default' => array()),
+			'strip_tags'             => array('data_type' => 'bool', 'default' => 1),
 			'field_path'             => array('data_type' => 'bool', 'default' => 0),
 			'field_path_module'      => array(),
 			'field_path_object_name' => array()
@@ -468,13 +469,19 @@ class BC_Input extends BimpComponent
 			case 'select':
 				$options['options'] = isset($this->params['options']) ? $this->params['options'] : array();
 				$options['select_first'] = isset($this->params['select_first']) ? $this->params['select_first'] : 0;
-				$options['dictionnary'] = (isset($this->params['dictionnary']) ? $this->params['dictionnary'] : (isset($this->field_params['dictionnary']) ? $this->field_params['dictionnary'] : ''));
+				$options['dictionnary'] = '';
+				if (!$this->input_only) {
+					$options['dictionnary'] = (isset($this->params['dictionnary']) ? $this->params['dictionnary'] : (isset($this->field_params['dictionnary']) ? $this->field_params['dictionnary'] : ''));
+				}
 				break;
 
 			case 'switch_options':
 				$options['options'] = isset($this->params['options']) ? $this->params['options'] : array();
 				$options['vertical'] = isset($this->params['vertical']) ? $this->params['vertical'] : 0;
-				$options['dictionnary'] = (isset($this->params['dictionnary']) ? $this->params['dictionnary'] : (isset($this->field_params['dictionnary']) ? $this->field_params['dictionnary'] : ''));
+				$options['dictionnary'] = '';
+				if (!$this->input_only) {
+					$options['dictionnary'] = (isset($this->params['dictionnary']) ? $this->params['dictionnary'] : (isset($this->field_params['dictionnary']) ? $this->field_params['dictionnary'] : ''));
+				}
 				break;
 
 			case 'toggle':

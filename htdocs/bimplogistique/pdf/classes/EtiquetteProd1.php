@@ -15,12 +15,12 @@ class EtiquetteProd1 extends BimpEtiquettePDF {
         $this->prefName = "Etiquette_Stock_";
     }
 
-    public function writeContent($content = '') {
+    public function writeContent($content = '', $params = array(), $debug = false) {
         $debug = false;
 //        $html = "";
-        
+
         $ids = array();
-        
+
         $objects = array();
         if(isset($this->object) && is_object($this->object))
             $objects[] = $this->object;
@@ -31,7 +31,7 @@ class EtiquetteProd1 extends BimpEtiquettePDF {
             $objTmp->fetch($id);
             $objects[] = $objTmp;
         }
-        
+
         $i = 0;
         foreach($objects as $object){
             $i++;

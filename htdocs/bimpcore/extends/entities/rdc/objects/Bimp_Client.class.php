@@ -37,13 +37,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 //self::BS_SAV_CANCELED_BY_CUST  => array('label' => 'Annulé par le client', 'icon' => 'fas_times', 'classes' => array('danger')),
 //self::BS_SAV_CANCELED_BY_USER  => array('label' => 'Annulé par utilisateur', 'icon' => 'fas_times', 'classes' => array('danger')),
 
-	public static $categorieMaitreRdc = array(
-		0 => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
-		1 => array('label' => 'Catégrorie 1'),
-		2 => array('label' => 'Catégorie 2'),
-		3 => array('label' => 'Catégorie 3'),
-		4 => array('label' => 'Catégorie 4'),
-	);
 	public static $statut_rdc_live = 11;
 	public static $statut_rdc_prospect_array = array(3, 4);
 

@@ -133,18 +133,18 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			'name_alias'		=> 'nom_boutique',
 			'nom'				=> 'nom_societe',
 			'shopid'			=> 'shopid',
-			'priorite_label'			=> 'priorite',
+			'priorite_label'	=> 'priorite',
 			'statut_prospect_label'	=> 'statut',
 			'commentaire_statut_ko' => 'commentaire_statut',
 			'date_changement_statut_rdc' =>	'date_chang_statut',
-			'fk_source_rdc'	=> 'Source',
+			'source_rdc'		=> 'Sources',
 			'presta_source' => 'prestataire',
 			'url' => 'url',
 
 			'nom_contact' => 'nom_contact',
 			'prenom_contact' => 'prenom_contact',
 			'fonction_contact' => 'fonction_contact',
-			'email_contact' => 'email_contact',
+			'email' => 'mail_contact',
 			'tel_contact' => 'tel_contact',
 
 			'pays' => 'pays',
@@ -210,52 +210,55 @@ class BDS_ImportsDiversProcess extends BDSProcess
 						}
 					}
 				}
-				if($data['date_der_contact'])	{
+				if ($data['date_der_contact']) {
 					$data['date_der_contact'] = $this->convertDate($ln['date_der_contact']);
 				}
-				if($data['date_debut_prospect'])	{
+				if ($data['date_debut_prospect']) {
 					$data['date_debut_prospect'] = $this->convertDate($ln['date_debut_prospect']);
 				}
-				if($data['date_changement_statut_rdc'])	{
+				if ($data['date_changement_statut_rdc']) {
 					$data['date_changement_statut_rdc'] = $this->convertDate($ln['date_changement_statut_rdc']);
 				}
-				if ($data['priorite_label'])	{
-					$txt = $data['priorite_label'];
+				if ($data['priorite_label']) {
 					$nomDic = 'societe_rdc_priorities';
-					$data['fk_priorite'] = $this->getBimpDict($txt, $nomDic);
-					unset($data['priorite_label']);
+					$data['fk_priorite'] = $this->getBimpDict($data['priorite_label'], $nomDic);
 				}
-				if ($data['statut_prospect_label'])	{
+				if ($data['statut_prospect_label']) {
 					$txt = str_replace('?', 'é', $data['statut_prospect_label']);
 					$soc = BimpObject::getBimpObjectInstance('bimpcore', 'Bimp_Client');
 					$dic = array_column($soc::$statusRdc, 'label');
 					$id_pros = array_search($txt, $dic);
 					if ($id === false) {
-						$this->Error('Statut prospect non trouvé', null, $ln['Name'].' ligne '.($id+1));
+						$this->Error('Statut prospect non trouvé', null, $ln['Name'] . ' ligne ' . ($id + 1));
 						continue;
 					}
-					$data['fk_statut_prospect'] = $id_pros;
-					unset($data['statut_prospect_label']);
+					$data['fk_statut_rdc'] = $id_pros;
 				}
-				if ($data['pays'])	{
+				if ($data['pays']) {
 					$data['fk_pays'] = $this->getPays($data['pays'], 'label');
-					unset($data['pays']);
-				}
-
-				if ($data['cat_maitre'])	{
+				} else $data['fk_pays'] = 0;
+				if ($data['cat_maitre']) {
 					$nomDic = 'societe_rdc_cat_maitre';
-					$cats = explode('#', $data['cat_maitre']);
+					$cats = explode('#', trim($data['cat_maitre']));
 					$cats_id = array();
 					foreach ($cats as $cat) {
-						$cat = str_replace('?', 'é', trim($cat));
+						$cat = str_replace('?', 'é', $cat);
 						$idcat = $this->getBimpDict($cat, $nomDic);
 						if ($idcat === '') {
-							$this->Error('Catégorie non trouvée', null, $ln['Name'].' ligne '.($id+1));
+							$this->Error('Catégorie non trouvée', null, $ln['nom_boutique'] . ' cat: ' . $cat);
+						} else {
+							$cats_id[] = (int) $idcat;
 						}
-						else $cats_id[] = (int)$idcat;
 					}
 					$data['fk_categorie_maitre'] = implode(',', $cats_id);
-					unset($data['cat_maitre']);
+				}
+				if ($data['source_rdc']) {
+					$txt = str_replace('?', 'é', $data['source_rdc']);
+					$nomDic = 'societe_rdc_sources';
+					$data['fk_source_rdc'] = $this->getBimpDict($txt, $nomDic);
+				}
+				if (!$data['import_key']) {
+					$data['import_key'] = $data['nom_boutique'];
 				}
 				$errors = $warnings = array();
 				$obj = BimpObject::createOrUpdateBimpObject('bimpcore', 'Bimp_Client', $dataFiltres, $data, true, true, $errors, $warnings);
@@ -264,6 +267,54 @@ class BDS_ImportsDiversProcess extends BDSProcess
 				}
 				foreach ($warnings as $warning) {
 					$this->Alert($warning, null, $ln['nom_boutique']);
+				}
+				if (!$errors && !$warnings)	{
+					$fk_soc = $obj->id;
+					// creation contact
+					if($data['nom_contact']) {
+						$dataPeople = array(
+							'lastname'   => $data['nom_contact'],
+							'firstname'  => $data['prenom_contact'],
+							'email'      => $data['email'],
+							'phone'      => $data['tel_contact'],
+							'fk_soc'     => $fk_soc,
+							'poste'      => $data['fonction_contact'],
+							'import_key' => $data['import_key'],
+							'fk_pays'    => $data['fk_pays'],
+						);
+						$objPeople = BimpObject::createOrUpdateBimpObject('bimpcore', 'Bimp_Contact', $dataFiltres, $dataPeople, true, true, $errors, $warnings);
+						foreach ($errors as $error) {
+							$this->Error($error, null, $ln['nom_boutique']);
+						}
+						foreach ($warnings as $warning) {
+							$this->Alert($warning, null, $ln['nom_boutique']);
+						}
+					}
+					// creation CR échange
+					if ($data['date_echange'] && !$errors && !$warnings)	{
+						$type = $this->db->getValue('c_actioncomm', 'id', 'libelle LIKE \'%'.trim($data['type_echange']).'\'');
+						$dataAction = array(
+							'fk_soc' => $fk_soc,
+							'fk_user_author' => $this->user->id,
+							'datep' => $this->convertDate($data['date_echange']),
+							'label' => $data['Sujet'],
+							'fk_user_action' => 17,
+							'fk_action' => $type,
+							'fk_motif_echange' => 3,
+							'action_echange' => $data['Action'],
+							'point_positif_echange' => $data['pt_positif'],
+							'risque_identifie_echange' => $data['risque_identifie'],
+							'note' => $data['Commentaire'],
+							'import_key' => $data['import_key'],
+						);
+						$objAction = BimpObject::createOrUpdateBimpObject('bimpcore', 'Bimp_ActionComm', $dataFiltres, $dataAction, true, true, $errors, $warnings);
+						foreach ($errors as $error) {
+							$this->Error($error, null, $ln['nom_boutique']);
+						}
+						foreach ($warnings as $warning) {
+							$this->Alert($warning, null, $ln['nom_boutique']);
+						}
+					}
 				}
 				$ok[] = $ln['nom_boutique'].' - '.$obj->id;
 			} else {
@@ -735,7 +786,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 	{
 		$res = $this->db->getRows(
 			'bimpcore_dictionnary_value as dv',
-			'dv.label LIKE "' . $label . '" AND d.code = "' . $nomDic . '"',
+			'dv.label LIKE "%' . trim($label) . '%" AND d.code = "' . $nomDic . '"',
 			null,
 			'array',
 			array('dv.id'),
@@ -750,6 +801,6 @@ class BDS_ImportsDiversProcess extends BDSProcess
 	}
 
 	public function getPays($needle, $field)	{
-		return $this->db->getValue('c_country', 'rowid', $field . ' = \'' . $needle . '\'');
+		return $this->db->getValue('c_country', 'rowid', $field . ' = \'' . trim($needle) . '\'');
 	}
 }

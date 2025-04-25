@@ -142,6 +142,8 @@ fields:
     id_atradius: unset
     id_contact_relances: unset
     filters: unset
+    fk_pays:
+        default_value: 0
 
 fields_tables:
     identity_rdc:

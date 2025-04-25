@@ -400,7 +400,7 @@ fields:
         label: Paramètres incrustation signature
         type: json
     expertise:
-        label: Expertise Bimp
+        label: Expertise Metier
         dol_extra_field: 1
         type: int
         values: 

@@ -315,7 +315,7 @@ fields:
                 callback: getRibArray
         default_value: 0
     expertise:
-        label: Expertise Bimp
+        label: Expertise Metier
         dol_extra_field: 1
         type: int
         values: 

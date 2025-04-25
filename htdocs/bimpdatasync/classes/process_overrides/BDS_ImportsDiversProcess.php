@@ -257,7 +257,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 					$nomDic = 'societe_rdc_sources';
 					$data['fk_source_rdc'] = $this->getBimpDict($txt, $nomDic);
 				}
-				if (!$data['import_key']) {
+				if (strlen($data['import_key']) < 3) {
 					$data['import_key'] = $data['nom_boutique'];
 				}
 				$errors = $warnings = array();
@@ -344,7 +344,8 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			$errors[] = 'Fichier absent';
 		} else {
 			$rows = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-			$this->data_persistante['header'] = $this->traiteLn($rows[0]);
+//			$this->data_persistante['header'] = $this->traiteLn($rows[0]);
+			$this->data_persistante['header'] = explode(';', $rows[0]);
 			unset($rows[0]);
 
 			if (empty($rows)) {
@@ -371,10 +372,12 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			'address'			=> 'MailingStreet',
 			'zip'				=> 'MailingPostalCode',
 			'town'				=> 'MailingCity',
+			'country'			=> 'MailingCountry',
 			'phone'				=> 'Phone',
 			'phone_mobile'		=> 'MobilePhone',
 			'email'				=> 'Email',
 			'poste'				=> 'Title',
+			'note_public'		=> 'Description',
 			'import_key'		=> 'Id',
 		);
 		$keys = array(
@@ -392,7 +395,8 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			}
 			$line = $rows[$id];
 			$this->incProcessed();
-			$data = $this->traiteLn($line);
+//			$data = $this->traiteLn($line);
+			$data = explode(';', $line);
 //			echo '<pre>'.print_r($this->data_persistante, true).'</pre>'; echo '<pre>'.print_r($data, true).'</pre>';die;
 			$ln = array_combine($this->data_persistante['header'], $data);
 

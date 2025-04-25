@@ -157,6 +157,10 @@ params:
     exports_ldlc_ftp_mdp:
         label: Mdp FTP pour les exports LDLC
         def: ''
+    use_notes_models: 
+        label: Activer les modèles de note
+        type: bool
+        def: 0
     
     # Defaults: 
     default_id_entrepot: 

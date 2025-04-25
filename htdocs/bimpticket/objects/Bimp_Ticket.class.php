@@ -139,6 +139,41 @@ class Bimp_Ticket extends BimpDolObject
 			}
 		}
 
+		if ($this->isLoaded($errors)) {
+			$note = BimpObject::getInstance("bimpcore", "BimpNote");
+
+			$buttons[] = array(
+				'label'   => 'E-mail Tier',
+				'icon'    => 'fas_envelope',
+				'onclick' => $note->getJsLoadModalForm('default', 'Envoyer un e-mail au tiers', array(
+					'fields' => array(
+						"obj_type"    => "bimp_object",
+						"obj_module"  => $this->module,
+						"obj_name"    => $this->object_name,
+						"id_obj"      => $this->id,
+						'visibility'  => $note::BN_ALL,
+						'type_author' => $note::BN_AUTHOR_USER,
+						"type_dest"   => $note::BN_DEST_SOC
+					)
+				))
+			);
+			$buttons[] = array(
+				'label'   => 'E-mail Contact',
+				'icon'    => 'fas_envelope',
+				'onclick' => $note->getJsLoadModalForm('default', 'Envoyer un e-mail à un contact tiers', array(
+					'fields' => array(
+						"obj_type"    => "bimp_object",
+						"obj_module"  => $this->module,
+						"obj_name"    => $this->object_name,
+						"id_obj"      => $this->id,
+						'visibility'  => $note::BN_ALL,
+						'type_author' => $note::BN_AUTHOR_USER,
+						"type_dest"   => $note::BN_DEST_CONTACT
+					)
+				))
+			);
+		}
+
 		return $buttons;
 	}
 
@@ -172,10 +207,11 @@ class Bimp_Ticket extends BimpDolObject
 	{
 		global $conf;
 		$ref = dol_sanitizeFileName($this->dol_object->ref);
-		if ($this->isLoaded() && $this->dol_object->entity > 0)
+		if ($this->isLoaded() && $this->dol_object->entity > 0) {
 			return $conf->ticket->multidir_output[$this->dol_object->entity] . '/';
-		else
+		} else {
 			return $conf->ticket->dir_output . '/';
+		}
 	}
 
 
@@ -480,8 +516,9 @@ class Bimp_Ticket extends BimpDolObject
 			}
 		}
 
-		if($this->getData('email_msgid') == '')
-			$this->updateField('email_msgid', randomPassword('35').'@bimpticket');
+		if ($this->getData('email_msgid') == '') {
+			$this->updateField('email_msgid', randomPassword('35') . '@bimpticket');
+		}
 
 		return $errors;
 	}
@@ -642,21 +679,24 @@ class Bimp_Ticket extends BimpDolObject
 		return $data;
 	}
 
-	public function getMailToContacts(){
+	public function getMailToContacts()
+	{
 		$contacts = $return = array();
 		$contacts = $this->dol_object->liste_contact(-1, 'external');
-		foreach($contacts as $contact){
-				$return[$contact['email']] = $contact['lastname']. ' '.$contact['firstname'].' ('.$contact['email'].')';
+		foreach ($contacts as $contact) {
+			$return[$contact['email']] = $contact['lastname'] . ' ' . $contact['firstname'] . ' (' . $contact['email'] . ')';
 		}
 //		echo '<pre>';print_r($contacts);
 		return $return;
 	}
 
-	public function getMailFrom(){
+	public function getMailFrom()
+	{
 		return BimpCore::getConf('mailReponse', '', 'bimpticket');
 	}
 
-	public function getObjectMail(){
-		return 'Rép. : '.$this->getData('subject');
+	public function getObjectMail()
+	{
+		return 'Rép. : ' . $this->getData('subject');
 	}
 }

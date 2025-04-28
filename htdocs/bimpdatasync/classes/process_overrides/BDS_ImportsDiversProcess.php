@@ -192,7 +192,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 				$data = $dataFiltres = array();
 				if (!$ln['nom_societe'])	$ln['nom_societe'] = $ln['nom_boutique'];
 				foreach($ln as $key => $value){
-//					$value = utf8_encode($value);
+					$value = utf8_encode($value);
 					if($correspondance2[$key]){
 						if(stripos($value, '<script') !== false){
 							if(stripos($ln['Name'], '<script') === false){
@@ -258,7 +258,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 					$data['fk_source_rdc'] = $this->getBimpDict($txt, $nomDic);
 				}
 				if (strlen($data['import_key']) < 3) {
-					$data['import_key'] = $data['nom_boutique'];
+					$data['import_key'] = substr('IMP_FLO_' . str_replace(" ", "",$data['name_alias']), 0, 29);
 				}
 				$errors = $warnings = array();
 				$obj = BimpObject::createOrUpdateBimpObject('bimpcore', 'Bimp_Client', $dataFiltres, $data, true, true, $errors, $warnings);
@@ -381,13 +381,14 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			'import_key'		=> 'Id',
 		);
 		$keys = array(
-			'import_key'
+			'import_key',
 		);
 		$correspondance2 = array_flip($correspondance);
 		$ok = array();
 		$file = $this->getParam('csv_file', '');
 		$rows = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 		$traite = $this->getParam('elem_ok', 0);
+		$antidouble = array();
 		foreach ($this->references as $id) {
 			if($id <= $traite){
 				$this->incIgnored();
@@ -403,7 +404,6 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			if (strlen($ln['LastName'])) {
 				$data = $dataFiltres = array();
 				$errors = $warnings = array();
-
 				foreach($ln as $key => $value){
 					$value = utf8_encode($value);
 					if($correspondance2[$key]){
@@ -422,15 +422,15 @@ class BDS_ImportsDiversProcess extends BDSProcess
 							$dataFiltres[$correspondance2[$key]] = $value;
 						}
 					}
-					// retrouver le fk_soc selon le AccountId
-					$fk_soc = $this->db->getValue('societe', 'rowid', 'import_key = \''.$ln['AccountId'].'\'');
-					if($fk_soc){
-						$data['fk_soc'] = $fk_soc;
-						$dataFiltres['fk_soc'] = $fk_soc;
-					} else {
-						$this->Error('Société non trouvée : '.strlen($ln['LastName']), null, $ln['AccountId'].' ligne '.($id+1));
-						continue 2;
-					}
+				}
+				// retrouver le fk_soc selon le AccountId
+				$fk_soc = $this->db->getValue('societe', 'rowid', 'import_key = \''.$ln['AccountId'].'\'');
+				if($fk_soc){
+					$data['fk_soc'] = $fk_soc;
+					$dataFiltres['fk_soc'] = $fk_soc;
+				} else {
+					$this->Error('Société non trouvée : '.strlen($ln['LastName']), null, $ln['AccountId'].' ligne '.($id+1));
+					continue;
 				}
 
 				$obj = BimpObject::createOrUpdateBimpObject('bimpcore', 'Bimp_Contact', $dataFiltres, $data, true, true, $errors, $warnings);
@@ -555,7 +555,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 				$data['type_code'] = null;
 				$data['datec'] = $this->convertDate($data['datec']);
 				$data['date_close'] = $this->convertDate($data['date_close']);
-				$data['date_update'] = $this->convertDate($data['date_update']);
+				$data['date_update'] = $this->convertDate($data['date_update'], 1);
 				if ($data['fk_status'] == 'En cours SM') $data['fk_status'] = 3; else {
 					$data['fk_status'] = 8;
 					$data['resolution'] = BimpTools::getDatesIntervalData($data['datec'], $data['date_close'])['full_days'];
@@ -568,7 +568,8 @@ class BDS_ImportsDiversProcess extends BDSProcess
 					if ($fk_soc) {
 						$data['fk_soc'] = $fk_soc;
 					} else {
-						$this->Alert('Société non trouvée : ' . strlen($ln['CaseNumber']), null, $ln['AccountId'] . ' ligne ' . ($id + 1));
+						$this->Error('Société non trouvée : ' . $ln['CaseNumber'], null, $ln['AccountId'] . ' ligne ' . ($id + 1));
+						continue;
 					}
 				} else $data['fk_soc'] = 0;
 				// retoruver le contact selon le ContactId
@@ -577,7 +578,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 					if ($fk_contact) {
 						$data['fk_contact'] = $fk_contact;
 					} else {
-						$this->Alert('Contact non trouvé : ' . strlen($ln['CaseNumber']), null, $ln['ContactId'] . ' ligne ' . ($id + 1));
+						$this->Alert('Contact non trouvé : ' . $ln['CaseNumber'], null, $ln['ContactId'] . ' ligne ' . ($id + 1));
 					}
 				} else $data['fk_contact'] = 0;
 
@@ -637,10 +638,10 @@ class BDS_ImportsDiversProcess extends BDSProcess
 		}
 	}
 
-	public function convertDate($date){
+	public function convertDate($date, $seconde = false){
 		$date = substr($date, 0, 10);
 		$date .= ' 00:00';
-		$datetime = DateTime::createFromFormat('d/m/Y H:i', $date);
+		$datetime = DateTime::createFromFormat('d/m/Y H:i' . ($seconde ? ':s' : '') , $date);
 		if ($datetime) {
 			return $datetime->format('Y-m-d');
 		}

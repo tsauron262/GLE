@@ -2255,14 +2255,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 		global $user;
 		if($user->admin){
 
+			$propal = $this->getChildObject('propal');
 			$client = $this->getChildObject('client');
 
-			$encoursActu = $client->getAllEncoursForSiret(true)['total'];
-			$authorisation = ($client->getData('outstanding_limit') + $this->getUserLimitEncours()) * 1.2;
+			$encoursActu = (int) $client->getAllEncoursForSiret(true)['total'];
+			$authorisation = (int) ($client->getData('outstanding_limit') + $this->getUserLimitEncours()) * 1.2;
 			$besoin = $encoursActu + $propal->dol_object->total_ht;
 
 //			if ($besoin > ($authorisation + 1)) {
-				$html .= 'Le client doit payer comptant (Carte bancaire, A réception de facture), son encours autorisé (' . price($authorisation) . ' €) est inférieur au besoin (' . price($besoin) . ' €)';
+				$html .= 'Le client doit payer comptant (Carte bancaire, A réception de facture), son encours autorisé (' . $authorisation . ' €) est inférieur au besoin (' . $besoin . ' €)';
 //			}
 		}
 

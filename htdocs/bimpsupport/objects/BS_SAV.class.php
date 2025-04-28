@@ -2262,9 +2262,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 			$authorisation = (int) ($client->getData('outstanding_limit') + $this->getUserLimitEncours()) * 1.2;
 			$besoin = $encoursActu + $propal->dol_object->total_ht;
 
-//			if ($besoin > ($authorisation + 1)) {
+			if ($besoin > ($authorisation + 1)) {
 				$html .= 'Le client doit payer comptant (Carte bancaire, A réception de facture), son encours autorisé (' . $authorisation . ' €) est inférieur au besoin (' . $besoin . ' €)';
-//			}
+			}
 		}
 
 		return $html;

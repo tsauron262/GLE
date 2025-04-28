@@ -323,10 +323,10 @@ views:
                     -   type: view
                         view:
                             name: fiche
-            -   cols:
-                    -   type: custom
-                        custom:
-                            callback: renderNotesList
+#            -   cols:
+#                    -   type: custom
+#                        custom:
+#                            callback: renderNotesList
     
     fiche:
         rows:
@@ -334,14 +334,20 @@ views:
                     -   type: fields_table
                         fields_table:
                             name: infos
-                        col_lg: 6
-                        col_md: 6
-                    
+                        col_lg: 12
+                        col_md: 12
+                        
+            -   cols:
+                    -   type: custom
+                        custom:
+                            callback: renderNotesList
+                            
+            -   cols:
                     -   type: fields_table
                         fields_table:
                             name: client_infos
-                        col_lg: 6
-                        col_md: 6
+                        col_lg: 12
+                        col_md: 12
             -   cols:
                     -   type: custom
                         custom:

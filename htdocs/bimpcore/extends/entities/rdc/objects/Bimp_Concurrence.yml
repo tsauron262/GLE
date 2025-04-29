@@ -110,13 +110,17 @@ lists:
     default:
         title: liste des concurrents
         n: 3
+        add_btn: 
+            callback: canAddConcurrence
         add_form_name: default
         add_btn_label: Ajouter un concurrent
-        extra_btn:
-            callback: getListExtraButtons
-        edit_btn: 1
+#        extra_btn:
+#            callback: getListExtraButtons
+        edit_btn: 
+            callback: canAddConcurrence
         edit_form: default
-        delete_btn: 1
+        delete_btn: 
+            callback: canAddConcurrence
         cols:
             nom:
             site:

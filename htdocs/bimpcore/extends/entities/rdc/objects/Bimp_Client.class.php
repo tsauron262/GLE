@@ -9,8 +9,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		3 => array('label' => 'Prospection: prise de contact', 'icon' => 'fas_suitcase', 'classes' => array('important')),
 		4 => array('label' => 'Prospection: contact et présentation ok', 'icon' => 'fas_suitcase', 'classes' => array('important')),
 		5 => array('label' => 'Prospect KO', 'icon' => 'fas_suitcase', 'classes' => array('danger')),
-				6 => array('label' => 'KYC en cours'),
-				7 => array('label' => 'MANGOPAY en cours'),
+//				6 => array('label' => 'KYC en cours'),
+//				7 => array('label' => 'MANGOPAY en cours'),
 		8 => array('label' => 'En attente onboarding catalogue', 'icon' => 'fas_handshake', 'classes' => array('important')),
 		9 => array('label' => 'Onboarding catalogue KO', 'icon' => 'fas_handshake', 'classes' => array('danger')),
 		10 => array('label' => 'Onboarding catalogue OK', 'icon' => 'fas_handshake', 'classes' => array('success')),
@@ -414,6 +414,18 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		);
 
 		return BimpRender::renderNavTabs($tabs);
+	}
+
+	public function getFlagImport()
+	{
+		$html = '';
+		$import_key = $this->getData('import_key');
+		if ($import_key) {
+			$html .= '<span class="success" title="Importé">';
+			$html .= BimpRender::renderIcon('fas_file-import', 'iconRight');
+			$html .= '</span>';
+		}
+		return $html;
 	}
 
 	public function renderActionsCommView($type)

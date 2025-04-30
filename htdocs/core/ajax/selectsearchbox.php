@@ -180,6 +180,8 @@ if (isModEnabled('holiday') && !getDolGlobalString('MAIN_SEARCHFORM_HOLIDAY_DISA
 	$arrayresult['searchintoleaves'] = array('position' => 220, 'img' => 'object_holiday', 'label' => $langs->trans("SearchIntoLeaves", $search_boxvalue), 'text' => img_picto('', 'object_holiday', 'class="pictofixedwidth"').' '.$langs->trans("SearchIntoLeaves", $search_boxvalue), 'url' => DOL_URL_ROOT.'/holiday/list.php?mainmenu=hrm'.($search_boxvalue ? '&search_all='.urlencode($search_boxvalue) : ''));
 }
 
+//echo '1<pre>' . print_r($arrayresult, 1) . '</pre>';
+
 // Execute hook addSearchEntry
 $parameters = array('search_boxvalue' => $search_boxvalue, 'arrayresult' => $arrayresult);
 $reshook = $hookmanager->executeHooks('addSearchEntry', $parameters);
@@ -188,6 +190,9 @@ if (empty($reshook)) {
 } else {
 	$arrayresult = $hookmanager->resArray;
 }
+
+//echo '2<pre>' . print_r($arrayresult, 1) . '</pre>';
+//exit;
 
 // This pushes a search entry to the top
 if (getDolGlobalString('DEFAULT_SEARCH_INTO_MODULE')) {
@@ -213,7 +218,7 @@ if(strlen($search_boxvalue) > 10 && strlen($search_boxvalue) < 16 && stripos($se
 	$arrayresult=array_merge(array($arrayresult["searchintosn"]), $arrayresult);
 if((strlen($search_boxvalue) > 10) && strlen($search_boxvalue) < 14 && is_numeric($search_boxvalue) && isset($arrayresult["searchintoproduct"]))
 	$arrayresult=array_merge(array($arrayresult["searchintoproduct"]), $arrayresult);
-if(stripos($search_boxvalue, "fa") === 0 OR 
+if(stripos($search_boxvalue, "fa") === 0 OR
         stripos($search_boxvalue, "av") === 0 OR
         stripos($search_boxvalue, "ac") === 0)
 	$arrayresult=array_merge(array($arrayresult["searchintoinvoice"]), $arrayresult);

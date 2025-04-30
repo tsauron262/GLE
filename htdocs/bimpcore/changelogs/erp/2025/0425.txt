@@ -1,0 +1,2 @@
+- Envoi des notes par email aux contacts clients
+- Ajouts des références de champ dans les notes

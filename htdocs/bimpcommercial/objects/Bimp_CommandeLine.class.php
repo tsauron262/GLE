@@ -8174,6 +8174,7 @@ class Bimp_CommandeLine extends ObjectLine
 			}
 
 			$qty = isset($data['qty']) ? round((float) $data['qty'], 6) : 0;
+			$max = round($max, 6);
 			$id_commande_fourn = isset($data['id_commande_fourn']) ? $data['id_commande_fourn'] : 0;
 			$commande = $this->getParentInstance();
 

@@ -146,8 +146,11 @@ class ActionsBimpticket
 				//		echo '<pre>';print_r($parameters['from'].$bimp_ticket->id);echo '</pre>';die;
 				if (!$traite && isset($parameters['objectemail']) && is_a($parameters['objectemail'], 'ticket')) {
 					$ticket = $parameters['objectemail'];
+//					$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
 					$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
-					$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
+					// correction des object avec des accents
+					$s = str_replace("_", " ", mb_decode_mimeheader($Bimp_Ticket->getData('subject')));
+					$Bimp_Ticket->updateField('subject', $s);
 					$Bimp_Ticket->addObjectLog($Bimp_Ticket->getData('message'));
 					$Bimp_Ticket->updateField("message", $msg);
 

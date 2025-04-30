@@ -102,7 +102,7 @@ class ActionsBimpcore
 			$_REQUEST['id'] = $_REQUEST['socid'];
 		}
 
-		if (stripos($url, '/admin/') === false && stripos($url, '/fourn/commande/dispatch.php') === false &&  stripos($url, 'stats')== false) {
+		if (stripos($url, '/admin/') === false && stripos($url, '/fourn/commande/dispatch.php') === false && stripos($url, 'stats') == false) {
 			if (stripos($url, '/commande/') !== false) {
 				$tabObj = array("bimpcommercial", "Bimp_Commande");
 			}
@@ -307,8 +307,11 @@ class ActionsBimpcore
 	function addSearchEntry($parameters, &$object, &$action, $hookmanager)
 	{
 		global $langs;
-		$this->results['searchintolivraison'] = array('position' => 49, 'img' => "generic", 'text' => img_object("Expédition", "generic") . " " . $langs->trans("Expédition"), 'url' => DOL_URL_ROOT . '/bimpcommercial/index.php?fc=commandes&search=1&object=shipment&sall=' . GETPOST('q'), 'label' => 'Expédition');
-		$this->results['searchintoreception'] = array('position' => 50, 'img' => "generic", 'text' => img_object("Reception", "generic") . " " . $langs->trans("Reception"), 'url' => DOL_URL_ROOT . '/bimpcommercial/index.php?fc=commandesFourn&search=1&object=reception&sall=' . GETPOST('q'), 'label' => 'Reception');
+		if (BimpCore::isModuleActive('bimplogtistique')) {
+			$this->results['searchintolivraison'] = array('position' => 49, 'img' => "generic", 'text' => img_object("Expédition", "generic") . " " . $langs->trans("Expédition"), 'url' => DOL_URL_ROOT . '/bimpcommercial/index.php?fc=commandes&search=1&object=shipment&sall=' . GETPOST('q'), 'label' => 'Expédition');
+			$this->results['searchintoreception'] = array('position' => 50, 'img' => "generic", 'text' => img_object("Reception", "generic") . " " . $langs->trans("Reception"), 'url' => DOL_URL_ROOT . '/bimpcommercial/index.php?fc=commandesFourn&search=1&object=reception&sall=' . GETPOST('q'), 'label' => 'Reception');
+		}
+
 		return 0;
 	}
 }

@@ -113,6 +113,10 @@ class ActionsBimpticket
 						$msg = $tabT[0];
 					}
 
+					// correction des object avec des accents
+					$s = str_replace("_", " ", mb_decode_mimeheader($bimp_ticket->getData('subject')));
+					$bimp_ticket->updateField('subject', $s);
+
 					$userAttribut = (int) $bimp_ticket->getData('fk_user_assign');
 					$errors = $bimp_ticket->addNote($msg, 20, 0, 0, $parameters['from'], 2, ($userAttribut) ? 1 : 0, 0, $userAttribut);
 					if (!count($errors)) {

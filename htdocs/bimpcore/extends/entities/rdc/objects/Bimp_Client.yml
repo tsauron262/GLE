@@ -11,7 +11,7 @@ nom_url:
     
 labels:
     name: Marchant
-    is_female: Marchant
+    is_female: 0
         
 objects:
     user_attr:

@@ -307,7 +307,7 @@ class ActionsBimpcore
 	function addSearchEntry($parameters, &$object, &$action, $hookmanager)
 	{
 		global $langs;
-		if (BimpCore::isModuleActive('bimplogtistique')) {
+		if (BimpCore::isModuleActive('bimplogistique')) {
 			$this->results['searchintolivraison'] = array('position' => 49, 'img' => "generic", 'text' => img_object("Expédition", "generic") . " " . $langs->trans("Expédition"), 'url' => DOL_URL_ROOT . '/bimpcommercial/index.php?fc=commandes&search=1&object=shipment&sall=' . GETPOST('q'), 'label' => 'Expédition');
 			$this->results['searchintoreception'] = array('position' => 50, 'img' => "generic", 'text' => img_object("Reception", "generic") . " " . $langs->trans("Reception"), 'url' => DOL_URL_ROOT . '/bimpcommercial/index.php?fc=commandesFourn&search=1&object=reception&sall=' . GETPOST('q'), 'label' => 'Reception');
 		}

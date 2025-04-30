@@ -8185,7 +8185,7 @@ class Bimp_CommandeLine extends ObjectLine
 			if (!$qty) {
 				$errors[] = 'Veuillez saisir une quantité supérieure à 0';
 			} elseif ($qty > $max) {
-				$errors[] = 'Il ne reste que ' . $max . ' unité(s) à commander. Veuillez corriger les quantités';
+				$errors[] = 'Il ne reste que ' . $max . ' unité(s) à commander. Veuillez retirer ' . $qty - $max . ' unité(s)';
 			} elseif (!$id_commande_fourn) {
 				$errors[] = 'Veuillez sélectionner une commande fournisseur';
 			} elseif (!BimpObject::objectLoaded($commande)) {

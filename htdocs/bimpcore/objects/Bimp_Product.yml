@@ -136,7 +136,7 @@ fields:
         user_edit: 1
         hashtags: 1
         
-    description_strong: 
+    longdescript: 
         label: Description longue
         type: html
         user_edit: 1
@@ -735,7 +735,7 @@ forms:
             - field: code_config
             - field: label
             - field: description
-            - field: description_strong
+            - field: longdescript
             - field: fk_product_type
             - field: type2
             - field: serialisable
@@ -846,7 +846,7 @@ forms:
                   callback: isLoaded
             - field: label
             - field: description 
-            - field: description_strong
+            - field: longdescript
             - field: fk_product_type
             - field: type2           
             - field: no_fixe_prices
@@ -1136,7 +1136,7 @@ fields_tables:
             - field: accountancy_code_sell_intra
             - field: accountancy_code_sell_export
             - field: description
-            - field: description_strong
+            - field: longdescript
             - field: note
             - field: url
             

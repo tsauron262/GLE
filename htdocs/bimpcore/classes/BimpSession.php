@@ -123,10 +123,6 @@ class Session {
     }
     // Ecriture des sessions
     public function session_ecriture($sessionID, $sessionData) {
-
-
-
-
         $datetime_actuel = new DateTime("now", new DateTimeZone('Europe/Paris'));
         $time = (hrtime(true)-$this->timeDeb) / 1000000000;
         if(!isset($_SESSION['time']))

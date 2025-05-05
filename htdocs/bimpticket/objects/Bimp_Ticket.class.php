@@ -6,6 +6,8 @@ class Bimp_Ticket extends BimpDolObject
 	/* @var Ticket */
 	public $dol_object;
 
+	public static $dol_module = 'ticket';
+
 	public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
 	const STATUS_DRAFT = 0;
@@ -27,10 +29,33 @@ class Bimp_Ticket extends BimpDolObject
 		self::STATUS_WAITING        => array('label' => 'En attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
 		self::STATUS_CLOSED         => array('label' => 'Terminé', 'icon' => 'fas_check', 'classes' => array('success')),
 		self::STATUS_CANCELED       => array('label' => 'Annulé', 'icon' => 'fas_times', 'classes' => array('danger')),
-		self::STATUS_TRANSFERED     => array('label' => 'Trtansféré', 'icon' => 'fas_sign-out-alt', 'classes' => array('important')),
+		self::STATUS_TRANSFERED     => array('label' => 'Transféré', 'icon' => 'fas_sign-out-alt', 'classes' => array('important')),
 	);
 
 	public static $types = array();
+
+	// Droits users :
+
+	public function canSetAction($action)
+	{
+		global $user;
+
+		switch ($action) {
+			case 'assign':
+				return $user->admin || $user->rights->bimpticket->assign;
+
+			case 'newStatus':
+				if ($user->admin || $user->rights->bimpticket->assign) {
+					return 1;
+				}
+				if ($this->getData('fk_user_assign') == $user->id) {
+					return 1;
+				}
+				return 0;
+		}
+
+		return parent::canSetAction($action);
+	}
 
 	// Getters booléens:
 
@@ -114,6 +139,41 @@ class Bimp_Ticket extends BimpDolObject
 			}
 		}
 
+		if ($this->isLoaded($errors)) {
+			$note = BimpObject::getInstance("bimpcore", "BimpNote");
+
+			$buttons[] = array(
+				'label'   => 'E-mail Tier',
+				'icon'    => 'fas_envelope',
+				'onclick' => $note->getJsLoadModalForm('default', 'Envoyer un e-mail au tiers', array(
+					'fields' => array(
+						"obj_type"    => "bimp_object",
+						"obj_module"  => $this->module,
+						"obj_name"    => $this->object_name,
+						"id_obj"      => $this->id,
+						'visibility'  => $note::BN_ALL,
+						'type_author' => $note::BN_AUTHOR_USER,
+						"type_dest"   => $note::BN_DEST_SOC
+					)
+				))
+			);
+			$buttons[] = array(
+				'label'   => 'E-mail Contact',
+				'icon'    => 'fas_envelope',
+				'onclick' => $note->getJsLoadModalForm('default', 'Envoyer un e-mail à un contact tiers', array(
+					'fields' => array(
+						"obj_type"    => "bimp_object",
+						"obj_module"  => $this->module,
+						"obj_name"    => $this->object_name,
+						"id_obj"      => $this->id,
+						'visibility'  => $note::BN_ALL,
+						'type_author' => $note::BN_AUTHOR_USER,
+						"type_dest"   => $note::BN_DEST_CONTACT
+					)
+				))
+			);
+		}
+
 		return $buttons;
 	}
 
@@ -142,6 +202,18 @@ class Bimp_Ticket extends BimpDolObject
 
 		return $options;
 	}
+
+	public function getDirOutput()
+	{
+		global $conf;
+		$ref = dol_sanitizeFileName($this->dol_object->ref);
+		if ($this->isLoaded() && $this->dol_object->entity > 0) {
+			return $conf->ticket->multidir_output[$this->dol_object->entity] . '/';
+		} else {
+			return $conf->ticket->dir_output . '/';
+		}
+	}
+
 
 	// Rendus HTML :
 
@@ -283,6 +355,10 @@ class Bimp_Ticket extends BimpDolObject
 
 			$errors = $this->updateField('fk_user_assign', $fk_user_assign);
 
+			if (BimpTools::isPostFieldSubmit('type_code')) {
+				$errors = BimpTools::merge_array($errors, $this->updateField('type_code', BimpTools::getPostFieldValue('type_code', $this->getData('type_code'), 'alphanohtml')));
+			}
+
 			if (!count($errors)) {
 				$this->checkUserAssigned(true, $init_user_assign);
 			}
@@ -388,7 +464,7 @@ class Bimp_Ticket extends BimpDolObject
 		}
 
 		return array(
-			'errors' => $errors,
+			'errors'    => $errors,
 			'wanrnings' => array()
 		);
 	}
@@ -440,6 +516,10 @@ class Bimp_Ticket extends BimpDolObject
 			}
 		}
 
+		if ($this->getData('email_msgid') == '') {
+			$this->updateField('email_msgid', randomPassword('35') . '@bimpticket');
+		}
+
 		return $errors;
 	}
 
@@ -456,5 +536,167 @@ class Bimp_Ticket extends BimpDolObject
 
 		return $errors;
 
+	}
+
+	// Méthodes statiques :
+
+	public static function getTicketsForUser($id_user, $tms = '', $options = array(), &$errors = array())
+	{
+		if ((int) BimpCore::getConf('mode_eco')) {
+			return array();
+		}
+
+		$data = array(
+			'tms'      => date('Y-m-d H:i:s'),
+			'elements' => array()
+		);
+
+		$bimp_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+		if (!BimpObject::objectLoaded($bimp_user)) {
+			return $data;
+		}
+
+		$bdb = self::getBdb();
+		$bimp_user->dol_object->loadRights();
+		$filters = array();
+
+		if ($tms) {
+			$filters['a.tms'] = array(
+				'operator' => '>',
+				'value'    => $tms
+			);
+		}
+
+		if (!empty($options['excluded_tickets'])) {
+			$filters['a.rowid'] = array(
+				'not_in' => $options['excluded_tickets']
+			);
+		}
+
+		$filters['a.fk_statut'] = array(
+			'operator' => '<',
+			'value'    => self::STATUS_CLOSED
+		);
+
+		$users_filters = array($id_user);
+
+//		if (...) { // todo : check droits users pour voir / assigner nouveaux tickets.
+		$users_filters = array_merge($users_filters, array(0, null));
+//		}
+
+		if ((int) BimpTools::getArrayValueFromPath($options, 'include_delegations', 1)) {
+			$users_delegations = $bdb->getValues('user', 'rowid', 'delegations LIKE \'%[' . $id_user . ']%\'');
+
+			if (!empty($users_delegations)) {
+				foreach ($users_delegations as $id_user_delegation) {
+					if ($id_user_delegation != $id_user) {
+						$users_filters[] = $id_user_delegation;
+					}
+				}
+			}
+		}
+
+		$filters['fk_user_assign'] = $users_filters;
+
+		$i = 0;
+		$tickets = array();
+
+		$sql = 'SELECT DISTINCT a.rowid';
+		$sql .= BimpTools::getSqlFrom('ticket');
+		$sql .= BimpTools::getSqlWhere($filters);
+		$sql .= BimpTools::getSqlOrderBy('datec', 'DESC', 'a');
+		$sql .= BimpTools::getSqlLimit(50);
+
+//		echo 'SQL : ' . $sql .'<br/><br/>';
+
+		$rows = $bdb->executeS($sql, 'array');
+
+		if (!is_array($rows)) {
+			$errors[] = 'Echec requête SQL : ' . $bdb->err();
+			return array();
+		}
+
+		foreach ($rows as $r) {
+			$t = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', (int) $r['rowid']);
+			if (!BimpObject::objectLoaded($t)) {
+				continue;
+			}
+
+			$status = (int) $t->getData('fk_statut');
+			$status_icon = '<span class="' . implode(' ', self::$status_list[$status]['classes']) . ' bs-popover" style="margin-right: 8px"';
+			$status_icon .= BimpRender::renderPopoverData(self::$status_list[$status]['label']) . '>';
+			$status_icon .= BimpRender::renderIcon(self::$status_list[$status]['icon']) . '</span>';
+
+			$user_author = $t->getChildObject('user_create');
+
+			$dest = '';
+			if ((int) $t->getData('fk_user_assign') !== $id_user) {
+				$user_assign = $t->getChildObject('user_assign');
+				if (BimpObject::objectLoaded($user_assign)) {
+					$dest = $user_assign->getName();
+				}
+			}
+
+			$nb_msgs = 0;
+
+			foreach ($users_filters as $id_u) {
+				if ((int) $id_u) {
+					$nb_msgs += $t->getNbNotesFormUser($id_u);
+				}
+			}
+
+			$nb_msgs = $t->getNbNotesFormUser($id_user);
+
+
+			$client = $t->getChildObject('client');
+
+			$ticket = array(
+				'id'            => $t->id,
+				'ref'           => $t->getRef(),
+				'sort_val'      => $t->getData('datec'),
+				'affected'      => (int) ($t->getData('fk_user_assign') > 0),
+				'status_icon'   => $status_icon,
+				'subj'          => $t->getData('subject'),
+				'src'           => $t->getData('origin_email'),
+				'txt'           => $t->displayData("message", 'default', false),
+				'date_create'   => $t->getData('datec'),
+				'url'           => DOL_URL_ROOT . '/bimpticket/index.php?fc=ticket&id=' . $t->id,
+				'can_begin'     => (int) ($t->canSetAction('newStatus') && $t->isActionAllowed('newStatus') && $status < self::STATUS_IN_PROGRESS && $status >= self::STATUS_READ),
+				'can_close'     => (int) ($t->canSetAction('newStatus') && $t->isActionAllowed('newStatus') && $status < self::STATUS_CLOSED && $status >= self::STATUS_IN_PROGRESS),
+				'can_attribute' => (int) ($t->canSetAction('assign') && $t->isActionAllowed('assign')),
+				'can_edit'      => (int) $t->can('edit'),
+				'author'        => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : ''),
+				'dest'          => $dest,
+				'nb_msgs'       => $nb_msgs,
+				'client'        => (BimpObject::objectLoaded($client) ? $client->getLink() : ''),
+			);
+
+			$tickets[] = $ticket;
+		}
+
+		$data['elements'] = $tickets;
+
+		return $data;
+	}
+
+	public function getMailToContacts()
+	{
+		$contacts = $return = array();
+		$contacts = $this->dol_object->liste_contact(-1, 'external');
+		foreach ($contacts as $contact) {
+			$return[$contact['email']] = $contact['lastname'] . ' ' . $contact['firstname'] . ' (' . $contact['email'] . ')';
+		}
+//		echo '<pre>';print_r($contacts);
+		return $return;
+	}
+
+	public function getMailFrom()
+	{
+		return BimpCore::getConf('mailReponse', '', 'bimpticket');
+	}
+
+	public function getObjectMail()
+	{
+		return 'Rép. : ' . $this->getData('subject');
 	}
 }

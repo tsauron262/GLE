@@ -45,8 +45,8 @@ class DoliDBMysqli extends DoliDB
 
 	/** @var bool|mysqli_result Resultset of last query */
 	private $_results;
-        
-        
+
+
         /*moddrsi (20.2)*/
         public $countReq = 0;
         public $countReq2 = 0;
@@ -314,7 +314,7 @@ class DoliDBMysqli extends DoliDB
 	 */
 	public function close()
 	{
-		if ($this->db) {
+		if ($this->db && defined('BIMP_READY_FOR_CLOSE_DB')) {
 			if ($this->transaction_opened > 0) {
 				dol_syslog(get_class($this)."::close Closing a connection with an opened transaction depth=".$this->transaction_opened, LOG_ERR);
 			}
@@ -339,10 +339,10 @@ class DoliDBMysqli extends DoliDB
 	public function query($query, $usesavepoint = 0, $type = 'auto', $result_mode = 0)
 	{
 		global $dolibarr_main_db_readonly, $user;
-                
+
                 /* moddrsi (20.2)*/
                 global $debugTime, $timestamp_debut;
-                
+
                 if (defined('BDD_2_HOST') && !defined('OFF_MULTI_SQL') && BDD_2_HOST != $this->database_host && (!defined('BDD_3_HOST') || BDD_3_HOST != $this->database_host)) {
                     $d1 = new Datetime();
                     if (stripos(trim($query), "SELECT") === 0) {
@@ -386,7 +386,7 @@ class DoliDBMysqli extends DoliDB
                         $_SESSION['dateOldModif'] = $d1->format('U');
                     }
                 }
-                
+
                 $this->countReq ++;
                 $timestamp_debut = microtime(true);
                 if ($debugTime) {
@@ -457,8 +457,8 @@ class DoliDBMysqli extends DoliDB
 			$this->lastquery = $query;
 			$this->_results = $ret;
 		}
-                
-                
+
+
                 /* moddrsi */
                 $timestamp_fin = microtime(true);
                 $difference_ms = $timestamp_fin - $timestamp_debut;
@@ -1412,7 +1412,7 @@ class DoliDBMysqli extends DoliDB
 
 		return $result;
 	}
-        
+
         /*moddrsi (20.2)*/
         public function catch($query, $ret, $e = null)
         {

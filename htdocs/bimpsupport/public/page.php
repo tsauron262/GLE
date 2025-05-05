@@ -29,11 +29,18 @@ global $db;
 
 
 function getSavsBySerial($serial) {
+	$savs = array();
     $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
     $rows = $equipment->getList(array(
         'serial' => $serial
     ));
-    
+	if(!count($rows) && strlen($serial) >= 10){
+		$rows = $equipment->getList(array(
+			'old_serial' => array('operator'=> 'like', 'value' => '%'.$serial.'%')
+		));
+	}
+
+
     foreach ($rows as $row) {
         $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
         $rows2 = $sav->getList(array(
@@ -72,7 +79,7 @@ if (isset($_GET['amp;user_name']))
 
 if (isset($_GET['user_name']))
     $_POST['user_name'] = $_GET['user_name'];
-    
+
 if (isset($_POST['user_name'])) {
     if (empty($_POST['user_name'])) {
         $errors[] = 'Veuillez saisir les trois premières lettres de votre nom.';
@@ -102,12 +109,11 @@ if (isset($_GET['savs'])) {
     }
 }
 
-
 if ($serial && $userName) {
     if(is_numeric($serial) && strlen($serial) < 10)//C'est l'id
         $savs = array($serial);
     else
-    $savs = getSavsBySerial($serial);
+    	$savs = getSavsBySerial($serial);
     if (!is_array($savs) || !count($savs)) {
         $errors[] = 'Aucun suivi SAV trouvé pour ce numéro de série.';
     }/* else if (count($savs) == 1) {
@@ -189,7 +195,7 @@ if ($id_sav) {
     $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $id_sav);
     $equipment = $sav->getChildObject('equipment');
     if($serial == $equipment->getData("serial")){
-    
+
         $tech = $sav->getChildObject("user_tech");
         $savRows[] = array("label" => "Technicien",
                             "value" =>($tech->id > 0)? $tech->dol_object->getFullName(1) : "");
@@ -233,7 +239,7 @@ if ($id_sav) {
         <div class="container">
             <div class="row">
                     <?php
-                    
+
                     /*Si erreur*/
                     if (count($errors)) {
                         echo '</div>';
@@ -246,10 +252,10 @@ if ($id_sav) {
                         echo '</div>';
                         echo '<div class="row">';
                     }
-                    
+
                     echo '<h1>Suivi SAV&nbsp;&nbsp;<i class="fa fa-hand-o-right"></i></h1>';
 
-                    
+
                     $tabTextEtat = array("Nouveau" => "Nous allons bientot commencer le diagnostic de votre machine.",
                         "Examen en cours" => "Nous avons commencé le diagnostic de votre produit",
                         "Attente client" => "Nous attendons une information de votre part. Merci de nous contacter",
@@ -257,7 +263,7 @@ if ($id_sav) {
                         "Pièce reçu" => "Nous avons reçu la pièce commandée et elle est en cous de remontage",
                         "Terminé" => "Votre produit est terminé et à votre disposition",
                         "Fermé" => "Ce dossier est pour nous clôturé");
-                    
+
                     /* si liste des SAV*/
                     if (count($savRows)) {// si sav seul
                         if(isset($sav->societe) && is_object($sav->societe))
@@ -272,12 +278,12 @@ if ($id_sav) {
                         echo '<i class="fa fa-search left"></i>Nouvelle recherche</a>';
                         echo '</div></div>';
                         echo '<div class="row">';
-                        
+
                         if(isset($etat)){
                             if(isset($tabTextEtat[$etat]))
                                 echo "<h3>ETAT d'avancement : ".$tabTextEtat[$etat] . " </h3><br/><br/>";
                         }
-                        
+
                         echo '<table><thead></thead><tbody>';
                         $firstLoop = true;
                         foreach ($savRows as $r) {
@@ -316,7 +322,7 @@ if ($id_sav) {
                             echo '<td>' . $savInfos['etat'] . '</td>';
                             echo '<td>' . $savInfos['ref'] . '</td>';
                             echo '<td>' . $savInfos['date_create'] . '</td>';
-                            
+
                             echo "<td>";
                              if(isset($tabTextEtat[$etat]))
                                 echo $tabTextEtat[$etat];
@@ -331,7 +337,7 @@ if ($id_sav) {
                         }
                         echo '</tbody></table></div>';
                         echo '<div class="row">';
-                    }  
+                    }
 
                     if (!count($savRows) && !count($savsList)) {
                         echo '</div>';
@@ -347,7 +353,8 @@ if ($id_sav) {
                         echo '</div>';
                         echo '<div class="row">';
                         echo '<div class="col-lg-10 col-lg-offset-1">';
-                        echo '<input type="submit" value="Rechercher" class="butAction pull-right"/>';
+						echo '<input type="hidden" value="'.newToken().'" name="token"/>';
+						echo '<input type="submit" value="Rechercher" class="butAction pull-right"/>';
                         echo '</div>';
                         echo '</div>';
                         echo '</form>';

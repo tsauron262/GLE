@@ -3,3 +3,15 @@ fields:
         required: 0
     email:
         required: 0
+    fk_pays:
+        default_value: 0
+        
+        
+filters_panel:
+    default:
+        filters:
+            statut: unset
+            fk_departement: unset
+            phone_perso: unset
+            phone_mobile: unset
+            fax: unset

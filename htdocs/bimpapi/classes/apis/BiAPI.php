@@ -15,14 +15,16 @@ class BiAPI extends BimpAPI
 	public static $default_accept = 'text/xml';
 	public static $urls_bases = array(
 		'default' => array(
-			'prod' => 'http://ven-bi-1/OLAP/',
+			'prod' => 'https://erp.bimp.fr/bimp/bimpapi/public/',
+//			'prod' => 'http://172.24.2.31/OLAP/',
 			'test' => ''
 		)
 	);
 	public static $requests = array(
 		'req' => array(
 			'label'         => 'Requête',
-			'url'           => 'msmdpump.dll',
+//			'url'           => 'msmdpump.dll',
+			'url'           => 'rebond.php',
 			'content_type' 	=> 'text/xml',
 		),
 	);
@@ -35,7 +37,7 @@ class BiAPI extends BimpAPI
   <soap:Body>
     <Execute xmlns="urn:schemas-microsoft-com:xml-analysis">
       <Command>
-        <Statement>'.$req.'</Statement>
+        <Statement>'.str_replace('<br>', '', $req).'</Statement>
       </Command>
       <Properties>
         <PropertyList>
@@ -59,17 +61,65 @@ class BiAPI extends BimpAPI
 		), $errors);
 
 
-//		$ch = curl_init($this->getParam('url'));
-//		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: text/xml'));
-//		curl_setopt($ch, CURLOPT_HEADER, 1);
-//		curl_setopt($ch, CURLOPT_USERPWD, $this->getParam('login') . ":" . $this->getParam('mdp'));
-//		curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-//		curl_setopt($ch, CURLOPT_POST, 1);
-//		curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
-//		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-//		$return = curl_exec($ch);
-//		curl_close($ch);
-		return $return;
+
+		$return = '<?xml version="1.0" encoding="utf-8"?>'.str_ireplace(['SOAP-ENV:', 'SOAP:'], '', $return);
+		libxml_use_internal_errors(true);
+		$objXmlDocument = simplexml_load_string($return);
+
+		if ($objXmlDocument == FALSE) {
+			echo "There were errors parsing the XML file.\n";
+			foreach(libxml_get_errors() as $error) {
+				echo $error->message;
+			}
+			exit;
+		}
+		$objJsonDocument = json_encode($objXmlDocument->Body->ExecuteResponse->return->root);
+		$arrOutput = json_decode($objJsonDocument, TRUE);
+
+		$newTab = array();
+//		$tabConvert = array(
+//			'Vendeurs_x005B_Nom_x005D_'=> 'Name',
+//			'Vendeurs_x005B_FreeShipping_x005D_'=> 'FreeShipping',
+//			'_x005B_CA_x0020_Total_x0020_HT_x005D_'=> 'ca',
+//		);
+		foreach($arrOutput['row'] as $ln){
+			$cat = 0;
+			$name = $ln['Vendeurs_x005B_VendeurNomSociete_x005D_'];
+			$shopId = $ln['orders_x005B_shop_id_x005D_'];
+			if(isset($ln['_x005B_CA_x0020_par_x0020_Cat_x005D_'])){
+				$val = $ln['_x005B_CA_x0020_par_x0020_Cat_x005D_']*10 / 10;
+			}
+			elseif(isset($ln['_x005B_CA_x0020_Total_x0020_HT_x005D_'])){
+				$val = $ln['_x005B_CA_x0020_Total_x0020_HT_x005D_']*10 / 10;
+			}
+			if(isset($ln['FamillesProduitsSite_x005B_Level_2_Name_x005D_'])){
+				$cat = $ln['FamillesProduitsSite_x005B_Level_2_Name_x005D_'];
+			}
+
+			if(isset($ln['FamillesProduitsSite_x005B_Level_3_Name_x005D_'])){
+				$cat .= '%$'.$ln['FamillesProduitsSite_x005B_Level_3_Name_x005D_'];
+			}
+			if(isset($ln['FamillesProduitsSite_x005B_Level_4_Name_x005D_'])){
+				$cat .= '%$'.$ln['FamillesProduitsSite_x005B_Level_4_Name_x005D_'];
+			}
+			if(isset($ln['FamillesProduitsSite_x005B_Level_5_Name_x005D_'])){
+				$cat .= '%$'.$ln['FamillesProduitsSite_x005B_Level_5_Name_x005D_'];
+			}
+
+			if($name != '')
+				$newTab[$shopId][$cat] = $val;
+		}
+
+		return $newTab;
+	}
+
+	public function getDefaultCurlOptions($request_name, &$errors = array())
+	{
+		$options = array(
+			CURLOPT_SSL_VERIFYHOST => false,
+			CURLOPT_SSL_VERIFYPEER => false
+		);
+		return $options;
 	}
 
 	public function getDefaultRequestsHeaders($request_name, &$errors = []){
@@ -86,16 +136,127 @@ class BiAPI extends BimpAPI
 
 	public function testRequest(&$errors = array(), &$warnings = array())
 	{
-		$return = $this->sendReq('SUMMARIZECOLUMNS(
-	Vendeurs[Nom],
-	Vendeurs[FreeShipping],
-	KEEPFILTERS( TREATAS( {2025}, Calendrier[Année] )),
-"CA Total HT", [CA Total HT]
+		$this->majCaWithNbDay(10, $warnings, $errors);
+
+
+//		$mois = array("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12");
+//		$annee = array("2024", "2025");
+//		$categorie = 0;
+//		$this->majCa($annee, $mois, 0, $warnings, $errors);
+	}
+
+	public function majCaWithNbDay($nbDay, &$warnings = array(), &$errors = array()){
+		$date = new DateTime();
+		$date->modify('-'.$nbDay.' day');
+		$mois = array($date->format('m'));
+		$annee = array($date->format('Y'));
+		$this->majCa($annee, $mois, 0, $warnings, $errors);
+		$this->majCa($annee, $mois, 1, $warnings, $errors);
+	}
+
+	public function majCa($annee, $mois = array(), $categ = 0, &$warnings = array(), &$errors = array())
+	{
+		foreach ($annee as $val) {
+			$return = $this->traiteStats($val, 0, $categ, $warnings);
+//			$warnings[] = "<pre>".print_r($return,1);
+			foreach($mois as $val2){
+				$return = $this->traiteStats($val, $val2, $categ, $warnings);
+//				$warnings[] = "<pre>".print_r($return,1);
+			}
+		}
+		$warnings2 = array();
+		foreach($warnings as $msg){
+			if(!in_array($msg, $warnings2))
+				$warnings2[] = $msg;
+		}
+		$warnings = $warnings2;
+	}
+
+	public function getStats($annee, $mois = 0, $catergorie = 0){
+		$req = 'EVALUATE SUMMARIZECOLUMNS(
+	Vendeurs[VendeurNomSociete],
+	orders[shop_id],';
+		if ($catergorie){
+			$req .= '
+     FamillesProduitsSite[Level_2_Name],
+    FamillesProduitsSite[Level_3_Name],
+    FamillesProduitsSite[Level_4_Name],
+    FamillesProduitsSite[Level_5_Name],';
+		}
+		$req .= 'KEEPFILTERS( TREATAS( {'.$annee.'}, Calendrier[Année] )),';
+		if($mois > 0){
+			$req .= 'KEEPFILTERS( TREATAS( {'.(int) $mois.'}, Calendrier[Mois Numéro] )),';
+		}
+		$req .= '"CA Total HT", [CA Total HT]
 )
 ORDER BY
-    Vendeurs[Nom] ASC,
-    Vendeurs[FreeShipping] ASC');
-		$warnings[] = $return;
+    Vendeurs[VendeurNomSociete] ASC';
+
+	$return = $this->sendReq($req);
+		return $return;
+	}
+
+	public function traiteStats($annee, $mois = 0, $catergorie = 0, &$warnings = array())
+	{
+		BimpObject::loadClass('bimpcore', 'Bimp_ChiffreAffaire');
+		$errors = array();
+		$ok = $bad = 0;
+		$return = $this->getStats($annee, $mois, $catergorie);
+//		echo '<pre>';print_r($return);die;
+
+		$dict = BimpDict::getDictionnary('ca_categories');
+
+		foreach ($return as $key => $tabT) {
+			foreach ($tabT as $cat => $val) {
+				$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('shopId' => $key));
+//				if (!$soc || !$soc->isLoaded()) {
+//					$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('name_alias' => $key));
+//				}
+				if (!$soc || !$soc->isLoaded()) {
+					$warnings[] = 'Societe introuvable : ' . $key;
+					$bad++;
+				} else {
+					$ok++;
+					if ($mois == 0) {
+						$date = $annee . '-01-01';
+					} else {
+						$date = $annee . '-' . $mois . '-01';
+					}
+					$dataFiltre = array(
+						'id_obj'       => $soc->id,
+						'type_obj'     => 0,
+						'fk_period'    => ($mois == 0) ? 0 : 3,
+						'debut_period' => $date,
+					);
+
+					if ($cat != 0) {
+						$tabCat = explode('%$', $cat);
+						for($i=1;$i<5;$i++){
+//						foreach($tabCat as $i => $cat){
+							if(isset($tabCat[$i-1]))
+								$cat = $tabCat[$i-1];
+							else
+								$cat = 'N/C';
+							$cat = $dict->getByValue($cat, true, true);
+							if($i == 1)
+								$dataFiltre['fk_category'] = $cat;
+							else
+								$dataFiltre['fk_category'.$i] = $cat;
+						}
+					}
+					else
+						$dataFiltre['fk_category'] = 0;
+
+
+					$data = array(
+						'ca' => $val
+					);
+					BimpObject::createOrUpdateBimpObject('bimpcore', 'Bimp_ChiffreAffaire', $dataFiltre, $data, true, true, $errors, $warnings);
+				}
+			}
+		}
+		if($bad > 0)
+			return $ok.' Ok'.' '.$bad.' Bad'.print_r($warnings,1).print_r($errors,1);
 	}
 
 

@@ -13,6 +13,7 @@ common_fields: 0
 nom_url:
     syntaxe: <ref>
 
+
 header_list_name: default
 header_edit_form: default
 header_btn:
@@ -85,12 +86,11 @@ fields:
         type: percent
         default_value: 0
     
-    type:
+    type_code:
         label: Type
         values:
-            dict:
-                code: bimp_ticket_types
-                include_empty: 1
+            dict: bimp_ticket_types
+        default_value: ''
     
     origin_email:
         label: Adresse Email source
@@ -156,11 +156,15 @@ fields:
     date_close:
         label: Date de clôture
         type: datetime
+        
+        
+    email_msgid:
+        label: ID message
 
 forms:
     default:
         rows:
-            -   field: type
+            -   field: type_code
             -   field: fk_soc
             -   field: subject
             -   field: message
@@ -169,7 +173,8 @@ forms:
         rows:
             -   field: fk_user_assign
                 label: Assigner à
-            -   field: type
+            -   field: type_code
+                reload_btn: 1
             -   field: fk_soc
             -   custom: 1
                 label: Contact client suivi
@@ -286,7 +291,11 @@ forms:
                     
     assign: 
         rows:
+            -   field: type_code
+                show: 
+                    callback: isLoaded
             -   field: fk_user_assign
+                required: 1
                 label: Assigner à
 
 fields_tables:
@@ -294,7 +303,7 @@ fields_tables:
         title: Informations
         icon: info-circle
         rows:
-            -   field: type
+            -   field: type_code
             -   field: subject
             -   field: message
     
@@ -314,10 +323,10 @@ views:
                     -   type: view
                         view:
                             name: fiche
-            -   cols:
-                    -   type: custom
-                        custom:
-                            callback: renderNotesList
+#            -   cols:
+#                    -   type: custom
+#                        custom:
+#                            callback: renderNotesList
     
     fiche:
         rows:
@@ -325,14 +334,20 @@ views:
                     -   type: fields_table
                         fields_table:
                             name: infos
-                        col_lg: 6
-                        col_md: 6
-                    
+                        col_lg: 12
+                        col_md: 12
+                        
+            -   cols:
+                    -   type: custom
+                        custom:
+                            callback: renderNotesList
+                            
+            -   cols:
                     -   type: fields_table
                         fields_table:
                             name: client_infos
-                        col_lg: 6
-                        col_md: 6
+                        col_lg: 12
+                        col_md: 12
             -   cols:
                     -   type: custom
                         custom:
@@ -346,10 +361,10 @@ views:
 filters_panels:
     default:
         filters:
-            type:
+            type_code:
             fk_soc:
             fk_statut:
-            fk_user_assigned:
+            fk_user_assign:
             datec:
 
 lists:
@@ -362,7 +377,7 @@ lists:
             -   label: supprimer les tickets sélectionnés
                 icon: fas_trash-alt
                 onclick: deleteSelectedObjects('list_id', $(this))
-        sort_field: date_create
+        sort_field: datec
         sort_way: desc
         n: 10
         add_form_name: create
@@ -375,8 +390,35 @@ lists:
         cols:
             ref:
             fk_statut:
-            type:
+            type_code:
             subject:
             datec:
             fk_soc:
-            fk_user_assigned:
+            fk_user_assign:
+                
+    client: 
+        extends: default
+        cols:
+            fk_soc: unset
+
+stats_lists_cols:
+    nb_tickets:
+        label: Nb tickets
+        type: count
+        data_type: int
+        
+    avg_resolution:
+        label: Délai de résolution (en jours / moyenne)
+        type: avg
+        field: resolution
+
+stats_lists:
+    default:
+        filters_panel: default
+        group_by_options:
+            - fk_statut
+            - type_code
+            - fk_soc
+            - fk_user_assign
+        cols:
+            nb_tickets:

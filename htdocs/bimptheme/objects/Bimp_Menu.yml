@@ -23,7 +23,7 @@ fields:
         required: 1
     
     code_path:
-        label: Chemins codes
+        label: Code chemin
         required: 1
     
     fk_menu:

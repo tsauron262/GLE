@@ -79,6 +79,8 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpLayout.php';
 	require_once $dir . 'BimpDict.php';
 
+	BimpController::initErrorsHandler();
+
 
     require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 

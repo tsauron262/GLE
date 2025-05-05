@@ -26,6 +26,19 @@ sections:
                 view:
                     object: client
                     name: default
+          - id: ca
+            title: CA
+            ajax_render_method:
+                object: client
+                method: renderView
+                params:
+                    - ca
+            icon: fas_chart-bar
+#            struct:
+#                type: view
+#                view:
+#                    object: client
+#                    name: ca
           - id: contact
             title: Contacts
             icon: fas_address-book
@@ -48,15 +61,16 @@ sections:
 
           - id: tickets
             title: Tickets
-            icon: fas_calendar-check
+            icon: fas_ticket-alt
             ajax_render_method:
                 object: client
                 method: renderLinkedObjectList
                 params:
-                    - btk_tickets
+                    - bimp_tickets
                         
           - id: all_files
             title: Fichiers
+            icon: fas_folder-open
             struct:
                 type: list
                 list:

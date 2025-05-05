@@ -1,8 +1,18 @@
+# Entité RDC
+
 table: societe
 controller: client_rdc
 
 header_edit_form: form_client_rdc
 
+nom_url:
+    syntaxe: <name>
+    
+    
+labels:
+    name: Marchant
+    is_female: 0
+        
 objects:
     user_attr:
         extends: user
@@ -15,13 +25,13 @@ objects:
         instance:
             bimp_object: Bimp_Concurrence
     chiffre_affaire:
-        relation: hasOne
+        relation: hasMany
         delete: 1
         instance:
             bimp_object: Bimp_ChiffreAffaire
         list:
             filters:
-                type_obj: 0
+                type_obj: Bimp_Societe
                 id_obj:
                     callback:
                         method: getData
@@ -49,12 +59,12 @@ fields:
         type: date
     fk_priorite:
         label: Priorité
+        type: int
         values:
-            array:
-                callback:
-                    method: getPriorities
+            dict: societe_rdc_priorities                    
     fk_statut_rdc:
         label: Prospection
+        type: int
         values:
             array: statusRdc
     date_changement_statut_rdc:
@@ -62,13 +72,17 @@ fields:
         type: date
     delai_ouverture:
         label: Délai ouverture
-        type: number
+        type: int
     fk_source_rdc:
         label: Source
+        type: int
         values:
-            array:
-                callback:
-                    method: getSourcesRdc
+            dict: societe_rdc_sources
+    fk_statut_kyc:
+        label: Statut KYC
+        type: int
+        values:
+            array: statut_kyc_list
     contrefacon:
         label: Suspition de contrefaçon
         type: bool
@@ -92,6 +106,53 @@ fields:
     commentaire_rdc:
         label: Commentaires
         type: text
+    url:
+        label: Site internet marchand
+    date_maj_mirakl:
+        label: Date de mise à jour Mirakl
+        type: datetime
+    commentaire_statut_ko:
+        label: Commentaire statut KO
+    potentiel_catalogue:
+        label: Potentiel catalogue
+        type: qty
+        unsigned: 0
+    fk_categorie_maitre:
+        label: Catégorie Maitre
+        type: items_list
+        values:
+            dict: societe_rdc_cat_maitre
+        items_data_type: int
+        items_braces: 1
+
+    presta_source:
+        label: Prestataire/Agrégateur
+        input:
+            extra_content: '<p style="margin-top:1em; color: red;">Obligatoire si la source est "Prestataire/Agrégateur"</p>'
+    quality_score:
+        label: Qualité
+        type: float
+    name_alias:
+        label: Nom de la boutique
+    
+        
+    outstanding_limit: unset
+    outstanding_limit_credit_check: unset
+    outstanding_limit_manuel: unset
+    outstanding_limit_manuel_old: unset
+    outstanding_limit_atradius: unset
+    date_atradius: unset
+    date_rappel_atradius: unset
+    date_demande_atradius: unset
+    status_atradius: unset
+    outstanding_limit_icba: unset
+    date_depot_icba: unset
+    id_atradius: unset
+    id_contact_relances: unset
+    filters: unset
+    fk_pays:
+        default_value: 0
+    code_client: unset
 
 fields_tables:
     identity_rdc:
@@ -112,6 +173,7 @@ fields_tables:
             - label: Adresse
               value:
                   callback: displayFullAddress
+            - field: url
             - field: commentaire_rdc
     
     param_rdc:
@@ -119,25 +181,29 @@ fields_tables:
         icon: fas_briefcase
         rows:
             - field: shopid
+            - field: date_maj_mirakl
             - field: name_alias
-              label: Nom de la boutique
-              edit: 1
+            - label: Lien Mirakl
+              value:
+                  callback: getMiraklLink
             - field: date_der_contact
             - field: date_debut_prospect
             - field: date_ouverture
             - field: fk_priorite
-              edit:
-                  callback:
-                      method: isUserInGroup
-                      params:
-                          - BD
-            - field: fk_statut_rdc
-            - field: date_changement_statut_rdc
+#            - field: fk_statut_rdc
+#            - field: date_changement_statut_rdc
+#            - field: fk_statut_kyc
             - field: delai_ouverture
             - field: fk_source_rdc
-            - field: contrefacon
-            - field: fk_group_rdc
+            - field: presta_source
+#            - field: quality_score
+            - label: Suspition de contrefaçon
+              value:
+                  callback: getContrefacon
+#            - field: fk_group_rdc
             - field: fk_user_attr_rdc
+            - field: fk_categorie_maitre
+            - field: potentiel_catalogue
     
     commentaires:
         title: Commentaires
@@ -179,16 +245,31 @@ views:
                     fields_table:
                         name: param_rdc
                   
-                  -   type: custom
-                      col_lg: 12
-                      col_md: 12
-                      col_sm: 12
-                      custom:
-                          callback:
-                              method: renderChildrenList
-                              params:
-                                  - chiffre_affaire
-                                  - default
+                  - type: custom
+                    col_lg: 6
+                    col_md: 6
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenList
+                            params:
+                                - concurrence
+                                - default
+                  
+    ca:
+        title: CA
+        rows:
+              - cols:
+                  - type: custom
+                    col_lg: 12
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                      callback:
+                          method: renderChildrenList
+                          params:
+                              - chiffre_affaire
+                              - default
                   - type: custom
                     col_lg: 6
                     col_md: 12
@@ -208,27 +289,59 @@ views:
                             method: renderChildrenGraph
                             params:
                                 - chiffre_affaire
-                                - evol
-                  
+                                - rep2
                   - type: custom
                     col_lg: 6
-                    col_md: 6
+                    col_md: 12
                     col_sm: 12
                     custom:
                         callback:
-                            method: renderChildrenList
+                            method: renderChildrenGraph
                             params:
-                                - concurrence
-                                - default
+                                - chiffre_affaire
+                                - rep3
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - rep4
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - evol
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - evol2
 
 forms:
     default:
         extends: form_client_rdc
+        
     form_client_rdc:
         title: Ajout d'un client
         rows:
             Nom:
                 field: nom
+            boutique:
+                field: name_alias
             Filiale:
                 field: is_subsidiary
             Téléphone:
@@ -243,23 +356,29 @@ forms:
                 field: town
             Pays:
                 field: fk_pays
+            Site internet marchand:
+                field: url
             Shop ID:
                 field: shopid
-                edit:
-                    callback: isShopIdEditable
             Priorité:
                 field: fk_priorite
-                edit:
-                    callback:
-                        method: isUserInGroup
-                        params:
-                            - BD
             Prospection:
                 field: fk_statut_rdc
-                edit:
-                    callback: isProspectionEditable
+            Commentaire statut KO:
+                field: commentaire_statut_ko
+                required:
+                    callback: isCommentaireStatutKoRequired
+            fk_categorie_maitre:
+                field: fk_categorie_maitre
             Source:
-                field: fk_source
+                field: fk_source_rdc
+            Agrégateur:
+                field: presta_source
+                display_if:
+                    field_name: fk_source_rdc
+                    show_values:
+                        callback:
+                            method: getIdSourcePresta                
             Suspition de contrefaçon:
                 field: contrefacon
             Groupe:
@@ -268,7 +387,10 @@ forms:
                 field: fk_user_attr_rdc
             Commentaires:
                 field: commentaire_rdc
-    
+            Potenitel catalogue:
+                field: potentiel_catalogue
+                
+                
     formActionRdc:
         title: Choisir une action
         rows:
@@ -280,9 +402,91 @@ forms:
                   options:
                       callback: getListButtons
 
+filters_panels:
+    default:
+        filters:
+            fk_statut_rdc:
+            fk_statut_kyc:
+            fk_priorite:
+            fk_categorie_maitre:
+            fk_source_rdc:
+            date_der_contact:
+            date_debut_prospect:
+            date_ouverture:
+            fk_pays:
+            fk_typent: unset
+            code_compta: unset
+            code_client: unset
+            siret: unset
+            siren: unset
+            ape: unset
+            rpps: unset
+            commerciaux: unset
+            secteuractivite: unset
+            marche: unset
+            address: unset
+            zip: unset
+            town: unset
+            email: unset
+            phone: unset
+            status: unset
+            solvabilite_status: unset
+            
+                
+
+lists_cols:
+    flag_import:
+        label: Flag
+        value:
+            callback: getFlagImport
+            
+
 lists:
     default:
         title: Liste des clients
         object: client
         add_btn_label: Nouvelle société
         add_form_name: form_client_rdc
+
+    rdc:
+        configurable: 1
+        checkboxes: 1
+        title: Liste des Marchands
+        filters_panel: default
+        bulk_actions:
+            -   label: supprimer les société sélectionnées
+                icon: fas_trash-alt
+                onclick: deleteSelectedObjects('list_id', $(this))
+        object: client
+        add_btn_label: Nouveau marchand
+        add_form_name: form_client_rdc
+        sort_field: name_alias
+        sort_way: ASC
+        page_btn: 1
+        modal_view: default
+        edit_btn: 1
+        cols:
+            shopid:
+            nom:
+            name_alias:
+            fk_statut_rdc:
+            fk_statut_kyc:
+            full_address:
+            infos_contact:
+            date_der_contact:
+            date_debut_prospect:
+            fk_priorite:
+            flag_import:
+                label: Flag
+
+
+stats_lists:
+    default:
+        group_by_options:
+            - fk_categorie_maitre
+            - fk_statut_rdc
+            - fk_priorite
+            - fk_source_rdc
+            - fk_statut_kyc
+            - fk_group_rdc
+            - fk_user_attr_rdc

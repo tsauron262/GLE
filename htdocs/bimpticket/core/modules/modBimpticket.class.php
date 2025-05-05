@@ -61,7 +61,7 @@ class modBimpticket extends DolibarrModules
 		$this->picto = 'generic';
 
 		$this->module_parts = array(
-			'hooks'  => array('printTopRightMenu', 'toprightmenu', "searchform"),  // Set here all hooks context you want to support)
+			'hooks'  => array('printTopRightMenu', 'toprightmenu', "searchform", "emailcolector", "emailcollectorcard"),  // Set here all hooks context you want to support)
 			"models" => 1
 		);
 
@@ -71,17 +71,10 @@ class modBimpticket extends DolibarrModules
 		$this->rights = array();  // Permission array used by this module
 		$r = 0;
 		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Voir, créer et modifier les tickets'; // Permission label
+		$this->rights[$r][1] = 'Assigner les tickets'; // Permission label
 		$this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'read';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+		$this->rights[$r][4] = 'assign';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 		$this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-		$r++;
-
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Supprimer les tickets'; // Permission label
-		$this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'delete';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-		$this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2
 		$r++;
 
 		$this->menu = array();
@@ -108,72 +101,108 @@ class modBimpticket extends DolibarrModules
 			return 0;
 		}
 
+		$errors = array();
+		$bdb = BimpCache::getBdb();
+
 		$name = 'module_version_' . strtolower($this->name);
 
 		if (BimpCore::getConf($name, '') === "") {
 			BimpCore::setConf($name, floatval($this->version));
-			$bdb = BimpCache::getBdb();
 			if (!$bdb->executeFile(DOL_DOCUMENT_ROOT . '/' . strtolower($this->name) . '/sql/install.sql')) {
 				setEventMessage('Echec exécution du fichier install.sql - ' . $bdb->err(), 'errors');
 			}
 		}
 
-		if (!(int) BimpCache::getBdb()->getValue('bimpcore_dictionnary', 'id', 'code = \'bimp_ticket_types\'')) {
-			$errors = array();
-
-			$dict = BimpDict::addDefaultDictionnary('bimp_ticket_types', 'Types de ticket');
+		if (!(int) $bdb->getValue('bimpcore_dictionnary', 'id', 'code = \'bimp_ticket_types\'')) {
+			$dict = BimpDict::addDolDictionnary('bimp_ticket_types', 'Types de ticket', 'c_ticket_type', 45, array(
+				'use_default' => array('type' => 'bool', 'default' => 0),
+				'description' => array('default' => '')
+			), array(
+				'key_field' => 'code',
+				'key_data_type' => 'string',
+				'position_field' => 'pos',
+			), $errors);
 
 			if (BimpObject::objectLoaded($dict)) {
-				BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
-					'id_dict' => $dict->id,
-					'code'    => 'INT',
-					'label'   => 'Intégration'
-				), true, $errors);
-				BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
-					'id_dict' => $dict->id,
-					'code'    => 'OFF',
-					'label'   => 'Offres'
-				), true, $errors);
-				BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
-					'id_dict' => $dict->id,
-					'code'    => 'CM',
-					'label'   => 'Création marque'
-				), true, $errors);
-				BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
-					'id_dict' => $dict->id,
-					'code'    => 'LIV',
-					'label'   => 'Livraison'
-				), true, $errors);
-				BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
-					'id_dict' => $dict->id,
-					'code'    => 'FDP',
-					'label'   => 'Frais de port'
-				), true, $errors);
-				BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
-					'id_dict' => $dict->id,
-					'code'    => 'ERRPROD',
-					'label'   => 'Erreur fiche produit'
-				), true, $errors);
-				BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
-					'id_dict' => $dict->id,
-					'code'    => 'API',
-					'label'   => 'API'
-				), true, $errors);
-				BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
-					'id_dict' => $dict->id,
-					'code'    => 'PROM',
-					'label'   => 'Promotion'
-				), true, $errors);
-				BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
-					'id_dict' => $dict->id,
-					'code'    => 'SOL',
-					'label'   => 'Soldes'
-				), true, $errors);
+				$bdb->delete('c_ticket_type', '1', true);
+				if ($bdb->insert('c_ticket_type', array(
+						'code'        => 'INT',
+						'label'       => 'Intégration',
+						'use_default' => 0,
+						'pos'         => '01'
+					)) <= 0) {
+					$errors[] = 'Echec insertion type ticket - ' . $bdb->err();
+				}
+				$bdb->insert('c_ticket_type', array(
+					'code'        => 'OFF',
+					'label'       => 'Offres',
+					'use_default' => 0,
+					'pos'         => '02'
+				));
+				$bdb->insert('c_ticket_type', array(
+					'code'        => 'CM',
+					'label'       => 'Création marque',
+					'use_default' => 0,
+					'pos'         => '03'
+				));
+				$bdb->insert('c_ticket_type', array(
+					'code'        => 'LIV',
+					'label'       => 'Livraison',
+					'use_default' => 0,
+					'pos'         => '04'
+				));
+				$bdb->insert('c_ticket_type', array(
+					'code'        => 'FDP',
+					'label'       => 'Frais de port',
+					'use_default' => 0,
+					'pos'         => '05'
+				));
+				$bdb->insert('c_ticket_type', array(
+					'code'        => 'ERRPROD',
+					'label'       => 'Erreur fiche produit',
+					'use_default' => 0,
+					'pos'         => '06'
+				));
+				$bdb->insert('c_ticket_type', array(
+					'code'        => 'API',
+					'label'       => 'Problèmes API',
+					'use_default' => 0,
+					'pos'         => '07'
+				));
+				$bdb->insert('c_ticket_type', array(
+					'code'        => 'PROMO',
+					'label'       => 'Promotion',
+					'use_default' => 0,
+					'pos'         => '08'
+				));
+				$bdb->insert('c_ticket_type', array(
+					'code'        => 'SOL',
+					'label'       => 'Solde',
+					'use_default' => 0,
+					'pos'         => '09'
+				));
+				$bdb->insert('c_ticket_type', array(
+					'code'        => 'OTHER',
+					'label'       => 'Autre',
+					'use_default' => 0,
+					'pos'         => '10'
+				));
 			}
+		}
 
-			if (count($errors)) {
-				setEventMessage(BimpTools::getMsgFromArray($errors), 'errors');
-			}
+		if (!(int) $bdb->getValue('bimp_notification', 'id', 'method = \'getTicketsForUser\'')) {
+			BimpObject::createBimpObject('bimpcore', 'BimpNotification', array(
+				'label'  => 'Tickets en cours',
+				'nom'    => 'notif_ticket',
+				'module' => 'bimpticket',
+				'class'  => 'Bimp_Ticket',
+				'method' => 'getTicketsForUser',
+				'active' => 1
+			), true, $errors);
+		}
+
+		if (count($errors)) {
+			setEventMessage(BimpTools::getMsgFromArray($errors), 'errors');
 		}
 
 		return $this->_init($sql, $options);

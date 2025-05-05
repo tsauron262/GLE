@@ -1226,6 +1226,7 @@ class Ticket extends CommonObject
 
 				$dir = DOL_DATA_ROOT.'/'.$this->element.'/'.$this->ref;
 				// For remove dir
+				require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 				if (dol_is_dir($dir)) {
 					if (!dol_delete_dir_recursive($dir)) {
 						$this->errors[] = $this->error;
@@ -2960,7 +2961,8 @@ class Ticket extends CommonObject
 								$url_public_ticket = (getDolGlobalInt('TICKET_ENABLE_PUBLIC_INTERFACE') ?
 										(getDolGlobalString('TICKET_URL_PUBLIC_INTERFACE') !== '' ? getDolGlobalString('TICKET_URL_PUBLIC_INTERFACE') . '/view.php' : dol_buildpath('/public/ticket/view.php', 2)) : dol_buildpath('/ticket/card.php', 2)).'?track_id='.$object->track_id;
 
-								$message .= '<br>'.$langs->trans('TicketNewEmailBodyInfosTrackUrlCustomer').' : <a href="'.$url_public_ticket.'">'.$object->track_id.'</a><br>';
+								if(getDolGlobalInt('TICKET_ENABLE_PUBLIC_INTERFACE'))
+									$message .= '<br>'.$langs->trans('TicketNewEmailBodyInfosTrackUrlCustomer').' : <a href="'.$url_public_ticket.'">'.$object->track_id.'</a><br>';
 
 								// Build final message
 								$message = $message_intro.'<br><br>'.$message;

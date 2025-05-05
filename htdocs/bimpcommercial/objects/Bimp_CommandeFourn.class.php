@@ -836,12 +836,15 @@ class Bimp_CommandeFourn extends BimpCommAchat
             0 => 'Nouvelle facture'
         );
 
-        $factures = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureFourn', array(
-                    'fk_statut' => 0,
-                    'fk_soc'    => (int) $this->getData('fk_soc'),
-                    /* 'entrepot'  => (int) $this->getData('entrepot'), */
-                    'ef_type'   => $this->getData('ef_type')
-        ));
+		$filters = array(
+			'fk_statut' => 0,
+			'fk_soc'    => (int) $this->getData('fk_soc'),
+			/* 'entrepot'  => (int) $this->getData('entrepot'), */
+		);
+		$factureFourn = BimpObject::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn');
+		if($factureFourn->field_exists('ef_type')){
+			$filters['ef_type'] = $this->getData('ef_type');
+		}
 
         foreach ($factures as $facture) {
             $dt = new DateTime($facture->getData('datec'));

@@ -11,3 +11,20 @@ params:
         label: id du Group TECH RDC
         def: 0
         cat: groups
+    id_user_group_MANAGER:
+        label: id du Group Manager
+        def: 0
+        cat: groups
+    id_user_group_ADMIN:
+        label: id du Group Admin
+        def: 0
+        cat: groups
+#    id_user_group_Quality:
+#        label: id du Group Qualité
+#        def: 0
+#        cat: groups
+
+    id_source_presta:
+        label: id de la source Partenaire/agrégateur
+        info: Si cette source est sélectioner, il devient obligatoire de préciser le nom du prestataire/agrégateur
+        required: 1

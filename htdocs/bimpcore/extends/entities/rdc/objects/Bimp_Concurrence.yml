@@ -12,13 +12,6 @@ parent_object: Bimp_Societe
 parent_id_property: fk_soc
 
 objects:
-    concurrent:
-        relation: hasMany
-        delete: 1
-        instance:
-            bimp_object:
-                module: bimpcore
-                name: Bimp_Concurrence
     chiffre_affaire:
         relation: hasOne
         delete: 1
@@ -26,7 +19,7 @@ objects:
             bimp_object: Bimp_ChiffreAffaire
         list:
             filters:
-                type_obj: 1
+                type_obj: Bimp_Concurrence
                 id_obj:
                     callback:
                         method: getData
@@ -91,19 +84,43 @@ views:
                             method: renderChildrenGraph
                             params:
                                 - chiffre_affaire
+                                - rep2
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
                                 - evol
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - evol2
 
 lists:
     default:
         title: liste des concurrents
         n: 3
+        add_btn: 
+            callback: canAddConcurrence
         add_form_name: default
         add_btn_label: Ajouter un concurrent
-        extra_btn:
-            callback: getListExtraButtons
-        edit_btn: 1
+#        extra_btn:
+#            callback: getListExtraButtons
+        edit_btn: 
+            callback: canAddConcurrence
         edit_form: default
-        delete_btn: 1
+        delete_btn: 
+            callback: canAddConcurrence
         cols:
             nom:
             site:

@@ -621,17 +621,22 @@ class Bimp_Client extends Bimp_Societe
 				)
 			);
 		}
-		$buttons[] = array(
-			'label'       => 'Création automatique',
-			'icon_before' => 'fas_cogs',
-			'classes'     => array('btn', 'btn-default'),
-			'attr'        => array(
-				'onclick' => $this->getJsActionOnclick('creat_auto', array(), array(
-					'form_name' => 'creat_auto',
+
+		require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+		$api = BimpAPI::getApiInstance('Inpi');
+		if ($api->isOk()) {
+			$buttons[] = array(
+				'label'       => 'Création automatique',
+				'icon_before' => 'fas_cogs',
+				'classes'     => array('btn', 'btn-default'),
+				'attr'        => array(
+					'onclick' => $this->getJsActionOnclick('creat_auto', array(), array(
+						'form_name' => 'creat_auto',
 //                        'on_form_submit' => 'function($form, extra_data) {return onRelanceClientsPaiementsFormSubmit($form, extra_data);}'
-				))
-			)
-		);
+					))
+				)
+			);
+		}
 
         if (BimpCore::isEntity('bimp') && $this->canSetAction('listClientsToExcludeForCreditLimits')) {
             $buttons[] = array(
@@ -1916,9 +1921,9 @@ class Bimp_Client extends Bimp_Societe
 				$list->addFieldFilterValue('id_client', (int) $this->id);
 				break;
 
-			case 'btk_tickets':
-				$list = new BC_ListTable(BimpObject::getInstance('bimpticket', 'BTK_Ticket'), 'default', 1, null, 'Tickets hotline du client "' . $client_label . '"', 'fas_headset');
-				$list->addFieldFilterValue('id_client', (int) $this->id);
+			case 'bimp_tickets':
+				$list = new BC_ListTable(BimpObject::getInstance('bimpticket', 'Bimp_Ticket'), 'client', 1, null, 'Tickets du client "' . $client_label . '"', 'fas_ticket-alt');
+				$list->addFieldFilterValue('fk_soc', (int) $this->id);
 				break;
 
             case 'sav':

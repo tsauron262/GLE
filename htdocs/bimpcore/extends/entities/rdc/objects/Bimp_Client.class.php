@@ -4,60 +4,80 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 {
 	public static $statusRdc = array(
 		0 => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
-		1 => array('label' => 'Prospection: demande entrante'),
-		2 => array('label' => 'Prospection: lead identifié'),
-		3 => array('label' => 'Prospection: prise de contact'),
-		4 => array('label' => 'Prospection: contact et présentation ok'),
-		5 => array('label' => 'Prospect KO'),
-		6 => array('label' => 'KYC en cours'),
-		7 => array('label' => 'MANGOPAY en cours'),
-		8 => array('label' => 'En attente onboarding catalogue'),
-		9 => array('label' => 'Onboarding catalogue KO'),
-		10 => array('label' => 'Onboarding catalogue OK'),
-		11 => array('label' => 'Live'),
-		12 => array('label' => 'Résilié'),
-		13 => array('label' => 'Suspendu'),
-		14 => array('label' => 'Fermé')
-);
-//self::BS_SAV_RESERVED          => array('label' => 'Réservé par le client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
-//self::BS_SAV_CANCELED_BY_CUST  => array('label' => 'Annulé par le client', 'icon' => 'fas_times', 'classes' => array('danger')),
-//self::BS_SAV_CANCELED_BY_USER  => array('label' => 'Annulé par utilisateur', 'icon' => 'fas_times', 'classes' => array('danger')),
+		1 => array('label' => 'Prospection: demande entrante', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		2 => array('label' => 'Prospection: lead identifié', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		3 => array('label' => 'Prospection: prise de contact', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		4 => array('label' => 'Prospection: contact et présentation ok', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		5 => array('label' => 'Prospect KO', 'icon' => 'fas_suitcase', 'classes' => array('danger')),
+//				6 => array('label' => 'KYC en cours'),
+//				7 => array('label' => 'MANGOPAY en cours'),
+		8 => array('label' => 'En attente onboarding catalogue', 'icon' => 'fas_handshake', 'classes' => array('important')),
+		9 => array('label' => 'Onboarding catalogue KO', 'icon' => 'fas_handshake', 'classes' => array('danger')),
+		10 => array('label' => 'Onboarding catalogue OK', 'icon' => 'fas_handshake', 'classes' => array('success')),
+		11 => array('label' => 'Live', 'icon' => 'fas_thumbs-up', 'classes' => array('success')),
+		12 => array('label' => 'Résilié', 'icon' => 'fas_thumbs-down', 'classes' => array('danger')),
+		13 => array('label' => 'Suspendu', 'icon' => 'fas_thumbs-down', 'classes' => array('danger')),
+		14 => array('label' => 'Fermé', 'icon' => 'fas_thumbs-down', 'classes' => array('danger'))
+	);
 
+	const PENDING_SUBMISSION = 1;
+	const PENDING_APPROVAL = 2;
+	const APPROVED = 3;
+	const REFUSED = 4;
+	public static $statut_kyc_list = array(
+		0 => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
+		self::PENDING_SUBMISSION => array('label' => 'En attente de soumission KYC', 'icon' => 'fas_hourglass', 'classes' => array('important')),
+		self::PENDING_APPROVAL => array('label' => 'Vérification KYC en cours', 'icon' => 'fas_spinner' , 'classes' => array('important')),
+		self::APPROVED => array('label' => 'KYC validé', 'icon' => 'fas_check', 'classes' => array('success')),
+		self::REFUSED => array('label' => 'KYC non valide', 'icon' => 'fas_times', 'classes' => array('danger')),
+	);
 	public static $statut_rdc_live = 11;
-	public static $statut_rdc_prospect_array = array(1, 2, 3, 4);
+	public static $statut_rdc_prospect_array = array(3, 4);
 
 	public static $actions_selon_statut_rdc = array(
+		0 => array( // N/C
+			1, 2, 3, 4
+		),
 		1 => array( // Prospection: demande entrante
-			2, 3, 4, 5, 6, 7, 8, 9, 10, 11 // les autres statuts de prospection
+			2, 3, 4, 5, 8
 		),
-		2 => array(
-			1, 3, 4, 5
+		2 => array( // Prospection: lead identifié
+			3, 4, 5, 8
 		),
-		3 => array(
-			1, 2, 4, 5
+		3 => array( // prospection: prise de contact
+			4, 5, 8
 		),
-		4 => array(
-			1, 2, 3, 5
+		4 => array( // Prospection: contact et présentation ok
+			5, 8
 		),
-		5 => array(
-			1, 2, 3, 4, 11
+		5 => array( // Prospect KO
+			8, 3
 		),
-		11 => array( // Live
-			13, 14, // suspendu, férmé
+		8 => array( // En attente onboarding catalogue
+			9, 10, 5
 		),
-		13 => array( // suspendu
-			12
+		9 => array( // Onboarding catalogue KO
+			10, 5
 		),
-		14 => array( // Fermé
-			12
+		10 => array( // Onboarding catalogue OK
+			5
 		),
+//		11 => array( // Live
+//			13, 14, // suspendu, férmé
+//		),
+//		13 => array( // suspendu
+//
+//		),
+//		14 => array( // Fermé
+//			12
+//		),
 	);
 
 	public static $group_allowed_actions = array(
 		1 => array('BD'),
 		2 => array('BD'),
-		3 => array('BD'), // en fait c'est BD, c juste pour le test
-		4 => array('BD'), // en fait c'est BD, c juste pour le test
+		3 => array('BD'),
+		4 => array('BD'),
 		5 => array('BD'),
 		6 => array('BD'),
 		7 => array('BD'),
@@ -70,12 +90,13 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		14 => array(),
 	);
 
+
 	public static function getUserGroupsArray($include_empty = 1, $nom_url = 0)
 	{
 		$grouparray = array(
 			BimpCore::getUserGroupId('BD'),
 			BimpCore::getUserGroupId('KAM'),
-			BimpCore::getUserGroupId('TECH_RDC'),
+//			BimpCore::getUserGroupId('TECH_RDC'),
 		);
 
 		$cache_key = 'users_groups';
@@ -102,19 +123,32 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return self::getCacheArray($cache_key, $include_empty);
 	}
 
+	public function getContrefacon()
+	{
+		if ($this->getData('contrefacon')) return '<span class="danger">Oui</span>';
+		else return '<span class="success">Non</span>';
+	}
     public function getActionsButtons()
 	{
+//		echo '<pre>'; print_r($this->data); echo '</pre>';die;
+		$actioncomm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm');
+		$buttons[] = array(
+			'label'   => 'CR échange',
+			'icon'    => 'fas_comment',
+//			'onclick' => $actioncomm->getJsActionOnclick('cr_echange', array('fk_soc' => $this->id), array('form_name' => 'formCREchange'))
+			'onclick' => $actioncomm->getJsLoadModalForm('formCREchange', 'Compte rendu d\\\'échange', array('fields' => array('fk_soc' => $this->id)))
+		);
+
 		$buttons[] = array(
 			'label'   => 'Actions',
 			'icon'    => 'fas_edit',
-			'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut), array('form_name' => 'formActionRdc'))
-//			'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut))
+			'onclick' => $this->getJsActionOnclick('change_status_rdc', array(), array('form_name' => 'formActionRdc'))
 		);
 
 		if ($this->getData('shopid') > 0) {
 			$buttons[] = array(
 				'label'   => 'Synchro Mirakl',
-				'icon'    => 'fas_rotate',
+				'icon'    => 'fas_sync',
 				'onclick' => $this->getJsActionOnclick('synchroMirakl', array(), array())
 			);
 		}
@@ -129,31 +163,27 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	{
 		$buttons = array();
 
-		$statuts_rdc = BimpCache::getStatuts_rdc();
-
 		$statu = $this->getData('fk_statut_rdc');
-		if($statu == 0)
-			$statu = 1;
 		if (isset(self::$actions_selon_statut_rdc[$statu])) {
 			foreach (self::$actions_selon_statut_rdc[$statu] as $statut) {
 				$listGroup_allowed = self::$group_allowed_actions[$statut];
 				$user_in_group = false;
 				foreach ($listGroup_allowed as $group) {
-					if ($this->isUserInGroup($group)) {
+					if ($this->isUserInGroup($group) || $this->isUserManager()) {
 						$user_in_group = true;
 						break;
 					}
 				}
 				if($user_in_group)
 					$buttons[$statut] = array(
-						'label'   => 'Passer le statut à ' . $statuts_rdc[$statut]['libelle'],
+						'label'   => 'Passer le statut à ' . self::$statusRdc[$statut]['label'],
 						'icon'    => 'fas_edit',
 //						'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut), array('form_name' => 'formActionRdc'))
 						'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut))
 					);
 				else
 					$buttons[$statut] = array(
-						'label'   => 'Passer le statut à ' . $statuts_rdc[$statut]['libelle'],
+						'label'   => 'Passer le statut à ' . self::$statusRdc[$statut]['label'],
 						'icon'    => 'fas_times',
 						'onclick' => '',
 						'disabled' => 1,
@@ -162,54 +192,167 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			}
 		}
 		return $buttons;
-		/*$groups = array();
-		if (!empty($buttons)) {
-			$groups[] = array(
-				'label'   => 'Actions',
-				'icon'    => 'fas_cogs',
-				'buttons' => $buttons
-			);
-		}
-
-		if (!empty($groups)) {
-			return array(
-				'buttons_groups' => $groups,
-			);
-		}
-
-		return array();*/
 	}
 
-	public function isShopIdEditable()
+	public function getMiraklLink()
 	{
-		$id = BimpTools::getPostFieldValue('id');
-		if (!$id) return false;
-		if ($this->getData('shopid')) return false;
-		else return true;
+		if ($this->getData('shopid') > 0) {
+			$url = 'https://mirakl-web.groupe-rueducommerce.fr/mmp/operator/shop/' . $this->getData('shopid');
+			return $this->getHref($url);
+		}
+		else return '';
 	}
 
-	public function isProspectionEditable()
-	{
-		$id = BimpTools::getPostFieldValue('id');
-		if (!$id) return true;
-		else return false;
+	public function getUrlMarchand()	{
+		if ($this->getData('url')) {
+			$url = $this->getData('url');
+			return $this->getHref($url);
+		}
+		else return ' ';
 	}
+
+	public function getHref($url, $target="_blank")
+	{
+		if (substr($url, 0, 4) != 'http')	{
+			$url = 'https://' . $url;
+		}
+//		$href = '<a href="' . $url . '" target="' . $target . '"><i class="fas fa-external-link-alt"></></a>';
+		$href = '<a href="' . $url . '" target="' . $target . '">' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
+		return $url . " " . $href;
+	}
+
+	public function canEditField($field_name)
+	{
+		switch ($field_name) {
+			case 'fk_priorite':
+			case 'presta_source':
+			case 'fk_categorie_maitre':
+			case 'potentiel_catalogue':
+				return $this->isUserBDKAM();
+
+			case 'fk_source_rdc':
+			case 'name_alias':
+			case 'nom':
+				return $this->isUserBD();
+
+			case 'contrefacon':// lot 2 : return $this->isUserQuality(); // : créer un group Qualité (cf bimpcore.yml)
+			case 'fk_group_rdc':
+			case 'fk_user_attr_rdc':
+				return $this->isUserManager();
+
+			case 'fk_statut_rdc':
+				return 0;
+		}
+		return parent::canEditField($field_name);
+	}
+
+	public function isFieldEditable($field, $force_edit = false)
+	{
+		switch ($field) {
+			case 'shopid':
+				if ($this->getData('shopid')) return false;
+				else return $this->isUserBD();
+		}
+		return parent::isFieldEditable($field, $force_edit);
+	}
+
+	public function isAdmin()
+	{
+//		global $user;
+//		return $user->admin;
+		return $this->isUserInGroup('ADMIN');
+	}
+
+	public function isUserBD()
+	{
+		return $this->isUserInGroup('BD') || $this->isUserManager();
+	}
+
+	public function isUserKAM()
+	{
+		return $this->isUserInGroup('KAM') || $this->isUserManager();
+	}
+
+	public function isUserManager()
+	{
+		return $this->isUserInGroup('MANAGER') || $this->isUserInGroup('ADMIN');
+	}
+
+	public function isUserTECH()
+	{
+		return $this->isUserInGroup('TECH_RDC')|| $this->isUserManager();
+	}
+
+	public function isUserQuality()
+	{
+		return $this->isUserInGroup('Quality')|| $this->isUserManager();
+	}
+
+	public function isUserBDKAM()
+	{
+		return $this->isUserBD() || $this->isUserKAM();
+	}
+
 	public function isUserInGroup($g)
 	{
 		global $user;
-		/*todo a voir si on garde*/
-		if($user->admin)
-			return 1;
-
 		$id_group = BimpCore::getConf('id_user_group_' . $g);
+//var_dump($g, $id_group); echo '<hr />';
 		$groups = $this->db->getRow('usergroup_user', 'fk_user = ' . $user->id . ' AND fk_usergroup = ' . $id_group , array('rowid'), 'array');
 		if($groups)
 			return true;
 
 		return false;
 	}
+
+	public function isCommentaireStatutKoRequired()	{
+		$statut = $this->getData('fk_statut_rdc');
+		if ($statut == 5) { // KO
+			return true;
+		}
+		return false;
+	}
+
 	public function renderHeaderStatusExtra()	{
-		return '';
+		$html = '';
+		$tab = self::$statusRdc[$this->getData('fk_statut_rdc')];
+		$classes = '';
+		if (isset($tab['classes'])) {
+			foreach ($tab['classes'] as $class) {
+				$classes .= ($classes!='' ? ', ' : '') . $class;
+			}
+		}
+		$html .= '<div><span class="' .$classes . '">Statut de prospection&nbsp;: ';
+		$icon = '';
+		if(isset($tab['icon'])) {
+			$icon = BimpRender::renderIcon($tab['icon'], 'iconLeft');
+		}
+		$html .= $icon . $tab['label'];
+		$html .= '</span>';
+		if ($this->getData('fk_statut_rdc') == 5) {
+			$html .= '<br />Motif KO&nbsp;: ' . $this->getData('commentaire_statut_ko');
+		}
+		if ($this->getData('date_changement_statut_rdc')) {
+			$html .= '<br />Dernier changement de statut le&nbsp;: ' . date('d / m / Y', strtotime($this->getData('date_changement_statut_rdc')));
+		}
+		$html .= '</div><div>&nbsp;</div>';
+
+		$tab = self::$statut_kyc_list[$this->getData('fk_statut_kyc')];
+		$classes = '';
+		if (isset($tab['classes'])) {
+			foreach ($tab['classes'] as $class) {
+				$classes .= ($classes!='' ? ', ' : '') . $class;
+			}
+		}
+		$html .= '<div class="' .$classes . '">Statut KYC&nbsp;: ';
+		$icon = '';
+		if(isset($tab['icon'])) {
+			$icon = BimpRender::renderIcon($tab['icon'], 'iconLeft');
+		}
+		$html .= $icon . $tab['label'];
+		$html .= '</div><div>&nbsp;</div>';
+
+		return $html;
 	}
 
 	public function getStatusProperty()	{
@@ -239,16 +382,17 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return $users;
 	}
 
+	public function getIdSourcePresta()	{
+		return array(BimpCore::getConf('id_source_presta'));
+	}
+
 	public function renderPageView()
 	{
-		global $user;
-
 		$tabs = array();
-		$isAdmin = $user->admin;
 
 		$tabs[] = array(
 			'id' => 'default',
-			'title' => 'Actions commerciales',
+			'title' => 'Compte rendu d\'échange',
 			'content' => $this->renderActionsCommView('manuel')
 		);
 		$tabs[] = array(
@@ -258,6 +402,18 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		);
 
 		return BimpRender::renderNavTabs($tabs);
+	}
+
+	public function getFlagImport()
+	{
+		$html = '';
+		$import_key = $this->getData('import_key');
+		if ($import_key) {
+			$html .= '<span class="success" title="Importé">';
+			$html .= BimpRender::renderIcon('fas_file-import', 'iconRight');
+			$html .= '</span>';
+		}
+		return $html;
 	}
 
 	public function renderActionsCommView($type)
@@ -272,7 +428,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		switch ($type)	{
 			case 'manuel':
 				$filtre_type = 'not_in';
-				$titre = 'Actions commerciales';
+				$titre = 'Liste des échanges';
 				break;
 			case 'auto':
 				$filtre_type = 'in';
@@ -289,14 +445,24 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return $list->renderHtml();
 	}
 
+	public function create(&$warnings = array(), $force_create = false)
+	{
+		$this->checkAttr();
+		return parent::create($warnings, $force_create);
+	}
+
 	public function update(&$warnings = array(), $force_update = false)
 	{
-		$this->checkAttr();	// envoi de mail si changement d'attribtion
-
-		// on a enregistré le shopId => on met à jour le Tiers avec API Mirakl S20;
-		if ($this->getData('shopid') != $this->getInitData('shopid')) {
-//			$this->appelMiraklS20(BimpTools::getPostFieldValue('shopid'), $warnings);
+		$errors = array();
+		if ( BimpTools::getPostFieldValue('fk_source_rdc') == BimpCore::getConf('id_source_presta', 20) && strlen(BimpTools::getPostFieldValue('presta_source')) <= 0) {
+			$errors[] = 'Le champ Prestataire/agrégateur est obligatoire';
 		}
+
+		if (count($errors))
+			return $errors;
+
+		$this->checkAttr();
+		$this->checkPassageLive();
 
 		return parent::update($warnings, $force_update);
 	}
@@ -304,25 +470,35 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function actionSynchroMirakl($data, &$success){
 		$errors = $warnings = array();
 		$success = 'Synchro OK';
-		$this->appelMiraklS20($this->getData('shopid'), $errors);
+		$this->appelMiraklS20($errors);
 		return array(
 			'errors'   => $errors,
 			'warnings' => $warnings
 		);
 	}
 
+	/*
 	public function onSave(&$errors = array(), &$warnings = array())
 	{
-		if (!BimpTools::getPostFieldValue('id'))	$this->checkAttr(true);
 		parent::onSave($errors, $warnings);
 	}
+	*/
 
-	public function appelMiraklS20($shopid, &$warnings = array())
+	public function appelMiraklS20(&$warnings = array())
 	{
+		$shopid = $this->getData('shopid');
 		if(BimpTools::isModuleDoliActif('bimpapi')) {
 			require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 			$api = BimpAPI::getApiInstance('mirakl');
+			if(!isset($api) || !is_object($api)) {
+				$warnings[] = 'Module API non actif';
+				return;
+			}
 			$data = $api->getShopInfo($shopid);
+			if(!is_array($data)) {
+				$warnings[] = 'Erreur lors de la récupération des données Mirakl';
+				return;
+			}
 
 			$errors = array();
 			if ($data['total_count'] == 0) {
@@ -330,8 +506,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$this->set('shopid', 0);
 			} else {
 				$shop = $data['shops'][0];
-
+//				echo '<pre>'; print_r($shop); echo '</pre>';
 				// traitement des données reçues : mise a jour du tiers
+				$kyc = constant('self::' . $shop['kyc']['status']);
+				if ($kyc)
+					$this->set('fk_statut_kyc', $kyc);
 				$this->set('nom', $shop['pro_details']['corporate_name']);
 				$this->set('name_alias', $shop['shop_name']);
 				$add = $shop['contact_informations']['street1'];
@@ -342,7 +521,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$this->set('zip', $shop['contact_informations']['zip_code']);
 				$this->set('town', $shop['contact_informations']['city']);
 				if ($shop['contact_informations']['country']) {
-					$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $shop['contact_informations']['country']) . '\'';
+					$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $shop['contact_informations']['country'] . '\'');
 					if ($id_pays) {
 						$this->set('fk_pays', $id_pays);
 					}
@@ -364,6 +543,35 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				} else { // pas de contact connu => on en crée un
 					$this->createContact($shop['contact_informations']);
 				}
+				// surcharge attribution
+				if ($shop['assignees'])	{
+					$emailAssign = strtolower($shop['assignees'][0]['email']);
+					$userAttr = $this->getBdb()->getRows(
+						'user AS u',
+						'u.email LIKE \'' . $emailAssign . '\' OR LOCATE(\'' . $emailAssign . '\', ue.alias)',
+						1,'array',array('u.rowid'),null,null,array(
+							'ue' => array(
+								'table' => 'user_extrafields',
+								'on'    => 'u.rowid = ue.fk_object'
+							))
+					);
+					if (isset($userAttr[0]['rowid']) && $userAttr[0]['rowid']) $this->set('fk_user_attr_rdc', $userAttr[0]['rowid']);
+					else $warnings [] = 'Utilisateur d\'attribution non trouvé. ' . $emailAssign;
+				}
+
+				// surcharge statut
+				if ($shop['shop_state'] === 'SUSPENDED' && !in_array($this->getData('fk_statut_rdc') , array(12, 13, 14))) 	{
+					$this->set('fk_statut_rdc', 13);
+					$this->set('date_changement_statut_rdc', date('Y-m-d', strtotime($shop['closed_form'])));
+				}
+				if ($shop['shop_state'] === 'OPEN' && $this->getData('shopid') > 0) {
+					$this->set('fk_statut_rdc', self::$statut_rdc_live);
+					$this->set('date_changement_statut_rdc', date('Y-m-d'));
+					if(!$this->getData('date_ouverture'))
+						$this->set('date_ouverture', date('Y-m-d', strtotime($shop['date_created'])));
+				}
+				$this->set('date_maj_mirakl', date('Y-m-d H:i:s'));
+				$this->update($warnings);
 			}
 		}
 		else{
@@ -383,10 +591,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$obj->set('address', $add);
 		$obj->set('zip', $contact['zip_code']);
 		$obj->set('town', $contact['city']);
-		if ($contact['contact_informations']['country'])	{
-			$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $contact['contact_informations']['country']) . '\'';
-			if ($id_pays)	$this->set('fk_pays', $id_pays);
+		if ($contact['country'])	{
+			$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $contact['country'] . '\'');
+			if ($id_pays)	$obj->set('fk_pays', $id_pays);
 		}
+//		echo '<pre>'; print_r($contact); echo '</pre>';die;
 		$obj->set('phone', $contact['phone']);
 		$obj->set('email', $contact['email']);
 		$obj->set('datec', date('Y-m-d H:i:s'));
@@ -402,14 +611,15 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			$contact->set('civility', $this->traduct_civility($info['civility']));
 			$contact->set('lastname', $info['lastname']);
 			$contact->set('firstname', $info['firstname']);
-			$add = $info['contact_informations']['street1'];
-			if ($info['contact_informations']['street2'])	$add .= ' ' . $info['contact_informations']['street2'];
+			$add = $info['street1'];
+			if ($info['street2'])	$add .= ' ' . $info['street2'];
 			$this->set('address', $add);
 			$contact->set('zip', $info['zip_code']);
 			$contact->set('town', $info['city']);
-			if ($contact['contact_informations']['country'])	{
-				$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $contact['contact_informations']['country']) . '\'';
-				if ($id_pays)	$this->set('fk_pays', $id_pays);
+			if ($info['country'])	{
+				$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $info['country'] . '\'');
+				if ($id_pays)
+					$contact->set('fk_pays', $id_pays);
 			}
 			$contact->set('phone', $info['phone']);
 			$contact->set('email', $info['email']);
@@ -419,29 +629,23 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		}
 		return 1;
 	}
-	public function checkAttr($onSave = false) {
+
+	public function checkAttr() {
 		global $user;
 		$attr = $this->getData('fk_user_attr_rdc');
 		if ($attr != $user->id)	{
-			if ($attr && ($this->getInitData('fk_user_attr_rdc') != $attr || $onSave)) { // si changement d'attribution ou onSave (creation)
+			if ($attr && ($this->getInitData('fk_user_attr_rdc') != $attr)) { // si changement d'attribution
 				$code = 'Attribution_rdc';
 				$sujet = 'Attribution Compte';
 				$msg = 'Le compte ' . $this->getLink() . ' vient de vous être attribué par ' . $user->getNomUrl();
-				//////////////////
-				// todo: envoi du mail avec bimp UserMessage
-				$user_attr = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $attr);
-				$to = $user_attr->getData('email');
-				$res = mailSyn2($sujet, $to, '', $msg);
-				//////////////////
+//				BimpUserMsg::envoiMsg($code, $sujet, $msg, $attr);
 			}
 		}
 	}
 
 	public function change_status_rdc() {
 		if ($this->getInitData('fk_statut_rdc') != $this->getData('fk_statut_rdc')) {
-			$this->set('date_changement_statut_rdc', date('Y-m-d H:i:s'));
-
-
+			$this->set('date_changement_statut_rdc', date('Y-m-d'));
 		}
 	}
 
@@ -464,26 +668,17 @@ class Bimp_Client_ExtEntity extends Bimp_Client
         $errors = array();
 		$success = 'Changement de statut effectué';
 
-		// update de la date_debut_prospect (si statut_rdc dans la liste des statuts de début de prospection)
-		if (in_array($data['status'], self::$statut_rdc_prospect_array)) {
-			if (empty($this->getData('date_debut_prospect'))) {
-				$this->set('date_debut_prospect', date('Y-m-d'));
+		if (!$data['status'])	{
+			$errors[] = 'Aucun statut sélectionné';
+		}
+		else {
+			// update de la date_debut_prospect (si statut_rdc dans la liste des statuts de début de prospection)
+			if (in_array($data['status'], self::$statut_rdc_prospect_array)) {
+				if (empty($this->getData('date_debut_prospect'))) {
+					$this->set('date_debut_prospect', date('Y-m-d'));
+				}
 			}
 		}
-
-		/*
-		// update de la date_ouverture (si statut_rdc = live pour la premiere fois)
-		if ((int)$data['fk_statut_rdc'] == self::$statut_rdc_live) 	{
-			if (empty($this->getData('date_ouverture'))) {
-				$this->set('date_ouverture', date('Y-m-d H:i:s'));
-				$date_p = new DateTime($this->getData('date_debut_prospect'));
-				$date_o = new DateTime();
-				$interval = $date_p->diff($date_o);
-				$delai = $interval->days;
-				$this->set('delai_ouv', $delai);
-			}
-		}
-		*/
 
 		$this->set('fk_statut_rdc', $data['status']);
 		$this->set('date_changement_statut_rdc', date('Y-m-d'));
@@ -492,5 +687,21 @@ class Bimp_Client_ExtEntity extends Bimp_Client
             'errors'   => $errors,
             'warnings' => $warnings
         );
+	}
+
+	public function checkPassageLive()
+	{
+		if ((int)$this->getData('fk_statut_rdc') == self::$statut_rdc_live) 	{
+			if (empty($this->getData('date_ouverture'))) {
+				$this->set('date_ouverture', date('Y-m-d'));
+				if (!empty($this->getData('date_debut_prospect'))) {
+					$date_p = new DateTime($this->getData('date_debut_prospect'));
+					$date_o = new DateTime();
+					$interval = $date_p->diff($date_o);
+					$delai = $interval->days;
+					$this->set('delai_ouv', $delai);
+				}
+			}
+		}
 	}
 }

@@ -36,7 +36,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/db/mysqli.class.php';
  */
 /*
  *      Example of configuration (conf/config.php):
- * 
+ *
   define('CONSUL_SERVERS', serialize (array("http://10.192.20.115:8300", "http://10.192.20.116:8300", "http://10.192.20.117:8300")));
   define('CONSUL_SERVICE_DATABASE', "bderpdev");
   define('CONSUL_SERVICES_PRIORITY_WRITE', serialize (array(2,1,3)));
@@ -80,7 +80,7 @@ class DoliDBMysqliC extends DoliDBMysqli
     public $database_pass;
     public $thread_id = 0;
     public $timeReconnect = 0;
-    
+
     public $useMysqlic = false;
 
     /**
@@ -99,10 +99,10 @@ class DoliDBMysqliC extends DoliDBMysqli
 //        ini_set('display_errors', 1);
 
         global $conf, $langs;
-        
-        
-        
-        if (empty($conf->db->dolibarr_main_db_collation)) {//old install 
+
+
+
+        if (empty($conf->db->dolibarr_main_db_collation)) {//old install
                 $conf->db->dolibarr_main_db_collation = 'utf8_unicode_ci'; // Old installation
         }
         if (empty($conf->db->dolibarr_main_db_character_set)) {
@@ -284,7 +284,7 @@ class DoliDBMysqliC extends DoliDBMysqli
                 return TRUE;
         }
 
-        $this->_svc_read = array(); // Clean arrays 
+        $this->_svc_read = array(); // Clean arrays
         $this->_svc_write = array();
 
         foreach ($this->CONSUL_SERVERS as $consul_server) {
@@ -517,7 +517,7 @@ class DoliDBMysqliC extends DoliDBMysqli
      */
     function close()
     {
-        if ($this->db && $this->connected) {
+        if ($this->db && $this->connected && defined('BIMP_READY_FOR_CLOSE_DB')) {
             if ($this->transaction_opened > 0)
                 dol_syslog(get_class($this) . "::close Closing a connection with an opened transaction depth=" . $this->transaction_opened, LOG_ERR);
             if ($this->transaction_opened > 0 && class_exists('BimpCore'))
@@ -533,10 +533,10 @@ class DoliDBMysqliC extends DoliDBMysqli
     /*
      * Returns actually valid server of cluster
      * using local array, redis or consul
-     * 
+     *
      * @param   int     $query_type   SQL query type: 0 - unknown, 1 - read, 2 - write
      * @return  bool    FALSE if no servers available, TRUE if a server is connected
-     * 
+     *
      * If success - IP address and port of the currently connected server will be set in $this->database_host and $this->database_port
      */
 
@@ -743,11 +743,11 @@ class DoliDBMysqliC extends DoliDBMysqli
             if ($query_type == 2) {
                 if (($ind_srv = array_search($server, $this->_svc_write)) !== false)
                     array_splice($this->_svc_write, $ind_srv, 1);
-                //                unset($this->_svc_write[$ind_srv]);     // Should always be true            
+                //                unset($this->_svc_write[$ind_srv]);     // Should always be true
             } else {
                 if (($ind_srv = array_search($server, $this->_svc_read)) !== false)
                     array_splice($this->_svc_read, $ind_srv, 1);
-                //                unset($this->_svc_read[$ind_srv]);     // Should always be true                        
+                //                unset($this->_svc_read[$ind_srv]);     // Should always be true
             }
 
             dol_syslog('Impossible de se connectée a ' . $server, 3);
@@ -764,7 +764,7 @@ class DoliDBMysqliC extends DoliDBMysqli
     /**
      * 	Execute a SQL request and return the resultset
      *  SELECT, SHOW and DESC queries are considered "read", all others - "write"
-     *  Server to use for the query will be taken from arrays or newly discovered  
+     *  Server to use for the query will be taken from arrays or newly discovered
      *
      * 	@param	string	$query			SQL query string
      * 	@param	int		$usesavepoint	0=Default mode, 1=Run a savepoint before and a rollbock to savepoint if error (this allow to have some request with errors inside global transactions).

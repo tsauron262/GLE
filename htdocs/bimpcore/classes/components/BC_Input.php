@@ -17,17 +17,21 @@ class BC_Input extends BimpComponent
 	public $extraData = array();
 	public $name_prefix = '';
 	public $display_card_mode = 'none'; // hint / visible
+	public $input_only = false;
 	protected $input_extra_classes = array();
 	protected $input_extra_data = array();
 	public static $type_params_def = array(
 		'text'                        => array(
-			'values'          => array('data_type' => 'array', 'compile' => true, 'default' => array()),
-			'allow_custom'    => array('data_type' => 'bool', 'default' => 1),
-			'hashtags'        => array('data_type' => 'bool', 'default' => 0),
-			'scanner'         => array('data_type' => 'bool', 'default' => 0),
-			'no_autocorrect'  => array('data_type' => 'bool', 'default' => 0),
-			'possible_values' => array('data_type' => 'array', 'default' => array()),
-			'strip_tags'      => array('data_type' => 'bool', 'default' => 1)
+			'values'                 => array('data_type' => 'array', 'compile' => true, 'default' => array()),
+			'allow_custom'           => array('data_type' => 'bool', 'default' => 1),
+			'hashtags'               => array('data_type' => 'bool', 'default' => 0),
+			'scanner'                => array('data_type' => 'bool', 'default' => 0),
+			'no_autocorrect'         => array('data_type' => 'bool', 'default' => 0),
+			'possible_values'        => array('data_type' => 'array', 'default' => array()),
+			'strip_tags'             => array('data_type' => 'bool', 'default' => 1),
+			'field_path'             => array('data_type' => 'bool', 'default' => 0),
+			'field_path_module'      => array(),
+			'field_path_object_name' => array()
 		),
 		'password'                    => array(
 			'min_length'       => array('data_type' => 'int', 'default' => 12), // Nombre de caractères minimum
@@ -47,13 +51,13 @@ class BC_Input extends BimpComponent
 		),
 		'date'                        => array(
 			'display_now' => array('data_type' => 'bool', 'default' => 0),
-			'format' => array('data_type' => 'text', 'default' => '')
+			'format'      => array('data_type' => 'text', 'default' => '')
 		),
 		'datetime'                    => array(
 			'display_now'   => array('data_type' => 'bool', 'default' => 0),
 			'with_hours'    => array('data_type' => 'bool', 'default' => 1),
 			'with_secondes' => array('data_type' => 'bool', 'default' => 0),
-			'format' => array('data_type' => 'text', 'default' => '')
+			'format'        => array('data_type' => 'text', 'default' => '')
 		),
 		'timer'                       => array(
 			'with_days'     => array('data_type' => 'bool', 'default' => 1), // A implémenter
@@ -62,28 +66,36 @@ class BC_Input extends BimpComponent
 			'with_secondes' => array('data_type' => 'bool', 'default' => 1)
 		),
 		'textarea'                    => array(
-			'rows'             => array('data_type' => 'int', 'default' => 3),
-			'auto_expand'      => array('data_type' => 'bool', 'default' => 0),
-			'note'             => array('data_type' => 'bool', 'default' => 0),
-			'tab_key_as_enter' => array('data_type' => 'bool', 'default' => 0),
-			'maxlength'        => array('data_type' => 'int'),
-			'possible_values'  => array('data_type' => 'array', 'default' => array()),
-			'hashtags'         => array('data_type' => 'bool', 'default' => 0),
-			'scanner'          => array('data_type' => 'bool', 'default' => 0),
-			'strip_tags'       => array('data_type' => 'bool', 'default' => 1)
+			'rows'                   => array('data_type' => 'int', 'default' => 3),
+			'auto_expand'            => array('data_type' => 'bool', 'default' => 0),
+			'note'                   => array('data_type' => 'bool', 'default' => 0),
+			'tab_key_as_enter'       => array('data_type' => 'bool', 'default' => 0),
+			'maxlength'              => array('data_type' => 'int'),
+			'possible_values'        => array('data_type' => 'array', 'default' => array()),
+			'hashtags'               => array('data_type' => 'bool', 'default' => 0),
+			'scanner'                => array('data_type' => 'bool', 'default' => 0),
+			'strip_tags'             => array('data_type' => 'bool', 'default' => 1),
+			'field_path'             => array('data_type' => 'bool', 'default' => 0),
+			'field_path_module'      => array(),
+			'field_path_object_name' => array()
 		),
 		'html'                        => array(
-			'hashtags'        => array('data_type' => 'bool', 'default' => 0),
-			'possible_values' => array('data_type' => 'array', 'default' => array())
+			'hashtags'               => array('data_type' => 'bool', 'default' => 0),
+			'possible_values'        => array('data_type' => 'array', 'default' => array()),
+			'field_path'             => array('data_type' => 'bool', 'default' => 0),
+			'field_path_module'      => array(),
+			'field_path_object_name' => array()
 //            'scanner'  => array('data_type' => 'bool', 'default' => 0) // A implémenter
 		),
 		'select'                      => array(
 			'options'      => array('data_type' => 'array', 'compile' => true, 'default' => array()),
-			'select_first' => array('data_type' => 'bool', 'default_value' => 0)
+			'select_first' => array('data_type' => 'bool', 'default_value' => 0),
+			'dictionnary'  => array()
 		),
 		'switch_options'              => array(
-			'options'  => array('data_type' => 'array', 'compile' => true, 'default' => array()),
-			'vertical' => array('data_type' => 'bool', 'default_value' => 0)
+			'options'     => array('data_type' => 'array', 'compile' => true, 'default' => array()),
+			'vertical'    => array('data_type' => 'bool', 'default_value' => 0),
+			'dictionnary' => array()
 		),
 		'toggle'                      => array(
 			'toggle_on'  => array('default' => 'OUI'),
@@ -185,8 +197,14 @@ class BC_Input extends BimpComponent
 			'files_dir'     => array('default' => ''),
 			'allowed_types' => array('default' => ''),
 			'allowed_ext'   => array('default' => '')
+		),
+		'object_field'                => array(
+			'module'      => array('default' => ''),
+			'object_name' => array('default' => '')
 		)
 	);
+
+	public static $types_with_options = array('select', 'switch_options');
 
 	public function __construct(BimpObject $object, $data_type, $input_name, $path, $value = null, &$field_params = array(), $option = null)
 	{
@@ -279,17 +297,18 @@ class BC_Input extends BimpComponent
 			}
 		}
 
-		switch ($this->params['type']) {
-			case 'select':
-			case 'switch_options':
-				if (is_null($this->params['options']) || !count($this->params['options'])) {
-					if (isset($this->field_params['values']) && !is_null($this->field_params['values'])) {
-						$this->params['options'] = $this->field_params['values'];
+		if (in_array($this->params['type'], self::$types_with_options)) {
+			if (empty($this->params['options'])) {
+				if (isset($this->field_params['values'])) {
+					if (!empty($this->field_params['dictionnary'])) {
+						$this->params['options'] = BimpDict::getValuesArray($this->field_params['dictionnary'], true, true);
 					} else {
-						$this->params['options'] = array();
+						$this->params['options'] = $this->field_params['values'];
 					}
+				} else {
+					$this->params['options'] = array();
 				}
-				break;
+			}
 		}
 
 		$this->input_id = $this->object->object_name;
@@ -443,17 +462,26 @@ class BC_Input extends BimpComponent
 				$options['maxlength'] = isset($this->params['maxlength']) ? $this->params['maxlength'] : '';
 				$options['possible_values'] = isset($this->params['possible_values']) ? $this->params['possible_values'] : array();
 				$options['hashtags'] = (int) (isset($this->params['hashtags']) && (int) $this->params['hashtags'] ? $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? $this->field_params['hashtags'] : 0));
+				$options['field_path'] = (int) (isset($this->params['field_path']) && (int) $this->params['field_path'] ? $this->params['field_path'] : (isset($this->field_params['field_path']) ? $this->field_params['field_path'] : 0));
 //                $options['scanner'] = ((isset($this->params['scanner'])) ? (int) $this->params['scanner'] : 0);
 				break;
 
 			case 'select':
 				$options['options'] = isset($this->params['options']) ? $this->params['options'] : array();
 				$options['select_first'] = isset($this->params['select_first']) ? $this->params['select_first'] : 0;
+				$options['dictionnary'] = '';
+				if (!$this->input_only) {
+					$options['dictionnary'] = (isset($this->params['dictionnary']) ? $this->params['dictionnary'] : (isset($this->field_params['dictionnary']) ? $this->field_params['dictionnary'] : ''));
+				}
 				break;
 
 			case 'switch_options':
 				$options['options'] = isset($this->params['options']) ? $this->params['options'] : array();
 				$options['vertical'] = isset($this->params['vertical']) ? $this->params['vertical'] : 0;
+				$options['dictionnary'] = '';
+				if (!$this->input_only) {
+					$options['dictionnary'] = (isset($this->params['dictionnary']) ? $this->params['dictionnary'] : (isset($this->field_params['dictionnary']) ? $this->field_params['dictionnary'] : ''));
+				}
 				break;
 
 			case 'toggle':
@@ -610,6 +638,29 @@ class BC_Input extends BimpComponent
 				$options['maj_required'] = isset($this->params['maj_required']) ? (int) $this->params['maj_required'] : (isset($this->field_params['maj_required']) ? $this->field_params['maj_required'] : 1);
 				$options['num_required'] = isset($this->params['num_required']) ? (int) $this->params['num_required'] : (isset($this->field_params['num_required']) ? $this->field_params['num_required'] : 1);
 				break;
+
+			case 'object_field':
+				$options['module'] = isset($this->params['module']) ? $this->params['module'] : '';
+				$options['object_name'] = isset($this->params['object_name']) ? $this->params['object_name'] : '';
+				break;
+		}
+
+		if (isset($options['field_path']) && (int) $options['field_path']) {
+			if (isset($this->field_params['field_path_module'])) {
+				$options['field_path_module'] = $this->field_params['field_path_module'];
+			} elseif (isset($this->params['field_path_module'])) {
+				$options['field_path_module'] = $this->params['field_path_module'];
+			} else {
+				$options['field_path_module'] = $this->object->module;
+			}
+
+			if (isset($this->field_params['field_path_object_name'])) {
+				$options['field_path_object_name'] = $this->field_params['field_path_object_name'];
+			} elseif (isset($this->params['field_path_object_name'])) {
+				$options['field_path_object_name'] = $this->params['field_path_object_name'];
+			} else {
+				$options['field_path_object_name'] = $this->object->object_name;
+			}
 		}
 
 		return $options;

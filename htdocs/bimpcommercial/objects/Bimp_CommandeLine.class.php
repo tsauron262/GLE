@@ -8173,8 +8173,8 @@ class Bimp_CommandeLine extends ObjectLine
 				}
 			}
 
-
-			$qty = isset($data['qty']) ? (float) $data['qty'] : 0;
+			$qty = isset($data['qty']) ? round((float) $data['qty'], 6) : 0;
+			$max = round($max, 6);
 			$id_commande_fourn = isset($data['id_commande_fourn']) ? $data['id_commande_fourn'] : 0;
 			$commande = $this->getParentInstance();
 
@@ -8185,7 +8185,7 @@ class Bimp_CommandeLine extends ObjectLine
 			if (!$qty) {
 				$errors[] = 'Veuillez saisir une quantité supérieure à 0';
 			} elseif ($qty > $max) {
-				$errors[] = 'Il ne reste que ' . $max . ' unité(s) à commander. Veuillez corriger les quantités';
+				$errors[] = 'Il ne reste que ' . $max . ' unité(s) à commander. Veuillez retirer ' . $qty - $max . ' unité(s)';
 			} elseif (!$id_commande_fourn) {
 				$errors[] = 'Veuillez sélectionner une commande fournisseur';
 			} elseif (!BimpObject::objectLoaded($commande)) {

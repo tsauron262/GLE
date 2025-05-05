@@ -103,6 +103,8 @@ class BimpCache
 	public static function getCacheArray($cache_key, $include_empty = false, $empty_value = 0, $empty_label = '')
 	{
 		if ($include_empty) {
+//			$empty_value = 0;
+
 			$return = array(
 				$empty_value => $empty_label
 			);
@@ -641,6 +643,29 @@ class BimpCache
 		return $result;
 	}
 
+	public static function getObjectFieldsArray(BimpObject $object, $include_empty = false) {
+		if (!is_null($object) && is_a($object, 'BimpObject')) {
+			$cache_key = $object->module . '_' . $object->object_name . '_fields_array';
+			if (!isset(self::$cache[$cache_key])) {
+				self::$cache[$cache_key] = array();
+
+				if (isset($object->params['fields'])) {
+					foreach ($object->params['fields'] as $field_name) {
+						if ($object->isFieldActivated($field_name)) {
+							if ($object->getConf('fields/' . $field_name . '/viewable', 1, false, 'bool')) {
+								self::$cache[$cache_key][$field_name] = $object->getConf('fields/' . $field_name . '/label', $field_name, true);
+							}
+						}
+					}
+				}
+			}
+
+			return self::getCacheArray($cache_key, $include_empty, '', '');
+		}
+
+		return ($include_empty ? array('' => '') : array());
+	}
+
 	public static function getExtraFieldsArray($element)
 	{
 		$entitys = getEntity($element, 0);
@@ -911,7 +936,7 @@ class BimpCache
 			return self::getCacheArray($cache_key, $include_empty, '', '');
 		}
 
-		return array();
+		return ($include_empty ? array('' => '') : array());
 	}
 
 	public static function getObjectStatsListColsArray(BimpObject $object, $list_name)
@@ -2092,59 +2117,6 @@ class BimpCache
 		return $return;
 	}
 
-	public static function getPriorities()
-	{
-		$cache_key = 'proriety_label';
-
-		if (!isset(self::$cache[$cache_key])) {
-			self::$cache[$cache_key] = array(0=> '');
-
-			$rows = self::getBdb()->getRows('c_societe_rdc_priorite', '`active` = 1', null, 'array', array('rowid', 'libelle'));
-			if (!is_null($rows)) {
-				foreach ($rows as $r) {
-					self::$cache[$cache_key][(int) $r['rowid']] = $r['libelle'];
-				}
-			}
-		}
-
-		return self::getCacheArray($cache_key);
-	}
-
-
-	public static function getCategoriesRdc()
-	{
-		$cache_key = 'category_ca_rdc_label';
-
-		if (!isset(self::$cache[$cache_key])) {
-			self::$cache[$cache_key] = array(0=> '');
-
-			$rows = self::getBdb()->getRows('c_categorie_rdc', '`active` = 1', null, 'array', array('rowid', 'libelle'));
-			if (!is_null($rows)) {
-				foreach ($rows as $r) {
-					self::$cache[$cache_key][(int) $r['rowid']] = $r['libelle'];
-				}
-			}
-		}
-		return self::getCacheArray($cache_key);
-	}
-
-	public static function getSourcesRdc()
-	{
-		$cache_key = 'source_rdc_label';
-
-		if (!isset(self::$cache[$cache_key])) {
-			self::$cache[$cache_key] = array(0=> '');
-
-			$rows = self::getBdb()->getRows('c_societe_rdc_source', '`active` = 1', null, 'array', array('rowid', 'libelle'));
-			if (!is_null($rows)) {
-				foreach ($rows as $r) {
-					self::$cache[$cache_key][(int) $r['rowid']] = $r['libelle'];
-				}
-			}
-		}
-		return self::getCacheArray($cache_key);
-	}
-
 	public static function getTypesSocietesCodesArray($include_empty = false, $active_only = false)
 	{
 		$cache_key = 'types_socs_codes_array';
@@ -2373,25 +2345,6 @@ class BimpCache
 			if (is_array($rows)) {
 				foreach ($rows as $r) {
 					self::$cache[$cache_key][] = (int) $r['fk_user'];
-				}
-			}
-		}
-
-		return self::$cache[$cache_key];
-	}
-
-	public static function getStatuts_rdc()
-	{
-		$cache_key = 'rdc_statuts_prospects';
-
-		if (!isset(self::$cache[$cache_key])) {
-			self::$cache[$cache_key] = array();
-
-			$rows = self::getBdb()->getRows('c_societe_rdc_statut', 'active = 1', null, 'array');
-
-			if (is_array($rows)) {
-				foreach ($rows as $r) {
-					self::$cache[$cache_key][$r['rowid']] = $r;
 				}
 			}
 		}

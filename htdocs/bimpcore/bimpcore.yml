@@ -157,6 +157,10 @@ params:
     exports_ldlc_ftp_mdp:
         label: Mdp FTP pour les exports LDLC
         def: ''
+    use_notes_models: 
+        label: Activer les modèles de note
+        type: bool
+        def: 0
     
     # Defaults: 
     default_id_entrepot: 
@@ -235,6 +239,11 @@ params:
                       def: ''    
     
     # Debugs: 
+    bimpdebug_times_backtraces: 
+        label: Inclure les backtraces dans les timers
+        type: bool
+        def: 0
+        cat: debug
     js_debug_local_storage: 
         label: Activer le debug JS du stockage local
         type: bool

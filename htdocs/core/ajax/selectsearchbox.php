@@ -213,7 +213,7 @@ if(strlen($search_boxvalue) > 10 && strlen($search_boxvalue) < 16 && stripos($se
 	$arrayresult=array_merge(array($arrayresult["searchintosn"]), $arrayresult);
 if((strlen($search_boxvalue) > 10) && strlen($search_boxvalue) < 14 && is_numeric($search_boxvalue) && isset($arrayresult["searchintoproduct"]))
 	$arrayresult=array_merge(array($arrayresult["searchintoproduct"]), $arrayresult);
-if(stripos($search_boxvalue, "fa") === 0 OR 
+if(stripos($search_boxvalue, "fa") === 0 OR
         stripos($search_boxvalue, "av") === 0 OR
         stripos($search_boxvalue, "ac") === 0)
 	$arrayresult=array_merge(array($arrayresult["searchintoinvoice"]), $arrayresult);

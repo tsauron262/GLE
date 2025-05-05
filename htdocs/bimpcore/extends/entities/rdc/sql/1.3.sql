@@ -23,14 +23,14 @@ CREATE TABLE IF NOT EXISTS `llx_ca_rdc` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS `llx_c_categorie_rdc` (
-  `rowid` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `libelle` varchar(50) NOT NULL,
-  `ordre` int(11) NOT NULL,
-  `active` tinyint(1) NOT NULL DEFAULT '1'
-);
-INSERT INTO `llx_c_categorie_rdc` (libelle, ordre) VALUES
-	('Catégorie 1', 10),
-	('Catégorie 2', 20),
-	('Catégorie 3', 30),
-	('Catégorie 4', 40);
+-- CREATE TABLE IF NOT EXISTS `llx_c_categorie_rdc` (
+--   `rowid` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+--   `libelle` varchar(50) NOT NULL,
+--   `ordre` int(11) NOT NULL,
+--   `active` tinyint(1) NOT NULL DEFAULT '1'
+-- );
+-- INSERT INTO `llx_c_categorie_rdc` (libelle, ordre) VALUES
+-- 	('Catégorie 1', 10),
+-- 	('Catégorie 2', 20),
+-- 	('Catégorie 3', 30),
+-- 	('Catégorie 4', 40);

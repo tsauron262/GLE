@@ -258,6 +258,12 @@ class BimpUserMsg
 			'module'      => 'bimpcore',
 			'type_metier' => 'devs'
 		),
+		'pb_envoi_ecologic'                           => array(    // \BimpDebug::testLogDebug
+			'label'       => 'Page trés lourde - X sec.',
+			'dests'       => 'conf::default_sav_email/bimpsupport',
+			'module'      => 'bimpcore',
+			'type_metier' => 'devs'
+		),
 		'relance_paiement_acompte'                   => array(    // \Bimp_Client::relancePaiements
 			'label'  => 'L\'acompte xxx pour le client xxx est impayé. Merci d\'en vérifier la raison et de procéder à sa régularisation.',
 			'dests'  => 'conf::rappels_factures_financement_impayees_emails/bimpcommercial',
@@ -710,6 +716,12 @@ class BimpUserMsg
 			'dests'  => 'conf::emails_notify_solvabilite_client_change',
 			'module' => 'bimpcore',
 			'metier' => 'devs'
+		),
+		'Attribution_rdc'							=> array(
+			'label'  => 'Le compte XXX vient de vous être attribué',
+			'dests'  => 'object::id_user',
+			'module' => 'bimpcore',
+			'metier' => 'metier'
 		)
 
 		// todo tommy : separer mail client et mail interne :
@@ -761,6 +773,7 @@ class BimpUserMsg
 	{
 		if (!isset(static::$userMessages[$code])) {
 			$errors[] = 'Code message inconnu : ' . $code;
+			BimpCore::addlog('Code message inconnu : ' . $code, 'error');
 		} else {
 			$um = static::$userMessages[$code];
 			$params = static::$default_params;

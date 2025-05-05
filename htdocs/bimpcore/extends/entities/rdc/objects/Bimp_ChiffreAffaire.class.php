@@ -1,17 +1,18 @@
 <?php
 
-class Bimp_ChiffreAffaire_ExtEntity extends BimpObject {
+class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
+{
 	public static $parentObjectArray = array(
-		0 => 'Bimp_Societe',
-		1 => 'Bimp_Concurrence',
+		'Bimp_Societe' => 'Bimp_Societe',
+		'Bimp_Concurrence' => 'Bimp_Concurrence',
 	);
 	public static $parentIdProperty = array(
 		0 => 'fk_soc',
 		1 => 'id',
 	);
 	public static $objLabelArray = array(
-		0 => 'CA société',
-		1 => 'CA concurrence',
+		'Bimp_Societe'    => 'CA société',
+		'Bimp_Concurrence' => 'CA concurrence',
 	);
 	public static $periodsRdcArray = array(
 		0 => 'Annee',
@@ -21,40 +22,81 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject {
 		4 => 'Semaine',
 	);
 
+	public function getParentFilters()
+	{
+		$return = array();
+		if (!$this->isLoaded()){
+			foreach (static::$parentObjectArray as $type => $name) {
+				if (is_a($this->parent, $name)) {
+					$return['type_obj'] = $type;
+				}
+			}
+			if(isset($this->parent->id)){
+				$return['id_obj'] = $this->parent->id;
+			}
+			$params = json_decode(BimpTools::getValue('extra_data/param_filters', '{}', 'array'), true);
+			if(isset($params['id_obj']) && !isset($return['id_obj'])){
+				$return['id_obj'] = $params['id_obj'];
+			}
+			if(isset($params['type_obj'])&& !isset($return['type_obj'])){
+				$return['type_obj'] = $params['type_obj'];
+			}
+		}
+		else {
+			$return['type_obj'] = $this->getData('type_obj');
+			$return['id_obj'] = $this->getData('id_obj');
+		}
+
+		if(!isset($return['id_obj']))
+			die('imposible de trouvé l\'id de l\'objet parent'.$this->isLoaded().'<pre>'.print_r($_REQUEST, true));
+		if(!isset($return['type_obj']))
+			die('imposible de trouvé le type de  l\'objet parent'.$this->isLoaded().'<pre>'.print_r($_REQUEST, true));
+
+		return $return;
+	}
+
 	// getters
-	public function getParentObject($type) 	{
+	public function getParentObject()
+	{
+		$type = BimpTools::getPostFieldValue('type_obj', $this->getData('type_obj'), 'int');
 		return self::$parentObjectArray[$type];
 	}
-	public function getParent_IdProperty() 	{
+
+	public function getParent_IdProperty()
+	{
 		$type = BimpTools::getPostFieldValue('type_obj', $this->getData('type_obj'), 'int');
 		return self::$parentIdProperty[$type];
 	}
 
-	public function getTypesObjetsRdc() {
+	public function getTypesObjetsRdc()
+	{
 		return self::$objLabelArray;
 	}
 
-	public function getObjectParentName(){
-		$type = BimpTools::getPostFieldValue('type_obj', $this->getData('type_obj'), 'int');
+	public function getObjectParentName()
+	{
+		$type = BimpTools::getPostFieldValue('type_obj', $this->getData('type_obj', 0), 'int');
 		return static::$parentObjectArray[$type];
 	}
 
-	public function getDefaultIdParenrt(){
-		$type = BimpTools::getPostFieldValue('type_obj', $this->getData('type_obj'), 'int');
-		if($type == 0 && BimpTools::getPostFieldValue('action') == 'loadObjectForm'){
-			return BimpTools::getPostFieldValue('id', 0, 'int');
-		}
-	}
+//	public function getDefaultIdParenrt()
+//	{
+//		$type = BimpTools::getPostFieldValue('type_obj', $this->getData('type_obj'), 'int');
+//		if ($type == 0 && BimpTools::getPostFieldValue('action') == 'loadObjectForm') {
+//			return BimpTools::getPostFieldValue('id', 0, 'int');
+//		}
+//	}
 
-	public function getPeriodsRdc() {
+	public function getPeriodsRdc()
+	{
 		return self::$periodsRdcArray;
 	}
 
-	public function getParamsPeriode(){
-		if($this->getData('fk_period') == 0){
+	public function getParamsPeriode()
+	{
+		if ($this->getData('fk_period') == 0) {
 			return 'YYYY';
-		}
-		elseif($this->getData('fk_period') < 4) {
+		} elseif ($this->getData('fk_period') < 4) {
 			return 'MM YYYY';
 		}
 	}
@@ -62,81 +104,108 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject {
 	public function validateValue($field, $value, $forbidden_chars = array())
 	{
 		$errors = array();
-		if($field == 'debut_period'){
+		if ($field == 'debut_period') {
 			$date = strtotime($value);
 			$day = date('d', $date);
 			$jSemaine = date('w', $date);
 			$month = date('m', $date);
 
 
-			if($this->getData('fk_period') < 4){
-				if($day != 1)
+			if ($this->getData('fk_period') < 4) {
+				if ($day != 1) {
 					$errors[] = 'Le jour doit être en debut de mois (01)';
-			}
-			else{
-				if($jSemaine != 1){
-					$errors[] = 'Le jour doit être un lundi '.$jSemaine;
+				}
+			} else {
+				if ($jSemaine != 1) {
+					$errors[] = 'Le jour doit être un lundi ' . $jSemaine;
 				}
 			}
-			if($this->getData('fk_period') == 0){
-				if($month != 1){
+			if ($this->getData('fk_period') == 0) {
+				if ($month != 1) {
 					$errors[] = 'Le mois doit être en debut d\'année (01)';
 				}
 			}
-			if($this->getData('fk_period') == 1){
-				if(fmod($month, 6) != 1){
-					$errors[] = $month.' n\'est pas le début d\'un semestre';
+			if ($this->getData('fk_period') == 1) {
+				if (fmod($month, 6) != 1) {
+					$errors[] = $month . ' n\'est pas le début d\'un semestre';
 				}
 			}
-			if($this->getData('fk_period') == 2){
-				if(fmod($month, 3) != 1){
-					$errors[] = $month.' n\'est pas le début d\'un trimestre';
+			if ($this->getData('fk_period') == 2) {
+				if (fmod($month, 3) != 1) {
+					$errors[] = $month . ' n\'est pas le début d\'un trimestre';
 				}
 			}
 		}
-		if(count($errors))
+		if (count($errors)) {
 			return $errors;
+		}
 
 		return parent::validateValue($field, $value, $forbidden_chars); // TODO: Change the autogenerated stub
 	}
 
 
+	public function getCategCa($type = 1){
+		$result = array();
+		$categories = BimpDict::getValuesArray('ca_categories', true, false);
+		$filters = $this->getParentFilters();
+		if($type == 1)
+			$field = 'fk_category';
+		else
+			$field = 'fk_category'.$type;
+		$sql = $this->db->db->query('SELECT DISTINCT('.$field.') as fk_category FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$filters['id_obj'].' AND type_obj = "'.$filters['type_obj'].'"');
+		while($ln = $this->db->db->fetch_object($sql)){
+			$result[$ln->fk_category] = $categories[$ln->fk_category]['label'];
+		}
+		return $result;
+	}
+
 	//graph
-	public function getCategForGrpah($type = 1, $label = ''){
+	public function getCategForGrpah($type = 1, $label = '')
+	{
 		$fields = array();
-		$filter = array(
-		);
-		$cmds = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filter);
-		foreach($this->getCategoriesRdc() as $idC => $label){
-			if($idC > 0) {
-				$filter2 = array_merge($filter, array('fk_category' => $idC));
+		$categories = BimpDict::getValuesArray('ca_categories', true, false);
+		$filters = $this->getParentFilters();
+
+		if($type == 1)
+			$field = 'fk_category';
+		else
+			$field = 'fk_category'.$type;
+		$sql = $this->db->db->query('SELECT DISTINCT('.$field.') as categ FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$filters['id_obj'].' AND type_obj = "'.$filters['type_obj'].'"');
+		while($ln = $this->db->db->fetch_object($sql)){
+			$idC = $ln->categ;
+			if ($idC > 0) {
 				$fields[$idC] = array(
-					"title"   => $label,
+					"title"   => $categories[$idC]['label'],
 					'field'   => 'ca',
 					'calc'    => 'SUM',
-					'filters' => $filter2
+					'filters' => array($field => $idC)
 				);
 			}
 		}
+
 		return $fields;
 	}
 
-	public function getFiltersForGraph(){
-		$filters = array(
-			'fk_category'	=> 0,
-			'fk_period'		=> 0,
-		);
-		$data = $this->paramsUrlToArray(BimpTools::getPostFieldValue('form'));
+//	public function getFiltersForGraph()
+//	{
+//		$filters = array(
+//			'fk_category' => 0,
+//			'fk_period'   => 3,
+//		);
+//		$data = $this->paramsUrlToArray(BimpTools::getPostFieldValue('form'));
+//
+//		if (isset($data['fk_category'])) {
+//			$filters['fk_category'] = $data['fk_category'];
+//		}
+//		if (isset($data['fk_period'])) {
+//			$filters['fk_period'] = $data['fk_period'];
+//		}
+//
+//		return $filters;
+//	}
 
-		if(isset($data['fk_category']))
-			$filters['fk_category'] = $data['fk_category'];
-		if(isset($data['fk_period']))
-			$filters['fk_period'] = $data['fk_period'];
-
-		return $filters;
-	}
-
-	public function paramsUrlToArray($str){
+	public function paramsUrlToArray($str)
+	{
 		$tab = explode('&', $str);
 		foreach ($tab as $key => $value) {
 			$tab2 = explode('=', $value);

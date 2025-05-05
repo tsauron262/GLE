@@ -2252,6 +2252,24 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 			}
 		}
 
+		/* test de l'encours*/
+		$propal = $this->getChildObject('propal');
+		$client = $this->getChildObject('client');
+
+		if ($propal->dol_object->cond_reglement_id != BimpCore::getConf('sav_cond_reglement', null, 'bimpsupport') || $propal->dol_object->mode_reglement_id != BimpCore::getConf('sav_mode_reglement', null, 'bimpsupport')) {
+			//exception pour les virement bencaire a la commande
+			if ($propal->dol_object->cond_reglement_id != 20 || $propal->dol_object->mode_reglement_id != 2) {
+
+				$encoursActu = $client->getAllEncoursForSiret(true)['total'];
+				$authorisation = ($client->getData('outstanding_limit') + $this->getUserLimitEncours()) * 1.2;
+				$besoin = $encoursActu + $propal->dol_object->total_ht;
+
+				if ($besoin > ($authorisation + 1)) {
+						$html .= BimpRender::renderAlerts('Le client doit payer comptant (Carte bancaire, A réception de facture), son encours autorisé (' . price($authorisation) . ' €) est inférieur au besoin (' . price($besoin) . ' €)');
+				}
+			}
+		}
+
 		return $html;
 	}
 

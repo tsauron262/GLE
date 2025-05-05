@@ -1,7 +1,22 @@
+title: Marchands
+
 sections:
     -   type: tabs
         tabs:
-            remises: unset
-            stat_client: unset
-            ribs: unset
-            stats: unset
+            default:
+                label: Marchands
+                sections:
+                    - type: list
+                      list:
+                          object: client
+                          name: rdc
+            contacts:
+                label: Contacts marchands
+            stat_client:
+                label: Statistiques marchands
+
+                        
+#            remises: unset
+#            stat_client: unset
+#            ribs: unset
+#            stats: unset

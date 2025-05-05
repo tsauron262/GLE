@@ -9,8 +9,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		3 => array('label' => 'Prospection: prise de contact', 'icon' => 'fas_suitcase', 'classes' => array('important')),
 		4 => array('label' => 'Prospection: contact et présentation ok', 'icon' => 'fas_suitcase', 'classes' => array('important')),
 		5 => array('label' => 'Prospect KO', 'icon' => 'fas_suitcase', 'classes' => array('danger')),
-				6 => array('label' => 'KYC en cours'),
-				7 => array('label' => 'MANGOPAY en cours'),
+//				6 => array('label' => 'KYC en cours'),
+//				7 => array('label' => 'MANGOPAY en cours'),
 		8 => array('label' => 'En attente onboarding catalogue', 'icon' => 'fas_handshake', 'classes' => array('important')),
 		9 => array('label' => 'Onboarding catalogue KO', 'icon' => 'fas_handshake', 'classes' => array('danger')),
 		10 => array('label' => 'Onboarding catalogue OK', 'icon' => 'fas_handshake', 'classes' => array('success')),
@@ -30,19 +30,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		self::PENDING_APPROVAL => array('label' => 'Vérification KYC en cours', 'icon' => 'fas_spinner' , 'classes' => array('important')),
 		self::APPROVED => array('label' => 'KYC validé', 'icon' => 'fas_check', 'classes' => array('success')),
 		self::REFUSED => array('label' => 'KYC non valide', 'icon' => 'fas_times', 'classes' => array('danger')),
-	);
-
-
-//self::BS_SAV_RESERVED          => array('label' => 'Réservé par le client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
-//self::BS_SAV_CANCELED_BY_CUST  => array('label' => 'Annulé par le client', 'icon' => 'fas_times', 'classes' => array('danger')),
-//self::BS_SAV_CANCELED_BY_USER  => array('label' => 'Annulé par utilisateur', 'icon' => 'fas_times', 'classes' => array('danger')),
-
-	public static $categorieMaitreRdc = array(
-		0 => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
-		1 => array('label' => 'Catégrorie 1'),
-		2 => array('label' => 'Catégorie 2'),
-		3 => array('label' => 'Catégorie 3'),
-		4 => array('label' => 'Catégorie 4'),
 	);
 	public static $statut_rdc_live = 11;
 	public static $statut_rdc_prospect_array = array(3, 4);
@@ -177,14 +164,12 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$buttons = array();
 
 		$statu = $this->getData('fk_statut_rdc');
-//		if($statu == 0)
-//			$statu = 1;
 		if (isset(self::$actions_selon_statut_rdc[$statu])) {
 			foreach (self::$actions_selon_statut_rdc[$statu] as $statut) {
 				$listGroup_allowed = self::$group_allowed_actions[$statut];
 				$user_in_group = false;
 				foreach ($listGroup_allowed as $group) {
-					if ($this->isUserInGroup($group)) {
+					if ($this->isUserInGroup($group) || $this->isUserManager()) {
 						$user_in_group = true;
 						break;
 					}
@@ -207,22 +192,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			}
 		}
 		return $buttons;
-		/*$groups = array();
-		if (!empty($buttons)) {
-			$groups[] = array(
-				'label'   => 'Actions',
-				'icon'    => 'fas_cogs',
-				'buttons' => $buttons
-			);
-		}
-
-		if (!empty($groups)) {
-			return array(
-				'buttons_groups' => $groups,
-			);
-		}
-
-		return array();*/
 	}
 
 	public function getMiraklLink()
@@ -255,15 +224,22 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function canEditField($field_name)
 	{
 		switch ($field_name) {
-			case 'fk_categorie_maitre':
 			case 'fk_priorite':
+			case 'presta_source':
+			case 'fk_categorie_maitre':
 			case 'potentiel_catalogue':
 				return $this->isUserBDKAM();
+
 			case 'fk_source_rdc':
+			case 'name_alias':
+			case 'nom':
 				return $this->isUserBD();
+
+			case 'contrefacon':// lot 2 : return $this->isUserQuality(); // : créer un group Qualité (cf bimpcore.yml)
 			case 'fk_group_rdc':
 			case 'fk_user_attr_rdc':
 				return $this->isUserManager();
+
 			case 'fk_statut_rdc':
 				return 0;
 		}
@@ -282,28 +258,34 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function isAdmin()
 	{
-		global $user;
-		return $user->admin;
+//		global $user;
+//		return $user->admin;
+		return $this->isUserInGroup('ADMIN');
 	}
 
 	public function isUserBD()
 	{
-		return $this->isUserInGroup('BD');
+		return $this->isUserInGroup('BD') || $this->isUserManager();
 	}
 
 	public function isUserKAM()
 	{
-		return $this->isUserInGroup('KAM');
+		return $this->isUserInGroup('KAM') || $this->isUserManager();
 	}
 
 	public function isUserManager()
 	{
-		return $this->isUserInGroup('MANAGER');
+		return $this->isUserInGroup('MANAGER') || $this->isUserInGroup('ADMIN');
 	}
 
 	public function isUserTECH()
 	{
-		return $this->isUserInGroup('TECH_RDC');
+		return $this->isUserInGroup('TECH_RDC')|| $this->isUserManager();
+	}
+
+	public function isUserQuality()
+	{
+		return $this->isUserInGroup('Quality')|| $this->isUserManager();
 	}
 
 	public function isUserBDKAM()
@@ -314,9 +296,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function isUserInGroup($g)
 	{
 		global $user;
-		/*todo a voir si on garde*/
-		if ($this->isAdmin()) return true;
 		$id_group = BimpCore::getConf('id_user_group_' . $g);
+//var_dump($g, $id_group); echo '<hr />';
 		$groups = $this->db->getRow('usergroup_user', 'fk_user = ' . $user->id . ' AND fk_usergroup = ' . $id_group , array('rowid'), 'array');
 		if($groups)
 			return true;
@@ -348,6 +329,9 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		}
 		$html .= $icon . $tab['label'];
 		$html .= '</span>';
+		if ($this->getData('fk_statut_rdc') == 5) {
+			$html .= '<br />Motif KO&nbsp;: ' . $this->getData('commentaire_statut_ko');
+		}
 		if ($this->getData('date_changement_statut_rdc')) {
 			$html .= '<br />Dernier changement de statut le&nbsp;: ' . date('d / m / Y', strtotime($this->getData('date_changement_statut_rdc')));
 		}
@@ -418,6 +402,18 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		);
 
 		return BimpRender::renderNavTabs($tabs);
+	}
+
+	public function getFlagImport()
+	{
+		$html = '';
+		$import_key = $this->getData('import_key');
+		if ($import_key) {
+			$html .= '<span class="success" title="Importé">';
+			$html .= BimpRender::renderIcon('fas_file-import', 'iconRight');
+			$html .= '</span>';
+		}
+		return $html;
 	}
 
 	public function renderActionsCommView($type)

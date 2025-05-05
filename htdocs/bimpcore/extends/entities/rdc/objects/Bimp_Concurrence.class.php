@@ -20,6 +20,13 @@ class Bimp_Concurrence_ExtEntity extends Bimp_Concurrence	{
 		}
 		return $buttons;
 	}
+
+	public function canAddConcurrence()	{
+		$id = BimpTools::getPostFieldValue('id');
+		$soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id);
+
+		return $soc->isUserBD();
+	}
 }
 
 /* todo comme le non extend n'existe pas*/

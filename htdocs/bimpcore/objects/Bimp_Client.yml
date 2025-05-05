@@ -463,7 +463,7 @@ searches:
       
 stats_lists_cols: 
     nb_client: 
-        label: Nb Client
+        label: Nombre
         type: count_distinct
         field: nom
 #    tot_qty: 

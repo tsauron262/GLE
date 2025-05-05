@@ -27,6 +27,9 @@ if (!$user->admin) {
 	exit;
 }
 
+mailSyn2('TEST àéè', 'f.martinez@bimp.fr', '', '');
+BimpCore::addlog('TEST àéè', 4, 'bimpcore', null);
+
 echo '<br/>FIN';
 echo '</body></html>';
 

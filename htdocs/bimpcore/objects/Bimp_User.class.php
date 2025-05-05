@@ -1047,27 +1047,41 @@ class Bimp_User extends BimpObject
 		}
 		}
 
-		if ($isAdmin || $isItself || $this->canViewUserCommissions()) {
+		if (BimpCore::isModuleActive('BIMPFINANC')) {
+			if ($isAdmin || $isItself || $this->canViewUserCommissions()) {
+				$tabs[] = array(
+					'id'            => 'commissions',
+					'title'         => BimpRender::renderIcon('fas_comment-dollar', 'iconLeft') . 'Commissions',
+					'ajax'          => 1,
+					'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#commissions .nav_tab_ajax_result\')', array('commissions'), array('button' => ''))
+				);
+			}
+		}
+
+		if (BimpCore::isModuleActive('BIMPCOMMERCIAL')) {
 			$tabs[] = array(
-				'id'            => 'commissions',
-				'title'         => BimpRender::renderIcon('fas_comment-dollar', 'iconLeft') . 'Commissions',
-				'ajax'          => 1,
-				'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#commissions .nav_tab_ajax_result\')', array('commissions'), array('button' => ''))
+				'id'      => 'commercial',
+				'title'   => BimpRender::renderIcon('fas_briefcase', 'iconLeft') . 'Commercial',
+				'content' => $this->renderCommercialView()
 			);
 		}
 
-		$tabs[] = array(
-			'id'      => 'commercial',
-			'title'   => BimpRender::renderIcon('fas_briefcase', 'iconLeft') . 'Commercial',
-			'content' => $this->renderCommercialView()
-		);
+		if (BimpCore::isModuleActive('BIMPEQUIPMENT')) {
+			$tabs[] = array(
+				'id'      => 'materiel',
+				'title'   => BimpRender::renderIcon('fas_tv', 'iconLeft') . 'Materiel',
+				'content' => $this->renderMaterielView()
+			);
+		}
 
-		$tabs[] = array(
-			'id'      => 'materiel',
-			'title'   => BimpRender::renderIcon('fas_tv', 'iconLeft') . 'Materiel',
-			'content' => $this->renderMaterielView()
-		);
-
+		if (BimpCore::isModuleActive('BIMPTICKET')) {
+			$tabs[] = array(
+				'id'            => 'tickets',
+				'title'         => BimpRender::renderIcon('fas_ticket-alt', 'iconLeft') . 'Tickets',
+				'content'       => $this->renderTicketsView(),
+			);
+		}
+		
 		$tabs[] = array(
 			'id'            => 'ldap',
 			'title'         => BimpRender::renderIcon('link', 'iconLeft') . 'LDAP',
@@ -1075,6 +1089,7 @@ class Bimp_User extends BimpObject
 			'ajax'          => 1,
 			'ajax_callback' => $this->getJsLoadCustomContent('renderLdapView', '$(\'#ldap .nav_tab_ajax_result\')', array('ldap'), array('button' => ''))
 		);
+
 
 		return BimpRender::renderNavTabs($tabs);
 	}
@@ -1340,6 +1355,26 @@ class Bimp_User extends BimpObject
 		);
 
 		return BimpRender::renderNavTabs($tabs, 'conges_tabs');
+	}
+
+	public function renderTicketsView() {
+		$tabs = array();
+
+		$tabs[] = array(
+			'id'            => 'all_tickets',
+			'title'         => BimpRender::renderIcon('fas_ticket-alt', 'iconLeft') . 'Tous les tickets',
+			'ajax'          => 1,
+			'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#all_tickets .nav_tab_ajax_result\')', array('all_tickets'), array('button' => ''))
+		);
+
+		$tabs[] = array(
+			'id'            => 'my_tickets',
+			'title'         => BimpRender::renderIcon('fas_ticket-alt', 'iconLeft') . 'Mes tickets',
+			'ajax'          => 1,
+			'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#my_tickets .nav_tab_ajax_result\')', array('my_tickets'), array('button' => ''))
+		);
+
+		return BimpRender::renderNavTabs($tabs, 'tickets');
 	}
 
 	public function renderParamsView()
@@ -2108,6 +2143,17 @@ class Bimp_User extends BimpObject
 				$list->addFieldFilterValue('fk_usergroup', array(
 					'in' => BimpCache::getUserUserGroupsList((int) $this->id)
 				));
+				break;
+
+			case 'all_tickets':
+				$tickets = BimpObject::getInstance('bimpticket', 'Bimp_Ticket');
+				$list = new BC_ListTable($tickets, 'default', 1, null, 'Tous les tickets', 'fas_ticket-alt');
+				break;
+
+			case 'my_tickets':
+				$tickets = BimpObject::getInstance('bimpticket', 'Bimp_Ticket');
+				$list = new BC_ListTable($tickets, 'default', 1, null, 'Tickets assignés à "' . $user_label . '"', 'fas_ticket-alt');
+				$list->addFieldFilterValue('fk_user_assign', (int) $this->id);
 				break;
 
 			// Onglet "Commission":

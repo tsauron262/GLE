@@ -5,6 +5,14 @@ controller: client_rdc
 
 header_edit_form: form_client_rdc
 
+nom_url:
+    syntaxe: <name>
+    
+    
+labels:
+    name: Marchant
+    is_female: 0
+        
 objects:
     user_attr:
         extends: user
@@ -142,6 +150,9 @@ fields:
     id_atradius: unset
     id_contact_relances: unset
     filters: unset
+    fk_pays:
+        default_value: 0
+    code_client: unset
 
 fields_tables:
     identity_rdc:
@@ -391,12 +402,82 @@ forms:
                   options:
                       callback: getListButtons
 
+filters_panels:
+    default:
+        filters:
+            fk_statut_rdc:
+            fk_statut_kyc:
+            fk_priorite:
+            fk_categorie_maitre:
+            fk_source_rdc:
+            date_der_contact:
+            date_debut_prospect:
+            date_ouverture:
+            fk_pays:
+            fk_typent: unset
+            code_compta: unset
+            code_client: unset
+            siret: unset
+            siren: unset
+            ape: unset
+            rpps: unset
+            commerciaux: unset
+            secteuractivite: unset
+            marche: unset
+            address: unset
+            zip: unset
+            town: unset
+            email: unset
+            phone: unset
+            status: unset
+            solvabilite_status: unset
+            
+                
+
+lists_cols:
+    flag_import:
+        label: Flag
+        value:
+            callback: getFlagImport
+            
+
 lists:
     default:
         title: Liste des clients
         object: client
         add_btn_label: Nouvelle société
         add_form_name: form_client_rdc
+
+    rdc:
+        configurable: 1
+        checkboxes: 1
+        title: Liste des Marchands
+        filters_panel: default
+        bulk_actions:
+            -   label: supprimer les société sélectionnées
+                icon: fas_trash-alt
+                onclick: deleteSelectedObjects('list_id', $(this))
+        object: client
+        add_btn_label: Nouveau marchand
+        add_form_name: form_client_rdc
+        sort_field: name_alias
+        sort_way: ASC
+        page_btn: 1
+        modal_view: default
+        edit_btn: 1
+        cols:
+            shopid:
+            nom:
+            name_alias:
+            fk_statut_rdc:
+            fk_statut_kyc:
+            full_address:
+            infos_contact:
+            date_der_contact:
+            date_debut_prospect:
+            fk_priorite:
+            flag_import:
+                label: Flag
 
 
 stats_lists:

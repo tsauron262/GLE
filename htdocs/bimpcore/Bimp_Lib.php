@@ -129,6 +129,8 @@ if (!defined('BIMP_LIB')) {
         require_once $dir . 'BimpMail.php';
     }
 
+	BimpTools::secuTestIp();
+
 //    BimpConfig::initCacheServeur();
 }
 

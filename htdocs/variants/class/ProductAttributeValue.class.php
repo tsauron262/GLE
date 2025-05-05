@@ -309,6 +309,10 @@ class ProductAttributeValue extends CommonObjectLine
 
 		$sql .= " ORDER BY v.position ASC";
 
+		if ($only_used) {
+			$sql .= ' LIMIT 0,10';
+		}
+
 		$query = $this->db->query($sql);
 
 		while ($result = $this->db->fetch_object($query)) {

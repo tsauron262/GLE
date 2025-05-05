@@ -7,24 +7,62 @@ class en_social2{
 	public $onlyUp = false;
 	function cronExec(){
 		$message = array(
-			array("c" => "FF0000", "t" => "A"),
-			array("c" => "00FF00", "t" => "B"),
-			array("c" => "0000FF", "t" => "O"),
-			array("c" => "FFFFFF", "t" => "N"),
-			array("c" => "FF0000", "t" => "N"),
-			array("c" => "00FF00", "t" => "E"),
-			array("c" => "0000FF", "t" => "Z"),
-			array("c" => "FFFFFF", "t" => "-"),
-			array("c" => "FF0000", "t" => "V"),
-			array("c" => "00FF00", "t" => "O"),
-			array("c" => "0000FF", "t" => "U"),
-			array("c" => "FFFFFF", "t" => "S"),
+			array("c" => "FF33F9", "t" => "A"),
+			array("c" => "33D7FF", "t" => "B"),
+			array("c" => "33FF5B", "t" => "O"),
+			array("c" => "AFFF33", "t" => "N"),
+			array("c" => "ECFF33", "t" => "N"),
+			array("c" => "FFC133", "t" => "E"),
+			array("c" => "FF6E33", "t" => "Z"),
+			array("c" => "FF3352", "t" => "-"),
+			array("c" => "FF3368", "t" => "V"),
+			array("c" => "B233FF", "t" => "O"),
+			array("c" => "3C33FF", "t" => "U"),
+			array("c" => "33A8FF", "t" => "S"),
+//			array("c" => "33A8FF", "t" => " PAS !!!!"),
 		);
 		$this->createMessage($message, 'MSG', 'text');
+
+
+//		$this->createMessage('01-05-2021 => 30-04-2025  = 4 ANS', 'MSG', '102');
+//// Your OpenWeatherMap API key
+//		$apiKey = 'b5f44b0578e132472aa516e50ae0d66d';
+//		$city = 'Les Estables';
+//		$units = 'metric'; // Use 'imperial' for Fahrenheit
+//		$apiUrl = "https://api.openweathermap.org/data/2.5/weather?q={$city}&units={$units}&appid={$apiKey}";
+//
+//// Fetch weather data
+//		$response = file_get_contents($apiUrl);
+//		if ($response === false) {
+//			die('Error occurred while fetching weather data.');
+//		}
+//
+//// Decode JSON response
+//		$data = json_decode($response, true);
+//
+//// Display weather information
+//		if (isset($data['main'])) {
+//			echo "City: " . $data['name'] . "\n";
+//			echo "Temperature: " . $data['main']['temp'] . "°C\n";
+//			echo "Weather: " . $data['weather'][0]['description'] . "\n";
+//		} else {
+//			echo "Error: Unable to fetch weather data.\n";
+//		}
+//		$this->createMessage($data['main']['temp'] . "°C", 'temp', 'text');
+//
+
 		for($i=0; $i < 10; $i++){
 			$this->checkSocial();
 			sleep(5);
 		}
+
+
+
+
+
+
+
+
 		return 0;
 	}
 
@@ -130,7 +168,7 @@ class en_social2{
 				}
 				$message = array(
 					array("t" => substr($result, 0, -$nb)),
-					array("c" => "FF0000", "t" => substr($result, -$nb)),
+					array("c" => "00FF00", "t" => substr($result, -$nb)),
 				);
 				$this->createMessage($message, '', $mode, 'adams', 'Matrix');
 				$datas[$mode]['nb'] = $result;
@@ -142,11 +180,11 @@ class en_social2{
 
 	function createMessage($text, $topic = '', $icon = '', $sound = '', $effect = '', $color = '#FF0000') {
 		if($icon == 'fb'){
-			$icon = '18426';
+			$icon = '7303';
 			$color = '#3B5998';
 		}
 		elseif($icon == 'ig'){
-			$icon = '3741';
+			$icon = '58261';
 			$color = '#E1306C';
 		}
 		if($topic != '')

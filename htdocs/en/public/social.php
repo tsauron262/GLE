@@ -42,7 +42,7 @@ if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'log') {
 	/*
 	 * trucage
 	 */
-	$data['authResponse']['accessToken'] = 'EAAaI7w3JtZCQBOzyWMR22pFcHSZBpvkxZAUOEgjylD2ZBSde901mbt8qU9ZBbZBSjHZBY0GWYUc1qqQRt1oH95uxtXRsZCv9ZA1lplWU459dONHAv8iD7GBYz2XGifRj8FTLLIcqpHMteIbjn5Q3oJbqZCTdiktOr9jlQYf1HGGIoVX6qVcFZAd19nlzBhLsydd6msPX9nwUouDVOikcZAX45QZDZD';
+	$data['authResponse']['accessToken'] = 'EAAaI7w3JtZCQBO163vqeNILlUmZCur2uOvMUxaHNgvEtVuVH8SLsfmoQHHQxXzdXGhPjr4WhZAgCuQVYc8emwS8rpo27ClZB6c7unNXLrE0lZCdedkPJfigMoTw46r4hEqIKhbsObvtlytnZCEV6RuwVcZBzSU9AYXdJJa3GGdXgFNUcu21VGFi7NhdpZCN80S2Sd5W7l8ClLYBRa4yxYGoZD';
 	if(isset($data['authResponse']['accessToken']) && $data['status'] == 'connected') {
 		if(isset($data['authResponse']['graphDomain']) == 'facebook') {
 			$object->saveToken('fb', $data['authResponse']['accessToken'], $data['authResponse']['data_access_expiration_time']);

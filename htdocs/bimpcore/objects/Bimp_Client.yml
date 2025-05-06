@@ -1,6 +1,12 @@
 extends: 
     module: bimpcore
     object_name: Bimp_Societe
+#dol_object:
+#    instance:
+#        dol_object: 
+#            module: societe
+#            file: client
+#            class: Client
     
 controller: client
 

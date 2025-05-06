@@ -459,6 +459,8 @@ lists:
                 onclick: deleteSelectedObjects('list_id', $(this))
         object: client
         add_btn_label: Nouveau marchand
+        header_buttons:
+            callback: getDefaultListExtraHeaderButtons
         add_form_name: form_client_rdc
         sort_field: name_alias
         sort_way: ASC

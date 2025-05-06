@@ -8,7 +8,15 @@ class BimpDictionnary extends BimpObject
 	public function canCreate()
 	{
 		global $user;
-		return $user->admin || BimpTools::isUserInGroup($user->id, 'Admin');
+		$isUserInGroup = false;
+		$params = $this->getData('values_params');
+		if (isset($params['edit'])) {
+			$edit = explode(':', $params['edit']);
+			if (isset($edit[0]) && $edit[0] == 'GR')	{
+				$isUserInGroup = BimpTools::isUserInGroup($user->id, $edit[1]);
+			}
+		}
+		return $user->admin || $isUserInGroup;
 	}
 
 	public function canEdit()

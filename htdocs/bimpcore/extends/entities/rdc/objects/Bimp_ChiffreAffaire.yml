@@ -175,7 +175,12 @@ lists:
             fk_category4:
             ca:
             fk_period:
-            debut_period:
+            period:
+                custom: 1
+                label: Période
+                value:
+                    callback:
+                        method: displayPeriode
                 
                 
 views:

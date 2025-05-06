@@ -22,6 +22,28 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 		4 => 'Semaine',
 	);
 
+	public function displayPeriode(){
+		$date = strtotime($this->getData('debut_period'));
+		switch($this->getData('fk_period')){
+			case 0:
+				$format = 'Y';
+				break;
+			case 1:
+				$format = 'm/Y';
+				break;
+			case 2:
+				$format = 'm/Y';
+				break;
+			case 3:
+				$format = 'm/Y';
+				break;
+			case 4:
+				$format = 'd/m/Y';
+				break;
+		}
+		return date($format, $date);
+	}
+
 	public function getParentFilters()
 	{
 		$return = array();

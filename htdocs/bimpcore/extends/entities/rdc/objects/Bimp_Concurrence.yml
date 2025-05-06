@@ -13,7 +13,7 @@ parent_id_property: fk_soc
 
 objects:
     chiffre_affaire:
-        relation: hasOne
+        relation: hasMany
         delete: 1
         instance:
             bimp_object: Bimp_ChiffreAffaire
@@ -128,3 +128,8 @@ lists:
         cols:
             nom:
             site:
+            ca:
+                custom: 1
+                label: CA
+                value:
+                    callback: displayCa

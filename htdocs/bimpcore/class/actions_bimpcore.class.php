@@ -119,12 +119,20 @@ class ActionsBimpcore
 
 			if (stripos($url, '/comm/action') === false && stripos($url, '/comm/index.php') === false && stripos($url, '/comm/rem') === false && stripos($url, 'admin') === false
 				&& (stripos($url, '/comm/') !== false || stripos($url, '/societe/') !== false)) {
-				if (stripos($url, 'societe/list.php?leftmenu=thirdparties') || stripos($url, 'societe/index.php?mainmenu=companies&leftmenu=')) {
-					$tabObj = array("bimpcore", "Bimp_Societe");
-				} elseif (BimpTools::getValue('type', 's', 'aZ09comma') == 'f') {
-					$tabObj = array("bimpcore", "Bimp_Fournisseur");
-				} else {
+				/*
+				 * societe clinet ou fourn
+				 */
+				if(!BimpTools::isModuleDoliActif('fournisseur')){
 					$tabObj = array("bimpcore", "Bimp_Client");
+				}
+				else {
+					if (stripos($url, 'societe/list.php?search_all') || stripos($url, 'societe/list.php?leftmenu=thirdparties') || stripos($url, 'societe/index.php?mainmenu=companies&leftmenu=')) {
+						$tabObj = array("bimpcore", "Bimp_Societe");
+					} elseif (BimpTools::getValue('type', 's', 'aZ09comma') == 'f') {
+						$tabObj = array("bimpcore", "Bimp_Fournisseur");
+					} else {
+						$tabObj = array("bimpcore", "Bimp_Client");
+					}
 				}
 			}
 			if (stripos($url, 'comm/propal') !== false) {

@@ -65,6 +65,10 @@ views:
                               params:
                                   - chiffre_affaire
                                   - default
+    ca_graph:
+        title: Chiffre d'affaire
+        rows:
+            - cols:
                   - type: custom
                     col_lg: 6
                     col_md: 12
@@ -114,8 +118,8 @@ lists:
             callback: canAddConcurrence
         add_form_name: default
         add_btn_label: Ajouter un concurrent
-#        extra_btn:
-#            callback: getListExtraButtons
+        extra_btn:
+            callback: getListExtraButtons
         edit_btn: 
             callback: canAddConcurrence
         edit_form: default

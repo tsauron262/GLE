@@ -12070,6 +12070,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 					if (isset($this->dol_object) && isset($this->dol_object->element)) {
 						$objName = $this->dol_object->element;
 					}
+					if(is_a($this, 'Bimp_Client')){
+						$objName = "client";
+					}
 					if ($objName == "order_supplier") {
 						$objName = "commande_fourn";
 					}

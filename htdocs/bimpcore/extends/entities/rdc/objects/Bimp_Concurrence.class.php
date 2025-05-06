@@ -19,12 +19,27 @@ class Bimp_Concurrence_ExtEntity extends Bimp_Concurrence	{
 			);
 			$buttons[] = array(
 				'label'   => 'Graph des Ca',
-				'icon'    => 'fa_signal',
+				'icon'    => 'fas_chart-bar',
 				'onclick' => $this->getJsLoadModalView('ca_graph')
-	//				'onclick' => $ca->getJsLoadModalList('default', array('extra_filters'=>array('type_obj'=>1, 'id_obj'=>$this->id), 'title'=>'Chiffre d\\\'affaire de la concurrence "'.$this->getData('nom').'"')),
 			);
 		}
 		return $buttons;
+	}
+
+	public function displayCa(){
+		$cas = $this->getChildrenObjects('chiffre_affaire', array('fk_category'=>0, 'fk_period'=>0), 'debut_period', 'DESC');
+		foreach($cas as $ca){
+			return $ca->displayPeriode().' : '.BimpTools::displayMoneyValue($ca->getData('ca'));
+		}
+		/*
+		 * ona pas trouvé de global on cherche avec categ
+		 */
+		$cas = $this->getChildrenObjects('chiffre_affaire', array('fk_period'=>0), 'debut_period', 'DESC');
+		foreach($cas as $ca){
+			return $ca->displayData('fk_category').' : '.$ca->displayPeriode().' : '.BimpTools::displayMoneyValue($ca->getData('ca'));
+		}
+//		print_r($cas);
+//		return count($cas);
 	}
 
 	public function canAddConcurrence()	{

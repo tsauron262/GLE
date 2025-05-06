@@ -7,9 +7,8 @@ class BimpDictionnary extends BimpObject
 
 	public function canCreate()
 	{
-		return 1;
-//		global $user;
-//		return (int) $user->admin;
+		global $user;
+		return $user->admin || BimpTools::isUserInGroup($user->id, 'Admin');
 	}
 
 	public function canEdit()

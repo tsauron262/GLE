@@ -2092,6 +2092,17 @@ class BimpTools
 		return 0;
 	}
 
+	public static function isUserInGroup($userid, $groupName)
+	{
+		$bdd = BimpCache::getBdb();
+		$res = $bdd->getRows('usergroup_user ugu', 'ugu.fk_user = ' . $userid . ' AND ug.nom LIKE \'' . $groupName . '\'' , null, 'array', array('ugu.rowid'), null, null,
+		array(
+				'ug' => array('table' => 'usergroup', 'on' => 'ug.rowid = ugu.fk_usergroup')
+			)
+		);
+		return $res[0]['rowid'];
+	}
+
 	public static function getDataTypeLabel($type)
 	{
 		switch ($type) {

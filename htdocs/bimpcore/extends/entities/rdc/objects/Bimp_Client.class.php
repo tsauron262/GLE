@@ -161,6 +161,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
     public function getListButtons()
 	{
+		global $user;
 		$buttons = array();
 
 		$statu = $this->getData('fk_statut_rdc');
@@ -169,7 +170,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$listGroup_allowed = self::$group_allowed_actions[$statut];
 				$user_in_group = false;
 				foreach ($listGroup_allowed as $group) {
-					if ($this->isUserInGroup($group) || $this->isUserManager()) {
+					if (BimpTools::isUserInGroup($user->id, $group) || $this->isUserManager()) {
 						$user_in_group = true;
 						break;
 					}
@@ -258,51 +259,43 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function isAdmin()
 	{
-//		global $user;
-//		return $user->admin;
-		return $this->isUserInGroup('ADMIN');
+		global $user;
+		return BimpTools::isUserInGroup($user->id, 'Admin');
 	}
 
 	public function isUserBD()
 	{
-		return $this->isUserInGroup('BD') || $this->isUserManager();
+		global $user;
+		return BimpTools::isUserInGroup($user->id,'BD') || $this->isUserManager();
 	}
 
 	public function isUserKAM()
 	{
-		return $this->isUserInGroup('KAM') || $this->isUserManager();
+		global $user;
+		return BimpTools::isUserInGroup($user->id,'KAM') || $this->isUserManager();
 	}
 
 	public function isUserManager()
 	{
-		return $this->isUserInGroup('MANAGER') || $this->isUserInGroup('ADMIN');
+		global $user;
+		return BimpTools::isUserInGroup($user->id,'MANAGER') || BimpTools::isUserInGroup($user->id,'ADMIN');
 	}
 
 	public function isUserTECH()
 	{
-		return $this->isUserInGroup('TECH_RDC')|| $this->isUserManager();
+		global $user;
+		return BimpTools::isUserInGroup($user->id,'TECH_RDC')|| $this->isUserManager();
 	}
 
 	public function isUserQuality()
 	{
-		return $this->isUserInGroup('Quality')|| $this->isUserManager();
+		global $user;
+		return BimpTools::isUserInGroup($user->id,'Quality')|| $this->isUserManager();
 	}
 
 	public function isUserBDKAM()
 	{
 		return $this->isUserBD() || $this->isUserKAM();
-	}
-
-	public function isUserInGroup($g)
-	{
-		global $user;
-		$id_group = BimpCore::getConf('id_user_group_' . $g);
-//var_dump($g, $id_group); echo '<hr />';
-		$groups = $this->db->getRow('usergroup_user', 'fk_user = ' . $user->id . ' AND fk_usergroup = ' . $id_group , array('rowid'), 'array');
-		if($groups)
-			return true;
-
-		return false;
 	}
 
 	public function isCommentaireStatutKoRequired()	{

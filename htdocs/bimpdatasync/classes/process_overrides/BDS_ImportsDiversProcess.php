@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_ImportsDiversProcess extends BDSProcess
 {
 
-    public static $current_version = 5;
+    public static $current_version = 6;
     public static $default_public_title = 'Imports Divers';
 
     // Imports AppleCare:
@@ -638,12 +638,134 @@ class BDS_ImportsDiversProcess extends BDSProcess
 		}
 	}
 
-	public function convertDate($date, $seconde = false){
+	public function initImportActioncommRDC(&$data, &$errors = array())
+	{
+		$file = $this->getOption('csv_file5', '');
+		if ($file) {
+			$this->updateParameter('csv_file', $file);
+			$this->updateParameter('elem_ok', 0);
+		}
+		else{
+			$file = $this->getParam('csv_file', '');
+		}
+		if (!$file) {
+			$errors[] = 'Fichier absent';
+		} else {
+			$rows = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+			$this->data_persistante['header'] = explode(';', $rows[0]);
+//			echo '<pre>'; print_r($this->data_persistante); echo '</pre>'; die;
+			unset($rows[0]);
+
+			if (empty($rows)) {
+				$errors[] = 'Fichier vide';
+			} else {
+				$data['steps'] = array(
+					'import' => array(
+						'label'                  => 'Création des actioncomm',
+						'on_error'               => 'continue',
+						'elements'               => array_keys($rows),
+						'nbElementsPerIteration' => 100
+					)
+				);
+			}
+		}
+	}
+
+	public function executeImportActioncommRDC(&$data, &$errors = array())
+	{
+		$correspondance = array(
+			'ref_ext'       => 'Id',
+//			'fk_soc'           => 'AccountId',
+			'label'           => 'Subject',
+			'note'           => 'Description',
+			'datec'            => 'CreatedDate',
+			'datep'            => 'ActivityDate',
+		);
+		$keys = array(
+			'ref_ext'
+		);
+
+		$correspondance2 = array_flip($correspondance);
+		$ok = array();
+		$file = $this->getParam('csv_file', '');
+		$rows = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+		$traite = $this->getParam('elem_ok', 0);
+		foreach ($this->references as $id) {
+			if($id <= $traite){
+				$this->incIgnored();
+				continue;
+			}
+			$line = $rows[$id];
+			$this->incProcessed();
+//			$data = $this->traiteLn($line);
+			$data = explode(';', $line);
+			if (count($data) != count($this->data_persistante['header'])) {
+//				$this->Error('Erreur Nb colonnes: <pre>' . print_r($data, true) . '</pre>', null, 'Ligne ' . ($id + 1) . '<br/>' . print_r(array(count($this->data_persistante['header']), count($data)), true) );
+				continue;
+			}
+			$ln = array_combine($this->data_persistante['header'], $data);
+
+			if (strlen($ln['Subject'])) {
+				$data = $dataFiltres = array();
+				$errors = $warnings = array();
+				foreach($ln as $key => $value){
+					$value = utf8_encode($value);
+					if($correspondance2[$key]){
+						if(stripos($value, '<script') !== false){
+							$this->Error('Script détecté', null, $ln['Subject'].' ligne '.($id+1));
+							continue 2;
+						}
+						$data[$correspondance2[$key]] = $value;
+						if(in_array($correspondance2[$key], $keys)){
+							$dataFiltres[$correspondance2[$key]] = $value;
+						}
+					}
+				}
+				// retrouver le fk_soc selon le AccountId
+				$fk_soc = $this->db->getValue('societe', 'rowid', 'import_key = \''.$ln['AccountId'].'\'');
+				if($fk_soc){
+					$data['fk_soc'] = $fk_soc;
+				} else {
+					$this->Error('Société non trouvée : ', null, $ln['AccountId'].' ligne '.($id+1));
+					continue;
+				}
+//				echo '<pre>' . print_r($data, true).'</pre>';
+				$data['fk_action'] = 4;
+				$data['datep'] = $this->convertDate($data['datep'], 0, 'Y-m-d H:i:s');
+				$data['datec'] = $this->convertDate($data['datec'], 0, 'Y-m-d H:i:s');
+				$data['datep2'] = $data['datep'];
+				$data['datef'] = $data['datep'];
+				$data['fk_user_action'] = 17;
+				$data['fk_user_author'] = $this->user->id;
+
+				$obj = BimpObject::createOrUpdateBimpObject('bimpcore', 'Bimp_ActionComm', $dataFiltres, $data, true, true, $errors, $warnings);
+				foreach ($errors as $error) {
+					$this->Error($error, null, ' ligne '.($id+1));
+				}
+				foreach ($warnings as $warning) {
+					$this->Alert($warning, null, $ln['LastName'].' ligne '.($id+1));
+				}
+				$ok[] = ' - '.$obj->id;
+//				if(!count($errors))
+//					$this->Success('OK<pre>' . print_r($data, true).'</pre>', null, $ln['Name']);
+			} else {
+				$this->Error('Ligne invalide: <pre>' . print_r($ln, true).'</pre>', null, 'Ligne '.($id+1));
+			}
+			$this->incIgnored();
+		}
+		if(count($ok)){
+			$this->Success('OK<pre>' . print_r($ok, true).'</pre>', null, '');
+			if(isset($id) && $id > 0)
+				$this->updateParameter('elem_ok', $id);
+		}
+	}
+
+	public function convertDate($date, $seconde = false, $formatRetour = 'Y-m-d'){
 		$date = substr($date, 0, 10);
 		$date .= ' 00:00';
 		$datetime = DateTime::createFromFormat('d/m/Y H:i' . ($seconde ? ':s' : '') , $date);
 		if ($datetime) {
-			return $datetime->format('Y-m-d');
+			return $datetime->format($formatRetour);
 		}
 		return null;
 	}
@@ -776,6 +898,29 @@ class BDS_ImportsDiversProcess extends BDSProcess
 				'id_process'    => (int) $id_process,
 				'title'         => 'Import Cases RDC -> Ticket',
 				'name'          => 'importCasesRDC',
+				'description'   => '',
+				'warning'       => 'Fichier CSV : ',
+				'active'        => 1,
+				'use_report'    => 1,
+				'reports_delay' => 15
+			), true, $errors, $warnings);
+		}
+
+		if ($cur_version < 6) {
+			// Opération "Import activitées saleforce -> transformation en actioncomm":
+			BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+				'id_process'    => (int) $id_process,
+				'label'         => 'Fichier CSV',
+				'name'          => 'csv_file5',
+				'info'          => '',
+				'type'          => 'file',
+				'default_value' => '',
+				'required'      => 0
+			), true, $errors, $warnings);
+			$op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+				'id_process'    => (int) $id_process,
+				'title'         => 'Import Activités -> Actioncomm',
+				'name'          => 'importActioncommRDC',
 				'description'   => '',
 				'warning'       => 'Fichier CSV : ',
 				'active'        => 1,

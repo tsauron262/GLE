@@ -4372,7 +4372,7 @@ class BimpTools
 	public static function secuTestIp()
 	{
 		if (static::secuGetNbEchec() > 20) {
-			BimpCore::addlog('Activité anormal : ' . static::getUserIp(), 4);
+			BimpCore::addlog('Activité anormal : ' . static::getUserIp(), 3);
 			$msg = 'Une activité anormale a étais détecté sur votre connexion...';
 			$html = BimpRender::renderAlerts($msg);
 			header('HTTP/1.0 403 Forbidden');

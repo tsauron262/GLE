@@ -98,6 +98,12 @@ class BS_SAV_ExtVersion extends BS_SAV
 
         $result = $api->executereqWithCache('printproducttypewithlabellist');
 
+		global $user;
+		if ($user->login == 'f.martinez') {
+			echo $type . '<pre>' . print_r($result, 1) . '</pre>';
+			exit;
+		}
+
         $resultList = array();
         if (isset($result['ResponseData']) && !empty($result['ResponseData'])) {
             foreach ($result['ResponseData'] as $typeMat) {

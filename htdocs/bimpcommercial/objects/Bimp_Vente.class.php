@@ -176,11 +176,11 @@ class Bimp_Vente extends BimpObject
 //        ));
 
         $products_list = $product->getList(array(
-			'rowid' => 257728
-//            'ref'     => array(
-//                                    'operator' => 'like',
-//                                    'value'    => 'app-%'
-//                                )
+//			'rowid' => 257728
+            'ref'     => array(
+                                    'operator' => 'like',
+                                    'value'    => 'app-%'
+                                )
                 ), null, null, 'rowid', 'asc', 'array', array('rowid', 'ref', 'price', 'no_fixe_prices', 'pmp', 'cur_pa_ht'), array());
 
         BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
@@ -246,11 +246,11 @@ class Bimp_Vente extends BimpObject
             }
         }
 
-		global $user;
-		if ($user->login == 'f.martinez') {
-			echo '<pre>' . print_r($shiptos_data, 1) . '</pre>';
-			exit;
-		}
+//		global $user;
+//		if ($user->login == 'f.martinez') {
+//			echo '<pre>' . print_r($shiptos_data, 1) . '</pre>';
+//			exit;
+//		}
 
         // Distribution du CA:
         $html = '';

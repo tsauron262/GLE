@@ -499,7 +499,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$this->set('shopid', 0);
 			} else {
 				$shop = $data['shops'][0];
-//				echo '<pre>'; print_r($shop); echo '</pre>';
+//				echo '<pre>'; print_r($shop); echo '</pre>';  exit;
 				// traitement des données reçues : mise a jour du tiers
 				$kyc = constant('self::' . $shop['kyc']['status']);
 				if ($kyc)
@@ -523,19 +523,76 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$this->set('phone', $shop['contact_informations']['phone']);
 				$this->set('url', $shop['contact_informations']['site_web']);
 
-				// traitement des données reçues : mise a jour / creation du contact
-				$contacts = $this->getChildrenObjects('contacts');
-				$nbModif = 0;
-				if (count($contacts)) {
-					foreach ($contacts as $contact) {    // tentative de mise a jour du contact (si mail et tel identiques)
-						$nbModif += $this->updateContact($contact, $shop['contact_informations']);
-					}
-					if (!$nbModif) { // aucun contact modifié => on en crée un
-						$this->createContact($shop['contact_informations']);
-					}
-				} else { // pas de contact connu => on en crée un
-					$this->createContact($shop['contact_informations']);
+				$datas = array(
+					'civility' => $this->traduct_civility($shop['contact_informations']['civility']),
+					'lastname' => $shop['contact_informations']['lastname'],
+					'firstname' => $shop['contact_informations']['firstname'],
+					'street1' => $shop['contact_informations']['street1'],
+					'street2' => $shop['contact_informations']['street2'],
+					'zip' => $shop['contact_informations']['zip_code'],
+					'town' => $shop['contact_informations']['city'],
+					'email' => $shop['contact_informations']['email'],
+					'phone' => $shop['contact_informations']['phone'],
+					'poste' => 'Mirakl: Contact principal',
+				);
+				$this->createOrUpdateContacts($datas);
+
+				// traitement des champs additionnels
+				$additional_fields = array();
+				foreach ($shop['shop_additional_fields'] as $value) {
+					$additional_fields[$value['code']] = array('value' => $value['value'], 'type' => $value['type']);
 				}
+//				echo '<pre>'; print_r($additional_fields); echo '</pre>';  exit;
+				if (!empty($additional_fields['lastname-cs']) || !empty($additional_fields['email-cs']) || !empty($additional_fields['address-cs']) || !empty($additional_fields['firstname-cs']) || !empty($additional_fields['phone-cs']) ) {
+					$datas = array(
+						'lastname' => $additional_fields['lastname-cs']['value'],
+						'firstname' => $additional_fields['firstname-cs']['value'],
+						'email' => $additional_fields['email-cs']['value'],
+						'phone' => $additional_fields['phone-cs']['value'],
+						'civility' => $additional_fields['civ-cs']['value'],
+						'street1' => $additional_fields['address-cs']['value'],
+						'street2' => $additional_fields['address-cs-2']['value'],
+						'zip' => $additional_fields['postal-code-cs']['value'],
+						'town' => $additional_fields['city-cs']['value'],
+						'country' => $additional_fields['country-cs']['value'],
+						'poste' => 'Mirakl: Contact CS',
+					);
+					$this->createOrUpdateContacts($datas);
+				}
+				if (!empty($additional_fields['nom-contact-commercial']) || !empty($additional_fields['email-contact-commercial']) || !empty($additional_fields['prenom-contact-commercial']) || !empty($additional_fields['telephone-contact-commercial'])) {
+					$datas = array(
+						'lastname' => $additional_fields['nom-contact-commercial']['value'],
+						'firstname' => $additional_fields['prenom-contact-commercial']['value'],
+						'email' => $additional_fields['email-contact-commercial']['value'],
+						'phone' => $additional_fields['telephone-contact-commercial']['value'],
+						'poste' => 'Mirakl: Contact commercial',
+					);
+					$this->createOrUpdateContacts($datas);
+				}
+				if (!empty($additional_fields['lastname-tech']) || !empty($additional_fields['email-tech']) || !empty($additional_fields['firstname-tech']) || !empty($additional_fields['phone-tech'])) {
+					$datas = array(
+						'lastname' => $additional_fields['lastname-tech']['value'],
+						'firstname' => $additional_fields['firstname-tech']['value'],
+						'email' => $additional_fields['email-tech']['value'],
+						'phone' => $additional_fields['phone-tech']['value'],
+						'civility' => $additional_fields['civ-tech']['value'],
+						'poste' => 'Mirakl: Contact technique',
+					);
+					$this->createOrUpdateContacts($datas);
+				}
+				if (!empty($additional_fields['accounting-lastname']) || !empty($additional_fields['accounting-email']) || !empty($additional_fields['accounting-firstname']) || !empty($additional_fields['accounting-phone'])) {
+					$datas = array(
+						'lastname' => $additional_fields['accounting-lastname']['value'],
+						'firstname' => $additional_fields['accounting-firstname']['value'],
+						'email' => $additional_fields['accounting-email']['value'],
+						'phone' => $additional_fields['accounting-phone']['value'],
+						'poste' => 'Mirakl: Contact comptabilité',
+					);
+					$this->createOrUpdateContacts($datas);
+				}
+
+
+
 				// surcharge attribution
 				if ($shop['assignees'])	{
 					$emailAssign = strtolower($shop['assignees'][0]['email']);
@@ -572,25 +629,30 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		}
 	}
 
+	public function createOrUpdateContacts($datas)
+	{
+		// traitement des données reçues : mise a jour / creation du contact
+		$contacts = $this->getChildrenObjects('contacts');
+
+		if (count($contacts)) {
+			$nbModif = 0;
+			foreach ($contacts as $contact) {    // tentative de mise a jour du contact (si mail et tel identiques)
+				$nbModif += $this->updateContact($contact, $datas);
+			}
+			if (!$nbModif) { // aucun contact modifié => on en crée un
+				$this->createContact($datas);
+			}
+		} else { // pas de contact connu => on en crée un
+			$this->createContact($datas);
+		}
+	}
+
 	public function createContact($contact)
 	{
 		global $user;
 		$obj = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact');
-		$obj->set('civility', $this->traduct_civility($contact['civility']));
-		$obj->set('lastname', $contact['lastname']);
-		$obj->set('firstname', $contact['firstname']);
-		$add = $contact['street1'];
-		if ($contact['street2'])	$add .= ' ' . $contact['street2'];
-		$obj->set('address', $add);
-		$obj->set('zip', $contact['zip_code']);
-		$obj->set('town', $contact['city']);
-		if ($contact['country'])	{
-			$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $contact['country'] . '\'');
-			if ($id_pays)	$obj->set('fk_pays', $id_pays);
-		}
-//		echo '<pre>'; print_r($contact); echo '</pre>';die;
-		$obj->set('phone', $contact['phone']);
-		$obj->set('email', $contact['email']);
+		$obj = $this->setObj($obj, $contact);
+		$obj->set('poste', $contact['poste']);
 		$obj->set('datec', date('Y-m-d H:i:s'));
 		$obj->set('fk_user_creat', $user->id);
 		$obj->set('fk_soc', $this->id);
@@ -600,27 +662,40 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function updateContact($contact, $info)
 	{
-		if($contact->getData('email') == $info['email'] && $contact->getData('phone') == $info['phone'])	{
-			$contact->set('civility', $this->traduct_civility($info['civility']));
-			$contact->set('lastname', $info['lastname']);
-			$contact->set('firstname', $info['firstname']);
-			$add = $info['street1'];
-			if ($info['street2'])	$add .= ' ' . $info['street2'];
-			$this->set('address', $add);
-			$contact->set('zip', $info['zip_code']);
-			$contact->set('town', $info['city']);
-			if ($info['country'])	{
-				$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $info['country'] . '\'');
-				if ($id_pays)
-					$contact->set('fk_pays', $id_pays);
+		if($contact->getData('email') == $info['email'])	{
+			$contact = $this->setObj($contact, $info);
+			$poste = $contact->getData('poste');
+			if ($poste && strstr($poste, $info['poste']) === false) {
+				// c'est un nouveau poste, on l'ajoute
+				if ($poste) $poste .= '<br>';
+				$poste .= $info['poste'];
+				$contact->set('poste', $poste);
 			}
-			$contact->set('phone', $info['phone']);
-			$contact->set('email', $info['email']);
 			$err = $contact->update();
 			if($err) return 0;
 			else return 1;
 		}
-		return 1;
+		return 0;
+	}
+
+	public function setObj($obj, $contact)	{
+		$obj->set('civility', $contact['civility'] ? $this->traduct_civility($contact['civility']) : $obj->getData('civility'));
+		$obj->set('lastname', $contact['lastname'] ?: $obj->getData('lastname'));
+		$obj->set('firstname', $contact['firstname'] ?: $obj->getData('firstname'));
+		$add = $contact['street1'] ?: $this->getData('address');
+		if ($contact['street1'] && $contact['street2'])	$add .= ' ' . $contact['street2'];
+		$obj->set('address', $add);
+		$obj->set('zip', $contact['zip_code'] ?: $this->getData('zip'));
+		$obj->set('town', $contact['city'] ?: $this->getData('town'));
+		$id_pays = 0;
+		if ($contact['country'])	{
+			$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $contact['country'] . '\' OR label LIKE \'' . $contact['country'] . '\'');
+			if ($id_pays)	$obj->set('fk_pays', $id_pays);
+		}
+		if (!$id_pays)	$obj->set('fk_pays', $this->getData('fk_pays'));
+		$obj->set('phone', $contact['phone']);
+		$obj->set('email', $contact['email']);
+		return $obj;
 	}
 
 	public function checkAttr() {
@@ -645,10 +720,16 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function traduct_civility($civility) {
 		switch ($civility) {
 			case 'Mr':
+			case 'M':
+			case 'MR':
 				return 'MR';
 			case 'Mrs':
+			case 'MRS':
+			case 'MME':
 				return 'MME';
 			case 'Ms':
+			case 'MS':
+			case 'MLLE':
 				return 'Mlle';
 			default:
 				return '';

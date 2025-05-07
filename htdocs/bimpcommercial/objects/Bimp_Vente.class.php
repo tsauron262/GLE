@@ -53,7 +53,7 @@ class Bimp_Vente extends BimpObject
         $dt = new DateTime();
         $dow = (int) $dt->format('w');
         if ($dow > 0) {
-            $dt->sub(new DateInterval('P' . $dow . 'D')); // Premier dimanche précédent. 
+            $dt->sub(new DateInterval('P' . $dow . 'D')); // Premier dimanche précédent.
         }
         $date_to = $dt->format('Y-m-d');
 
@@ -158,7 +158,7 @@ class Bimp_Vente extends BimpObject
 //        if (!$id_category) {
 //            $errors[] = 'ID de la catégorie "APPLE" non configurée';
 //            return array(
-//                'filename' => '',   
+//                'filename' => '',
 //                'html'     => ''
 //            );
 //        }
@@ -174,7 +174,7 @@ class Bimp_Vente extends BimpObject
 //                'on'    => 'a.rowid = ef.fk_object'
 //            )
 //        ));
-        
+
         $products_list = $product->getList(array(
             'ref'     => array(
                                     'operator' => 'like',
@@ -191,6 +191,12 @@ class Bimp_Vente extends BimpObject
         foreach ($products_list as $p) {
             if (stripos($p['ref'], 'SAVAPPLE') === false && stripos($p['ref'], 'SAV-DIAG') === false && stripos($p['ref'], 'Opération') === false && stripos($p['ref'], 'MYL92NF/A-') === false) {
                 $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
+
+				global $user;
+				if ($user->login == 'f.martinez') {
+					echo '<pre>' . print_r($entrepots_data, 1) . '</pre>';
+					exit;
+				}
 
                 if ((int) $p['no_fixe_prices']) {
                     $pa_ht = 0;
@@ -245,14 +251,14 @@ class Bimp_Vente extends BimpObject
             }
         }
 
-        // Distribution du CA: 
+        // Distribution du CA:
         $html = '';
         if ($distribute_ca) {
             $shiptos = explode(',', BimpCore::getConf('csv_apple_distribute_ca_shiptos'));
             $shiptos_data = $this->distributeCaForShiptos($total_ca, $shiptos_data, $shiptos, 80, $html);
         }
 
-        // Génération du CSV Inventaire par shipTo: 
+        // Génération du CSV Inventaire par shipTo:
         if (isset($types['inventory']) && (int) $types['inventory']) {
             $file_str = '"Inventory Location ID
 
@@ -337,7 +343,7 @@ Preferred Field
             }
         }
 
-        // Génération du CSV Ventes par shipto: 
+        // Génération du CSV Ventes par shipto:
 
         if (isset($types['sales']) && (int) $types['sales']) {
 //            $socsTypes = array();
@@ -421,7 +427,7 @@ Preferred Field
 (9)";"End Customer Country
 
 Preferred Field
-(2)";"End Customer Type 
+(2)";"End Customer Type
 
 Preferred Field
 (2)";"Error"' . "\n";
@@ -437,7 +443,7 @@ Preferred Field
                             if (preg_match('/^(Z[^\/]+)$/', $prod_ref, $matches)) {
                                 $prod_ref = substr($matches[1], 0, 4);
                             }
-                            
+
                             if (isset($prod['factures']) && !empty($prod['factures'])) {
                                 foreach ($prod['factures'] as $id_fac => $fac_lines) {
                                     $fac_data = $this->db->getRow('facture', 'rowid = ' . (int) $id_fac, array('fk_soc', 'ref', 'datef', 'id_client_final'), 'array');
@@ -508,7 +514,7 @@ Preferred Field
 //                                                    'BB' // S
 //                                                )) . '"' . "\n";
 //                                        }
-                                        
+
                                         $file_str .= '"' . implode('";"', array(
                                                     $shipTo, // A
                                                     substr($prod_ref, 0, 15), // B
@@ -566,8 +572,8 @@ Preferred Field
 
     public function distributeCaForShiptos($total_ca, $shipTosData, $shiptos, $percent, &$html = '')
     {
-        // Actuellement la distribution se fait pour chaque vente totale d'un produit dans une facture d'un shipTo à un autre. 
-        // Attention: on ne transfert pas l'intégralité d'une facture pour l'instant: donc les vente d'une même facture peuvent se retrouver réparties sur plusieurs shipTos. 
+        // Actuellement la distribution se fait pour chaque vente totale d'un produit dans une facture d'un shipTo à un autre.
+        // Attention: on ne transfert pas l'intégralité d'une facture pour l'instant: donc les vente d'une même facture peuvent se retrouver réparties sur plusieurs shipTos.
 
         if (!(float) $total_ca) {
             $html .= BimpRender::renderAlerts('CA total: 0,00 €');
@@ -633,8 +639,8 @@ Preferred Field
         $v1 = ($total_ca_v1 / $total_ca) * 100;
         $v2 = ($total_ca_v2 / $total_ca) * 100;
         $tolerance = 1; // Tolérance de dépassemement du taux attendu: 1%
-        $max_transf_amount = 100; // Montant max transférable d'un shipTo à l'autre. 
-        // Ajustement aléatoire du % v2: 
+        $max_transf_amount = 100; // Montant max transférable d'un shipTo à l'autre.
+        // Ajustement aléatoire du % v2:
         $adjust = (rand(0, 500) / 100);
         if ((int) rand(0, 1)) {
             $adjust *= -1;
@@ -698,11 +704,11 @@ Preferred Field
                 break; // protection boucle infinie
             }
 
-            // Si on ne parvient pas à trouver des montants transférables, on ajuste les paramètres: 
+            // Si on ne parvient pas à trouver des montants transférables, on ajuste les paramètres:
             if ($nFails >= 500) {
                 $nFails = 0;
                 $tolerance += 0.1; // Ajout de 0,1%.
-                $max_transf_amount += 100; // Augmentation du montant max transférable de 100 euros. 
+                $max_transf_amount += 100; // Augmentation du montant max transférable de 100 euros.
                 $maxIterations += 500;
 
                 if ($tolerance > $maxTolerance) {
@@ -722,7 +728,7 @@ Preferred Field
                 $v2_shipTo = $v2_shipTos[$v2_idx]['shipTo'];
 
                 if (!empty($v1_shipTos[$v1_idx]['fac_ids'])) {
-                    // Facture de V1 aléatoire: 
+                    // Facture de V1 aléatoire:
                     $id_fac_idx = rand(0, $v1_shipTos[$v1_idx]['nFacs']);
                     $id_fac = (isset($v1_shipTos[$v1_idx]['fac_ids'][$id_fac_idx]) ? (int) $v1_shipTos[$v1_idx]['fac_ids'][$id_fac_idx] : 0);
                     if ($id_fac && isset($v1_shipTos[$v1_idx]['factures'][$id_fac])) {
@@ -738,7 +744,7 @@ Preferred Field
                             $max_v2 = ($rate + $tolerance);
 
                             if ($new_v1 >= $min_v1 && $new_v2 <= $max_v2) {
-                                // C'est ok, on effectue le transfert: 
+                                // C'est ok, on effectue le transfert:
 
                                 $nDone++;
                                 $total_transf += $total_fac;
@@ -886,7 +892,7 @@ Preferred Field
         $rate = $percent;
         $v2 = ($total_ca_v2 / $total_ca) * 100;
 
-        // Ajustement aléatoire du % v2: 
+        // Ajustement aléatoire du % v2:
         $adjust = (rand(0, 500) / 100);
         if ((int) rand(0, 1)) {
             $adjust *= -1;
@@ -951,7 +957,7 @@ Preferred Field
                 $v2_shipTo = $v2_shipTos[$v2_idx]['shipTo'];
 
                 if (!empty($v1_shipTos[$v1_idx]['products'])) {
-                    // Produit de V1 aléatoire: 
+                    // Produit de V1 aléatoire:
                     $prod_idx = rand(0, $v1_shipTos[$v1_idx]['nProds']);
                     $id_product = (isset($v1_shipTos[$v1_idx]['products'][$prod_idx]) ? (int) $v1_shipTos[$v1_idx]['products'][$prod_idx] : 0);
                     if ($id_product &&
@@ -961,7 +967,7 @@ Preferred Field
                         $v2_prod = $shipTosData[$v2_shipTo]['products'][$id_product];
 
                         if ((int) $v1_prod['ventes'] > 0) {
-                            // Qty aléatoire à transférer (max: 10). 
+                            // Qty aléatoire à transférer (max: 10).
                             $max = ((int) $v1_prod['ventes'] > 10 ? 10 : (int) $v1_prod['ventes']);
                             $qty = rand(1, $max);
                             $v1_diff = (float) $v1_prod['pa_ht'] * $qty;

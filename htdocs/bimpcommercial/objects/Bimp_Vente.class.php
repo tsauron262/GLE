@@ -176,10 +176,11 @@ class Bimp_Vente extends BimpObject
 //        ));
 
         $products_list = $product->getList(array(
-            'ref'     => array(
-                                    'operator' => 'like',
-                                    'value'    => 'app-%'
-                                )
+			'rowid' => 257728
+//            'ref'     => array(
+//                                    'operator' => 'like',
+//                                    'value'    => 'app-%'
+//                                )
                 ), null, null, 'rowid', 'asc', 'array', array('rowid', 'ref', 'price', 'no_fixe_prices', 'pmp', 'cur_pa_ht'), array());
 
         BimpObject::loadClass('bimpcore', 'BimpProductCurPa');

@@ -8020,6 +8020,20 @@ ORDER BY a.val_max DESC");
 
 	// Overrides:
 
+	public function onSave(&$errors = array(), &$warnings = array())
+	{
+		if ($this->isLoaded() && (int) $this->getData('status') == self::BS_SAV_FERME) {
+			if ($this->getData('login_admin') || $this->getData('pword_admin')) {
+				$this->db->update('bs_sav', array(
+					'login_admin' => '*****',
+					'pword_admin' => '*****'
+				), 'id = ' . $this->id);
+			}
+		}
+
+		parent::onSave($errors, $warnings);
+	}
+
 	public function validate()
 	{
 		$errors = parent::validate();

@@ -189,7 +189,6 @@ associations:
         object: propal
         label: Devis
 
-
 fields:
     ref:
         label: Référence

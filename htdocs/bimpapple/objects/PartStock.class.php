@@ -36,7 +36,7 @@ class PartStock extends BimpObject
             return 1;
         }
 
-        if (in_array($field_name, array('serials', 'qty'))) {
+        if (in_array($field_name, array('serials', 'qty', 'id_linked_prod'))) {
             return 1;
         }
 

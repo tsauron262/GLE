@@ -422,3 +422,17 @@ stats_lists:
             - fk_user_assign
         cols:
             nb_tickets:
+                
+searches:
+    default:
+        fields_search:
+            - a.rowid
+            - a.ref
+            - s.nom
+        joins:
+            s:
+                table: societe
+                on: a.fk_soc = s.rowid
+                alias: s
+        fields_return:
+            0: a.ref

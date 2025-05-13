@@ -15,16 +15,16 @@ class BiAPI extends BimpAPI
 	public static $default_accept = 'text/xml';
 	public static $urls_bases = array(
 		'default' => array(
-			'prod' => 'https://erp.bimp.fr/bimp/bimpapi/public/',
-//			'prod' => 'http://172.24.2.31/OLAP/',
+//			'prod' => 'https://erp.bimp.fr/bimp/bimpapi/public/',
+			'prod' => 'http://172.24.2.31/OLAP/',
 			'test' => ''
 		)
 	);
 	public static $requests = array(
 		'req' => array(
 			'label'         => 'Requête',
-//			'url'           => 'msmdpump.dll',
-			'url'           => 'rebond.php',
+			'url'           => 'msmdpump.dll',
+//			'url'           => 'rebond.php',
 			'content_type' 	=> 'text/xml',
 		),
 	);

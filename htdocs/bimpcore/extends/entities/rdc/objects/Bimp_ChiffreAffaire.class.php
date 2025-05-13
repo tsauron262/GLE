@@ -166,8 +166,8 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 	}
 
 
-	public function getCategCa($type = 1){
-		$result = array();
+	public function getCategCa($type = 1, $withAll = false){
+		$result = array("-1"=>'Toutes');
 		$categories = BimpDict::getValuesArray('ca_categories', true, false);
 		$filters = $this->getParentFilters();
 		if($type == 1)
@@ -193,14 +193,18 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 		else
 			$field = 'fk_category'.$type;
 		$sql = $this->db->db->query('SELECT DISTINCT('.$field.') as categ FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$filters['id_obj'].' AND type_obj = "'.$filters['type_obj'].'"');
+		$filters = array(
+			'fk_period' => 0
+		);
 		while($ln = $this->db->db->fetch_object($sql)){
 			$idC = $ln->categ;
 			if ($idC > 0) {
+				$filters[$field] = $idC;
 				$fields[$idC] = array(
 					"title"   => $categories[$idC]['label'],
 					'field'   => 'ca',
 					'calc'    => 'SUM',
-					'filters' => array($field => $idC)
+					'filters' => $filters
 				);
 			}
 		}

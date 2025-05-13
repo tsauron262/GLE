@@ -9,6 +9,7 @@ class cron extends BimpCron
 		$retCron = array();
 		if ($this->relance6mois() != 1)
 			$retCron[] = 'Erreur lors de la relance 6 mois';
+
 		if(count($retCron))	{
 			$this->output = implode("<br>", $retCron);
 			return 1;
@@ -20,7 +21,6 @@ class cron extends BimpCron
 	public function relance6mois()
 	{
 		$err = array();
-		$succes =  'Tache relance6mois réalisée avec succès';
 		// faire la liste par DB/KAM des marchants à relancer (date der_contact > 6 mois)
 		$marchants = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client');
 		$list = $marchants->getList(array(

@@ -240,18 +240,21 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function canEditField($field_name)
 	{
 		switch ($field_name) {
-			case 'fk_priorite':
 			case 'presta_source':
 			case 'fk_categorie_maitre':
 			case 'potentiel_catalogue':
 				return $this->isUserBDKAM();
 
+			case 'fk_priorite':
 			case 'fk_source_rdc':
 			case 'name_alias':
 			case 'nom':
 				return $this->isUserBD();
 
-			case 'contrefacon':// lot 2 : isUserQuality
+			case 'contrefacon':
+			case 'comment_quality':
+				return $this->isUserQuality();
+
 			case 'fk_group_rdc':
 			case 'fk_user_attr_rdc':
 				return $this->isUserManager();
@@ -281,13 +284,13 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function isUserBD()
 	{
 		global $user;
-		return BimpTools::isUserInGroup($user->id,'BD') || $this->isUserManager();
+		return BimpTools::isUserInGroup($user->id,'BD') || BimpTools::isUserInGroup($user->id,'Qualité') || $this->isUserManager();
 	}
 
 	public function isUserKAM()
 	{
 		global $user;
-		return BimpTools::isUserInGroup($user->id,'KAM') || $this->isUserManager();
+		return BimpTools::isUserInGroup($user->id,'KAM') || BimpTools::isUserInGroup($user->id,'Qualité') || $this->isUserManager();
 	}
 
 	public function isUserManager()
@@ -305,7 +308,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function isUserQuality()
 	{
 		global $user;
-		return BimpTools::isUserInGroup($user->id,'Quality')|| $this->isUserManager();
+		return BimpTools::isUserInGroup($user->id,'Qualité')|| $this->isUserManager();
 	}
 
 	public function isUserBDKAM()
@@ -365,6 +368,35 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function getStatusProperty()	{
 		return '';
+	}
+
+//	public function getRefProperty()
+//	{
+//		return 'shopid';
+//	}
+
+	public function getRef($withGeneric = true)
+	{
+		$html = '';
+		if ($this->getData('name_alias')) $html .= $this->getData('name_alias');
+		if ($this->getData('shopid')) {
+			if ($html != '') $html .= '<br>';
+			$html .= 'Shop id : ' . $this->getData('shopid');
+		}
+		return $html;
+	}
+
+	public function getPageTitle()
+	{
+		$html = '';
+		if ($this->getData('name_alias')) $html .= $this->getData('name_alias');
+		if ($this->getData('shopid')) {
+			if ($html != '') $html .= ' - ';
+			$html .= $this->getData('shopid');
+		}
+		if ($html)		return $html;
+
+		return parent::getPageTitle();
 	}
 
 	public function getUserAttrByGroupArray()	{
@@ -466,11 +498,16 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			$errors[] = 'Le champ Prestataire/agrégateur est obligatoire';
 		}
 
+		if (BimpTools::getPostFieldValue('contrefacon') == 1 && strlen(BimpTools::getPostFieldValue('comment_quality')) <= 0) {
+			$errors[] = 'Le champ Commentaire qualité est obligatoire';
+		}
+
 		if (count($errors))
 			return $errors;
 
 		$this->checkAttr();
 		$this->checkPassageLive();
+		$this->AlerteQualite();
 
 		return parent::update($warnings, $force_update);
 	}
@@ -797,6 +834,19 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 					$this->set('delai_ouv', $delai);
 				}
 			}
+		}
+	}
+
+	public function AlerteQualite()
+	{
+		global $user, $lang;
+		if($this->getData('contrefacon') && !$this->getInitData('contrefacon') && $this->getData('fk_user_attr_rdc') != $user->id) 	{
+			$code = 'alerte_qualite';
+			$sujet = 'Alerte qualité';
+			$msg = 'Le marchant ' . $this->getLink() . ' a été signalé pour un problème de qualité par ' . $user->getFullName($lang);
+			if ($this->getData('comment_quality'))
+				$msg .= '<p>Commentaire :<br>' . $this->getData('comment_quality') . '</p>';
+			BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
 		}
 	}
 }

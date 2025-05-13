@@ -15,3 +15,41 @@ filters_panel:
             phone_perso: unset
             phone_mobile: unset
             fax: unset
+            
+            
+forms:
+    default:
+        title: Ajout d'un contact
+        rows:
+            Civilité:
+                field: civility
+            Nom:
+                field: lastname
+            Prénom:
+                field: firstname
+            Adresse:
+                field: address
+            Code postal:
+                field: zip
+            Ville:
+                field: town
+            Pays:
+                field: fk_pays
+            E-mail:
+                field: email
+            Tél pro:
+                field: phone
+            Ligne directe:
+                field: phone_perso
+            Tél Portable:
+                field: phone_mobile
+            Date de naissance:
+                field: birthday
+            Poste:
+                field: poste
+            Note:
+                label: Note interne
+                field: note_private
+#            Note publique:
+#                label: Note visible par marchand
+#                field: note_public

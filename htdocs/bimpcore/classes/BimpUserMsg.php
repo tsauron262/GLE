@@ -729,6 +729,12 @@ class BimpUserMsg
 			'module' => 'bimpcore',
 			'metier' => 'metier'
 		),
+		'alerte_qualite'	=> array(
+			'label'  => 'Le client XXX a une alerte qualité',
+			'dests'  => 'object::id_user',
+			'module' => 'bimpcore',
+			'metier' => 'metier'
+		),
 
 		// todo tommy : separer mail client et mail interne :
 		/*

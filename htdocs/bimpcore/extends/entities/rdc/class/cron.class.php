@@ -25,9 +25,9 @@ class cron extends BimpCron
 	public function relance6mois()
 	{
 		$err = array();
-		// faire la liste par DB/KAM des marchants à relancer (date der_contact > 6 mois)
-		$marchants = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client');
-		$list = $marchants->getList(array(
+		// faire la liste par DB/KAM des marchands à relancer (date der_contact > 6 mois)
+		$marchands = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client');
+		$list = $marchands->getList(array(
 			'date_der_contact' => array('custom' => 'date_der_contact <= DATE_SUB(NOW(), INTERVAL 6 MONTH)'),
 			'fk_user_attr_rdc' => '> 0',
 		));
@@ -40,10 +40,10 @@ class cron extends BimpCron
 			$err0 = array();
 			$x = count($socIds);
 			$s = $x > 1 ? 's' : '';
-			$message = "Bonjour,<p>Voici " . $x . " marchant" . $s . " non contacté depuis 6 mois :</p><ul>";
+			$message = "Bonjour,<p>Voici " . $x . " marchand" . $s . " non contacté depuis 6 mois :</p><ul>";
 			foreach ($socIds as $id) {
-				$socMarchant = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id);
-				$message .= '<li>Raison sociale&nbsp;: ' . $socMarchant->getLink() . '<br>Boutique&nbsp;: ' . $socMarchant->getData('name_alias')  . '</li>';
+				$socMarchand = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id);
+				$message .= '<li>Raison sociale&nbsp;: ' . $socMarchand->getLink() . '<br>Boutique&nbsp;: ' . $socMarchand->getData('name_alias')  . '</li>';
 			}
 			$message .= "</ul><p>Merci de prendre contact rapidement,</p><p>Cordialement,</p>";
 
@@ -65,9 +65,9 @@ class cron extends BimpCron
 	public function relanceEnAttenteOnboarding()
 	{
 		$err = array();
-		// faire la liste par DB/KAM des marchants à relancer (marchand en attente onboarding)
-		$marchants = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client');
-		$list = $marchants->getList(array(
+		// faire la liste par DB/KAM des marchands à relancer (marchand en attente onboarding)
+		$marchands = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client');
+		$list = $marchands->getList(array(
 			'fk_statut_rdc'    => '8',
 			'fk_user_attr_rdc' => '> 0',
 		));
@@ -80,10 +80,10 @@ class cron extends BimpCron
 			$err0 = array();
 			$x = count($socIds);
 			$s = $x > 1 ? 's' : '';
-			$message = "Bonjour,<p>Voici " . $x . " marchant" . $s . " en attente d'onboarding :</p><ul>";
+			$message = "Bonjour,<p>Voici " . $x . " marchand" . $s . " en attente d'onboarding :</p><ul>";
 			foreach ($socIds as $id) {
-				$socMarchant = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id);
-				$message .= '<li>Raison sociale&nbsp;: ' . $socMarchant->getLink() . '<br>Boutique&nbsp;: ' . $socMarchant->getData('name_alias')  . '</li>';
+				$socMarchand = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id);
+				$message .= '<li>Raison sociale&nbsp;: ' . $socMarchand->getLink() . '<br>Boutique&nbsp;: ' . $socMarchand->getData('name_alias')  . '</li>';
 			}
 			$message .= "</ul><p>Cordialement,</p>";
 

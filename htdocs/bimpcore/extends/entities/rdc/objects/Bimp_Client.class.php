@@ -839,11 +839,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function AlerteQualite()
 	{
-		global $user, $lang;
+		global $user, $langs;
 		if($this->getData('contrefacon') && !$this->getInitData('contrefacon') && $this->getData('fk_user_attr_rdc') != $user->id) 	{
 			$code = 'alerte_qualite';
 			$sujet = 'Alerte qualité';
-			$msg = 'Le marchant ' . $this->getLink() . ' a été signalé pour un problème de qualité par ' . $user->getFullName($lang);
+			$msg = 'Le marchant ' . $this->getLink() . ' a été signalé pour un problème de qualité par ' . $user->getFullName($langs);
 			if ($this->getData('comment_quality'))
 				$msg .= '<p>Commentaire :<br>' . $this->getData('comment_quality') . '</p>';
 			BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));

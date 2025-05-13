@@ -3301,7 +3301,8 @@ class BimpObject extends BimpCache
 								$child_filters = $this->config->getCompiledParams('objects/' . $child_name . '/list/filters');
 
 								foreach ($child_filters as $field_name => $filter_data) {
-									if (!isset($filters[$alias . '.' . $field_name])) {
+//									if (!isset($filters[$alias . '.' . $field_name])) {
+									if($filter_data != ''){
 										$filters[$alias . '.' . $field_name] = $filter_data;
 									}
 								}

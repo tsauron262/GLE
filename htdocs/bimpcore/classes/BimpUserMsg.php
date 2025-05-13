@@ -724,17 +724,29 @@ class BimpUserMsg
 			'metier' => 'metier'
 		),
 		'relance_6mois_bdkam'	=> array(
-			'label'  => 'Les clients suivants n\'ont pas été relancé depuis 6 mois. Merci de le relancer',
+			'label'  => 'Les marchands suivants n\'ont pas été relancé depuis 6 mois. Merci de le relancer',
 			'dests'  => 'object::id_user',
 			'module' => 'bimpcore',
 			'metier' => 'metier'
 		),
 		'alerte_qualite'	=> array(
-			'label'  => 'Le client XXX a une alerte qualité',
+			'label'  => 'Le marchand XXX a une alerte qualité',
 			'dests'  => 'object::id_user',
 			'module' => 'bimpcore',
 			'metier' => 'metier'
 		),
+		'relance_onboarding_bdkam'	=> array(
+			'label'  => 'Les marchands suivants n\'ont pas été relancé depuis 6 mois. Merci de le relancer',
+			'dests'  => 'object::id_user',
+			'module' => 'bimpcore',
+			'metier' => 'metier'
+		),
+		'alerte_onboarding_catalogue'	=> array(
+			'label'  => 'Le marchand XXX vient d\'etre passer en onboarding catalogue OK',
+			'dests'  => 'object::id_user',
+			'module' => 'bimpcore',
+			'metier' => 'metier'
+		)
 
 		// todo tommy : separer mail client et mail interne :
 		/*

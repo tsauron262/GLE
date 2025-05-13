@@ -85,7 +85,9 @@ fields:
             array: statut_kyc_list
     contrefacon:
         label: Suspition de contrefaçon
-        type: bool
+        type: int
+        values:
+            array: valuesContrefacon
     
     fk_group_rdc:
         label: Groupe
@@ -169,11 +171,13 @@ fields_tables:
             - field: is_subsidiary
             - label: Infos contact
               value:
-                  callback: displayFullContactInfos
+                  callback: displayFullContactInfosNoWeb
             - label: Adresse
               value:
                   callback: displayFullAddress
-            - field: url
+            - label: Site internet Marchand
+              value:
+                  callback: getUrlMarchand
             - field: commentaire_rdc
     
     param_rdc:
@@ -197,10 +201,7 @@ fields_tables:
             - field: fk_source_rdc
             - field: presta_source
 #            - field: quality_score
-            - label: Suspition de contrefaçon
-              value:
-                  callback: getContrefacon
-#            - field: fk_group_rdc
+            - field: contrefacon
             - field: fk_user_attr_rdc
             - field: fk_categorie_maitre
             - field: potentiel_catalogue
@@ -379,7 +380,7 @@ forms:
                     show_values:
                         callback:
                             method: getIdSourcePresta                
-            Suspition de contrefaçon:
+            contrefacon:
                 field: contrefacon
             Groupe:
                 field: fk_group_rdc
@@ -407,12 +408,13 @@ filters_panels:
         filters:
             fk_statut_rdc:
             fk_statut_kyc:
-            fk_priorite:
-            fk_categorie_maitre:
-            fk_source_rdc:
             date_der_contact:
             date_debut_prospect:
             date_ouverture:
+            fk_priorite:
+            fk_source_rdc:
+            contrefacon:
+            fk_categorie_maitre:
             fk_pays:
             fk_typent: unset
             code_compta: unset
@@ -439,7 +441,6 @@ lists_cols:
         label: Flag
         value:
             callback: getFlagImport
-            
 
 lists:
     default:
@@ -473,14 +474,14 @@ lists:
             name_alias:
             fk_statut_rdc:
             fk_statut_kyc:
-            full_address:
-            infos_contact:
+#            full_address:
+#            infos_contact:
             date_der_contact:
             date_debut_prospect:
             fk_priorite:
             flag_import:
                 label: Flag
-
+            contrefacon:
 
 stats_lists:
     default:
@@ -493,7 +494,12 @@ stats_lists:
             - fk_group_rdc
             - fk_user_attr_rdc
                 
+
 searches:
     default:
         fields_search:
             4: a.shopid
+            # desactivation recherche sur codes unitiliser par RDC
+            3: unset
+            6: unset
+            7: unset

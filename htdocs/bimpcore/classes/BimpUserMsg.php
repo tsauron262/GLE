@@ -722,7 +722,13 @@ class BimpUserMsg
 			'dests'  => 'object::id_user',
 			'module' => 'bimpcore',
 			'metier' => 'metier'
-		)
+		),
+		'relance_6mois_bdkam'	=> array(
+			'label'  => 'Les clients suivants n\'ont pas été relancé depuis 6 mois. Merci de le relancer',
+			'dests'  => 'object::id_user',
+			'module' => 'bimpcore',
+			'metier' => 'metier'
+		),
 
 		// todo tommy : separer mail client et mail interne :
 		/*

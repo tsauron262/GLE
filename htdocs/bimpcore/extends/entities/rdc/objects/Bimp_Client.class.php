@@ -82,14 +82,18 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		6 => array('BD'),
 		7 => array('BD'),
 		8 => array('BD'),
-		9 => array('TECH_RDC'),
-		10 => array('TECH_RDC'),
+		9 => array('BD'),
+		10 => array('BD'),
 		11 => array(),
 		12 => array('BD'),
 		13 => array(),
 		14 => array(),
 	);
 
+	public static $valuesContrefacon = array(
+		0 => array('label' => ' '),
+		1 => array('label' => 'OUI', 'icon' => 'fas_exclamation', 'classes' => array('danger')),
+	);
 
 	public static function getUserGroupsArray($include_empty = 1, $nom_url = 0)
 	{
@@ -123,11 +127,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return self::getCacheArray($cache_key, $include_empty);
 	}
 
-	public function getContrefacon()
-	{
-		if ($this->getData('contrefacon')) return '<span class="danger">Oui</span>';
-		else return '<span class="success">Non</span>';
-	}
     public function getActionsButtons()
 	{
 //		echo '<pre>'; print_r($this->data); echo '</pre>';die;
@@ -205,11 +204,15 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	}
 
 	public function getUrlMarchand()	{
+		$html = ' ';
 		if ($this->getData('url')) {
-			$url = $this->getData('url');
-			return $this->getHref($url);
+			$sites = explode('<br>', $this->getData('url'));
+			foreach ($sites as $site) {
+				if($html != '') $html .= '<br>';
+				$html .= $this->getHref($site);
+			}
 		}
-		else return ' ';
+		return $html;
 	}
 
 	public function getHref($url, $target="_blank")
@@ -220,6 +223,18 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 //		$href = '<a href="' . $url . '" target="' . $target . '"><i class="fas fa-external-link-alt"></></a>';
 		$href = '<a href="' . $url . '" target="' . $target . '">' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
 		return $url . " " . $href;
+	}
+
+	public function displayFullContactInfosNoWeb()	{
+		$params = array(
+			'url' => false,
+//			'phone' => true,
+			);
+		return parent::displayFullContactInfos(1, 0, $params) ?: ' ';
+	}
+
+	public function displayFullAddress ($icon = false, $single_line = false)	{
+		return parent::displayFullAddress($icon, $single_line) ?: ' ';
 	}
 
 	public function canEditField($field_name)
@@ -236,7 +251,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			case 'nom':
 				return $this->isUserBD();
 
-			case 'contrefacon':// lot 2 : return $this->isUserQuality(); // : créer un group Qualité (cf bimpcore.yml)
+			case 'contrefacon':// lot 2 : isUserQuality
 			case 'fk_group_rdc':
 			case 'fk_user_attr_rdc':
 				return $this->isUserManager();
@@ -510,18 +525,24 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				if ($shop['contact_informations']['street2']) {
 					$add .= ' ' . $shop['contact_informations']['street2'];
 				}
-				$this->set('address', $add);
-				$this->set('zip', $shop['contact_informations']['zip_code']);
-				$this->set('town', $shop['contact_informations']['city']);
+				if ($add)
+					$this->set('address', $add);
+				if ($shop['contact_informations']['zip_code'])
+					$this->set('zip', $shop['contact_informations']['zip_code']);
+				if($shop['contact_informations']['city'])
+					$this->set('town', $shop['contact_informations']['city']);
 				if ($shop['contact_informations']['country']) {
 					$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $shop['contact_informations']['country'] . '\'');
 					if ($id_pays) {
 						$this->set('fk_pays', $id_pays);
 					}
 				}
-				$this->set('email', $shop['contact_informations']['email']);
-				$this->set('phone', $shop['contact_informations']['phone']);
-				$this->set('url', $shop['contact_informations']['site_web']);
+				if($shop['contact_informations']['email'])
+					$this->set('email', $shop['contact_informations']['email']);
+				if($shop['contact_informations']['phone'])
+					$this->set('phone', $shop['contact_informations']['phone']);
+				if($shop['contact_informations']['site_web'])
+					$this->set('url', $shop['contact_informations']['site_web']);
 
 				$datas = array(
 					'civility' => $this->traduct_civility($shop['contact_informations']['civility']),
@@ -665,7 +686,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		if($contact->getData('email') == $info['email'])	{
 			$contact = $this->setObj($contact, $info);
 			$poste = $contact->getData('poste');
-			if ($poste && strstr($poste, $info['poste']) === false) {
+			if (!$poste || $poste && strstr($poste, $info['poste']) === false) {
 				// c'est un nouveau poste, on l'ajoute
 				if ($poste) $poste .= '<br>';
 				$poste .= $info['poste'];

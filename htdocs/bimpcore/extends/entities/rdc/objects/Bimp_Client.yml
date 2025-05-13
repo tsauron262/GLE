@@ -343,7 +343,7 @@ forms:
         extends: form_client_rdc
         
     form_client_rdc:
-        title: Ajout d'un client
+        title: Ajout d'un marchand
         rows:
             Nom:
                 field: nom

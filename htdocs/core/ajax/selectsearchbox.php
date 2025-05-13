@@ -234,7 +234,9 @@ if(stripos($search_boxvalue, "cst") === 0 && isset($arrayresult["searchintocontr
 if(stripos($search_boxvalue, "fi") === 0 && isset($arrayresult["searchintointervention"]))
         $arrayresult=array_merge(array($arrayresult['searchintointervention']), $arrayresult);
 if(stripos($search_boxvalue, "sac") === 0 && isset($arrayresult["searchintosac"]))
-        $arrayresult=array_merge(array($arrayresult['searchintosac']), $arrayresult);
+	$arrayresult=array_merge(array($arrayresult['searchintosac']), $arrayresult);
+if(stripos($search_boxvalue, "ts") === 0 && isset($arrayresult["searchintotickets"]))
+	$arrayresult=array_merge(array($arrayresult['searchintotickets']), $arrayresult);
 /*fmoddrsi*/
 
 

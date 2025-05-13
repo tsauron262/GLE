@@ -24,6 +24,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	const PENDING_APPROVAL = 2;
 	const APPROVED = 3;
 	const REFUSED = 4;
+	const ID_ONBOARDING_OK = 12;		// YANN
 	public static $statut_kyc_list = array(
 		0 => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
 		self::PENDING_SUBMISSION => array('label' => 'En attente de soumission KYC', 'icon' => 'fas_hourglass', 'classes' => array('important')),
@@ -240,18 +241,21 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function canEditField($field_name)
 	{
 		switch ($field_name) {
-			case 'fk_priorite':
 			case 'presta_source':
 			case 'fk_categorie_maitre':
 			case 'potentiel_catalogue':
 				return $this->isUserBDKAM();
 
+			case 'fk_priorite':
 			case 'fk_source_rdc':
 			case 'name_alias':
 			case 'nom':
 				return $this->isUserBD();
 
-			case 'contrefacon':// lot 2 : isUserQuality
+			case 'contrefacon':
+			case 'comment_quality':
+				return $this->isUserQuality();
+
 			case 'fk_group_rdc':
 			case 'fk_user_attr_rdc':
 				return $this->isUserManager();
@@ -281,13 +285,13 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function isUserBD()
 	{
 		global $user;
-		return BimpTools::isUserInGroup($user->id,'BD') || $this->isUserManager();
+		return BimpTools::isUserInGroup($user->id,'BD') || BimpTools::isUserInGroup($user->id,'Qualité') || $this->isUserManager();
 	}
 
 	public function isUserKAM()
 	{
 		global $user;
-		return BimpTools::isUserInGroup($user->id,'KAM') || $this->isUserManager();
+		return BimpTools::isUserInGroup($user->id,'KAM') || BimpTools::isUserInGroup($user->id,'Qualité') || $this->isUserManager();
 	}
 
 	public function isUserManager()
@@ -305,7 +309,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function isUserQuality()
 	{
 		global $user;
-		return BimpTools::isUserInGroup($user->id,'Quality')|| $this->isUserManager();
+		return BimpTools::isUserInGroup($user->id,'Qualité')|| $this->isUserManager();
 	}
 
 	public function isUserBDKAM()
@@ -365,6 +369,35 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function getStatusProperty()	{
 		return '';
+	}
+
+//	public function getRefProperty()
+//	{
+//		return 'shopid';
+//	}
+
+	public function getRef($withGeneric = true)
+	{
+		$html = '';
+		if ($this->getData('name_alias')) $html .= $this->getData('name_alias');
+		if ($this->getData('shopid')) {
+			if ($html != '') $html .= '<br>';
+			$html .= 'Shop id : ' . $this->getData('shopid');
+		}
+		return $html;
+	}
+
+	public function getPageTitle()
+	{
+		$html = '';
+		if ($this->getData('name_alias')) $html .= $this->getData('name_alias');
+		if ($this->getData('shopid')) {
+			if ($html != '') $html .= ' - ';
+			$html .= $this->getData('shopid');
+		}
+		if ($html)		return $html;
+
+		return parent::getPageTitle();
 	}
 
 	public function getUserAttrByGroupArray()	{
@@ -466,11 +499,17 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			$errors[] = 'Le champ Prestataire/agrégateur est obligatoire';
 		}
 
+		if (BimpTools::getPostFieldValue('contrefacon') == 1 && strlen(BimpTools::getPostFieldValue('comment_quality')) <= 0) {
+			$errors[] = 'Le champ Commentaire qualité est obligatoire';
+		}
+
 		if (count($errors))
 			return $errors;
 
 		$this->checkAttr();
 		$this->checkPassageLive();
+		$this->AlerteQualite();
+		$this->alertePassage_XX($this->getData('fk_statut_rdc'));
 
 		return parent::update($warnings, $force_update);
 	}
@@ -732,11 +771,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		}
 	}
 
-	public function change_status_rdc() {
-		if ($this->getInitData('fk_statut_rdc') != $this->getData('fk_statut_rdc')) {
-			$this->set('date_changement_statut_rdc', date('Y-m-d'));
-		}
-	}
+//	public function change_status_rdc() {
+//		if ($this->getInitData('fk_statut_rdc') != $this->getData('fk_statut_rdc')) {
+//			$this->set('date_changement_statut_rdc', date('Y-m-d'));
+//		}
+//	}
 
 	public function traduct_civility($civility) {
 		switch ($civility) {
@@ -777,6 +816,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 		$this->set('fk_statut_rdc', $data['status']);
 		$this->set('date_changement_statut_rdc', date('Y-m-d'));
+
 		$this->update($warnings, true);
         return array(
             'errors'   => $errors,
@@ -799,4 +839,67 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			}
 		}
 	}
+
+	public function AlerteQualite()
+	{
+		global $user, $langs;
+		if($this->getData('contrefacon') && !$this->getInitData('contrefacon') && $this->getData('fk_user_attr_rdc') != $user->id) 	{
+			$code = 'alerte_qualite';
+			$sujet = 'Alerte qualité';
+			$msg = 'Le marchand ' . $this->getLink() . ' a été signalé pour un problème de qualité par ' . $user->getFullName($langs);
+			if ($this->getData('comment_quality'))
+				$msg .= '<p>Commentaire :<br>' . $this->getData('comment_quality') . '</p>';
+			BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+		}
+	}
+
+	public function alerteOnboarding_catalogue_OK()	{
+		global $user, $langs;
+		$code = 'alerte_onboarding_catalogue';
+		$sujet = 'Marchand en "Onboarding catalogue OK"';
+		$msg = 'Le marchand ' . $this->getLink() . ' a été mis en "Onboarding catalogue OK" par ' . $user->getFullName($langs);
+		BimpUserMsg::envoiMsg($code, $sujet, $msg, self::ID_ONBOARDING_OK);
+	}
+
+	public function alertePassage_live()	{
+		global $user, $langs;
+		$code = 'alerte_passage_live';
+		$sujet = 'Marchand en "Live"';
+		$msg = 'Bonjour,<p> Pour info, <br> marchand ' . $this->getLink() . ' vient de passer en LIVE</p>';
+		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+	}
+
+	public function alertePassage_resil()	{
+		global $user, $langs;
+		$code = 'alerte_passage_resil';
+		$sujet = 'Marchand en "Résilié"';
+		$msg = 'Bonjour,<p> Pour info, <br> marchand ' . $this->getLink() . ' vient de passer en RESILIE</p>';
+		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+	}
+
+	public function alertePassage_suspendu()	{
+		global $user, $langs;
+		$code = 'alerte_passage_suspendu';
+		$sujet = 'Marchand en "Suspendu"';
+		$msg = 'Bonjour,<p> Pour info, <br> marchand ' . $this->getLink() . ' vient de passer en SUSPENDU</p>';
+		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+	}
+
+	public function alertePassage_XX($s)	{
+		switch ($s)	{
+			case 10:
+				$this->alerteOnboarding_catalogue_OK();
+				break;
+			case 11:
+				$this->alertePassage_live();
+				break;
+			case 12:
+				$this->alertePassage_resil();
+				break;
+			case 13:
+				$this->alertePassage_suspendu();
+				break;
+		}
+	}
+
 }

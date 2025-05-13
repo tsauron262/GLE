@@ -211,7 +211,7 @@ class Bimp_FactureLine extends ObjectLine
 	{
 		$buttons = parent::getListExtraBtn();
 
-		if ($this->isLoaded() && $this->isNotTypeText()) {
+		if ($this->isLoaded() && $this->isNotTypeText() && BimpCore::isModuleActive('bimpfinanc')) {
 			$facture = $this->getParentInstance();
 			if (BimpObject::objectLoaded($facture)) {
 				$reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
@@ -832,9 +832,113 @@ class Bimp_FactureLine extends ObjectLine
 		return $errors;
 	}
 
+	public function checkRemisesArrieres(&$errors = array(), &$infos = array())
+	{
+		if (!$this->isLoaded() || !$this->qty) {
+			return;
+		}
+
+		$facture = $this->getParentInstance();
+		if (!BimpObject::objectLoaded($facture)) {
+			$errors[] = 'Ligne #' . $this->id . ' : facture absente';
+			return;
+		}
+
+		if (!in_array((int) $facture->getData('fk_statut'), array(1, 2))) {
+			return;
+		}
+
+		$remises_arrieres = $this->getRemisesArrieres();
+		$tot_ra = array(
+			'crt'       => 0,
+			'applecare' => 0,
+			'oth'       => array(
+				'amount' => 0,
+				'label'  => ''
+			)
+		);
+
+		if (!empty($remises_arrieres)) {
+			foreach ($remises_arrieres as $remise_arriere) {
+				$ra_type = $remise_arriere->getData('type');
+
+				if ($ra_type == 'oth') {
+					$tot_ra[$ra_type]['amount'] += $remise_arriere->getRemiseAmount();
+					$tot_ra[$ra_type]['label'] .= ($tot_ra[$ra_type]['label'] ? ' / ' : '') . $remise_arriere->getData('label');
+				} else {
+					$tot_ra[$ra_type] += $remise_arriere->getRemiseAmount();
+				}
+			}
+		}
+
+		$dt = new DateTime($facture->getData('datec'));
+		foreach ($tot_ra as $type_ra => $ra_data) {
+			$ra_amount = 0;
+			$ra_label = '';
+			$tot_reval = 0;
+
+			if (is_array($ra_data)) {
+				$ra_label = $ra_data['label'];
+				$ra_amount = $ra_data['amount'];
+			} else {
+				$ra_amount = $ra_data;
+			}
+
+			foreach (BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+				'id_facture'      => (int) $facture->id,
+				'id_facture_line' => (int) $this->id,
+				'type'            => $type_ra
+			)) as $reval) {
+				$tot_reval += (float) $reval->getTotal();
+			}
+
+			if (round($tot_reval, 4) != round($ra_amount, 4)) {
+				$diff = $ra_amount - $tot_reval;
+
+				$reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
+					'id_facture'      => (int) $facture->id,
+					'id_facture_line' => (int) $this->id,
+					'type'            => $type_ra,
+					'status'          => 0
+				), true);
+
+				$reval_errors = array();
+				if (!BimpObject::objectLoaded($reval) || (float) $reval->getData('qty') !== (float) $this->qty) {
+					$reval = BimpObject::createBimpObject('bimpfinanc', 'BimpRevalorisation', array(
+						'id_facture'      => (int) $facture->id,
+						'id_facture_line' => (int) $this->id,
+						'type'            => $type_ra,
+						'date'            => $dt->format('Y-m-d'),
+						'amount'          => ($diff / $this->qty),
+						'qty'             => (float) $this->qty,
+						'note'            => $ra_label
+					), true, $reval_errors);
+
+					if (count($reval_errors)) {
+						$errors[] = BimpTools::getMsgFromArray($reval_errors, 'Ligne n° ' . $this->getData('position') . ' : échec de la création d\'une nouvelle revalorisation de type "' . BimpRevalorisation::$types[$type_ra]) . '"' . ($ra_label ? ' (remise arrière "' . $ra_label . '")' : '');
+					} else {
+						$infos[] = 'Ligne n° ' . $this->getData('position') . ' création d\'une revalorisation de type "' . BimpRevalorisation::$types[$type_ra] . '" - Montant : ' . ($diff / $this->qty);
+					}
+				} else {
+					$reval_amount = ($reval->getTotal() + $diff) / (float) $reval->getData('qty');
+
+					$reval->set('amount', $reval_amount);
+					$reval_errors = $reval->update($reval_warnings, true);
+
+					if (count($reval_errors)) {
+						$errors[] = BimpTools::getMsgFromArray($reval_errors, 'Ligne n° ' . $this->getData('position') . ' : échec de la mise à jour de la revalorisation de type "' . BimpRevalorisation::$types[$type_ra]) . '"' . ($ra_label ? ' (remise arrière "' . $ra_label . '")' : '');
+					} else {
+						$infos[] = 'Ligne n° ' . $this->getData('position') . ' mise à jour de la revalorisation de type "' . BimpRevalorisation::$types[$type_ra] . '" - Nouveau montant : ' . $reval_amount;
+					}
+				}
+			}
+		}
+	}
+
 	// Actions:
 
-	public function actionBulkCreateRevalorisation($data, &$success)
+	public
+	function actionBulkCreateRevalorisation($data, &$success)
 	{
 		$errors = array();
 		$warnings = array();
@@ -923,7 +1027,8 @@ class Bimp_FactureLine extends ObjectLine
 
 	// Overrides:
 
-	public function create(&$warnings = array(), $force_create = false)
+	public
+	function create(&$warnings = array(), $force_create = false)
 	{
 		$errors = array();
 		$details = array();
@@ -938,7 +1043,8 @@ class Bimp_FactureLine extends ObjectLine
 		return parent::create($warnings, $force_create);
 	}
 
-	public function delete(&$warnings = array(), $force_delete = false)
+	public
+	function delete(&$warnings = array(), $force_delete = false)
 	{
 		$commLine = null;
 		$contratLine = null;

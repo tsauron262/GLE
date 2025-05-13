@@ -1583,6 +1583,7 @@ class BimpCache
 		if ($moduleName == 'bimpcore') {
 			return 1;
 		}
+
 		return (float) BimpCore::getConf('module_version_' . $moduleName, 0);
 	}
 

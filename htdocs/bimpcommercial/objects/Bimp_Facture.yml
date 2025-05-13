@@ -554,8 +554,6 @@ forms:
             id_facture_to_correct: unset
 #            avoir_same_lines: unset
 #            avoir_remain_to_pay: unset
-            typedeposit: unset
-            typedeposit: unset
             
     paid_partially:
         msgs: 
@@ -1066,9 +1064,7 @@ filters:
 filters_panels: 
     default: 
         filters: 
-            ref: unset
-            fk_availability: unset
-            
+            fk_availability: unset            
             ref: 
             paiement_status: 
             date_lim_reglement:
@@ -1077,7 +1073,6 @@ filters_panels:
 lists_cols:
     ref: 
         object_link: 1
-    ref: unset
     pdf: 
         label: Fichier PDF
         value: 
@@ -1185,7 +1180,6 @@ lists:
         total_row: 1
         title: Factures
         icon: fas_file-invoice-dollar
-        bulk_actions: unset
         sort_field: datec
         sort_way: desc
         add_btn_label: Créer une nouvelle facture

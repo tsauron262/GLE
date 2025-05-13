@@ -30,8 +30,9 @@ sections:
                                     object: facture
                                     method: renderRevalorisationsList
                                 show:
-                                    callback:
-                                        object: facture
-                                        method: isModuleActif
-                                        params:
-                                            - bimpfinanc
+                                    is_module_active: bimpfinanc
+#                                    callback:
+#                                        object: facture
+#                                        method: isModuleActif
+#                                        params:
+#                                            - bimpfinanc

@@ -1261,7 +1261,7 @@ class BimpCore
 		return false;
 	}
 
-// Gestion du contexte:
+	// Gestion du contexte:
 
 	public static function getContext()
 	{

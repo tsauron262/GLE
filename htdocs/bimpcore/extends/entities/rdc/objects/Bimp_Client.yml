@@ -470,6 +470,8 @@ lists:
         add_btn_label: Nouveau marchand
         header_buttons:
             callback: getDefaultListExtraHeaderButtons
+        extra_btn:
+            callback: getDefaultListExtraButtons
         add_form_name: form_client_rdc
         sort_field: name_alias
         sort_way: ASC

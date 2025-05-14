@@ -226,6 +226,18 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return $url . " " . $href;
 	}
 
+	public function getDefaultListExtraButtons()	{
+		$buttons = array();
+
+		$actioncomm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm');
+		$buttons[] = array(
+			'label'   => 'Ajouter un evenement',
+			'icon'    => 'fas_calendar-plus',
+			'onclick' => $actioncomm->getJsLoadModalForm('formCREchange', 'Compte rendu d\\\'échange', array('fields' => array('fk_soc' => $this->id)))
+		);
+		return $buttons;
+	}
+
 	public function displayFullContactInfosNoWeb()	{
 		$params = array(
 			'url' => false,

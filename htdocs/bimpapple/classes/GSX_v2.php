@@ -236,8 +236,9 @@ class GSX_v2 extends GSX_Const
 				//mailSyn2('auth GSX bad', 'tommy@bimp.fr, f.martinez@bimp.fr', null, $user->getFullName($langs) . ' id : ' . $this->appleId . ' auth bad' . date('l jS \of F Y h:i:s A'));
 
 				$msg = 'ERP ' . BimpCore::getConf('erp_name') . ' ' . ($conf->entity ? '(ent. ' . $conf->entity . ') ' : '');
+				$msg .= '. Attention compte admin.gle déconnecté de GSX';
 
-				BimpTools::sendSmsAdmin('Attention Compte admin.gle déconnecté de GSX');
+				BimpTools::sendSmsAdmin($msg);
 				$gsx_logout_mail_send = true;
 			}
 		} else {

@@ -373,15 +373,18 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function getTargetInfosHtml()
     {
-        global $langs;
+        global $langs, $user;
 
         $html = "";
         $nomsoc = pdfBuildThirdpartyName($this->thirdparty, $this->langs);
         if (is_null($this->contact) || $this->contact->getFullName($langs) != $nomsoc) {
             $html .= $nomsoc . "<br/>";
-            if (!is_null($this->contact) && is_object($this->object) && is_object($this->object->thirdparty) && $this->object->thirdparty->name_alias != "" && empty($this->thirdparty->name_alias)) {
-                $html .= $this->object->thirdparty->name_alias . "<br/>";
-            }
+
+			if ($user->login !== 'f.martinez') {
+				if (!is_null($this->contact) && is_object($this->object) && is_object($this->object->thirdparty) && $this->object->thirdparty->name_alias != "" && empty($this->thirdparty->name_alias)) {
+					$html .= $this->object->thirdparty->name_alias . "<br/>";
+				}
+			}
         }
 
         $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact, !is_null($this->contact) ? 1 : 0, 'target');

@@ -379,7 +379,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
 	public function getTargetInfosHtml()
 	{
-		global $langs, $user;
+		global $langs;
 
 		$html = "";
 		$nomsoc = pdfBuildThirdpartyName($this->thirdparty, $this->langs);
@@ -387,12 +387,6 @@ class BimpDocumentPDF extends BimpModelPDF
 			$html .= $nomsoc . "<br/>";
 
 			if (!is_null($this->contact) && is_object($this->object) && is_object($this->object->thirdparty) && $this->object->thirdparty->name_alias != "" && strpos($nomsoc, $this->object->thirdparty->name_alias) === false) {
-				if ($user->login == 'f.martinez') {
-					echo 'NOM SOC : "' . $nomsoc.'"<br/>';
-					echo 'ALIAS : "'.$this->object->thirdparty->name_alias.'"<br/>';
-					echo 'TEST : ' . (strpos($nomsoc, $this->object->thirdparty->name_alias) === false ? 'true' : 'false') . "<br/>";
-
-				}
 				$html .= $this->object->thirdparty->name_alias . "<br/>";
 			}
 		}

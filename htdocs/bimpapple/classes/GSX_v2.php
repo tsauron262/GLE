@@ -237,7 +237,7 @@ class GSX_v2 extends GSX_Const
 
 				$msg = 'ERP ' . BimpCore::getConf('erp_name') . ' ' . ($conf->entity ? '(ent. ' . $conf->entity . ') ' : '');
 
-				BimpTools::sendSmsAdmin('Attention Compte ' . $this->appleId . ' déconnecté de GSX');
+				BimpTools::sendSmsAdmin('Attention Compte admin.gle déconnecté de GSX');
 				$gsx_logout_mail_send = true;
 			}
 		} else {

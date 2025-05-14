@@ -868,7 +868,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			$msg = 'Le marchand ' . $this->getLink() . ' a été signalé pour un problème de qualité par ' . $user->getFullName($langs);
 			if ($this->getData('comment_quality'))
 				$msg .= '<p>Commentaire :<br>' . $this->getData('comment_quality') . '</p>';
-			BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+//			BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
 		}
 	}
 
@@ -877,7 +877,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$code = 'alerte_onboarding_catalogue';
 		$sujet = 'Marchand en "Onboarding catalogue OK"';
 		$msg = 'Le marchand ' . $this->getLink() . ' a été mis en "Onboarding catalogue OK" par ' . $user->getFullName($langs);
-		BimpUserMsg::envoiMsg($code, $sujet, $msg, self::ID_ONBOARDING_OK);
+//		BimpUserMsg::envoiMsg($code, $sujet, $msg, self::ID_ONBOARDING_OK);
 	}
 
 	public function alertePassage_live()	{
@@ -885,7 +885,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$code = 'alerte_passage_live';
 		$sujet = 'Marchand en "Live"';
 		$msg = 'Bonjour,<p> Pour info, <br> marchand ' . $this->getLink() . ' vient de passer en LIVE</p>';
-		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+//		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
 	}
 
 	public function alertePassage_resil()	{
@@ -893,7 +893,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$code = 'alerte_passage_resil';
 		$sujet = 'Marchand en "Résilié"';
 		$msg = 'Bonjour,<p> Pour info, <br> marchand ' . $this->getLink() . ' vient de passer en RESILIE</p>';
-		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+//		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
 	}
 
 	public function alertePassage_suspendu()	{
@@ -901,7 +901,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$code = 'alerte_passage_suspendu';
 		$sujet = 'Marchand en "Suspendu"';
 		$msg = 'Bonjour,<p> Pour info, <br> marchand ' . $this->getLink() . ' vient de passer en SUSPENDU</p>';
-		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+//		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
 	}
 
 	public function alertePassage_XX($s)	{

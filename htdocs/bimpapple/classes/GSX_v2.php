@@ -230,7 +230,7 @@ class GSX_v2 extends GSX_Const
 				$code = 'erreur_auth_gsx';
 				$sujet = 'auth GSX bad';
 				$msg = $user->getFullName($langs) . ' id : ' . $this->appleId . ' auth bad ' . date('l jS \of F Y h:i:s A');
-				$msg = '<br/><br/>ERP : ' . BimpCore::getConf('erp_name') . ' ' . ($conf->entity ? '(ent. ' . $conf->entity . ') ' : '');
+				$msg .= '<br/><br/>ERP : ' . BimpCore::getConf('erp_name') . ' ' . ($conf->entity ? '(ent. ' . $conf->entity . ') ' : '');
 
 				BimpUserMsg::envoiMsg($code, $sujet, $msg);
 				//mailSyn2('auth GSX bad', 'tommy@bimp.fr, f.martinez@bimp.fr', null, $user->getFullName($langs) . ' id : ' . $this->appleId . ' auth bad' . date('l jS \of F Y h:i:s A'));

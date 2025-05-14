@@ -8,6 +8,7 @@ table: entrepot
 primary: rowid
 icon: fas_warehouse
 
+header_edit_form: default
 header_btn:
     callback: getActionsButtons
 
@@ -88,7 +89,6 @@ views:
                     -   type: custom
                         custom:
                             callback: renderStocksView
-
 
 filters_panels:
     default:

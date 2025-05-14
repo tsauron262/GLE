@@ -207,10 +207,13 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function getUrlMarchand()	{
 		$html = ' ';
 		if ($this->getData('url')) {
-			$sites = explode('<br>', $this->getData('url'));
-			foreach ($sites as $site) {
-				if($html != '') $html .= '<br>';
-				$html .= $this->getHref($site);
+			$urls = explode("%0D%0A", urlencode($this->getData('url')));
+			foreach ($urls as $url) {
+				$lien = $this->getHref(urldecode($url));
+				if ($html != ' ') {
+					$html .= '<br>';
+				}
+				$html .= $lien;
 			}
 		}
 		return $html;
@@ -522,7 +525,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$this->checkPassageLive();
 		$this->AlerteQualite();
 		$this->alertePassage_XX($this->getData('fk_statut_rdc'));
-
+//		if ($this->getData('url') && $this->getData('url') != $this->getInitData('url')) {
+//			$url = nl2br($this->getData('url'));
+//			echo '<pre>';
+//			exit(var_dump(substr($url, 70, 10),strpos($url, html_entity_decode('&para;')), html_entity_decode('&para;')));
+//		}
 		return parent::update($warnings, $force_update);
 	}
 

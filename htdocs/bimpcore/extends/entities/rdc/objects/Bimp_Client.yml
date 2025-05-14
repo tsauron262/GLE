@@ -115,6 +115,7 @@ fields:
         type: text
     url:
         label: Site internet marchand
+        type: text
     date_maj_mirakl:
         label: Date de mise à jour Mirakl
         type: datetime

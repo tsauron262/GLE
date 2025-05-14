@@ -115,6 +115,7 @@ fields:
         type: text
     url:
         label: Site internet marchand
+        type: text
     date_maj_mirakl:
         label: Date de mise à jour Mirakl
         type: datetime
@@ -470,6 +471,8 @@ lists:
         add_btn_label: Nouveau marchand
         header_buttons:
             callback: getDefaultListExtraHeaderButtons
+        extra_btn:
+            callback: getDefaultListExtraButtons
         add_form_name: form_client_rdc
         sort_field: name_alias
         sort_way: ASC

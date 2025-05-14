@@ -163,7 +163,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			'Action' => 'Action',
 			'pt_positif' => 'pt_positif',
 			'risque_identifie' => 'risque_identifie',
-			'Commentaire' => 'Commentaire',
+			'commentaire_rdc' => 'Commentaire',
 		);
 
 		$keys = array(
@@ -259,6 +259,13 @@ class BDS_ImportsDiversProcess extends BDSProcess
 				}
 				if (strlen($data['import_key']) < 3) {
 					$data['import_key'] = substr('IMP_FLO_' . str_replace(" ", "",$data['name_alias']), 0, 29);
+					$dataFiltres['import_key'] = substr('IMP_FLO_' . str_replace(" ", "",$data['name_alias']), 0, 29);
+				}
+				if ($data['url'])	{
+					if(strpos($data['url'], '<br') !== false) {
+						$r = str_replace(array('<br />', '<br/>', '<br>'), urldecode("%0D%0A"), $data['url']);
+						$data['url'] = $r;
+					}
 				}
 				$errors = $warnings = array();
 				$obj = BimpObject::createOrUpdateBimpObject('bimpcore', 'Bimp_Client', $dataFiltres, $data, true, true, $errors, $warnings);

@@ -2,7 +2,7 @@
 
 class Bimp_Entrepot extends BimpObject
 {
-    public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
+	public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
 	public static $status_list = array(
 		0 => array('label' => 'Désactivé', 'icon' => 'fas_times', 'classes' => array('danger')),
@@ -18,9 +18,9 @@ class Bimp_Entrepot extends BimpObject
 		return (isset($user->rights->stock->creer) && $user->rights->stock->creer);
 	}
 
-	public function getValStock(){
-		$infos = $this->dol_object->nb_products();
-		return BimpTools::displayMoneyValue($infos['value']);
+	public function canEdit()
+	{
+		return $this->canCreate();
 	}
 
 	public function canDelete()
@@ -43,7 +43,7 @@ class Bimp_Entrepot extends BimpObject
 
 	public function getMail()
 	{
-		if(BimpCore::getExtendsEntity() == 'bimp'){
+		if (BimpCore::getExtendsEntity() == 'bimp') {
 			$domaine = 'bimp.fr';
 			$nbCaracdeps = array(3, 2);
 			foreach ($nbCaracdeps as $nbCaracdep) {
@@ -51,9 +51,9 @@ class Bimp_Entrepot extends BimpObject
 				$name = 'boutique' . $dep;
 				$sql = $this->db->db->query('SELECT mail FROM `llx_usergroup` u, llx_usergroup_extrafields ue WHERE ue.fk_object = u.rowid AND u.nom LIKE "' . $name . '"');
 				while ($ln = $this->db->db->fetch_object($sql)) {
-					if ($ln->mail && $ln->mail != '' && stripos($ln->mail, "@") !== false)
+					if ($ln->mail && $ln->mail != '' && stripos($ln->mail, "@") !== false) {
 						return $ln->mail;
-					else {
+					} else {
 						require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
 						return str_replace(",", "", traiteCarac($name) . "@" . $domaine);
 					}
@@ -62,7 +62,13 @@ class Bimp_Entrepot extends BimpObject
 		}
 	}
 
-    // Affichages:
+	public function getValStock()
+	{
+		$infos = $this->dol_object->nb_products();
+		return BimpTools::displayMoneyValue($infos['value']);
+	}
+
+	// Affichages:
 
 	public function displayFullAdress()
 	{
@@ -85,17 +91,17 @@ class Bimp_Entrepot extends BimpObject
 		return $html;
 	}
 
-    // Overrides:
+	// Overrides:
 
 	public function getDolObjectUpdateParams()
 	{
 		global $user;
 
-        return array(
-            ($this->isLoaded() ? (int) $this->id : 0),
-            $user
-        );
-    }
+		return array(
+			($this->isLoaded() ? (int) $this->id : 0),
+			$user
+		);
+	}
 
 	public function renderStocksView()
 	{
@@ -158,7 +164,7 @@ class Bimp_Entrepot extends BimpObject
 
 			case 'stocks_equipment':
 				$list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'Equipment'), 'entrepot', 1, null, 'Equipements en stock du produit "' . $product_label . '"', 'fas_desktop');
-					$list->addFieldFilterValue('epl.id_entrepot', $this->id);
+				$list->addFieldFilterValue('epl.id_entrepot', $this->id);
 				$list->addFieldFilterValue('epl.position', 1);
 				$list->addFieldFilterValue('epl.type', BE_Place::BE_PLACE_ENTREPOT);
 				$list->addJoin('be_equipment_place', 'a.id = epl.id_equipment', 'epl');

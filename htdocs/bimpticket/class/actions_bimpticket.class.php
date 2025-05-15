@@ -94,6 +94,8 @@ class ActionsBimpticket
 		preg_match_all('/([^: ]+): (.+?(?:\r\n\s(?:.+?))*)(\r\n|\s$)/m', $parameters['header'], $matches);
 		$headers = array_combine($matches[1], $matches[2]);
 
+
+		echo '<pre>' . print_r($matches[2], true) . '</pre>';
 		switch ($action) {
 			case 'hookBimpticketResponse':
 				$bimp_ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $parameters['objectemail']->id);
@@ -144,11 +146,24 @@ class ActionsBimpticket
 				//		echo '<pre>';print_r($parameters['from'].$bimp_ticket->id);echo '</pre>';die;
 				if (!$traite && isset($parameters['objectemail']) && is_a($parameters['objectemail'], 'ticket')) {
 					$ticket = $parameters['objectemail'];
-//					$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
 					$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
+					// trouver le type de ticket selon mail de reception
+					$type_code = '';
+					foreach ($matches[2] as $head) {
+						foreach ($Bimp_Ticket::$mail_typeTicket as $mail => $typeTicket) {
+							if (strpos($head, $mail) !== false) {
+								$type_code = $typeTicket;
+								break;
+							}
+						}
+						if($type_code) break;
+					}
+
+//					die('type_code: '.$type_code);
 					// correction des object avec des accents
 					$s = str_replace("_", " ", mb_decode_mimeheader($Bimp_Ticket->getData('subject')));
 					$Bimp_Ticket->updateField('subject', $s);
+					if($type_code != '') $Bimp_Ticket->updateField('type_code', $type_code);
 					$Bimp_Ticket->addObjectLog($Bimp_Ticket->getData('message'));
 					$Bimp_Ticket->updateField("message", $msg);
 

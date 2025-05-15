@@ -46,14 +46,15 @@ class BimpCacheRedis extends BimpCacheServer
             self::initCacheServeur();
         }
         if (!self::$isActif) {
-            return parent::delete($key);
+            parent::delete($key);
         }
+
         try {
             self::$redisObj->del($key);
         } catch (RedisException $e) {
             static::$isActif = false;
-            BimpCore::addlog('Probléme delete cache');
-            return 0;
+            BimpCore::addlog('Echec delete cache server');
+//            return 0;
         }
     }
 
@@ -86,7 +87,7 @@ class BimpCacheRedis extends BimpCacheServer
         $_key = self::$redisObj->keys('*');
 //        print_r($_key);
         foreach ($_key as $key) {
-            echo '<br/>jj' . $key;
+//            echo '<br/>jj' . $key;
             $this->delete($key);
         }
 
@@ -162,7 +163,7 @@ class BimpCacheRedis extends BimpCacheServer
 //            self::$redisObj->set(self::getPrefKey().$key, $value);
             self::$redisObj->setex(self::getPrefKey() . $key, $ttl, $value);
         } catch (Exception $e) {
-            BimpCore::addlog('Redis ingoignable ' . $e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);
+            BimpCore::addlog('Redis injoignable ' . $e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);
             return null;
         }
 

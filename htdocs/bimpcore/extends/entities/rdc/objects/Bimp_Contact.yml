@@ -53,3 +53,15 @@ forms:
 #            Note publique:
 #                label: Note visible par marchand
 #                field: note_public
+
+lists_cols:
+    flag_import:
+        label: Flag
+        value:
+            callback: getFlagImport
+            
+lists:
+    default:
+        cols:
+            flag_import:
+                label: Flag

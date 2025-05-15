@@ -143,7 +143,7 @@ class BiAPI extends BimpAPI
 		$annee = array("2020", "2021", "2022", "2023");
 //		$annee = array("2024");
 //		$annee = array("2025");
-		$categorie = 0;
+		$categorie = 1;
 		$this->majCa($annee, $mois, $categorie, $warnings, $errors);
 	}
 

@@ -12,7 +12,7 @@ class BimpDictionnary extends BimpObject
 		$params = $this->getData('values_params');
 		if (isset($params['edit'])) {
 			$edit = explode(':', $params['edit']);
-			if (isset($edit[0]) && $edit[0] == 'GR')	{
+			if (isset($edit[0]) && $edit[0] == 'GR') {
 				$isUserInGroup = BimpTools::isUserInGroup($user->id, $edit[1]);
 			}
 		}
@@ -103,22 +103,34 @@ class BimpDictionnary extends BimpObject
 						$filters = (isset($values_params['filters']) ? $values_params['filters'] : array());
 
 						if (isset($values_params['children'])) {
-							foreach ($this->getChildrenObjects($values_params['children'], $filters, 'position', 'asc') as $val) {
-								$val_data = $val->getDataArray(true);
+							$child_instance = $this->getChildObject($values_params['children']);
 
-								if (isset($values_params['extra_data'])) {
-									$val_extra_data = array();
-									if (isset($val_data['extra_data'])) {
-										$val_extra_data = $val_data['extra_data'];
-										unset($val_data['extra_data']);
-									}
+							if (is_a($child_instance, 'BimpObject')) {
+								$table = $child_instance->getTable();
+								$parent_id_prop = $child_instance->getParentIdProperty();
 
-									foreach ($values_params['extra_data'] as $data_name => $data_params) {
-										$val_data[$data_name] = (isset($val_extra_data[$data_name]) ? $val_extra_data[$data_name] : (isset($data_params['default']) ? $data_params['default'] : ''));
+								if ($table && $parent_id_prop) {
+									$rows = $this->db->getRows($table, $parent_id_prop . ' = ' . $this->id, null, 'array', null, $position_field, 'asc');
+									if (is_array($rows)) {
+										foreach ($rows as $r) {
+											$val_data = $r;
+
+											if (isset($values_params['extra_data'])) {
+												$val_extra_data = array();
+												if (isset($val_data['extra_data'])) {
+													$val_extra_data = $val_data['extra_data'];
+													unset($val_data['extra_data']);
+												}
+
+												foreach ($values_params['extra_data'] as $data_name => $data_params) {
+													$val_data[$data_name] = (isset($val_extra_data[$data_name]) ? $val_extra_data[$data_name] : (isset($data_params['default']) ? $data_params['default'] : ''));
+												}
+											}
+
+											$values[$val_data[$key_field]] = $val_data;
+										}
 									}
 								}
-
-								$values[$val_data[$key_field]] = $val_data;
 							}
 						} else {
 							$table = (isset($values_params['table']) ? $values_params['table'] : '');

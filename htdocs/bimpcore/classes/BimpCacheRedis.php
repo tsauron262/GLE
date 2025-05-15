@@ -139,18 +139,11 @@ class BimpCacheRedis extends BimpCacheServer
 			}
 		}
 
-		global $user;
-		if ($user->login == 'f.martinez') {
-			echo '<br/>GET ' . $key . ' : ' . $result . '</br>';
-		}
-
 		return $result;
 	}
 
 	function delete($key, $add_prefix = true)
 	{
-		global $user;
-
 		if (!self::$isInit) {
 			self::initCacheServeur();
 		}
@@ -163,14 +156,8 @@ class BimpCacheRedis extends BimpCacheServer
 		}
 
 		try {
-			$n = self::$redisObj->del($key);
-			if ($user->login == 'f.martinez') {
-				echo '<br/>DEL ' . $key . ' OK : ' . $n . '</br>';
-			}
+			self::$redisObj->del($key);
 		} catch (RedisException $e) {
-			if ($user->login == 'f.martinez') {
-				echo '<br/>DEL ' . $key . ' FAIL</br>';
-			}
 			static::$isActif = false;
 			BimpCore::addlog('Echec delete cache server');
 			return 0;

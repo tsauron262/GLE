@@ -101,7 +101,6 @@ class BimpCacheRedis extends BimpCacheServer
 			$this->delete($key);
 		}
 
-
 //        return '<pre>'.print_r($_key,1).'</pre>';
 	}
 
@@ -145,6 +144,11 @@ class BimpCacheRedis extends BimpCacheServer
 			if ((json_last_error() == JSON_ERROR_NONE)) {
 				$result = $resultO;
 			}
+		}
+
+		global $user;
+		if ($user->login == 'f.martinez') {
+			echo '<br/>GET ' . $key . ' : ' . $result . '</br>';
 		}
 
 		return $result;

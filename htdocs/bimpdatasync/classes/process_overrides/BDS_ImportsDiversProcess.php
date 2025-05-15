@@ -211,13 +211,13 @@ class BDS_ImportsDiversProcess extends BDSProcess
 					}
 				}
 				if ($data['date_der_contact']) {
-					$data['date_der_contact'] = $this->convertDate($ln['date_der_contact']);
+					$data['date_der_contact'] = $this->convertDate($data['date_der_contact']);
 				}
 				if ($data['date_debut_prospect']) {
-					$data['date_debut_prospect'] = $this->convertDate($ln['date_debut_prospect']);
+					$data['date_debut_prospect'] = $this->convertDate($data['date_debut_prospect']);
 				}
 				if ($data['date_changement_statut_rdc']) {
-					$data['date_changement_statut_rdc'] = $this->convertDate($ln['date_changement_statut_rdc']);
+					$data['date_changement_statut_rdc'] = $this->convertDate($data['date_changement_statut_rdc']);
 				}
 				if ($data['priorite_label']) {
 					$nomDic = 'societe_rdc_priorities';

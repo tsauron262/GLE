@@ -44,6 +44,7 @@ class Bimp_Ticket extends BimpDolObject
 	const TYPE_TICKET_QUALITE = 'QUA';
 	const MAIL_TICKET_FORMULAIRE = 'partenariat_marketplace@rueducommerce.fr';
 	const TYPE_TICKET_FORMULAIRE = 'FORMU';
+
 	public static $mail_typeTicket = array(
 		self::MAIL_TICKET_GENERAL => self::TYPE_TICKET_GENERAL,
 		self::MAIL_TICKET_SIGNALEMENT => self::TYPE_TICKET_SIGNALEMENT,
@@ -712,11 +713,13 @@ class Bimp_Ticket extends BimpDolObject
 	{
 		$from = self::MAIL_TICKET_GENERAL;
 		$type = $this->getData('type_code');
+
 		$keys = array_values(self::$mail_typeTicket);
 		if (!empty($type) && in_array($type, $keys)) {
 			$typeTicket_mail = array_flip(self::$mail_typeTicket);
 			$from = $typeTicket_mail[$type];
 		}
+
 		return $from;
 	}
 

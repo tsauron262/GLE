@@ -41,73 +41,66 @@ class BimpCacheRedis extends BimpCacheServer
 		}
 	}
 
-	function delete($key)
-	{
-		global $user;
-
-		if (!self::$isInit) {
-			self::initCacheServeur();
-		}
-		if (!self::$isActif) {
-			return parent::delete($key);
-		}
-
-		try {
-			$n = self::$redisObj->del($key);
-			if ($user->login == 'f.martinez') {
-				echo '<br/>DEL ' . $key . ' OK : ' . $n . '</br>';
-			}
-		} catch (RedisException $e) {
-			if ($user->login == 'f.martinez') {
-				echo '<br/>DEL ' . $key . ' FAIL</br>';
-			}
-			static::$isActif = false;
-			BimpCore::addlog('Echec delete cache server');
-			return 0;
-		}
-	}
-
-	public function printAll($filter = '')
-	{
-		if (!self::$isInit) {
-			self::initCacheServeur();
-		}
-		if (!self::$isActif) {
-			return parent::printAll();
-		}
-		$_key = self::$redisObj->keys('*');
-		$html = '';
-		foreach ($_key as $key) {
-			if ($filter == '' || stripos($key, $filter) > 0) {
-				$html .= $key . ' : <pre>' . print_r($this->getCacheServeur($key, true, false), 1) . '</pre><br/><br/><br/>';
-			}
-		}
-		return $html;
-//        return '<pre>'.print_r($_key,1).'</pre>';
-	}
-
-	public function deleteAll()
-	{
-		if (!self::$isInit) {
-			self::initCacheServeur();
-		}
-		if (!self::$isActif) {
-			return parent::printAll();
-		}
-		$_key = self::$redisObj->keys('*');
-//        print_r($_key);
-		foreach ($_key as $key) {
-//            echo '<br/>jj' . $key;
-			$this->delete($key);
-		}
-
-//        return '<pre>'.print_r($_key,1).'</pre>';
-	}
-
 	public static function getPrefKey()
 	{
 		global $conf;
 		return BimpCore::getConf('git_version', 1) . '_' . $conf->global->MAIN_INFO_SOCIETE_NOM . '_';
+	}
+
+	public function cache_exists($key)
+	{
+		if (!self::$isInit) {
+			self::initCacheServeur();
+		}
+
+		if (!self::$isActif) {
+			return parent::getCacheServeur($key);
+		}
+
+		try {
+			$ret = self::$redisObj->exists(self::getPrefKey() . $key);
+		} catch (Exception $e) {
+			BimpCore::addlog('Redis ingoignable ' . $e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);
+			return null;
+		}
+		return $ret;
+	}
+
+	public function setCacheServeur($key, $value, $ttl = null)
+	{
+		if (!self::$isInit) {
+			self::initCacheServeur();
+		}
+
+		if (!self::$isActif) {
+			return parent::setCacheServeur($key, $value);
+		}
+
+		if (is_null($value)) {
+			$value = "valnull";
+		}
+
+		if ($value == '') {
+			$value = "valvide";
+		}
+
+		if (is_array($value)) {
+			$value = json_encode($value);
+		}
+
+
+		if (is_null($ttl)) {
+			$ttl = self::$TTL;
+		}
+		try {
+//            self::$redisObj->set(self::getPrefKey().$key, $value);
+			self::$redisObj->setex(self::getPrefKey() . $key, $ttl, $value);
+		} catch (Exception $e) {
+			BimpCore::addlog('Redis injoignable ' . $e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);
+			return null;
+		}
+
+		return true;
 	}
 
 	public function getCacheServeur($key, $true_val = true, $add_prefix = true)
@@ -154,59 +147,72 @@ class BimpCacheRedis extends BimpCacheServer
 		return $result;
 	}
 
-	public function setCacheServeur($key, $value, $ttl = null)
+	function delete($key, $add_prefix = true)
 	{
+		global $user;
+
 		if (!self::$isInit) {
 			self::initCacheServeur();
 		}
-
 		if (!self::$isActif) {
-			return parent::setCacheServeur($key, $value);
+			return parent::delete($key, $add_prefix);
 		}
 
-		if (is_null($value)) {
-			$value = "valnull";
+		if ($add_prefix) {
+			$key = self::getPrefKey() . $key;
 		}
 
-		if ($value == '') {
-			$value = "valvide";
-		}
-
-		if (is_array($value)) {
-			$value = json_encode($value);
-		}
-
-
-		if (is_null($ttl)) {
-			$ttl = self::$TTL;
-		}
 		try {
-//            self::$redisObj->set(self::getPrefKey().$key, $value);
-			self::$redisObj->setex(self::getPrefKey() . $key, $ttl, $value);
-		} catch (Exception $e) {
-			BimpCore::addlog('Redis injoignable ' . $e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);
-			return null;
+			$n = self::$redisObj->del($key);
+			if ($user->login == 'f.martinez') {
+				echo '<br/>DEL ' . $key . ' OK : ' . $n . '</br>';
+			}
+		} catch (RedisException $e) {
+			if ($user->login == 'f.martinez') {
+				echo '<br/>DEL ' . $key . ' FAIL</br>';
+			}
+			static::$isActif = false;
+			BimpCore::addlog('Echec delete cache server');
+			return 0;
 		}
-
-		return true;
 	}
 
-	public function cache_exists($key)
+
+
+	public function deleteAll()
 	{
 		if (!self::$isInit) {
 			self::initCacheServeur();
 		}
-
 		if (!self::$isActif) {
-			return parent::getCacheServeur($key);
+			return parent::printAll();
+		}
+		$_key = self::$redisObj->keys('*');
+//        print_r($_key);
+		foreach ($_key as $key) {
+//            echo '<br/>jj' . $key;
+			$this->delete($key, false);
 		}
 
-		try {
-			$ret = self::$redisObj->exists(self::getPrefKey() . $key);
-		} catch (Exception $e) {
-			BimpCore::addlog('Redis ingoignable ' . $e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);
-			return null;
+//        return '<pre>'.print_r($_key,1).'</pre>';
+	}
+
+	public function printAll($filter = '')
+	{
+		if (!self::$isInit) {
+			self::initCacheServeur();
 		}
-		return $ret;
+		if (!self::$isActif) {
+			return parent::printAll();
+		}
+		$_key = self::$redisObj->keys('*');
+		$html = '';
+		foreach ($_key as $key) {
+			if ($filter == '' || stripos($key, $filter) > 0) {
+				$html .= $key . ' : <pre>' . print_r($this->getCacheServeur($key, true, false), 1) . '</pre><br/><br/><br/>';
+			}
+		}
+		return $html;
+//        return '<pre>'.print_r($_key,1).'</pre>';
 	}
 }

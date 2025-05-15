@@ -48,7 +48,7 @@ class BimpCacheServer
 		return static::$type;
 	}
 
-	public function delete($key)
+	public function delete($key, $add_prefix = true)
 	{
 		if (isset(self::$cache[$key])) {
 			unset(self::$cache[$key]);

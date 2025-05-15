@@ -77,6 +77,8 @@ class ActionsBimpticket
 
 	function doCollectImapOneCollector($parameters, &$object, &$action, $hookmanager)
 	{
+//		echo 'PARAMS : <pre>' . print_r($parameters['imapemail']->get('to'), 1) . '</pre>';
+//		exit;
 		global $db;
 
 		$errors = array();

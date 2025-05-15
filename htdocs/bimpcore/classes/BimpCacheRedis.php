@@ -177,8 +177,6 @@ class BimpCacheRedis extends BimpCacheServer
 		}
 	}
 
-
-
 	public function deleteAll()
 	{
 		if (!self::$isInit) {

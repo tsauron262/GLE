@@ -178,7 +178,7 @@ class BimpCache
 	public static function getCacheServeur($key)
 	{
 		global $conf;
-		$key = $conf->entity . $key;
+		$key = $conf->entity . '_' . $key;
 
 		if (isset(self::$cache[$key]) && !is_null(self::$cache[$key])) {
 			return self::$cache[$key];
@@ -208,7 +208,7 @@ class BimpCache
 	public static function setCacheServeur($key, $value, $ttl = null)
 	{
 		global $conf;
-		$key = $conf->entity . $key;
+		$key = $conf->entity . '_' . $key;
 		if (is_null(self::$cache_server)) {
 			self::initCacheServeur();
 		}
@@ -220,10 +220,25 @@ class BimpCache
 		return false;
 	}
 
+	public static function unsetCacheServeur($key)
+	{
+		global $conf;
+		$key = $conf->entity . '_' . $key;
+		if (is_null(self::$cache_server)) {
+			self::initCacheServeur();
+		}
+
+		if (is_a(self::$cache_server, 'BimpCacheServer')) {
+			return self::$cache_server->delete($key);
+		}
+
+		return false;
+	}
+
 	public static function cacheServerExists($key)
 	{
 		global $conf;
-		$key = $conf->entity . $key;
+		$key = $conf->entity . '_' . $key;
 		if (is_null(self::$cache_server)) {
 			self::initCacheServeur();
 		}
@@ -643,7 +658,8 @@ class BimpCache
 		return $result;
 	}
 
-	public static function getObjectFieldsArray(BimpObject $object, $include_empty = false) {
+	public static function getObjectFieldsArray(BimpObject $object, $include_empty = false)
+	{
 		if (!is_null($object) && is_a($object, 'BimpObject')) {
 			$cache_key = $object->module . '_' . $object->object_name . '_fields_array';
 			if (!isset(self::$cache[$cache_key])) {

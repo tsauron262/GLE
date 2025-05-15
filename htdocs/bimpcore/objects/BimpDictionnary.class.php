@@ -270,4 +270,28 @@ class BimpDictionnary extends BimpObject
 
 		return ($include_empty ? array($empty_value => $empty_label) : array());
 	}
+
+	// Traitements :
+
+	public function resetCache()
+	{
+		$code = $this->getData('code');
+		if (BimpCache::cacheServerExists('dictionnary_' . $code)) {
+			BimpCache::unsetCacheServeur('dictionnary_' . $code);
+		}
+	}
+
+	public function onChildSave($child)
+	{
+		if (is_a($child, 'BimpDictionnaryValue')) {
+			$this->resetCache();
+		}
+	}
+
+	public function onChildDelete($child, $id)
+	{
+		if (is_a($child, 'BimpDictionnaryValue')) {
+			$this->resetCache();
+		}
+	}
 }

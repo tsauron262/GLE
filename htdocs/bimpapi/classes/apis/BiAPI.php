@@ -143,7 +143,7 @@ class BiAPI extends BimpAPI
 		$annee = array("2020", "2021", "2022", "2023");
 //		$annee = array("2024");
 //		$annee = array("2025");
-		$categorie = 1;
+		$categorie = 0;
 		$this->majCa($annee, $mois, $categorie, $warnings, $errors);
 	}
 
@@ -211,12 +211,15 @@ ORDER BY
 
 		foreach ($return as $key => $tabT) {
 			foreach ($tabT as $cat => $val) {
-				$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('shopId' => $key));
+				$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Client', array('shopid' => $key), true);
 //				if (!$soc || !$soc->isLoaded()) {
 //					$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('name_alias' => $key));
 //				}
 				if (!$soc || !$soc->isLoaded()) {
-					$warnings[] = 'Societe introuvable : ' . $key;
+					$soc = BimpObject::createBimpObject('bimpcore', 'Bimp_Client', array('nom' => 'Marchand inconnue importé de BI', 'zip' => '69000', 'town' => 'Lyon', 'shopid' => $key), true, $warnings, $warnings);
+				}
+				if (!$soc || !$soc->isLoaded()) {
+					$warnings[] = 'Societe introuvable et non céable : ' . $key;
 					$bad++;
 				} else {
 					$ok++;

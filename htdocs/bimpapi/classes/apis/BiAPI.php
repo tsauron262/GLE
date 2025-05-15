@@ -136,13 +136,15 @@ class BiAPI extends BimpAPI
 
 	public function testRequest(&$errors = array(), &$warnings = array())
 	{
-		$this->majCaWithNbDay(10, $warnings, $errors);
+//		$this->majCaWithNbDay(10, $warnings, $errors);
 
 
-//		$mois = array("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12");
-//		$annee = array("2024", "2025");
-//		$categorie = 0;
-//		$this->majCa($annee, $mois, 0, $warnings, $errors);
+		$mois = array("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12");
+		$annee = array("2020", "2021", "2022", "2023");
+//		$annee = array("2024");
+//		$annee = array("2025");
+		$categorie = 1;
+		$this->majCa($annee, $mois, $categorie, $warnings, $errors);
 	}
 
 	public function majCaWithNbDay($nbDay, &$warnings = array(), &$errors = array()){
@@ -183,6 +185,7 @@ class BiAPI extends BimpAPI
     FamillesProduitsSite[Level_4_Name],
     FamillesProduitsSite[Level_5_Name],';
 		}
+		$req .= 'KEEPFILTERS( TREATAS( {"Expédiée", "Préparée", "Réceptionnée", "Validée", "Validée par le vendeur", "En préparation"}, StatutCommandes[StatutCommande] )),';
 		$req .= 'KEEPFILTERS( TREATAS( {'.$annee.'}, Calendrier[Année] )),';
 		if($mois > 0){
 			$req .= 'KEEPFILTERS( TREATAS( {'.(int) $mois.'}, Calendrier[Mois Numéro] )),';
@@ -224,7 +227,7 @@ ORDER BY
 					}
 					$dataFiltre = array(
 						'id_obj'       => $soc->id,
-						'type_obj'     => 0,
+						'type_obj'     => 'Bimp_Societe',
 						'fk_period'    => ($mois == 0) ? 0 : 3,
 						'debut_period' => $date,
 					);

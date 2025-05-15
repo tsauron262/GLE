@@ -207,10 +207,13 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function getUrlMarchand()	{
 		$html = ' ';
 		if ($this->getData('url')) {
-			$sites = explode('<br>', $this->getData('url'));
-			foreach ($sites as $site) {
-				if($html != '') $html .= '<br>';
-				$html .= $this->getHref($site);
+			$urls = explode("%0D%0A", urlencode($this->getData('url')));
+			foreach ($urls as $url) {
+				$lien = $this->getHref(urldecode($url));
+				if ($html != ' ') {
+					$html .= '<br>';
+				}
+				$html .= $lien;
 			}
 		}
 		return $html;
@@ -224,6 +227,18 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 //		$href = '<a href="' . $url . '" target="' . $target . '"><i class="fas fa-external-link-alt"></></a>';
 		$href = '<a href="' . $url . '" target="' . $target . '">' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
 		return $url . " " . $href;
+	}
+
+	public function getDefaultListExtraButtons()	{
+		$buttons = array();
+
+		$actioncomm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm');
+		$buttons[] = array(
+			'label'   => 'Ajouter un evenement',
+			'icon'    => 'fas_calendar-plus',
+			'onclick' => $actioncomm->getJsLoadModalForm('formCREchange', 'Compte rendu d\\\'échange', array('fields' => array('fk_soc' => $this->id)))
+		);
+		return $buttons;
 	}
 
 	public function displayFullContactInfosNoWeb()	{
@@ -450,7 +465,10 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$html = '';
 		$import_key = $this->getData('import_key');
 		if ($import_key) {
-			$html .= '<span class="success" title="Importé">';
+			if(strpos($import_key, 'IMP_FLO') !== false)
+				$html .= '<span class="" title="Importé Florian">';
+			else
+				$html .= '<span class="success" title="Importé Salesforce">';
 			$html .= BimpRender::renderIcon('fas_file-import', 'iconRight');
 			$html .= '</span>';
 		}
@@ -510,7 +528,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$this->checkPassageLive();
 		$this->AlerteQualite();
 		$this->alertePassage_XX($this->getData('fk_statut_rdc'));
-
+//		if ($this->getData('url') && $this->getData('url') != $this->getInitData('url')) {
+//			$url = nl2br($this->getData('url'));
+//			echo '<pre>';
+//			exit(var_dump(substr($url, 70, 10),strpos($url, html_entity_decode('&para;')), html_entity_decode('&para;')));
+//		}
 		return parent::update($warnings, $force_update);
 	}
 
@@ -672,13 +694,13 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				// surcharge statut
 				if ($shop['shop_state'] === 'SUSPENDED' && !in_array($this->getData('fk_statut_rdc') , array(12, 13, 14))) 	{
 					$this->set('fk_statut_rdc', 13);
-					$this->set('date_changement_statut_rdc', date('Y-m-d', strtotime($shop['closed_form'])));
+					$this->set('date_changement_statut_rdc', date('Y-m-d', strtotime(($shop['closed_form']?: $shop['last_updated_date']))));
 				}
 				if ($shop['shop_state'] === 'OPEN' && $this->getData('shopid') > 0) {
 					$this->set('fk_statut_rdc', self::$statut_rdc_live);
 					$this->set('date_changement_statut_rdc', date('Y-m-d'));
 					if(!$this->getData('date_ouverture'))
-						$this->set('date_ouverture', date('Y-m-d', strtotime($shop['date_created'])));
+						$this->set('date_ouverture', date('Y-m-d', strtotime(($shop['date_created']?: $shop['last_updated_date']))));
 				}
 				$this->set('date_maj_mirakl', date('Y-m-d H:i:s'));
 				$this->update($warnings);
@@ -849,7 +871,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			$msg = 'Le marchand ' . $this->getLink() . ' a été signalé pour un problème de qualité par ' . $user->getFullName($langs);
 			if ($this->getData('comment_quality'))
 				$msg .= '<p>Commentaire :<br>' . $this->getData('comment_quality') . '</p>';
-			BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+//			BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
 		}
 	}
 
@@ -858,7 +880,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$code = 'alerte_onboarding_catalogue';
 		$sujet = 'Marchand en "Onboarding catalogue OK"';
 		$msg = 'Le marchand ' . $this->getLink() . ' a été mis en "Onboarding catalogue OK" par ' . $user->getFullName($langs);
-		BimpUserMsg::envoiMsg($code, $sujet, $msg, self::ID_ONBOARDING_OK);
+//		BimpUserMsg::envoiMsg($code, $sujet, $msg, self::ID_ONBOARDING_OK);
 	}
 
 	public function alertePassage_live()	{
@@ -866,7 +888,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$code = 'alerte_passage_live';
 		$sujet = 'Marchand en "Live"';
 		$msg = 'Bonjour,<p> Pour info, <br> marchand ' . $this->getLink() . ' vient de passer en LIVE</p>';
-		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+//		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
 	}
 
 	public function alertePassage_resil()	{
@@ -874,7 +896,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$code = 'alerte_passage_resil';
 		$sujet = 'Marchand en "Résilié"';
 		$msg = 'Bonjour,<p> Pour info, <br> marchand ' . $this->getLink() . ' vient de passer en RESILIE</p>';
-		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+//		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
 	}
 
 	public function alertePassage_suspendu()	{
@@ -882,7 +904,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$code = 'alerte_passage_suspendu';
 		$sujet = 'Marchand en "Suspendu"';
 		$msg = 'Bonjour,<p> Pour info, <br> marchand ' . $this->getLink() . ' vient de passer en SUSPENDU</p>';
-		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+//		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
 	}
 
 	public function alertePassage_XX($s)	{

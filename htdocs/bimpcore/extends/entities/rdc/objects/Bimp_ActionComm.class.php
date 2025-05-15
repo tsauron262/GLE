@@ -51,8 +51,7 @@ class Bimp_ActionComm_ExtEntity extends Bimp_ActionComm {
 		if (!count($users)) {
 			$users = BimpTools::getPostFieldValue('param_values/fields/users_assigned', array(), 'array');
 			if (!count($users)) {
-				$id = BimpTools::getPostFieldValue('id');
-				$soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id);
+				$soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->getData('fk_soc'));
 				if ($soc->isLoaded() &&  $soc->getData('fk_user_attr_rdc')) {
 					$users[] = $soc->getData('fk_user_attr_rdc');
 				}

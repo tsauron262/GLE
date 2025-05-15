@@ -53,9 +53,9 @@ class BimpCacheRedis extends BimpCacheServer
 		}
 
 		try {
-			self::$redisObj->del($key);
+			$n = self::$redisObj->del($key);
 			if ($user->login == 'f.martinez') {
-				echo '<br/>DEL ' . $key . ' OK</br>';
+				echo '<br/>DEL ' . $key . ' OK : ' . $n . '</br>';
 			}
 		} catch (RedisException $e) {
 			if ($user->login == 'f.martinez') {

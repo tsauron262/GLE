@@ -1,0 +1,10 @@
+fields: 
+    id_owner: 
+        label: Propriétaire
+        type: id
+        
+    owner_type: 
+        label: Type propriétaire
+        values: 
+            array: ownerTypes
+        default_value: 1

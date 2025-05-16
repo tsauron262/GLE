@@ -1,0 +1,21 @@
+table: bimp_usergroup_share
+
+fields:
+    obj_module:
+        label: Module
+    
+    obj_name:
+        label: Nom objet
+    
+    id_obj:
+        label: ID objet
+    
+    id_group:
+        label: Groupe
+        type: id_object
+        object: group
+    
+    can_edit:
+        label: Peux éditer
+        type: bool
+        default_value: 0

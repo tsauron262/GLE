@@ -142,6 +142,7 @@ class ActionsBimpticket
 					}
 				} else {
 					$errors[] = 'Pas de ticket trouvé pour ' . str_replace(array('<', '>'), '', $headers['References']);
+					return -1;
 				}
 				break;
 

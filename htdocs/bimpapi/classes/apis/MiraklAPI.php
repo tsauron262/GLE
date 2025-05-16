@@ -51,7 +51,7 @@ class MiraklAPI extends BimpAPI
 					'IS_NULL'
 				)
 			)
-		));
+		), 'id', 'ASC', array(), 500);
 		foreach($socs as $soc){
 			$soc->appelMiraklS20($warnings);
 		}

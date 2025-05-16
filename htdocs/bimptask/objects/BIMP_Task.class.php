@@ -167,21 +167,20 @@ class BIMP_Task extends BimpAbstractFollow
 				if ((int) $this->getData('status') === 4) {
 					$errors[] = 'Cette tâche est fermée';
 				}
-				return 1;
+				return $this->canAttribute();
 
 			case 'close':
 				if ((int) $this->getData('status') === 4) {
 					$errors[] = 'Cette tâche est déjà fermée';
 				}
-				return 1;
+				return $this->canSetAction('close');
 
 			case 'reopen':
 				if ((int) $this->getData('status') !== 4) {
 					$errors[] = 'Cette tâche n\'a pas besoin d\'être réouverte';
 					return 0;
 				}
-
-				return 1;
+				return $this->canAttribute();
 		}
 		return parent::isActionAllowed($action, $errors);
 	}
@@ -260,7 +259,7 @@ class BIMP_Task extends BimpAbstractFollow
 					);
 				}
 
-				if (!$this->hasFilleEnCours()) {
+				if (!$this->hasFilleEnCours() && $this->canAttribute()) {
 					$buttons[] = array(
 						'label'      => 'Classer terminée',
 						'labelShort' => 'Terminer',

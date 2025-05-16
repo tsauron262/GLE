@@ -13,7 +13,6 @@ class ListFilters extends BCUserConfig
 
     public function getCreateJsCallback()
     {
-		return 'Bimp_'
         if ($this->isLoaded()) {
             $filters_id = BimpTools::getPostFieldValue('filters_id', '', 'alphanohtml');
 

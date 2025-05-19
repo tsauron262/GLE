@@ -76,6 +76,12 @@ class Bimp_Ticket extends BimpDolObject
 		return parent::canSetAction($action);
 	}
 
+	public function canDelete()
+	{
+		global $user;
+		return $user->rights->ticket->delete;
+	}
+
 	// Getters booléens:
 
 	public function isActionAllowed($action, &$errors = array())

@@ -142,7 +142,6 @@ class ActionsBimpticket
 					}
 				} else {
 					$errors[] = 'Pas de ticket trouvé pour ' . str_replace(array('<', '>'), '', $headers['References']);
-					return -1;
 				}
 				break;
 
@@ -192,6 +191,7 @@ class ActionsBimpticket
 				'hook'    => $action,
 				'Erreurs' => $errors
 			));
+			return -1;
 		}
 
 //		echo '<pre>';print_r($parameters['imapemail']->bodies['html']);echo '</pre>';

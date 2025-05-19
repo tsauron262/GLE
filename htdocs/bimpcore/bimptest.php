@@ -27,17 +27,18 @@ if (!$user->admin) {
 	exit;
 }
 
-$i = (int) BimpCache::getCacheServeur('test_cache_server_count');
-
-echo 'COUNT : ' . $i;
-
-if ((int) BimpTools::getValue('delete', 0, 'int')) {
-	BimpCache::unsetCacheServeur('test_cache_server_count');
-	echo '<br/>Cache serveur supprimé';
-} else {
-	BimpCache::setCacheServeur('test_cache_server_count', $i + 1);
-	echo '<br/>Cache serveur incrémenté';
-}
+echo 'HOLA!';
+//$i = (int) BimpCache::getCacheServeur('test_cache_server_count');
+//
+//echo 'COUNT : ' . $i;
+//
+//if ((int) BimpTools::getValue('delete', 0, 'int')) {
+//	BimpCache::unsetCacheServeur('test_cache_server_count');
+//	echo '<br/>Cache serveur supprimé';
+//} else {
+//	BimpCache::setCacheServeur('test_cache_server_count', $i + 1);
+//	echo '<br/>Cache serveur incrémenté';
+//}
 
 echo '<br/>FIN';
 echo '</body></html>';

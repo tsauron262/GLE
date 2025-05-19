@@ -1135,7 +1135,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
         $html = '';
 
         if ($this->isLoaded()) {
-            if (!((int) $this->isBilled())) {
+//            if (!((int) $this->isBilled())) {
                 if (in_array((int) $this->getData('fk_statut'), array(3, 4, 5))) {
                     $reception = BimpObject::getInstance('bimplogistique', 'BL_CommandeFournReception');
                     $onclick = $reception->getJsLoadModalForm('default', 'Nouvelle réception', array(
@@ -1158,7 +1158,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
                 $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter une ligne de commande';
                 $html .= '</button>';
-            }
+//            }
         }
 
         return $html;

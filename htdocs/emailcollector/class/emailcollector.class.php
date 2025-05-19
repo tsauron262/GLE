@@ -206,6 +206,8 @@ class EmailCollector extends CommonObject
 	public $target_directory;
 	public $maxemailpercollect;
 
+	public $isNew = 0;
+
 	/**
 	 * @var int|string $datelastresult
 	 */
@@ -2373,6 +2375,7 @@ class EmailCollector extends CommonObject
 
 				// Do operations (extract variables and creating data)
 				if ($mode < 2) {	// 0=Mode production, 1=Mode test (read IMAP and try SQL update then rollback), 2=Mode test with no SQL updates
+					$this->isNew = 0;
 					foreach ($this->actions as $operation) {
 						$errorforthisaction = 0;
 						$ticketalreadyexists = 0;
@@ -3341,6 +3344,7 @@ class EmailCollector extends CommonObject
 
 										$result = $tickettocreate->create($user);
 										if ($result <= 0) {
+											$this->isNew = true;
 											$errorforactions++;
 											$this->error = 'Failed to create ticket: '.$langs->trans($tickettocreate->error);
 											$this->errors = $tickettocreate->errors;
@@ -3501,6 +3505,7 @@ class EmailCollector extends CommonObject
 								'subject' => $subject,
 								'header' => $header,
 								'attachments' => $attachments,
+								'new'		=> $this->isNew
 							);
 							$reshook = $hookmanager->executeHooks('doCollectImapOneCollector', $parameters, $this, $operation['type']);
 

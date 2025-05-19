@@ -2009,7 +2009,7 @@ class EmailCollector extends CommonObject
 							$dateemail += (60 * (int) $reg[3]);
 						}
 					}
-					$subject = $overview['subject'];
+					$subject = $this->decodeSMTPSubject($overview['subject']);
 				} else {
 					$fromstring = $overview[0]->from;
 					$replytostring = (!empty($overview['in_reply-to']) ? $overview['in_reply-to'] : (!empty($headers['Reply-To']) ? $headers['Reply-To'] : "")) ;

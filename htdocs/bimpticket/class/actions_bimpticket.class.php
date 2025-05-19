@@ -184,10 +184,11 @@ class ActionsBimpticket
 
 			default:
 				// todo : pour tests à suppr:
-				echo '<pre>';
-				print_r($parameters);
-				echo '</pre>';
-				die('pas de traitement trouvé');
+//				echo '<pre>';
+//				print_r($parameters);
+//				echo '</pre>';
+//				die('pas de traitement trouvé');
+				break;
 		}
 
 		if (count($errors)) {

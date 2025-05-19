@@ -79,7 +79,7 @@ class Bimp_Ticket extends BimpDolObject
 	public function canDelete()
 	{
 		global $user;
-		return $user->rights->ticket->delete;
+		return ($user->rights->ticket->delete ? 1 : 0);
 	}
 
 	// Getters booléens:

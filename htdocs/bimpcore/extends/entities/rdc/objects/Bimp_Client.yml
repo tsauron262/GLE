@@ -8,7 +8,6 @@ header_edit_form: form_client_rdc
 nom_url:
     syntaxe: <name>
     
-    
 labels:
     name: Marchand
     is_female: 0

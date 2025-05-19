@@ -105,7 +105,7 @@ class ActionsBimpticket
 
 			case 'hookBimpticketInitial':
 				//		echo '<pre>';print_r($parameters['from'].$bimp_ticket->id);echo '</pre>';die;
-				if($parameters['isNew']) {
+				if($parameters['new']) {
 					if (!$traite && isset($parameters['objectemail']) && is_a($parameters['objectemail'], 'ticket')) {
 						$ticket = $parameters['objectemail'];
 						$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);

@@ -2432,7 +2432,6 @@ class EmailCollector extends CommonObject
 							$errorfetchticket = 0;
 							$alreadycreated = 0;
 							if (!empty($trackid)) {
-								die('iiifsdfsdfdsfsfds'.$trackid.'ppppp');
 								$alreadycreated = $tickettocreate->fetch(0, '', $trackid);
 							}
 							if ($alreadycreated == 0 && !empty($msgid)) {

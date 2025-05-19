@@ -2432,6 +2432,7 @@ class EmailCollector extends CommonObject
 							$errorfetchticket = 0;
 							$alreadycreated = 0;
 							if (!empty($trackid)) {
+								die('iiifsdfsdfdsfsfds'.$trackid.'ppppp');
 								$alreadycreated = $tickettocreate->fetch(0, '', $trackid);
 							}
 							if ($alreadycreated == 0 && !empty($msgid)) {
@@ -3344,7 +3345,6 @@ class EmailCollector extends CommonObject
 
 										$result = $tickettocreate->create($user);
 										if ($result <= 0) {
-											$this->isNew = true;
 											$errorforactions++;
 											$this->error = 'Failed to create ticket: '.$langs->trans($tickettocreate->error);
 											$this->errors = $tickettocreate->errors;
@@ -3353,6 +3353,7 @@ class EmailCollector extends CommonObject
 											 * mod drsi v20.0
 											 */
 											$objectemail = $tickettocreate;
+											$this->isNew = true;
 											/*
 											 * fmoddrsi
 											 */

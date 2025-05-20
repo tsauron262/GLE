@@ -5589,6 +5589,7 @@ a.label:hover, a.label:focus {
   text-align: center;
   background-color: #636363;
   border-radius: 10px;
+  height: fit-content;
 }
 .badge:empty {
   display: none;

@@ -198,6 +198,11 @@ params:
         type: bool
         def: 0
         cat: perfs
+    user_notifications_refresh_delay: 
+        label: Délai de rafraîchissement des notifications utilisateur
+        info: En secondes
+        def: 30
+        cat: perfs
     use_bimp_object_instances_clones: 
         label: cloner les instances de base des BimpObject
         type: bool

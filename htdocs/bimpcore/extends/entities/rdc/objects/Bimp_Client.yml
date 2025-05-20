@@ -8,7 +8,6 @@ header_edit_form: form_client_rdc
 nom_url:
     syntaxe: <name>
     
-    
 labels:
     name: Marchand
     is_female: 0
@@ -43,13 +42,10 @@ fields:
         required: 0
     town:
         required: 0
-    fournisseur: unset
-    code_compta: unset
     nom:
         label: Raison sociale
     shopid:
         label: Shop ID
-    
     date_der_contact:
         label: Dernier contact
         type: date
@@ -93,7 +89,6 @@ fields:
     comment_quality:
         label: Commentaire qualité
         type: text
-    
     fk_group_rdc:
         label: Groupe
         values:
@@ -132,7 +127,6 @@ fields:
             dict: societe_rdc_cat_maitre
         items_data_type: int
         items_braces: 1
-
     presta_source:
         label: Prestataire/Agrégateur
         input:
@@ -142,8 +136,11 @@ fields:
         type: float
     name_alias:
         label: Nom de la boutique
-    
-        
+    fk_pays:
+        default_value: 0
+            
+    fournisseur: unset
+    code_compta: unset
     outstanding_limit: unset
     outstanding_limit_credit_check: unset
     outstanding_limit_manuel: unset
@@ -158,8 +155,6 @@ fields:
     id_atradius: unset
     id_contact_relances: unset
     filters: unset
-    fk_pays:
-        default_value: 0
     code_client: unset
 
 fields_tables:
@@ -346,6 +341,7 @@ forms:
     form_client_rdc:
         title: Ajout d'un marchand
         rows:
+            unextends: 1
             Nom:
                 field: nom
             boutique:
@@ -401,6 +397,7 @@ forms:
                 field: potentiel_catalogue
                 
                 
+                
     formActionRdc:
         title: Choisir une action
         rows:
@@ -415,6 +412,7 @@ forms:
 filters_panels:
     default:
         filters:
+            unextends: 1
             fk_statut_rdc:
             fk_statut_kyc:
             date_der_contact:
@@ -425,25 +423,6 @@ filters_panels:
             contrefacon:
             fk_categorie_maitre:
             fk_pays:
-            fk_typent: unset
-            code_compta: unset
-            code_client: unset
-            siret: unset
-            siren: unset
-            ape: unset
-            rpps: unset
-            commerciaux: unset
-            secteuractivite: unset
-            marche: unset
-            address: unset
-            zip: unset
-            town: unset
-            email: unset
-            phone: unset
-            status: unset
-            solvabilite_status: unset
-            
-                
 
 lists_cols:
     flag_import:
@@ -474,6 +453,7 @@ lists:
         extra_btn:
             callback: getDefaultListExtraButtons
         add_form_name: form_client_rdc
+        edit_form: form_client_rdc
         sort_field: name_alias
         sort_way: ASC
         page_btn: 1
@@ -485,8 +465,6 @@ lists:
             name_alias:
             fk_statut_rdc:
             fk_statut_kyc:
-#            full_address:
-#            infos_contact:
             date_der_contact:
             date_debut_prospect:
             fk_priorite:

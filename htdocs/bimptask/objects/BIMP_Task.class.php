@@ -124,6 +124,15 @@ class BIMP_Task extends BimpAbstractFollow
 					return 1;
 				}
 				return $this->canAttribute();
+
+			case 'attribute':
+				if ($user->admin || $user->id === (int) $this->getData('id_user_owner')) {
+					return 1;
+				}
+				if ($user->id === (int) $this->getData('user_create') && $this->getData('id_user_owner') < 1) {
+					return 1;
+				}
+				return $this->canAttribute();
 		}
 		return parent::canSetAction($action);
 	}
@@ -167,20 +176,20 @@ class BIMP_Task extends BimpAbstractFollow
 				if ((int) $this->getData('status') === 4) {
 					$errors[] = 'Cette tâche est fermée';
 				}
-				return $this->canAttribute();
+				return 1;
 
 			case 'close':
 				if ((int) $this->getData('status') === 4) {
 					$errors[] = 'Cette tâche est déjà fermée';
 				}
-				return $this->canSetAction('close');
+				return 1;
 
 			case 'reopen':
 				if ((int) $this->getData('status') !== 4) {
 					$errors[] = 'Cette tâche n\'a pas besoin d\'être réouverte';
 					return 0;
 				}
-				return $this->canAttribute();
+				return 1;
 		}
 		return parent::isActionAllowed($action, $errors);
 	}
@@ -259,7 +268,7 @@ class BIMP_Task extends BimpAbstractFollow
 					);
 				}
 
-				if (!$this->hasFilleEnCours() && $this->canAttribute()) {
+				if (!$this->hasFilleEnCours() && $this->canSetAction('attribute')) {
 					$buttons[] = array(
 						'label'      => 'Classer terminée',
 						'labelShort' => 'Terminer',
@@ -268,7 +277,7 @@ class BIMP_Task extends BimpAbstractFollow
 					);
 				}
 			}
-			if ($this->can("edit") || $this->canAttribute()) {
+			if ($this->can("edit") || $this->canSetAction('attribute')) {
 				if ($this->getData("id_user_owner") < 1) {
 					$buttons[] = array(
 						'label'   => 'Attribuer',
@@ -462,7 +471,7 @@ class BIMP_Task extends BimpAbstractFollow
 			return 1;
 		}
 
-		if ($this->getData("user_create") == $user_check->id/* && $right == 'read' */) // => Pourquoi? le créateur devrait pouvoir modifier la tâche
+		if ($this->getData("user_create") == $user_check->id && $right == 'read')
 		{
 			return 1;
 		}
@@ -1443,7 +1452,7 @@ class BIMP_Task extends BimpAbstractFollow
 					'not_viewed'    => (int) $not_viewed,
 					'can_rep_mail'  => (int) ($t->can('edit') and filter_var($t->getData('src'), FILTER_VALIDATE_EMAIL) and filter_var($t->getData('dst'), FILTER_VALIDATE_EMAIL)),
 					'can_close'     => (int) $t->can('edit'),
-					'can_attribute' => (int) ($t->can('edit') or $t->canAttribute()),
+					'can_attribute' => (int) ($t->can('edit') || $t->canSetAction('attribute')),
 					'can_edit'      => (int) $t->can('edit'),
 					'author'        => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : ''),
 					'parent_task'   => (BimpObject::objectLoaded($parent_task) ? $parent_task->getLink() : '')

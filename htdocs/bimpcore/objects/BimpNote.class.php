@@ -462,6 +462,8 @@ class BimpNote extends BimpObject
 	public function getInitiale($str)
 	{
 		$str = str_replace(array("_", "-"), " ", $str);
+		$str = str_replace(array("(", ")"), " ", $str);
+		$str = str_replace('@', " @ ", $str);
 		$return = "";
 		if (strlen($str) > 0) {
 			$tabT = explode(" ", $str);
@@ -543,6 +545,13 @@ class BimpNote extends BimpObject
 				return $this->displayData('fk_group_dest', 'nom_url', $display_input_value, $no_html);
 
 			case self::BN_DEST_SOC:
+			case self::BN_DEST_CONTACT:
+				$mail = $this->getData('email');
+				if($mail != '')
+					return $this->getData('email');
+		}
+		switch ((int) $this->getData('type_dest')) {
+			case self::BN_DEST_SOC:
 				return 'Tier (par mail)';
 			case self::BN_DEST_CONTACT:
 				return 'Contact (par mail)';
@@ -582,7 +591,7 @@ class BimpNote extends BimpObject
 		$author = $this->displayAuthor(false, true);
 
 		$html .= '<div class="d-flex justify-content-' . ($this->isUserDest() ? "start" : ($this->isUserAuthor() ? "end" : "")) . ($style == "petit" ? ' petit' : '') . ' mb-4">';
-		$html .= BimpTools::getBadge($this->getInitiale($author), ($style == "petit" ? '35' : '55'), ($this->getData('type_author') == self::BN_AUTHOR_USER ? '55C1E7' : '5500E7'), $author);
+		$html .= BimpTools::getBadge($this->getInitiale($author), ($style == "petit" ? '35' : '55'), ($this->getData('type_author') == self::BN_AUTHOR_USER ? 'info' : 'warnings'), $author);
 		$html .= '<div class="msg_cotainer">' . $this->displayData("content");
 		if ($style != "petit" && $this->getData('user_create') != $user->id) {
 			$html .= '<span class="rowButton bs-popover"><i class="fas fa-share link" onclick="' . $this->getJsRepondre() . '"></i></span>';
@@ -593,7 +602,7 @@ class BimpNote extends BimpObject
 		if ($this->getData('type_dest') != self::BN_DEST_NO) {
 			$dest = $this->displayDestinataire(false, true);
 			if ($dest != "") {
-				$html .= BimpTools::getBadge($this->getInitiale($dest), ($style == "petit" ? '28' : '45'), ($this->getData('type_dest') == self::BN_DEST_USER ? '55C1E7' : '5500E7'), $dest);
+				$html .= BimpTools::getBadge($this->getInitiale($dest), ($style == "petit" ? '28' : '45'), ($this->getData('type_dest') == self::BN_DEST_USER ? 'info' : 'warnings'), $dest);
 			}
 		}
 		$html .= "";
@@ -952,8 +961,9 @@ class BimpNote extends BimpObject
 				BimpTools::displayBacktrace();
 				$errors[] = 'Email vide : ' . $mail;
 			}
-			$this->set('content', 'Envoyée a ' . $mail . '<br/>' . $this->getData('content'));
+//			$this->set('content', 'Envoyée a ' . $mail . '<br/>' . $this->getData('content'));
 			$this->set('visibility', self::BN_ALL);
+			$this->set('email', $mail);
 		}
 
 		if (!count($errors)) {

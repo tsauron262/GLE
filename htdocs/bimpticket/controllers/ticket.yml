@@ -54,4 +54,5 @@ sections:
                 object: ticket
                 params:
                     - 1
+                    - chat
     

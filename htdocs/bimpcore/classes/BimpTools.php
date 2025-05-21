@@ -2765,6 +2765,21 @@ class BimpTools
 		return (float) $str_number;
 	}
 
+	public static function htmlToString($html, $max_chars = false) {
+		$html = self::replaceBr($html, '[[BR]]');
+		foreach (array('div', 'p') as $tag) {
+			$html = str_replace('</' . $tag . '>', '</' . $tag . '>[[BR]]', $html);
+		}
+		$html = strip_tags($html);
+		$html = str_replace('[[BR]]', "\n", $html);
+
+		if ($max_chars && strlen($html) > $max_chars) {
+			$html = substr($html, 0, $max_chars) .'...';
+		}
+
+		return $html;
+	}
+
 	public static function getStringNbLines($string, $maxLineChars)
 	{
 		$words = explode(' ', $string);

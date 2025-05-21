@@ -46,11 +46,11 @@ class Bimp_Ticket extends BimpDolObject
 	const TYPE_TICKET_FORMULAIRE = 'FORMU';
 
 	public static $mail_typeTicket = array(
-		self::MAIL_TICKET_GENERAL => self::TYPE_TICKET_GENERAL,
-		self::MAIL_TICKET_SIGNALEMENT => self::TYPE_TICKET_SIGNALEMENT,
+		self::MAIL_TICKET_GENERAL          => self::TYPE_TICKET_GENERAL,
+		self::MAIL_TICKET_SIGNALEMENT      => self::TYPE_TICKET_SIGNALEMENT,
 		self::MAIL_TICKET_DEMANDE_ENTRANTE => self::TYPE_TICKET_DEMANDE_ENTRANTE,
-		self::MAIL_TICKET_QUALITE => self::TYPE_TICKET_QUALITE,
-		self::MAIL_TICKET_FORMULAIRE => self::TYPE_TICKET_FORMULAIRE
+		self::MAIL_TICKET_QUALITE          => self::TYPE_TICKET_QUALITE,
+		self::MAIL_TICKET_FORMULAIRE       => self::TYPE_TICKET_FORMULAIRE
 	);
 
 	// Droits users :
@@ -683,7 +683,8 @@ class Bimp_Ticket extends BimpDolObject
 				'status_icon'   => $status_icon,
 				'subj'          => $t->getData('subject'),
 				'src'           => $t->getData('origin_email'),
-				'txt'           => $t->displayData("message", 'default', false),
+//				'txt'           => $t->displayData("message", 'default', false),
+				'txt'           => trim(preg_replace("(\n+)", '<br/>', BimpTools::htmlToString($t->getData('message'), 800))),
 				'date_create'   => $t->getData('datec'),
 				'url'           => DOL_URL_ROOT . '/bimpticket/index.php?fc=ticket&id=' . $t->id,
 				'can_begin'     => (int) ($t->canSetAction('newStatus') && $t->isActionAllowed('newStatus') && $status < self::STATUS_IN_PROGRESS && $status >= self::STATUS_READ),

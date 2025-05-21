@@ -696,11 +696,12 @@ function BimpNotifications() {
 				if (bimp_debug_notifs) {
 					console.log('INIT NOTIF : ' + value.nom + ' - key : ' + value.storage_key);
 				}
+
 				$.getScript(dol_url_root + '/' + value.module + '/views/js/' + value.nom + '.js', function () {
 					eval('bimp_notifications.notifications[' + value.id_notification + '] = new ' + value.nom + '(' + value.id_notification + ', \'' + value.storage_key + '\');');
 					if (bimp_debug_notifs) {
 						if (typeof (bimp_notifications.notifications[value.id_notification]) !== 'undefined') {
-							console.log('INIT OK');
+							console.log('INIT ' + value.nom + ' OK');
 						}
 					}
 				});

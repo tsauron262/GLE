@@ -4441,25 +4441,12 @@ class BimpTools
 
 	public static function cleanHtml($html)
 	{
-		// Virer caractères invisibles :
-//        $html = str_replace('?', '[INTPOINT]', $html);
-//        $html = utf8_decode($html);
-//        $html = str_replace('?', '', $html);
-//        $html = str_replace('[INTPOINT]', '?', $html);
-
-		if ((int) BimpCore::getConf('pdf_use_html_purifier')) {
-//            echo 'AVANT: <br/>';
-//            echo htmlentities($html);
-
+//		if ((int) BimpCore::getConf('pdf_use_html_purifier')) {
 			$purifier = self::getHtmlPurifier();
 			$html = $purifier->purify($html);
-
-//            echo '<br/><br/>APRES: <br/>';
-//            echo htmlentities($html);
-//            exit;
-		} else {
-			// Envisager d'autres méthodes...
-		}
+//		} else {
+//			// Envisager d'autres méthodes...
+//		}
 
 		return $html;
 	}

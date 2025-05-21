@@ -28,27 +28,44 @@ if (!$user->admin) {
 
 $bdb = BimpCache::getBdb(true);
 
-$rows = $bdb->getRows('ticket', 'rowid', 'message');
+$where = '';
 
-foreach ($rows as $r) {
-	/* @var Bimp_Ticket $ticket */
-
-	$ticket->useNoTransactionsDb();
-
-	$new_txt = BimpTools::cleanHtml($r['message']);
-
-	if ($new_txt != $r['message']) {
-		echo 'UP ' . $r['rowid'] . ' : ';
-
-		if ($bdb->update('ticket', array(
-			'message' => $new_txt
-		), 'rowid = ' . $ticket->id) <= 0) {
-			echo 'FAIL - ' . $bdb->err();
-		} else {
-			echo 'OK';
-		}
-		echo '<br/>';
+if ((int) BimpTools::getValue('all', 0, 'int')) {
+	$where = 1;
+} else {
+	$id = (int) BimpTools::getValue('id_ticket', 0, 'int');
+	if ($id) {
+		$where = 'rowid = ' . $id;
 	}
+}
+
+if ($where) {
+	$rows = $bdb->getRows('ticket', $where, null, 'array', array('rowid', 'message'), 'rowid', 'DESC');
+
+	if (is_array($rows)) {
+		foreach ($rows as $r) {
+			$new_txt = BimpTools::cleanHtml($r['message']);
+
+			if ($new_txt != $r['message']) {
+				echo 'UP ' . $r['rowid'] . ' : ';
+
+				if ($bdb->update('ticket', array(
+						'message' => $new_txt
+					), 'rowid = ' . (int) $r['rowid']) <= 0) {
+					echo 'FAIL - ' . $bdb->err();
+				} else {
+					echo 'OK';
+				}
+				echo '<br/>';
+			} else {
+				echo 'NO UP ' . $r['rowid'] . '<br/>';
+			}
+		}
+	} else {
+		echo 'ERR ' . $bdb->err();
+	}
+} else {
+	echo 'FILTRES ABSENTS';
 }
 
 echo '<br/>FIN';

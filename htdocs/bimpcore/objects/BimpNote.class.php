@@ -869,9 +869,9 @@ class BimpNote extends BimpObject
 			$parent = $this->getParentInstance();
 
 			if (BimpObject::objectLoaded($parent)) {
-				$content = $this->getData('content');
-				$content = $parent->replaceFieldsValues($content, true, $errors);
-				$this->set('content', $content);
+//				$content = $this->getData('content');
+//				$content = $parent->replaceFieldsValues($content, true, $errors);
+//				$this->set('content', $content);
 			} else {
 				$errors[] = 'Objet parent absent ou invalide';
 			}

@@ -590,7 +590,13 @@ class BimpNote extends BimpObject
 
 		$author = $this->displayAuthor(false, true);
 
-		$html .= '<div class="d-flex justify-content-' . ($this->isUserDest() ? "start" : ($this->isUserAuthor() ? "end" : "")) . ($style == "petit" ? ' petit' : '') . ' mb-4">';
+		$parent = $this->getParentInstance();
+		if($parent && is_a($parent, 'Bimp_Ticket'))
+			$position = ($this->getData('type_author') == self::BN_AUTHOR_SOC || $this->getData('type_author') == self::BN_AUTHOR_FREE) ? "start" : "end";
+		else
+			$position = ($this->isUserDest() ? "start" : ($this->isUserAuthor() ? "end" : ""));
+
+		$html .= '<div class="d-flex justify-content-' . $position . ($style == "petit" ? ' petit' : '') . ' mb-4">';
 		$html .= BimpTools::getBadge($this->getInitiale($author), ($style == "petit" ? '35' : '55'), ($this->getData('type_author') == self::BN_AUTHOR_USER ? 'info' : 'warnings'), $author);
 		$html .= '<div class="msg_cotainer">' . $this->displayData("content");
 		if ($style != "petit" && $this->getData('user_create') != $user->id) {

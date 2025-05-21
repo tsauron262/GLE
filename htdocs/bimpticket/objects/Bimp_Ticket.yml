@@ -340,7 +340,11 @@ views:
             -   cols:
                     -   type: custom
                         custom:
-                            callback: renderNotesList
+                            callback: 
+                                method: renderNotesList
+                                params:
+                                    - 1
+                                    - chat
                             
             -   cols:
                     -   type: fields_table

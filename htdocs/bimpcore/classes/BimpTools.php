@@ -22,6 +22,7 @@ class BimpTools
 	public static $sql_operators = array('>', '<', '>=', '<=', '!=');
 	public static $bloquages = array();
 	public static $postTraitment = array();
+	public static $html_purifier = null;
 
 	// Gestion GET / POST
 
@@ -4404,6 +4405,63 @@ class BimpTools
 			$ipUser = $_SERVER['HTTP_X_REAL_IP'];
 		}
 		return $ipUser;
+	}
+
+
+	public static function getHtmlPurifier()
+	{
+		if (is_null(self::$html_purifier)) {
+			BimpCore::LoadHtmlPurifier();
+
+			$config = HTMLPurifier_Config::createDefault();
+			$allowed_tags = 'a,b,blockquote,br,dd,del,div,dl,dt,em,font,h1,h2,h3,h4,h5,h6,hr,i,img,li,ol,p,pre,small,span,strong,sub,sup,table,td,th,thead,tr,tt,u,ul';
+			$config->set('HTML.AllowedElements', $allowed_tags);
+
+			$root = '';
+
+			if (defined('PATH_TMP') && PATH_TMP) {
+				$root = PATH_TMP;
+				$path = '/htmlpurifier/serialiser';
+			} else {
+				$root = DOL_DATA_ROOT;
+				$path = '/bimpcore/htmlpurifier/serialiser';
+			}
+
+			if (!is_dir($root . $path)) {
+				BimpTools::makeDirectories($path, $root);
+			}
+
+			$config->set('Cache.SerializerPath', $root . $path);
+
+			self::$html_purifier = new HTMLPurifier($config);
+		}
+
+		return self::$html_purifier;
+	}
+
+	public static function cleanHtml($html)
+	{
+		// Virer caractères invisibles :
+//        $html = str_replace('?', '[INTPOINT]', $html);
+//        $html = utf8_decode($html);
+//        $html = str_replace('?', '', $html);
+//        $html = str_replace('[INTPOINT]', '?', $html);
+
+		if ((int) BimpCore::getConf('pdf_use_html_purifier')) {
+//            echo 'AVANT: <br/>';
+//            echo htmlentities($html);
+
+			$purifier = self::getHtmlPurifier();
+			$html = $purifier->purify($html);
+
+//            echo '<br/><br/>APRES: <br/>';
+//            echo htmlentities($html);
+//            exit;
+		} else {
+			// Envisager d'autres méthodes...
+		}
+
+		return $html;
 	}
 }
 

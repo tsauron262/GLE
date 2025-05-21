@@ -125,8 +125,8 @@ class ActionsBimpticket
 						if ($type_code != '') {
 							$Bimp_Ticket->updateField('type_code', $type_code);
 						}
-						$Bimp_Ticket->addObjectLog($Bimp_Ticket->getData('message'));
-						$Bimp_Ticket->updateField("message", $msg);
+						$Bimp_Ticket->addObjectLog(BimpTools::cleanHtml($Bimp_Ticket->getData('message')));
+						$Bimp_Ticket->updateField("message", BimpTools::cleanHtml($msg));
 
 						$contact_static = new Contact($db);
 						$contact_static->fetch(0, null, '', $Bimp_Ticket->getData('origin_email'));
@@ -159,7 +159,7 @@ class ActionsBimpticket
 						$id_note = (int) $bdb->getValue('bimpcore_note', 'id', 'obj_name = \'Bimp_Ticket\' AND id_obj = ' . $bimp_ticket->id . ' AND content = \'' . $msg . '\'');
 						if (!$id_note) {
 							$userAttribut = (int) $bimp_ticket->getData('fk_user_assign');
-							$errors = $bimp_ticket->addNote($msg, 20, 0, 0, $parameters['from'], 2, ($userAttribut) ? 1 : 0, 0, $userAttribut);
+						$errors = $bimp_ticket->addNote(BimpTools::cleanHtml($msg), 20, 0, 0, $parameters['from'], 2, ($userAttribut) ? 1 : 0, 0, $userAttribut);
 							if (!count($errors)) {
 								$traite = 1;
 

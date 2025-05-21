@@ -158,8 +158,10 @@ class ActionsBimpticket
 
 						$id_note = (int) $bdb->getValue('bimpcore_note', 'id', 'obj_name = \'Bimp_Ticket\' AND id_obj = ' . $bimp_ticket->id . ' AND content = \'' . $msg . '\'');
 						if (!$id_note) {
-							$userAttribut = (int) $bimp_ticket->getData('fk_user_assign');
-						$errors = $bimp_ticket->addNote(BimpTools::cleanHtml($msg), 20, 0, 0, $parameters['from'], 2, ($userAttribut) ? 1 : 0, 0, $userAttribut);
+							$id_user_assign = (int) $bimp_ticket->getData('fk_user_assign');
+							$id_soc = (int) $bimp_ticket->getData('fk_soc');
+							$errors = $bimp_ticket->addNote(BimpTools::cleanHtml($msg), 20, 0, 0, $parameters['from'], ($id_soc ? 2 : 3), ($id_user_assign) ? 1 : 0, 0, $id_user_assign, 0, $id_soc);
+
 							if (!count($errors)) {
 								$traite = 1;
 

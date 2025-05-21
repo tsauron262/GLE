@@ -78,6 +78,7 @@ class ActionsBimpticket
 	function doCollectImapOneCollector($parameters, &$object, &$action, $hookmanager)
 	{
 		global $db;
+		$bdb = BimpCache::getBdb();
 
 		$errors = array();
 
@@ -105,7 +106,7 @@ class ActionsBimpticket
 
 			case 'hookBimpticketInitial':
 				//		echo '<pre>';print_r($parameters['from'].$bimp_ticket->id);echo '</pre>';die;
-				if($parameters['new']) {
+				if ($parameters['new']) {
 					if (!$traite && isset($parameters['objectemail']) && is_a($parameters['objectemail'], 'ticket')) {
 						$ticket = $parameters['objectemail'];
 						$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
@@ -135,8 +136,7 @@ class ActionsBimpticket
 
 						$traite = 1;
 					}
-				}
-				else{
+				} else {
 					$bimp_ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $parameters['objectemail']->id);
 					if ($bimp_ticket->id > 0) {
 						// on purifie le message
@@ -156,22 +156,25 @@ class ActionsBimpticket
 							$msg = $tabT[0];
 						}
 
-						$userAttribut = (int) $bimp_ticket->getData('fk_user_assign');
-						$errors = $bimp_ticket->addNote($msg, 20, 0, 0, $parameters['from'], 2, ($userAttribut) ? 1 : 0, 0, $userAttribut);
-						if (!count($errors)) {
-							$traite = 1;
+						$id_note = (int) $bdb->getValue('bimpcore_note', 'id', 'obj_name = \'Bimp_Ticket\' AND id_obj = ' . $bimp_ticket->id . ' AND content = \'' . $msg . '\'');
+						if (!$id_note) {
+							$userAttribut = (int) $bimp_ticket->getData('fk_user_assign');
+							$errors = $bimp_ticket->addNote($msg, 20, 0, 0, $parameters['from'], 2, ($userAttribut) ? 1 : 0, 0, $userAttribut);
+							if (!count($errors)) {
+								$traite = 1;
 
-							if (!empty($parameters['attachments'])) {
-								$destdir = $bimp_ticket->getFilesDir();
-								if (!dol_is_dir($destdir)) {
-									dol_mkdir($destdir);
-								}
+								if (!empty($parameters['attachments'])) {
+									$destdir = $bimp_ticket->getFilesDir();
+									if (!dol_is_dir($destdir)) {
+										dol_mkdir($destdir);
+									}
 
-								foreach ($parameters['attachments'] as $attachment) {
-									$filename = $attachment->getName();
-									$content = $attachment->getContent();
-									if (!file_put_contents($destdir . $filename, $content)) {
-										$errors[] = 'Echec de l\'enregistrement de la pièce jointe ' . $filename;
+									foreach ($parameters['attachments'] as $attachment) {
+										$filename = $attachment->getName();
+										$content = $attachment->getContent();
+										if (!file_put_contents($destdir . $filename, $content)) {
+											$errors[] = 'Echec de l\'enregistrement de la pièce jointe ' . $filename;
+										}
 									}
 								}
 							}

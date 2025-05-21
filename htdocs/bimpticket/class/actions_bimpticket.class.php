@@ -197,7 +197,7 @@ class ActionsBimpticket
 		}
 
 		if (count($errors)) {
-			BimpCore::addLog('Erreurs collecte e-mail', 3, 'bimpcore', $parameters['objectemail'], array(
+			BimpCore::addLog('Erreurs collecte e-mail', 4, 'bimpcore', $parameters['objectemail'], array(
 				'Erreurs' => $errors
 			));
 			return -1;

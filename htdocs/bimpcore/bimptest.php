@@ -15,7 +15,6 @@ echo '<body style="padding: 30px">';
 BimpCore::displayHeaderFiles();
 
 global $db, $user;
-$bdb = new BimpDb($db);
 
 if (!BimpObject::objectLoaded($user)) {
 	echo BimpRender::renderAlerts('Aucun utilisateur connecté');
@@ -27,18 +26,30 @@ if (!$user->admin) {
 	exit;
 }
 
-echo 'HOLA!';
-//$i = (int) BimpCache::getCacheServeur('test_cache_server_count');
-//
-//echo 'COUNT : ' . $i;
-//
-//if ((int) BimpTools::getValue('delete', 0, 'int')) {
-//	BimpCache::unsetCacheServeur('test_cache_server_count');
-//	echo '<br/>Cache serveur supprimé';
-//} else {
-//	BimpCache::setCacheServeur('test_cache_server_count', $i + 1);
-//	echo '<br/>Cache serveur incrémenté';
-//}
+$bdb = BimpCache::getBdb(true);
+
+$rows = $bdb->getRows('ticket', 'rowid', 'message');
+
+foreach ($rows as $r) {
+	/* @var Bimp_Ticket $ticket */
+
+	$ticket->useNoTransactionsDb();
+
+	$new_txt = BimpTools::cleanHtml($r['message']);
+
+	if ($new_txt != $r['message']) {
+		echo 'UP ' . $r['rowid'] . ' : ';
+
+		if ($bdb->update('ticket', array(
+			'message' => $new_txt
+		), 'rowid = ' . $ticket->id) <= 0) {
+			echo 'FAIL - ' . $bdb->err();
+		} else {
+			echo 'OK';
+		}
+		echo '<br/>';
+	}
+}
 
 echo '<br/>FIN';
 echo '</body></html>';

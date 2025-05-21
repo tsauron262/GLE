@@ -65,7 +65,7 @@ if ($where) {
 		echo 'ERR ' . $bdb->err();
 	}
 
-	$rows = $bdb->getRows('bimpcore_note', 'obj_name = \'BimpTicket\'' . ($id_ticket ? ' AND id_obj = ' . $id_ticket : ''), null, 'array', array('id', 'content'), 'id', 'DESC');
+	$rows = $bdb->getRows('bimpcore_note', 'obj_name = \'Bimp_Ticket\'' . ($id_ticket ? ' AND id_obj = ' . $id_ticket : ''), null, 'array', array('id', 'content'), 'id', 'DESC');
 	if (is_array($rows)) {
 		foreach ($rows as $r) {
 			$new_txt = BimpTools::cleanHtml($r['content']);
@@ -74,7 +74,7 @@ if ($where) {
 				echo 'UP NOTE ' . $r['id'] . ' : ';
 
 				if ($bdb->update('bimpcore_note', array(
-						'message' => $new_txt
+						'content' => $new_txt
 					), 'id = ' . (int) $r['id']) <= 0) {
 					echo 'FAIL - ' . $bdb->err();
 				} else {

@@ -483,7 +483,7 @@ function BimpNotifications() {
 			bn.iterate();
 			return;
 		}
-		
+
 		var tms = new Date();
 		bimp_storage.set('notifs_last_refresh_tms', Math.floor(tms.getTime() / 1000))
 
@@ -495,7 +495,7 @@ function BimpNotifications() {
 
 		if (bimp_debug_notifs) {
 			if (id_notification_type) {
-				console.log('RELOAD USER NOTIFS (ID NOTIF : ' + id_notification_type + ')');	
+				console.log('RELOAD USER NOTIFS (ID NOTIF : ' + id_notification_type + ')');
 			} else {
 				console.log('RELOAD ALL USER NOTIFS');
 			}
@@ -698,6 +698,11 @@ function BimpNotifications() {
 				}
 				$.getScript(dol_url_root + '/' + value.module + '/views/js/' + value.nom + '.js', function () {
 					eval('bimp_notifications.notifications[' + value.id_notification + '] = new ' + value.nom + '(' + value.id_notification + ', \'' + value.storage_key + '\');');
+					if (bimp_debug_notifs) {
+						if (typeof (bimp_notifications.notifications[value.id_notification]) !== 'undefined') {
+							console.log('INIT OK');
+						}
+					}
 				});
 			}
 		}

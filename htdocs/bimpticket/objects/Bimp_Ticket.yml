@@ -138,13 +138,13 @@ fields:
     subject:
         label: Sujet ticket
         type: html
+        input: 
+            type: text
         required: 1
-        hashtags: 1
     
     message:
         label: Description
         type: html
-        hashtags: 1
     
     timing:
         label: Timing
@@ -210,6 +210,21 @@ forms:
                 depends_on: fk_soc
             -   field: subject
             -   field: message
+            -   custom: 1
+                label: Notifier le tiers
+                input_name: notify
+                input: 
+                    type: toggle
+                value: 1
+            -   custom: 1
+                label: Envoyer la notification à
+                input_name: notify_email
+                content: 
+                    callback: renderNotifyEmailInput
+                depends_on: fk_soc,id_contact_suivi
+                display_if: 
+                    field_name: notify
+                    show_values: 1
     
     new_status:
         rows:

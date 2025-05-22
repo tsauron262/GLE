@@ -939,10 +939,18 @@ class BimpController
 					$json_err_code = json_last_error();
 
 					if ($json_err_code == JSON_ERROR_UTF8) {
-						// On tente un encodage utf-8.
-						$result = BimpTools::utf8_encode($result);
-						$result['warnings'] = static::getAndResetAjaxWarnings();
-						$json = json_encode($result);
+						if (isset($result['no_utf8'])) {
+							// on tente d'ignorer les utf8 invalides :
+							$result['JSON_INVALID_UTF8_IGNORE'] = 1;
+							$json = json_encode($result, JSON_INVALID_UTF8_IGNORE);
+						}
+
+						if ($json === false) {
+							// On tente un encodage utf-8.
+							$result = BimpTools::utf8_encode($result);
+							$result['warnings'] = static::getAndResetAjaxWarnings();
+							$json = json_encode($result);
+						}
 
 						if ($json !== false) {
 							die($json);
@@ -3481,7 +3489,8 @@ class BimpController
 		return array(
 			'errors'        => $errors,
 			'notifications' => $notifs_for_user,
-			'request_id'    => BimpTools::getValue('request_id', 0, 'int')
+			'request_id'    => BimpTools::getValue('request_id', 0, 'int'),
+			'no_utf8'       => 1
 		);
 	}
 

@@ -29,6 +29,7 @@ if (!$user->admin) {
 ini_set('display_errors', 1);
 $errors = array();
 
+exit('Ce script est obsolète, il n\'est plus nécessaire de le lancer');
 
 $societes = array_column($bdd->getRows('societe', 'import_key IS NOT NULL', null, 'array', array('rowid')), 'rowid');
 $errors['societe_atradius'] = $bdd->delete('societe_atradius' , 'id_soc IN (' . implode(', ', $societes) . ')');

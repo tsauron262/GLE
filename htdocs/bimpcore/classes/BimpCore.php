@@ -197,7 +197,6 @@ class BimpCore
 			$config_notification = $notification->getList(array('active' => 1));
 //			}
 
-
 			foreach ($config_notification as $cn) {
 				if (BimpCore::isModuleActive($cn['module'])) {
 					$notifs .= $cn['id'] . ": {";

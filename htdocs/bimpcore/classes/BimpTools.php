@@ -2765,6 +2765,28 @@ class BimpTools
 		return (float) $str_number;
 	}
 
+	public static function htmlToString($html, $max_chars = false, $no_multiple_new_lines = true) {
+		$html = self::replaceBr($html, '[[BR]]');
+		foreach (array('div', 'p') as $tag) {
+			$html = str_replace('</' . $tag . '>', '</' . $tag . '>[[BR]]', $html);
+		}
+
+		$html = dol_string_nohtmltag($html);
+
+		$html = str_replace('[[BR]]', "<br/>", $html);
+
+		if ($no_multiple_new_lines) {
+			$html = preg_replace("(\n+)", '<br/>', $html);
+			$html = preg_replace('/( *<[ \/]*br[ \/]*> *)+/', '<br/>', $html);
+		}
+
+		if ($max_chars && strlen($html) > $max_chars) {
+			$html = substr($html, 0, $max_chars) .' [...]';
+		}
+
+		return $html;
+	}
+
 	public static function getStringNbLines($string, $maxLineChars)
 	{
 		$words = explode(' ', $string);
@@ -4441,25 +4463,12 @@ class BimpTools
 
 	public static function cleanHtml($html)
 	{
-		// Virer caractères invisibles :
-//        $html = str_replace('?', '[INTPOINT]', $html);
-//        $html = utf8_decode($html);
-//        $html = str_replace('?', '', $html);
-//        $html = str_replace('[INTPOINT]', '?', $html);
-
-		if ((int) BimpCore::getConf('pdf_use_html_purifier')) {
-//            echo 'AVANT: <br/>';
-//            echo htmlentities($html);
-
+//		if ((int) BimpCore::getConf('pdf_use_html_purifier')) {
 			$purifier = self::getHtmlPurifier();
 			$html = $purifier->purify($html);
-
-//            echo '<br/><br/>APRES: <br/>';
-//            echo htmlentities($html);
-//            exit;
-		} else {
-			// Envisager d'autres méthodes...
-		}
+//		} else {
+//			// Envisager d'autres méthodes...
+//		}
 
 		return $html;
 	}

@@ -294,7 +294,6 @@ forms:
             #              value: 
             #                  callback: getHisto
 
-
 lists_cols:
     date_create:
         label: Date

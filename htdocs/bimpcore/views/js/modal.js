@@ -313,7 +313,7 @@ function BimpModal($modal, var_name, open_btn_id, params) {
 
         modal.newContent(title, '', true, loading_text, null, modal_format);
 
-        if (!ajax_params || typeof (ajax_params) === 'undefined') {
+        if (!ajax_params || typeof (ajax_params) === 'undefined') {
             ajax_params = {};
         }
 

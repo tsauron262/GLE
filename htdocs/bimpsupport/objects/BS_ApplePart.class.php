@@ -373,6 +373,7 @@ class BS_ApplePart extends BimpObject
 
 		switch ($ref) {
 			case '661-44958':
+			case '661-44955':
 				return 489 / 1.2;
 
 			case '661-42726':
@@ -382,16 +383,20 @@ class BS_ApplePart extends BimpObject
 			case '661-44797':
 				return 339 / 1.2;
 
+			case 'SJ7X2Z/A':
+				return 289 / 1.2;
+
+			case '661-49431':
+				return 269 / 1.2;
+
 			case '661-44954':
 			case '661-42720':
 				return 135 / 1.2;
 
 			case '661-42837':
 			case '661-44796':
+			case '661-49432':
 				return 109 / 1.2;
-
-			case 'SJ7X2Z/A':
-				return 289 / 1.2;
 		}
 
 		if ($prix < 1) {

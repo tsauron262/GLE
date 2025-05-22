@@ -2772,7 +2772,6 @@ class BimpTools
 		}
 
 		$html = dol_string_nohtmltag($html);
-//		$html = strip_tags($html);
 
 		$html = str_replace('[[BR]]', "<br/>", $html);
 
@@ -2782,7 +2781,7 @@ class BimpTools
 		}
 
 		if ($max_chars && strlen($html) > $max_chars) {
-			$html = substr($html, 0, $max_chars) .'...';
+			$html = substr($html, 0, $max_chars) .' [...]';
 		}
 
 		return $html;

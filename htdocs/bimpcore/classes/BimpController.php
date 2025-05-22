@@ -3486,9 +3486,6 @@ class BimpController
 			$notifs_for_user = BimpNotification::getNotificationsForUser((int) $user->id, $notifs_data, $errors);
 		}
 
-//		echo '<pre>' . print_r($notifs_for_user, 1) . '</pre>';
-//		exit;
-
 		return array(
 			'errors'        => $errors,
 			'notifications' => $notifs_for_user,

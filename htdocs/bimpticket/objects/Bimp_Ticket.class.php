@@ -249,7 +249,7 @@ class Bimp_Ticket extends BimpDolObject
 
 		if (BimpObject::objectLoaded($note)) {
 			$txt = trim(BimpTools::htmlToString($note->getData('content'), 1200));
-			$html .= '<span class="bs-popover" ' . BimpRender::renderPopoverData($txt, 'bottom') . ' style="display: inline-block">';
+			$html .= '<span class="bs-popover" ' . BimpRender::renderPopoverData($txt, 'bottom', 'true') . ' style="display: inline-block">';
 			$html .= date('d / m / Y H:i', strtotime($note->getData('date_create'))) . '&nbsp;&nbsp;';
 			if ((int) $note->getData('viewed')) {
 				$html .= '<span class="success">';

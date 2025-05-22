@@ -832,9 +832,10 @@ class Bimp_FactureLine extends ObjectLine
 		return $errors;
 	}
 
-	public function checkRemisesArrieres(&$errors = array(), &$infos = array())
+	public function checkRemisesArrieres(&$errors = array(), &$infos = array(), $force = false)
 	{
 		if (!$this->isLoaded() || !$this->qty) {
+			$infos[] = 'FAIL 1';
 			return;
 		}
 
@@ -844,7 +845,8 @@ class Bimp_FactureLine extends ObjectLine
 			return;
 		}
 
-		if (!in_array((int) $facture->getData('fk_statut'), array(1, 2))) {
+		if (!$force && !in_array((int) $facture->getData('fk_statut'), array(1, 2))) {
+			$infos[] = 'FAIL 2';
 			return;
 		}
 

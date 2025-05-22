@@ -4530,7 +4530,8 @@ class Bimp_Facture extends BimpComm
 						}
 					} elseif ($line->isArticleLine()) {
 						// Création des revalorisations sur Remise arrière:
-						$line->checkRemisesArrieres($warnings);
+						$infos = array();
+						$line->checkRemisesArrieres($warnings, $infos, true);
 
 						// Mouvements de stocks :
 						if ($line->getData('linked_object_name') == 'contrat_line' && (int) $line->getData('linked_id_object')) {

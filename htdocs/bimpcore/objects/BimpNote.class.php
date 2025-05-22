@@ -502,7 +502,7 @@ class BimpNote extends BimpObject
 		);
 	}
 
-	public function getContentDefaultValue()
+	public function getContentDefaultValue($with_default = true)
 	{
 		$id_model = (int) BimpTools::getPostFieldValue('note_modele', 0, 'int');
 
@@ -526,7 +526,7 @@ class BimpNote extends BimpObject
 			}
 		}
 
-		if (isset($this->data['content'])) { // pas de getData sinon boucle infinie.
+		if ($with_default && isset($this->data['content'])) { // pas de getData sinon boucle infinie.
 			return $this->data['content'];
 		}
 
@@ -683,6 +683,18 @@ class BimpNote extends BimpObject
 		}
 
 		return $html;
+	}
+
+	public function renderCustomContentInput()
+	{
+		$value = $this->getContentDefaultValue(false);
+
+		return BimpInput::renderInput('html', 'content', $value, array(
+			'hashtags'               => 1,
+			'field_path'             => 1,
+			'field_path_module'      => $this->getData('obj_module'),
+			'field_path_object_name' => $this->getData('obj_name')
+		));
 	}
 
 	// Traitements:

@@ -467,6 +467,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		if ($import_key) {
 			if(strpos($import_key, 'IMP_FLO') !== false)
 				$html .= '<span class="" title="Importé Florian">';
+			elseif (strpos($import_key, 'IMP_MOALING_') !== false)
+				$html .= '<span class="" title="Importé Moaling">';
 			else
 				$html .= '<span class="success" title="Importé Salesforce">';
 			$html .= BimpRender::renderIcon('fas_file-import', 'iconRight');
@@ -525,14 +527,9 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			return $errors;
 
 		$this->checkAttr();
-		$this->checkPassageLive();
 		$this->AlerteQualite();
 		$this->alertePassage_XX($this->getData('fk_statut_rdc'));
-//		if ($this->getData('url') && $this->getData('url') != $this->getInitData('url')) {
-//			$url = nl2br($this->getData('url'));
-//			echo '<pre>';
-//			exit(var_dump(substr($url, 70, 10),strpos($url, html_entity_decode('&para;')), html_entity_decode('&para;')));
-//		}
+
 		return parent::update($warnings, $force_update);
 	}
 
@@ -690,17 +687,25 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 					if (isset($userAttr[0]['rowid']) && $userAttr[0]['rowid']) $this->set('fk_user_attr_rdc', $userAttr[0]['rowid']);
 					else $warnings [] = 'Utilisateur d\'attribution non trouvé. ' . $emailAssign;
 				}
-
 				// surcharge statut
-				if ($shop['shop_state'] === 'SUSPENDED' && !in_array($this->getData('fk_statut_rdc') , array(12, 13, 14))) 	{
+				if ($shop['shop_state'] === 'SUSPENDED' && !in_array($this->getData('fk_statut_rdc') , array(12, 14))) 	{
 					$this->set('fk_statut_rdc', 13);
-					$this->set('date_changement_statut_rdc', date('Y-m-d', strtotime(($shop['closed_form']?: $shop['last_updated_date']))));
+					$this->set('date_changement_statut_rdc', date('Y-m-d', strtotime($shop['last_updated_date'])));
 				}
-				if ($shop['shop_state'] === 'OPEN' && $this->getData('shopid') > 0) {
+				if ($shop['shop_state'] === 'OPEN' && $this->getData('fk_statut_rdc') != self::$statut_rdc_live) {
 					$this->set('fk_statut_rdc', self::$statut_rdc_live);
 					$this->set('date_changement_statut_rdc', date('Y-m-d'));
-					if(!$this->getData('date_ouverture'))
-						$this->set('date_ouverture', date('Y-m-d', strtotime(($shop['date_created']?: $shop['last_updated_date']))));
+					if (!$this->getData('date_ouverture') && $shop['last_updated_date'])
+						$this->set('date_ouverture', date('Y-m-d', strtotime($shop['last_updated_date'])));
+
+					if ($this->getData('date_debut_prospect'))	{
+							$dp = new DateTime($this->getData('date_debut_prospect'));
+							$do = new DateTime($this->getData('date_ouverture'));
+							$diff = $dp->diff($do);
+							if ($diff->invert == 0) {
+								$this->set('delai_ouverture', $diff->format('%a'));
+							}
+					}
 				}
 				$this->set('date_maj_mirakl', date('Y-m-d H:i:s'));
 				$this->update($warnings);
@@ -846,21 +851,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
         );
 	}
 
-	public function checkPassageLive()
-	{
-		if ((int)$this->getData('fk_statut_rdc') == self::$statut_rdc_live) 	{
-			if (empty($this->getData('date_ouverture'))) {
-				$this->set('date_ouverture', date('Y-m-d'));
-				if (!empty($this->getData('date_debut_prospect'))) {
-					$date_p = new DateTime($this->getData('date_debut_prospect'));
-					$date_o = new DateTime();
-					$interval = $date_p->diff($date_o);
-					$delai = $interval->days;
-					$this->set('delai_ouv', $delai);
-				}
-			}
-		}
-	}
 
 	public function AlerteQualite()
 	{

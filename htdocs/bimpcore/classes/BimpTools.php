@@ -2765,13 +2765,21 @@ class BimpTools
 		return (float) $str_number;
 	}
 
-	public static function htmlToString($html, $max_chars = false) {
+	public static function htmlToString($html, $max_chars = false, $no_multiple_new_lines = true) {
 		$html = self::replaceBr($html, '[[BR]]');
 		foreach (array('div', 'p') as $tag) {
 			$html = str_replace('</' . $tag . '>', '</' . $tag . '>[[BR]]', $html);
 		}
-		$html = strip_tags($html);
-		$html = str_replace('[[BR]]', "\n", $html);
+
+		$html = dol_string_nohtmltag($html);
+//		$html = strip_tags($html);
+
+		$html = str_replace('[[BR]]', "<br/>", $html);
+
+		if ($no_multiple_new_lines) {
+			$html = preg_replace("(\n+)", '<br/>', $html);
+			$html = preg_replace('/( *<[ \/]*br[ \/]*> *)+/', '<br/>', $html);
+		}
 
 		if ($max_chars && strlen($html) > $max_chars) {
 			$html = substr($html, 0, $max_chars) .'...';

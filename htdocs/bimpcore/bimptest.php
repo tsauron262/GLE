@@ -26,71 +26,87 @@ if (!$user->admin) {
 	exit;
 }
 
-$bdb = BimpCache::getBdb(true);
+/** @var $t Bimp_Ticket */
+$t = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', 15239);
 
-$where = '';
+if (BimpObject::objectLoaded($t)) {
+//	echo 'BEFORE : <br/>';
+//	echo $t->getData('message');
 
-$id_ticket = (int) BimpTools::getValue('id_ticket', 0, 'int');
-if ((int) BimpTools::getValue('all', 0, 'int')) {
-	$where = 1;
-} else {
-	if ($id_ticket) {
-		$where = 'rowid = ' . $id_ticket;
-	}
+	echo '<br/><br/>AFTER : <br/>';
+
+	$txt = trim(preg_replace("(\n+)", '<br/>', BimpTools::htmlToString($t->getData('message'), 800)));
+	echo $txt;
+
+	echo '<br/>------------------<br/>';
+	echo htmlentities($txt);
 }
 
-if ($where) {
-	$rows = $bdb->getRows('ticket', $where, null, 'array', array('rowid', 'message'), 'rowid', 'DESC');
-
-	if (is_array($rows)) {
-		foreach ($rows as $r) {
-			$new_txt = BimpTools::cleanHtml($r['message']);
-
-			if ($new_txt != $r['message']) {
-				echo 'UP TICKET ' . $r['rowid'] . ' : ';
-
-				if ($bdb->update('ticket', array(
-						'message' => $new_txt
-					), 'rowid = ' . (int) $r['rowid']) <= 0) {
-					echo 'FAIL - ' . $bdb->err();
-				} else {
-					echo 'OK';
-				}
-				echo '<br/>';
-			} else {
-				echo 'NO UP TICKET ' . $r['rowid'] . '<br/>';
-			}
-		}
-	} else {
-		echo 'ERR ' . $bdb->err();
-	}
-
-	$rows = $bdb->getRows('bimpcore_note', 'obj_name = \'Bimp_Ticket\'' . ($id_ticket ? ' AND id_obj = ' . $id_ticket : ''), null, 'array', array('id', 'content'), 'id', 'DESC');
-	if (is_array($rows)) {
-		foreach ($rows as $r) {
-			$new_txt = BimpTools::cleanHtml($r['content']);
-
-			if ($new_txt != $r['content']) {
-				echo 'UP NOTE ' . $r['id'] . ' : ';
-
-				if ($bdb->update('bimpcore_note', array(
-						'content' => $new_txt
-					), 'id = ' . (int) $r['id']) <= 0) {
-					echo 'FAIL - ' . $bdb->err();
-				} else {
-					echo 'OK';
-				}
-				echo '<br/>';
-			} else {
-				echo 'NO UP NOTE ' . $r['ID'] . '<br/>';
-			}
-		}
-	} else {
-		echo 'ERR ' . $bdb->err();
-	}
-} else {
-	echo 'FILTRES ABSENTS';
-}
+//$bdb = BimpCache::getBdb(true);
+//
+//$where = '';
+//
+//$id_ticket = (int) BimpTools::getValue('id_ticket', 0, 'int');
+//if ((int) BimpTools::getValue('all', 0, 'int')) {
+//	$where = 1;
+//} else {
+//	if ($id_ticket) {
+//		$where = 'rowid = ' . $id_ticket;
+//	}
+//}
+//
+//if ($where) {
+//	$rows = $bdb->getRows('ticket', $where, null, 'array', array('rowid', 'message'), 'rowid', 'DESC');
+//
+//	if (is_array($rows)) {
+//		foreach ($rows as $r) {
+//			$new_txt = BimpTools::cleanHtml($r['message']);
+//
+//			if ($new_txt != $r['message']) {
+//				echo 'UP TICKET ' . $r['rowid'] . ' : ';
+//
+//				if ($bdb->update('ticket', array(
+//						'message' => $new_txt
+//					), 'rowid = ' . (int) $r['rowid']) <= 0) {
+//					echo 'FAIL - ' . $bdb->err();
+//				} else {
+//					echo 'OK';
+//				}
+//				echo '<br/>';
+//			} else {
+//				echo 'NO UP TICKET ' . $r['rowid'] . '<br/>';
+//			}
+//		}
+//	} else {
+//		echo 'ERR ' . $bdb->err();
+//	}
+//
+//	$rows = $bdb->getRows('bimpcore_note', 'obj_name = \'Bimp_Ticket\'' . ($id_ticket ? ' AND id_obj = ' . $id_ticket : ''), null, 'array', array('id', 'content'), 'id', 'DESC');
+//	if (is_array($rows)) {
+//		foreach ($rows as $r) {
+//			$new_txt = BimpTools::cleanHtml($r['content']);
+//
+//			if ($new_txt != $r['content']) {
+//				echo 'UP NOTE ' . $r['id'] . ' : ';
+//
+//				if ($bdb->update('bimpcore_note', array(
+//						'content' => $new_txt
+//					), 'id = ' . (int) $r['id']) <= 0) {
+//					echo 'FAIL - ' . $bdb->err();
+//				} else {
+//					echo 'OK';
+//				}
+//				echo '<br/>';
+//			} else {
+//				echo 'NO UP NOTE ' . $r['ID'] . '<br/>';
+//			}
+//		}
+//	} else {
+//		echo 'ERR ' . $bdb->err();
+//	}
+//} else {
+//	echo 'FILTRES ABSENTS';
+//}
 
 echo '<br/>FIN';
 echo '</body></html>';

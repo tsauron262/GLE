@@ -684,7 +684,7 @@ class Bimp_Ticket extends BimpDolObject
 				'subj'          => $t->getData('subject'),
 				'src'           => $t->getData('origin_email'),
 //				'txt'           => $t->displayData("message", 'default', false),
-				'txt'           => trim(preg_replace("(\n+)", '<br/>', BimpTools::htmlToString($t->getData('message'), 800))),
+				'txt'           => trim(BimpTools::htmlToString($t->getData('message'), 800, true)),
 				'date_create'   => $t->getData('datec'),
 				'url'           => DOL_URL_ROOT . '/bimpticket/index.php?fc=ticket&id=' . $t->id,
 				'can_begin'     => (int) ($t->canSetAction('newStatus') && $t->isActionAllowed('newStatus') && $status < self::STATUS_IN_PROGRESS && $status >= self::STATUS_READ),

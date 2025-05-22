@@ -52,6 +52,15 @@ objects:
             id_object:
                 field_value: fk_user_assign
     
+    last_note_client: 
+        relation: hasOne
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpNote
+            id_object:
+                field_value: id_last_note_client
+                
     files:
         instance:
             bimp_object:
@@ -157,9 +166,19 @@ fields:
         label: Date de clôture
         type: datetime
         
-        
     email_msgid:
         label: ID message
+        
+    id_last_note_client: 
+        label: Dernier message client
+        type: id_object
+        object: last_note_client
+        default_value: 0
+        displays: 
+            nom_url: 
+                type: callback
+                method: displayLastNoteClient
+        
 
 forms:
     default:
@@ -371,6 +390,17 @@ filters_panels:
             fk_user_assign:
             datec:
 
+lists_cols:
+    id_last_note_client: 
+        min_width: 200
+        
+    nb_notes_unread: 
+        label: Nb messages non lus
+        align: center
+        min_width: 45
+        value: 
+            callback: displayNbNotesUnread
+    
 lists:
     default:
         title: Tickets

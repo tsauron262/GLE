@@ -239,6 +239,49 @@ class Bimp_Ticket extends BimpDolObject
 		}
 	}
 
+	// Affichages :
+
+	public function displayLastNoteClient()
+	{
+		$html = '';
+
+		$note = $this->getChildObject('last_note_client');
+
+		if (BimpObject::objectLoaded($note)) {
+			$txt = trim(BimpTools::htmlToString($note->getData('content'), 1200));
+			$html .= '<span class="bs-popover" ' . BimpRender::renderPopoverData($txt, 'bottom') . ' style="display: inline-block">';
+			$html .= date('d / m / Y H:i', strtotime($note->getData('date_create'))) . '&nbsp;&nbsp;';
+			if ((int) $note->getData('viewed')) {
+				$html .= '<span class="success">';
+				$html .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Lu';
+				$html .= '</span>';
+			} else {
+				$html .= '<span class="danger">';
+				$html .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non lu';
+				$html .= '</span>';
+			}
+			$html .= '</span>';
+		}
+
+		return $html;
+	}
+
+	public function displayNbNotesUnread()
+	{
+		$html = '';
+
+		if ($this->isLoaded($errors)) {
+			$nb = $this->db->getCount('bimpcore_note', 'obj_name = \'Bimp_Ticket\' AND id_obj = \'' . $this->id . '\' AND type_author IN (2,3) AND viewed = 0');
+
+			if (!$nb) {
+				$html .= '<span class="badge badge-success">0</span>';
+			} else {
+				$html .= '<span class="badge badge-danger">' . $nb . '</span>';
+			}
+		}
+
+		return $html;
+	}
 
 	// Rendus HTML :
 
@@ -363,6 +406,14 @@ class Bimp_Ticket extends BimpDolObject
 			if (empty($err)) {
 				$this->checkUserAssigned(true, $cur_user_assign);
 			}
+		}
+	}
+
+	public function afterCreateNote($note)
+	{
+		$type_author = $note->getData('type_author');
+		if ($note->getData('type_author') == BimpNote::BN_AUTHOR_SOC || ($type_author == BimpNote::BN_AUTHOR_FREE && $note->getData('email'))) {
+			$this->updateField('id_last_note_client', $note->id);
 		}
 	}
 

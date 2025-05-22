@@ -1589,7 +1589,7 @@ class BDS_VerifsProcess extends BDSProcess
 
 	public function initCheckFacturesRA(&$data, &$errors = array())
 	{
-		$rows = $this->db->getRows('facture f', 'f.date_valid > \'2024-05-01 00:00:00\'', null, 'array', array('f.rowid'), null, null, array());
+		$rows = $this->db->getRows('facture f', 'f.date_valid > \'2025-05-01 00:00:00\'', null, 'array', array('f.rowid'), null, null, array());
 
 		if (is_array($rows)) {
 			$elements = array();

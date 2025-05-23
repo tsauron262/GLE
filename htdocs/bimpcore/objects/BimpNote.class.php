@@ -60,14 +60,6 @@ class BimpNote extends BimpObject
 		return 0;
 	}
 
-	public function getHisto()
-	{
-		$parent = $this->getParentInstance();
-		if ($parent && is_object($parent)) {
-			return $parent->renderNotesList(false, 'chat', '', false, false);
-		}
-	}
-
 	public function canClientView()
 	{
 		global $userClient;
@@ -387,6 +379,14 @@ class BimpNote extends BimpObject
 		return parent::getLink($params, $forced_context);
 	}
 
+	public function getHisto()
+	{
+		$parent = $this->getParentInstance();
+		if ($parent && is_object($parent)) {
+			return $parent->renderNotesList(false, 'chat', '', false, false);
+		}
+	}
+
 	public function getActionsButtons()
 	{
 		$buttons = array();
@@ -502,7 +502,7 @@ class BimpNote extends BimpObject
 		);
 	}
 
-	public function getContentDefaultValue()
+	public function getContentDefaultValue($with_default = true)
 	{
 		$id_model = (int) BimpTools::getPostFieldValue('note_modele', 0, 'int');
 
@@ -526,7 +526,7 @@ class BimpNote extends BimpObject
 			}
 		}
 
-		if (isset($this->data['content'])) { // pas de getData sinon boucle infinie.
+		if ($with_default && isset($this->data['content'])) { // pas de getData sinon boucle infinie.
 			return $this->data['content'];
 		}
 
@@ -547,8 +547,9 @@ class BimpNote extends BimpObject
 			case self::BN_DEST_SOC:
 			case self::BN_DEST_CONTACT:
 				$mail = $this->getData('email');
-				if($mail != '')
+				if ($mail != '') {
 					return $this->getData('email');
+				}
 		}
 		switch ((int) $this->getData('type_dest')) {
 			case self::BN_DEST_SOC:
@@ -591,10 +592,11 @@ class BimpNote extends BimpObject
 		$author = $this->displayAuthor(false, true);
 
 		$parent = $this->getParentInstance();
-		if($parent && is_a($parent, 'Bimp_Ticket'))
+		if ($parent && is_a($parent, 'Bimp_Ticket')) {
 			$position = ($this->getData('type_author') == self::BN_AUTHOR_SOC || $this->getData('type_author') == self::BN_AUTHOR_FREE) ? "start" : "end";
-		else
+		} else {
 			$position = ($this->isUserDest() ? "start" : ($this->isUserAuthor() ? "end" : ""));
+		}
 
 		$html .= '<div class="d-flex justify-content-' . $position . ($style == "petit" ? ' petit' : '') . ' mb-4">';
 		$html .= BimpTools::getBadge($this->getInitiale($author), ($style == "petit" ? '35' : '55'), ($this->getData('type_author') == self::BN_AUTHOR_USER ? 'info' : 'warnings'), $author);
@@ -681,6 +683,18 @@ class BimpNote extends BimpObject
 		}
 
 		return $html;
+	}
+
+	public function renderCustomContentInput()
+	{
+		$value = $this->getContentDefaultValue(false);
+
+		return BimpInput::renderInput('html', 'content', $value, array(
+			'hashtags'               => 1,
+			'field_path'             => 1,
+			'field_path_module'      => $this->getData('obj_module'),
+			'field_path_object_name' => $this->getData('obj_name')
+		));
 	}
 
 	// Traitements:

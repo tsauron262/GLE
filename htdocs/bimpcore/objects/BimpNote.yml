@@ -14,6 +14,9 @@ parent_object:
     field_value: obj_name
 parent_id_property: id_obj
 
+nom_url: 
+    card: default
+    
 objects:
     user_group:
         relation: hasOne
@@ -281,11 +284,10 @@ forms:
             -   custom: 1
                 label: Texte
                 input_name: content
-                input:
-                    auto_expand: 1
-                    hashtags: 1
-                    type: textarea
-                    rows: 3
+                content: 
+                    callback: renderCustomContentInput
+                depends_on: note_modele
+                    
         after_content:
             callback: getHisto
             
@@ -424,3 +426,16 @@ filters_panels:
     default:
         filters:
             user_create:
+                
+cards: 
+    default:
+        status: viewed
+        fields: 
+            - label: Objet
+              value: 
+                  callback: getParentLink
+            - field: date_create
+            - label: Auteur 
+              value: 
+                  callback: displayAuthor
+            - field: content

@@ -239,6 +239,49 @@ class Bimp_Ticket extends BimpDolObject
 		}
 	}
 
+	// Affichages :
+
+	public function displayLastNoteClient()
+	{
+		$html = '';
+
+		$note = $this->getChildObject('last_note_client');
+
+		if (BimpObject::objectLoaded($note)) {
+			$txt = trim(BimpTools::htmlToString($note->getData('content'), 1200));
+			$html .= '<span class="bs-popover" ' . BimpRender::renderPopoverData($txt, 'bottom', 'true') . ' style="display: inline-block">';
+			$html .= date('d / m / Y H:i', strtotime($note->getData('date_create'))) . '&nbsp;&nbsp;';
+			if ((int) $note->getData('viewed')) {
+				$html .= '<span class="success">';
+				$html .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Lu';
+				$html .= '</span>';
+			} else {
+				$html .= '<span class="danger">';
+				$html .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non lu';
+				$html .= '</span>';
+			}
+			$html .= '</span>';
+		}
+
+		return $html;
+	}
+
+	public function displayNbNotesUnread()
+	{
+		$html = '';
+
+		if ($this->isLoaded($errors)) {
+			$nb = $this->db->getCount('bimpcore_note', 'obj_name = \'Bimp_Ticket\' AND id_obj = \'' . $this->id . '\' AND type_author IN (2,3) AND viewed = 0');
+
+			if (!$nb) {
+				$html .= '<span class="badge badge-success">0</span>';
+			} else {
+				$html .= '<span class="badge badge-danger">' . $nb . '</span>';
+			}
+		}
+
+		return $html;
+	}
 
 	// Rendus HTML :
 
@@ -297,6 +340,45 @@ class Bimp_Ticket extends BimpDolObject
 				$html .= '</div>';
 			}
 		}
+
+		return $html;
+	}
+
+	public function renderNotifyEmailInput()
+	{
+		$html = '';
+
+		$soc = $this->getChildObject('client');
+		if (BimpObject::objectLoaded($soc)) {
+			$values = array();
+			$email = $soc->getData('email');
+			if ($email) {
+				$values[$email] = 'Tiers (' . $email . ')';
+			}
+
+			$id_contact = (int) BimpTools::getPostFieldValue('id_contact_suivi');
+			if ($id_contact) {
+				/** @var Bimp_Contact $contact */
+				$contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+
+				if (BimpObject::objectLoaded($contact)) {
+					$email = $contact->getData('email');
+					if ($email) {
+						$values[$email] = 'Contact suivi (' . $email . ')';
+					}
+				}
+			}
+
+			return BimpInput::renderInput('select', 'notify_email', 'client', array(
+				'options' => $values
+			));
+		} else {
+			$html .= '<span class="danger">';
+			$html .= 'Aucun client sélectionné';
+			$html .= '</span>';
+			$html .= '<input type="hidden" value="" name="notify_email" />';
+		}
+
 
 		return $html;
 	}
@@ -363,6 +445,14 @@ class Bimp_Ticket extends BimpDolObject
 			if (empty($err)) {
 				$this->checkUserAssigned(true, $cur_user_assign);
 			}
+		}
+	}
+
+	public function afterCreateNote($note)
+	{
+		$type_author = $note->getData('type_author');
+		if ($note->getData('type_author') == BimpNote::BN_AUTHOR_SOC || ($type_author == BimpNote::BN_AUTHOR_FREE && $note->getData('email'))) {
+			$this->updateField('id_last_note_client', $note->id);
 		}
 	}
 
@@ -518,6 +608,29 @@ class Bimp_Ticket extends BimpDolObject
 
 	public function create(&$warnings = array(), $force_create = false)
 	{
+		$errors = array();
+
+		$notify = (int) BimpTools::getPostFieldValue('notify', 0, 'int');
+		if ($notify) {
+			$notify_email = BimpTools::getPostFieldValue('notify_email', '', 'alphanohtml');
+			$subject = $this->getData('subject');
+			$msg = $this->getData('message');
+
+			if (!$subject) {
+				$errors[] = 'Sujet obligatoire pour notification du tiers par e-mail';
+			}
+			if (!$msg) {
+				$errors[] = 'Description obligatoire pour notification du tiers par e-mail';
+			}
+			if (!$notify_email) {
+				$errors[] = 'Adresse e-mail absente pour notification du tiers';
+			}
+
+			if (count($errors)) {
+				return $errors;
+			}
+		}
+
 		$this->set('ref', $this->dol_object->getDefaultRef());
 
 		$errors = parent::create($warnings, $force_create);
@@ -537,6 +650,14 @@ class Bimp_Ticket extends BimpDolObject
 
 				if ($id_contact_suivi) {
 					$this->dol_object->add_contact($id_contact_suivi, 'SUPPORTCLI', 'external');
+				}
+			}
+
+			if ($notify) {
+				$mail_errors = array();
+				$mail = new BimpMail($this, $subject, $notify_email, $this->getMailFrom(), $msg);
+				if (!$mail->send($mail_errors)) {
+					$warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de notification à l\'adresse "' . $notify_email . '"');
 				}
 			}
 		}

@@ -26,21 +26,11 @@ if (!$user->admin) {
 	exit;
 }
 
-/** @var $t Bimp_Ticket */
-$t = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', 15239);
+$ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', 8427);
+$id_soc = (int) $ticket->getData('fk_soc');
+$id_user_assign = 3;
+$ticket->addNote('TEST', 20, 0, 0, $parameters['from'], ($id_soc ? 2 : 3), ($id_user_assign) ? 1 : 0, 0, $id_user_assign, 0, $id_soc);
 
-if (BimpObject::objectLoaded($t)) {
-//	echo 'BEFORE : <br/>';
-//	echo $t->getData('message');
-
-	echo '<br/><br/>AFTER : <br/>';
-
-	$txt = trim(preg_replace("(\n+)", '<br/>', BimpTools::htmlToString($t->getData('message'), 800)));
-	echo $txt;
-
-	echo '<br/>------------------<br/>';
-	echo htmlentities($txt);
-}
 
 //$bdb = BimpCache::getBdb(true);
 //

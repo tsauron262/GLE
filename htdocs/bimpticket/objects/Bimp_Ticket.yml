@@ -52,6 +52,15 @@ objects:
             id_object:
                 field_value: fk_user_assign
     
+    last_note_client: 
+        relation: hasOne
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpNote
+            id_object:
+                field_value: id_last_note_client
+                
     files:
         instance:
             bimp_object:
@@ -129,13 +138,13 @@ fields:
     subject:
         label: Sujet ticket
         type: html
+        input: 
+            type: text
         required: 1
-        hashtags: 1
     
     message:
         label: Description
         type: html
-        hashtags: 1
     
     timing:
         label: Timing
@@ -157,9 +166,19 @@ fields:
         label: Date de clôture
         type: datetime
         
-        
     email_msgid:
         label: ID message
+        
+    id_last_note_client: 
+        label: Dernier message client
+        type: id_object
+        object: last_note_client
+        default_value: 0
+        displays: 
+            nom_url: 
+                type: callback
+                method: displayLastNoteClient
+        
 
 forms:
     default:
@@ -191,6 +210,21 @@ forms:
                 depends_on: fk_soc
             -   field: subject
             -   field: message
+            -   custom: 1
+                label: Notifier le tiers
+                input_name: notify
+                input: 
+                    type: toggle
+                value: 1
+            -   custom: 1
+                label: Envoyer la notification à
+                input_name: notify_email
+                content: 
+                    callback: renderNotifyEmailInput
+                depends_on: fk_soc,id_contact_suivi
+                display_if: 
+                    field_name: notify
+                    show_values: 1
     
     new_status:
         rows:
@@ -371,6 +405,17 @@ filters_panels:
             fk_user_assign:
             datec:
 
+lists_cols:
+    id_last_note_client: 
+        min_width: 200
+        
+    nb_notes_unread: 
+        label: Nb messages non lus
+        align: center
+        min_width: 45
+        value: 
+            callback: displayNbNotesUnread
+    
 lists:
     default:
         title: Tickets

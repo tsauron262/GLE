@@ -26,10 +26,13 @@ if (!$user->admin) {
 	exit;
 }
 
-$ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', 8427);
-$id_soc = (int) $ticket->getData('fk_soc');
-$id_user_assign = 3;
-$ticket->addNote('TEST', 20, 0, 0, $parameters['from'], ($id_soc ? 2 : 3), ($id_user_assign) ? 1 : 0, 0, $id_user_assign, 0, $id_soc);
+$Bimp_Ticket = null;
+
+BimpObject::loadClass('bimpticket', 'Bimp_Ticket', $Bimp_Ticket);
+if (!$Bimp_Ticket) {
+	echo BimpRender::renderAlerts('Impossible de charger la classe Bimp_Ticket');
+	exit;
+}
 
 
 //$bdb = BimpCache::getBdb(true);

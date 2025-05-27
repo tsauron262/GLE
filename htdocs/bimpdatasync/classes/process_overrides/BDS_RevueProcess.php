@@ -74,7 +74,7 @@ class BDS_RevueProcess extends BDSProcess
         BimpObject::loadClass('bimpdatasync', 'BDS_Report');
         $this->data_persistante['ok_for_process'] = 1;
         if (!count($errors)) {
-            $where = "rowid IN (SELECT fk_usergroup FROM ".MAIN_DB_PREFIX."usergroup_rights)";
+            $where = "rowid IN (SELECT fk_usergroup FROM ".MAIN_DB_PREFIX."usergroup_rights WHERE entity IN (".getEntity('bimpcore')."))";
             $rows = $this->db->getRows('usergroup', $where, null, 'array', array('rowid'), 'rowid', 'desc');
             $elements = array();
 
@@ -141,6 +141,8 @@ class BDS_RevueProcess extends BDSProcess
 
 //
                     $rights = $group->getRights();
+					$this->data_persistante['mail'][$idGr]['rights'] = array();
+					// On récupère les droits du groupe
 //                    $rights = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_UserGroupRight', array('fk_usergroup'=> $group->id));
                     if(count($rights)){
                         foreach ($this->data_persistante['infoRights'] as $module => $module_rights) {
@@ -200,7 +202,7 @@ class BDS_RevueProcess extends BDSProcess
 							}
 							else {
 								$errors = BimpTools::merge_array($errors, $groupe->appendField('data_revue', array('Y:'.date('Y') => $data)));
-								$bimpMail = new BimpMail($groupe, 'Validation acces groupe ERP', 't.sauron@bimp.fr', '', $html);
+								$bimpMail = new BimpMail($groupe, 'Validation acces groupe ERP', $data['mail'], '', $html);
 								$bimpMail->send($errors);
 
 								$this->Success('Mail OK : Envoyé a ' . $data['mail'] . '<br/>' . $html);

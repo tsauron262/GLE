@@ -66,6 +66,7 @@ if (!$action) {
 		'check_ac_revals_out_of_stock'              => 'vérif des revals AC en attente hors stock',
 		'correct_stock_facture_depuis_inventaire'	=> 'Correction des stocks des factures depuis inventaire',
 		'check_attribut_entity'						=> 'Vérifier les attributs par entité',
+		'test_divers'								=> 'Test divers',
 	);
 
 	$path = pathinfo(__FILE__);
@@ -661,6 +662,9 @@ VALUES
 			}
 		}
 		break;
+	case 'test_divers':
+		BimpUserMsg::envoiMsg('paiements_non_identif_auto', 'Paiements non identifiés', 'msg de test');
+		break;
 
 	default:
 		echo 'Action invalide';
@@ -773,6 +777,7 @@ function convertListsConfigs($new_filters = array())
 					echo '<span class="success">[OK]</span>';
 				}
 				break;
+
 
 			default:
 				echo '<span class="danger">TYPE INCONNU: ' . $r['list_type'] . '</span>';

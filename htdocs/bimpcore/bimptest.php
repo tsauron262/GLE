@@ -34,6 +34,22 @@ if (!$Bimp_Ticket) {
 	exit;
 }
 
+echo 'VALS : <pre>' . print_r($Bimp_Ticket::$mail_typeTicket, 1) . '</pre>';
+
+$type_code = '';
+$to_email = 'qualite-marketplace@rueducommerce.com';
+
+if (isset($Bimp_Ticket::$mail_typeTicket[$to_email])) {
+	$type_code = $Bimp_Ticket::$mail_typeTicket[$to_email];
+} elseif (preg_match('/^(.+)\.com$/', $to_email, $matches)) {
+	if (isset($Bimp_Ticket::$mail_typeTicket[$matches[1] . '.fr'])) {
+		$type_code = $Bimp_Ticket::$mail_typeTicket[$matches[1] . '.fr'];
+	}
+}
+
+echo '<br/>TYPE : "' . $type_code .'"';
+
+
 
 //$bdb = BimpCache::getBdb(true);
 //

@@ -202,7 +202,7 @@ class BDS_RevueProcess extends BDSProcess
 							}
 							else {
 								$errors = BimpTools::merge_array($errors, $groupe->appendField('data_revue', array('Y:'.date('Y') => $data)));
-								$bimpMail = new BimpMail($groupe, 'Validation acces groupe ERP', 't.sauron@bimp.fr', '', $html);
+								$bimpMail = new BimpMail($groupe, 'Validation acces groupe ERP', $data['mail'], '', $html);
 								$bimpMail->send($errors);
 
 								$this->Success('Mail OK : Envoyé a ' . $data['mail'] . '<br/>' . $html);

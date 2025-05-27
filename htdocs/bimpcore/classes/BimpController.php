@@ -1982,17 +1982,19 @@ class BimpController
 						$form = new BC_Form($object, $id_parent, $form_name, 1, true);
 						$form->fields_prefix = $field_prefix;
 						$form->identifier = $form_id;
+						$row_params = array();
 						if (!is_null($form->config_path)) {
 							foreach ($form->params['rows'] as $row) {
 								if ($object->config->isDefined($form->config_path . '/rows/' . $row . '/field')) {
 									$form_field = $object->getConf($form->config_path . '/rows/' . $row . '/field', '');
 									if ($form_field && $form_field === $field_name) {
 										$row_params = BimpComponent::fetchParamsStatic($object->config, $form->config_path . '/rows/' . $row, BC_Form::$row_params);
-										$html = $form->renderFieldRow($field_name, $row_params, 3, true);
+										break;
 									}
 								}
 							}
 						}
+						$html = $form->renderFieldRow($field_name, $row_params, 3, true);
 
 						// Ancienne méthode :
 //                        $field = new BC_Field($object, $field_name, true, 'fields', $force_edit);

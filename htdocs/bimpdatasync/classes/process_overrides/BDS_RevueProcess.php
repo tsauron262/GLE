@@ -74,7 +74,7 @@ class BDS_RevueProcess extends BDSProcess
         BimpObject::loadClass('bimpdatasync', 'BDS_Report');
         $this->data_persistante['ok_for_process'] = 1;
         if (!count($errors)) {
-            $where = "rowid IN (SELECT fk_usergroup FROM ".MAIN_DB_PREFIX."usergroup_rights)";
+            $where = "rowid IN (SELECT fk_usergroup FROM ".MAIN_DB_PREFIX."usergroup_rights WHERE entity IN (".getEntity('bimpcore')."))";
             $rows = $this->db->getRows('usergroup', $where, null, 'array', array('rowid'), 'rowid', 'desc');
             $elements = array();
 

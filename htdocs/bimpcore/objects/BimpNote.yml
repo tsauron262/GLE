@@ -391,6 +391,7 @@ lists:
     
     chat:
         title: Messages
+        icon: fas_comments
         n: 100
         add_form_name: msg
         add_form_values:

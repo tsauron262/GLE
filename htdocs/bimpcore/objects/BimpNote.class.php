@@ -584,7 +584,7 @@ class BimpNote extends BimpObject
 		return '';
 	}
 
-	public function displayChatmsg($style = '', $checkview = true)
+	public function displayChatmsg($style = '', $checkview = false)
 	{
 		global $user;
 		$html = "";
@@ -603,6 +603,9 @@ class BimpNote extends BimpObject
 		$html .= '<div class="msg_cotainer">' . $this->displayData("content");
 		if ($style != "petit" && $this->getData('user_create') != $user->id) {
 			$html .= '<span class="rowButton bs-popover"><i class="fas fa-share link" onclick="' . $this->getJsRepondre() . '"></i></span>';
+		}
+		if ($style != "petit" && $this->isActionAllowed('setAsViewed') && $this->canSetAction('setAsViewed')) {
+			$html .= '<span class="rowButton bs-popover"><i class="far fa5-envelope-open" onclick="' . $this->getJsActionOnclick('setAsViewed') . '"></i></span>';
 		}
 
 		$html .= '<span class="msg_time">' . dol_print_date($this->db->db->jdate($this->getData("date_create")), "%d/%m/%y %H:%M:%S") . '</span>

@@ -139,6 +139,9 @@ class ActionsBimpticket
 							$ticket->add_contact($contact_static->id, 'SUPPORTCLI', 'external');
 						}
 
+						if (!$ticket->getData('fk_user_assign')) {
+							$ticket->updateField('fk_user_assign', 0);
+						}
 						$traite = 1;
 					}
 				} else {

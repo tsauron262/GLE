@@ -197,7 +197,7 @@ class Bimp_UserGroup extends BimpObject
             self::$cache[$cache_key] = array();
 
             $rows = self::getBdb()->getRows('usergroup_rights', 'fk_usergroup = ' . $id_usergroup.' AND entity = '.getEntity('rights'), null, 'array', array('fk_id'));
-
+echo '<br/>'.'fk_usergroup = ' . $id_usergroup.' AND entity = '.getEntity('rights');
             if (is_array($rows)) {
                 foreach ($rows as $r) {
                     self::$cache[$cache_key][] = (int) $r['fk_id'];

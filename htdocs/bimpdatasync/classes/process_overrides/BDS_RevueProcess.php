@@ -141,8 +141,6 @@ class BDS_RevueProcess extends BDSProcess
 
 //
                     $rights = $group->getRights();
-					if($group->id = 31)
-						die('iiii'.print_r($rights, true));
 					$this->data_persistante['mail'][$idGr]['rights'] = array();
 					// On récupère les droits du groupe
 //                    $rights = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_UserGroupRight', array('fk_usergroup'=> $group->id));

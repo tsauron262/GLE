@@ -2093,10 +2093,26 @@ function onChecklistSearchInputChange($input) {
 					var selected_items = [];
 					var found = false;
 					$container.findParentByClass('check_list_container').find('.check_list_item').each(function () {
-						if (!found && $(this).children('label').text() === mult_vals[i]) {
-							nOk++;
-							$(this).find('input.check_list_item_input').prop('checked', true);
-							found = true;
+						if (!found) {
+							var text = $(this).children('label').text();
+							if (text === mult_vals[i]) {
+								found = true;
+							} else {
+								if (/^.+ \(.+\)$/.test(text)) {
+									if (text.replace(/^(.+) \(.+\)$/, '$1') === mult_vals[i]) {
+										found = true;
+									} else if (text.replace(/^.+ \((.+)\)$/, '$1') === mult_vals[i]) {
+										found = true;
+									}
+								}								
+							}
+							
+							if (found) {
+								nOk++;
+								$(this).find('input.check_list_item_input').prop('checked', true);	
+							}
+							
+							
 						}
 					});
 					

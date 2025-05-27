@@ -10,7 +10,7 @@ class Bimp_UserGroup extends BimpObject
         return parent::__construct($module, $object_name);
     }
 
-    // Droits user: 
+    // Droits user:
 
     public function canView()
     {
@@ -55,24 +55,24 @@ class Bimp_UserGroup extends BimpObject
 
         return parent::canSetAction($action);
     }
-    
+
     public function isFieldEditable($field, $force_edit = false) {
         if($field == 'data_revue')
             return 0;
-        
+
         return parent::isFieldEditable($field, $force_edit);
     }
-    
+
     public function canViewField($field_name) {
         global $user;
         if($field_name == 'data_revue')
             return ($user->admin);
-        
-        
+
+
         return parent::canViewField($field_name);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -85,7 +85,7 @@ class Bimp_UserGroup extends BimpObject
         return parent::isActionAllowed($action, $errors);
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getUserListExtraButtons()
     {
@@ -158,7 +158,7 @@ class Bimp_UserGroup extends BimpObject
         return 'Groupe ' . $this->getName();
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getUserGroupUsers($active_only = false)
     {
@@ -187,7 +187,7 @@ class Bimp_UserGroup extends BimpObject
         return array();
     }
 
-    // Getters statics: 
+    // Getters statics:
 
     public static function getUsergroupRights($id_usergroup)
     {
@@ -196,7 +196,7 @@ class Bimp_UserGroup extends BimpObject
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
-            $rows = self::getBdb()->getRows('usergroup_rights', 'fk_usergroup = ' . $id_usergroup, null, 'array', array('fk_id'));
+            $rows = self::getBdb()->getRows('usergroup_rights', 'fk_usergroup = ' . $id_usergroup.' entity = '.getEntity('rights'), null, 'array', array('fk_id'));
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
@@ -208,7 +208,7 @@ class Bimp_UserGroup extends BimpObject
         return self::$cache[$cache_key];
     }
 
-    // Getters Statics: 
+    // Getters Statics:
 
     public static function getUserGroupsRights($id_user)
     {
@@ -239,7 +239,7 @@ class Bimp_UserGroup extends BimpObject
         return array();
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderUsersList()
     {
@@ -335,7 +335,7 @@ class Bimp_UserGroup extends BimpObject
         $tabs = array();
 
         $isAdmin = $user->admin;
-        //        $isItself = ($user->id == $this->id); // Ceci n'est valable que pour l'objet Bimp_User, à suppr. 
+        //        $isItself = ($user->id == $this->id); // Ceci n'est valable que pour l'objet Bimp_User, à suppr.
 
         $tabs[] = array(
             'id'      => 'infos',
@@ -343,7 +343,7 @@ class Bimp_UserGroup extends BimpObject
             // Pas la peine de charger l'onglet principal en ajax
             //            'ajax'          => 1,
             //            'ajax_callback' => $this->getJsLoadCustomContent('renderInfosView', '$(\'#infos .nav_tab_ajax_result\')', array(''), array('button' => ''))
-            'content' => $this->renderView('default') // Pour l'affichage des données, utiliser une vue (section "views" dans le yml) plutôt qu'une fonction. 
+            'content' => $this->renderView('default') // Pour l'affichage des données, utiliser une vue (section "views" dans le yml) plutôt qu'une fonction.
         );
 
         if ($isAdmin) {
@@ -407,18 +407,18 @@ class Bimp_UserGroup extends BimpObject
 
     public function renderInfosView()
     {
-        // Supprimer cette fonction une fois les commentaires lus. 
-        // 2 grosses erreurs ici: 
-        //   - 1: les données sont déjà présentes dans $this->data (cet appel est fait sur une instance fetchée) 
-        //   - 2: Il ne faut pas faire 4 requêtes SQL là où on peut en faire une seule. 
+        // Supprimer cette fonction une fois les commentaires lus.
+        // 2 grosses erreurs ici:
+        //   - 1: les données sont déjà présentes dans $this->data (cet appel est fait sur une instance fetchée)
+        //   - 2: Il ne faut pas faire 4 requêtes SQL là où on peut en faire une seule.
 
         $group_name = $this->db->getValue('usergroup', 'nom', 'rowid = ' . $_REQUEST['id']);
         $group_note = $this->db->getValue('usergroup', 'note', 'rowid = ' . $_REQUEST['id']);
         $alias = $this->db->getValue('usergroup_extrafields', 'alias', 'fk_object = ' . $_REQUEST['id']);
         $mail = $this->db->getValue('usergroup_extrafields', 'mail', 'fk_object = ' . $_REQUEST['id']);
-        //        
-        //        
-        // Ce code HTML est généré automatiquement (via le composant BC_FieldsTable, section "fields_tables" dans le yml de l'objet). 
+        //
+        //
+        // Ce code HTML est généré automatiquement (via le composant BC_FieldsTable, section "fields_tables" dans le yml de l'objet).
         $html = '<div id="Bimp_UserGroup_informations_fields_table_' . $_REQUEST['id'] . '_container" class="objectComponentContainer object_fields_table_container Bimp_UserGroup_fields_table_container">'
                 . '<div class="panel panel-secondary foldable open"><div class="panel-heading"><div class="panel-title">'
                 . '<i class="fas fa5-info-circle iconLeft"></i>informations</div><div class="header_buttons">'
@@ -485,7 +485,7 @@ class Bimp_UserGroup extends BimpObject
         $rights = BimpCache::getRightsDefDataByModules();
         $group_rights = $this->getRights();
 
-        // Ces fonction sont valables pour les users, par pour les groupes, à suppr. 
+        // Ces fonction sont valables pour les users, par pour les groupes, à suppr.
         //        $user_rights = $this->getAllRights();
         //        $user_groups = BimpCache::getUserUserGroupsList($this->id);
 
@@ -532,7 +532,7 @@ class Bimp_UserGroup extends BimpObject
                         ));
                     }
 
-                    // La notion de droit hérité est valable pour les users, par pour les groupes. 
+                    // La notion de droit hérité est valable pour les users, par pour les groupes.
                     //                    if ($has_groups_right) {
                     //                        $active = array(
                     //                            'content' => '<span class="info">' . BimpRender::renderIcon('fas_arrow-circle-down', 'iconLeft') . 'Hérité</span>',
@@ -735,7 +735,7 @@ class Bimp_UserGroup extends BimpObject
                             $nOk++;
                             $results[$id_right] = 1;
 
-                            // Ajout du droit lire si nécessaire: 
+                            // Ajout du droit lire si nécessaire:
                             if (!in_array($right_def['perms'], array('lire', 'read')) && !in_array($right_def['subperms'], array('lire', 'read'))) {
                                 $where = 'module = \'' . $right_def['module'] . '\'';
                                 if ($right_def['subperms']) {
@@ -772,8 +772,8 @@ class Bimp_UserGroup extends BimpObject
                         }
                     } else {
                         $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
-                        //                        $warnings[] = 'l\'utilisateur possède déjà le droit "' . $label . '"'; // Ouch! 
-                        $warnings[] = 'le groupe possède déjà le droit "' . $label . '"'; // Ouch! 
+                        //                        $warnings[] = 'l\'utilisateur possède déjà le droit "' . $label . '"'; // Ouch!
+                        $warnings[] = 'le groupe possède déjà le droit "' . $label . '"'; // Ouch!
                     }
 
                     if ($nOk === 1) {
@@ -824,7 +824,7 @@ class Bimp_UserGroup extends BimpObject
                             $results[$id_right] = 1;
 
                             if ($module) {
-                                // Si droit lire, suppr des droits du même ensemble: 
+                                // Si droit lire, suppr des droits du même ensemble:
                                 if (in_array($subperms, array('lire', 'read')) || in_array($perms, array('lire', 'read'))) {
                                     $filters = array(
                                         'a.fk_usergroup' => $this->id,

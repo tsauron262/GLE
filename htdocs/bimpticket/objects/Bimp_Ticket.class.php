@@ -164,21 +164,6 @@ class Bimp_Ticket extends BimpDolObject
 					)
 				))
 			);
-			$buttons[] = array(
-				'label'   => 'E-mail Contact',
-				'icon'    => 'fas_envelope',
-				'onclick' => $note->getJsLoadModalForm('default', 'Envoyer un e-mail à un contact tiers', array(
-					'fields' => array(
-						"obj_type"    => "bimp_object",
-						"obj_module"  => $this->module,
-						"obj_name"    => $this->object_name,
-						"id_obj"      => $this->id,
-						'visibility'  => $note::BN_ALL,
-						'type_author' => $note::BN_AUTHOR_USER,
-						"type_dest"   => $note::BN_DEST_CONTACT
-					)
-				))
-			);
 		}
 
 		return $buttons;

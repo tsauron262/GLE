@@ -365,6 +365,18 @@ class Bimp_Ticket extends BimpDolObject
 		return $html;
 	}
 
+	public function renderDescription()
+	{
+		$html = $this->displayDataDefault('message');
+		$title = BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Description';
+
+		$images = $this->renderImages(false);
+		if ($images) {
+			$html .= ($html ? '<br/><br/>' : '') . '<div style="font-size: 14px; border-top: 1px solid #999; margin-top: 10px; padding-top: 10px">' . BimpRender::renderIcon('fas_images', 'iconLeft') . 'Images liées : </div>' . $images;
+		}
+
+		return BimpRender::renderPanel($title, $html, '', array('type' => 'secondary'));
+	}
 	// Traitements :
 
 	public function checkStatus()

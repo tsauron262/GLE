@@ -395,6 +395,9 @@ views:
                                 params:
                                     - 1
                                     - chat
+                                    - ''
+                                    - 0
+                                    - 0
             -   cols:
                     -   type: list
                         list:

@@ -318,7 +318,7 @@ class Bimp_Ticket extends BimpDolObject
 			$client = $this->getChildObject('client');
 			if (BimpObject::objectLoaded($client)) {
 				$html .= '<div style="margin-top: 10px">';
-				$html .= '<b>Client : </b> ' . $client->getLink();
+				$html .= '<b>Marchand : </b> ' . $client->getLink();
 				$html .= '</div>';
 			}
 		}
@@ -356,7 +356,7 @@ class Bimp_Ticket extends BimpDolObject
 			));
 		} else {
 			$html .= '<span class="danger">';
-			$html .= 'Aucun client sélectionné';
+			$html .= 'Aucun marchand sélectionné';
 			$html .= '</span>';
 			$html .= '<input type="hidden" value="" name="notify_email" />';
 		}

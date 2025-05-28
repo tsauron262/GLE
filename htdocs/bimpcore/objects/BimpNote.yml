@@ -440,6 +440,7 @@ lists:
         n: 100
         add_form_name: msg
         add_btn_label: Nouveau message
+        add_form_title: Nouveau message
         add_form_values:
             fields:
                 type_author: 1

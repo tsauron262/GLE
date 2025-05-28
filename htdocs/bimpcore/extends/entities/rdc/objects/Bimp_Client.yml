@@ -377,9 +377,7 @@ forms:
                 display_if:
                     field_name: fk_source_rdc
                     show_values:
-                        conf: 
-                            module: nom_module
-                            name: id_source_presta
+                        conf: id_source_presta
 
             contrefacon:
                 field: contrefacon

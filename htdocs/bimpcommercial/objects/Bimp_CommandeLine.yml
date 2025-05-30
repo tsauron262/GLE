@@ -104,7 +104,7 @@ fields:
         max: none
         decimals: 6
         unsigned: 0
-        viewable: 0
+        viewable: 1
         filterable: 1
         default_value: 0
         

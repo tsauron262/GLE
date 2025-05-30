@@ -12153,6 +12153,7 @@ div.bv_demandes_panel .user_demande {
 }
 .bimp_chat_msg .bimp_chat_msg_body {
   display: flex;
+  margin: 3px 0;
 }
 .bimp_chat_msg .bimp_chat_dest_badge,
 .bimp_chat_msg .bimp_chat_author_badge {

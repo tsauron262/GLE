@@ -77,10 +77,11 @@ class BimpNote extends BimpObject
 
 	public function canSetAction($action)
 	{
+		global $user;
+
 		switch ($action) {
 			case 'setAsViewed':
 				if ($this->isLoaded()) {
-					global $user;
 					if ($this->getData('user_create') == $user->id && $this->getData('type_author') == self::BN_AUTHOR_USER) {
 						$errors[] = 'L\'utilisateur connecté est l\'auteur';
 						return 0;
@@ -90,6 +91,13 @@ class BimpNote extends BimpObject
 						$errors[] = 'Vous ne faites pas partie des destinataires';
 						return 0;
 					}
+				}
+				return 1;
+
+			case 'repondre':
+				if ($user->id == (int) $this->getData('user_create')) {
+					$errors[] = 'L\'utilisateur connecté est l\'auteur de la note';
+					return 0;
 				}
 				return 1;
 		}
@@ -463,8 +471,10 @@ class BimpNote extends BimpObject
 		}
 	}
 
-	public function getInitiale($str)
+	public function getInitiales($str, $length = 3)
 	{
+		$str = strip_tags($str);
+		$str = str_replace(array('"', '\''), '', $str);
 		$str = str_replace(array("_", "-"), " ", $str);
 		$str = str_replace(array("(", ")"), " ", $str);
 		$str = str_replace('@', " @ ", $str);
@@ -474,7 +484,7 @@ class BimpNote extends BimpObject
 			foreach ($tabT as $part) {
 				$return .= substr($part, 0, 1);
 			}
-			$return = strtoupper(substr($return, 0, 3));
+			$return = strtoupper(substr($return, 0, $length));
 		}
 		return $return;
 	}
@@ -591,52 +601,256 @@ class BimpNote extends BimpObject
 
 	public function getParentMsgId() {}
 
-	// Affichage:
-
-	public function displayDestinataire($display_input_value = true, $no_html = false)
+	public function getAuthorName()
 	{
-		switch ((int) $this->getData('type_dest')) {
-			case self::BN_DEST_USER:
-				return $this->displayData('fk_user_dest', 'nom_url', $display_input_value, $no_html);
-
-			case self::BN_DEST_GROUP:
-				return $this->displayData('fk_group_dest', 'nom_url', $display_input_value, $no_html);
-
-			case self::BN_DEST_SOC:
-				$email = $this->getData('email');
-				if ($email) {
-					return $email;
+		switch ((int) $this->getData('type_author')) {
+			case self::BN_AUTHOR_USER:
+				$user = $this->getChildObject('user_create');
+				if (BimpObject::objectLoaded($user) && strtolower($user->getData('login')) !== 'client_user') {
+					return $user->getName();
 				}
-				return 'Tier (par mail)';
+				return '';
+
+			case self::BN_AUTHOR_SOC:
+			case self::BN_AUTHOR_FREE:
+				$soc = $this->getChildObject('societe');
+				if (BimpObject::objectLoaded($soc)) {
+					return $soc->getName();
+				}
+				return $this->getData('email');
+
+			case self::BN_AUTHOR_GROUP:
+				$group = $this->getChildObject('author_group');
+				if (BimpObject::objectLoaded($group)) {
+					return $group->getName();
+				}
+				return '';
 		}
 
 		return '';
 	}
 
-	public function displayAuthor($display_input_value = true, $no_html = false)
+	public function getDestName()
 	{
+		$html = '';
+
+		switch ((int) $this->getData('type_dest')) {
+			case self::BN_DEST_USER:
+				$user = $this->getChildObject('user_dest');
+				if (BimpObject::objectLoaded($user)) {
+					return $user->getName();
+				}
+				return '';
+
+			case self::BN_DEST_GROUP:
+				$group = $this->getChildObject('user_group');
+				if (BimpObject::objectLoaded($group)) {
+					return $group->getName();
+				}
+
+			case self::BN_DEST_SOC:
+				$soc = $this->getChildObject('societe');
+				if (BimpObject::objectLoaded($soc)) {
+					return $soc->getName();
+				}
+				return $this->getData('email');
+		}
+
+		return '';
+	}
+
+	// Affichage:
+
+	public function displayDestinataire($display_input_value = true, $no_html = false, $with_icon = false)
+	{
+		$html = '';
+
+		switch ((int) $this->getData('type_dest')) {
+			case self::BN_DEST_USER:
+				if ($with_icon) {
+					$html .= BimpRender::renderIcon('fas_user', 'iconLeft');
+				}
+				$html .= $this->displayData('fk_user_dest', 'nom_url', $display_input_value, $no_html);
+				break;
+
+			case self::BN_DEST_GROUP:
+				if ($with_icon) {
+					$html .= BimpRender::renderIcon('fas_users', 'iconLeft');
+				}
+				$html .= $this->displayData('fk_group_dest', 'nom_url', $display_input_value, $no_html);
+				break;
+
+			case self::BN_DEST_SOC:
+				$id_soc = (int) $this->getData('id_societe');
+				$email = $this->getData('email');
+
+				if ($id_soc) {
+					if ($with_icon) {
+						$html .= BimpRender::renderIcon('fas_building', 'iconLeft');
+					}
+
+					$html .= $this->displayData('id_societe', 'nom_url', $display_input_value, $no_html);
+					if ($email) {
+						$html .= ' (' . $email . ')';
+					}
+				} elseif ($email) {
+					$html .= $email;
+				}
+				break;
+		}
+
+		return $html;
+	}
+
+	public function displayAuthor($display_input_value = true, $no_html = false, $with_icon = false)
+	{
+		$html = '';
+
 		switch ((int) $this->getData('type_author')) {
 			case self::BN_AUTHOR_USER:
 				$user = $this->getChildObject('user_create');
 				if (BimpObject::objectLoaded($user) && strtolower($user->getData('login')) === 'client_user') {
 					return '';
 				}
-				return $this->displayData('user_create', 'nom_url', $display_input_value, $no_html);
+
+				if ($with_icon) {
+					$html .= BimpRender::renderIcon('fas_user', 'iconLeft');
+				}
+				$html .= $this->displayData('user_create', 'nom_url', $display_input_value, $no_html);
+				break;
 
 			case self::BN_AUTHOR_SOC:
-				return $this->displayData('id_societe', 'nom_url', $display_input_value, $no_html);
+				if ($with_icon) {
+					$html .= BimpRender::renderIcon('fas_building', 'iconLeft');
+				}
+				$id_soc = (int) $this->getData('id_societe');
+				$email = $this->getData('email');
+
+				if ($id_soc) {
+					$html .= $this->displayData('id_societe', 'nom_url', $display_input_value, $no_html);
+					if ($email) {
+						$html .= ' (' . $email . ')';
+					}
+				} elseif ($email) {
+					$html .= $email;
+				}
+				break;
 
 			case self::BN_AUTHOR_FREE:
-				return $this->displayData('email', 'default', $display_input_value, $no_html);
+				$html .= $this->displayData('email', 'default', $display_input_value, $no_html);
+				break;
 
 			case self::BN_AUTHOR_GROUP:
-				return $this->displayData('fk_group_author', 'nom_url', $display_input_value, $no_html);
+				if ($with_icon) {
+					$html .= BimpRender::renderIcon('fas_users', 'iconLeft');
+				}
+				$html .= $this->displayData('fk_group_author', 'nom_url', $display_input_value, $no_html);
+				break;
 		}
 
-		return '';
+		return $html;
 	}
 
-	public function displayChatmsg($style = '', $checkview = false)
+	public function displayAuthorBadge()
+	{
+		$name = $this->getAuthorName();
+
+		if ($name) {
+			$html = '<span class="userBadge author ' . ($this->isUserAuthor() ? 'user' : '') . '" title="' . $name . '">';
+			$html .= $this->getInitiales($name, 2);
+			$html .= '</span>';
+		}
+
+		return $html;
+	}
+
+	public function displayDestBadge()
+	{
+		$name = $this->getDestName();
+
+		if ($name) {
+			$html = '<span class="userBadge author ' . ($this->isUserDest() ? 'user' : '') . '" title="' . $name . '">';
+			$html .= $this->getInitiales($name, 2);
+			$html .= '</span>';
+		}
+
+		return $html;
+	}
+
+	public function displayDate($relative_today = false)
+	{
+		if ($relative_today) {
+			$dt = new DateTime($this->getData('date_create'));
+			$now = new DateTime();
+
+			if ($dt->format('Y-m-d') == $now->format('Y-m-d')) {
+				return $dt->format('H:i');
+			}
+
+			$now->sub(new DateInterval('P1D'));
+			if ($dt->format('Y-m-d') == $now->format('Y-m-d')) {
+				return 'Hier | ' . $dt->format('H:i');
+			}
+		}
+
+		return date('d/m/Y | H:i', strtotime($this->getData('date_create')));
+	}
+
+	public function displayChatMsg()
+	{
+		global $user;
+		$html = '';
+
+		$author = $this->displayAuthor(false, true, true);
+		$dest = $this->displayDestinataire(false, true, true);
+
+		$parent = $this->getParentInstance();
+		if ($parent && is_a($parent, 'Bimp_Ticket')) {
+			$side = ($this->getData('type_author') == self::BN_AUTHOR_SOC || $this->getData('type_author') == self::BN_AUTHOR_FREE) ? "left" : "right";
+		} else {
+			$side = ($this->isUserDest() ? "left" : ($this->isUserAuthor() ? "right" : ""));
+		}
+
+		$buttons = '';
+		if ($this->isActionAllowed('setAsViewed') && $this->canSetAction('setAsViewed')) {
+			$buttons .= BimpRender::renderRowButton('Vu', 'far_envelope-open', $this->getJsActionOnclick('setAsViewed'));
+		}
+		if ($this->isActionAllowed('repondre') && $this->canSetAction('repondre')) {
+			$buttons .= BimpRender::renderRowButton('Répondre', 'fas_share', $this->getJsRepondre());
+		}
+
+		$html .= '<div class="bimp_chat_msg_container ' . $side . '">';
+		$html .= '<div class="bimp_chat_msg">';
+
+		$html .= '<div class="bimp_chat_msg_header">';
+		$html .= '<span class="bimp_chat_author">De : ' . $author . '</span>';
+		$html .= '<span class="bimp_chat_date">' . $this->displayDate(true) . '</span>';
+		$html .= '</div>';
+
+		$html .= '<div class="bimp_chat_msg_body">';
+		$html .= '<div class="bimp_chat_author_badge">' . $this->displayAuthorBadge() . '</div>';
+		$html .= '<div class="bimp_chat_msg_content">';
+		$html .= $this->displayData("content");
+		$html .= '</div>';
+		$html .= '<div class="bimp_chat_dest_badge">' . $this->displayDestBadge() . '</div>';
+		$html .= '</div>';
+
+		$html .= '<div class="bimp_chat_msg_footer">';
+		if ($dest) {
+			$html .= '<span class="bimp_chat_dest">À : ' . $dest . '</span>';
+		}
+		if ($buttons) {
+			$html .= '<span class="bimp_chat_buttons">'.$buttons.'</span>';
+		}
+		$html .= '</div>';
+
+		$html .= '</div>';
+		$html .= '</div>';
+
+		return $html;
+	}
+
+	public function displayChatMsg_old($style = '', $checkview = false)
 	{
 		global $user;
 		$html = "";
@@ -651,7 +865,9 @@ class BimpNote extends BimpObject
 		}
 
 		$html .= '<div class="d-flex justify-content-' . $position . ($style == "petit" ? ' petit' : '') . ' mb-4">';
-		$html .= BimpTools::getBadge($this->getInitiale($author), ($style == "petit" ? '35' : '55'), ($this->getData('type_author') == self::BN_AUTHOR_USER ? 'info' : 'warnings'), $author);
+
+		$html .= BimpTools::getBadge($this->getInitiales($author), ($style == "petit" ? '35' : '55'), ($this->getData('type_author') == self::BN_AUTHOR_USER ? 'info' : 'warnings'), $author);
+
 		$html .= '<div class="msg_cotainer">' . $this->displayData("content");
 		if ($style != "petit" && $this->getData('user_create') != $user->id) {
 			$html .= '<span class="rowButton bs-popover"><i class="fas fa-share link" onclick="' . $this->getJsRepondre() . '"></i></span>';
@@ -665,7 +881,7 @@ class BimpNote extends BimpObject
 		if ($this->getData('type_dest') != self::BN_DEST_NO) {
 			$dest = $this->displayDestinataire(false, true);
 			if ($dest != "") {
-				$html .= BimpTools::getBadge($this->getInitiale($dest), ($style == "petit" ? '28' : '45'), ($this->getData('type_dest') == self::BN_DEST_USER ? 'info' : 'warnings'), $dest);
+				$html .= BimpTools::getBadge($this->getInitiales($dest), ($style == "petit" ? '28' : '45'), ($this->getData('type_dest') == self::BN_DEST_USER ? 'info' : 'warnings'), $dest);
 			}
 		}
 		$html .= "";

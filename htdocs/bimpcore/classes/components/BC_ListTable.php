@@ -77,6 +77,7 @@ class BC_ListTable extends BC_List
         $this->params_def['enable_csv'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['search_open'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['graph'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
+		$this->params_def['no_rows_borders'] = array('data_type' => 'bool', 'default' => 1);
 
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -162,7 +163,7 @@ class BC_ListTable extends BC_List
         $current_bc = $prev_bc;
     }
 
-    // Gestion des colonnes: 
+    // Gestion des colonnes:
 
     protected function fetchCols_old()
     {
@@ -235,7 +236,7 @@ class BC_ListTable extends BC_List
         $this->cols = array();
         $cols = array();
 
-        // Colonnes config user: 
+        // Colonnes config user:
         if ($this->params['configurable'] && BimpObject::objectLoaded($this->userConfig)) {
             $user_cols = $this->userConfig->getData('cols');
 
@@ -244,7 +245,7 @@ class BC_ListTable extends BC_List
             }
         }
 
-        // Colonnes par défaut de la liste: 
+        // Colonnes par défaut de la liste:
         if (empty($cols)) {
             foreach ($this->params['cols'] as $col_name) {
                 $cols[] = $col_name;
@@ -429,7 +430,7 @@ class BC_ListTable extends BC_List
         return 'a.' . $this->object->getPrimary();
     }
 
-    // Getters statiques: 
+    // Getters statiques:
 
     public static function getObjectConfigColParams(BimpObject $object, $col_name, $list_name = '')
     {
@@ -443,14 +444,14 @@ class BC_ListTable extends BC_List
             if (!count($errors)) {
                 $params = self::getDefaultParams(self::$col_params);
 
-                // Label du champ: 
+                // Label du champ:
                 if ($field_object->field_exists($field_name)) {
                     $params['label'] = $field_object->getConf('fields/' . $field_name . '/label', '', true);
                 } elseif ($field_object->config->isDefined('objects/' . $field_name)) {
-                    // todo: le champ final correspond à une sous-liste d'enfants. 
+                    // todo: le champ final correspond à une sous-liste d'enfants.
                 }
 
-                // Lists cols de l'objet propriétaire du champ: 
+                // Lists cols de l'objet propriétaire du champ:
                 if ($field_object->config->isDefined('lists_cols/' . $field_name)) {
                     $override_params = self::fetchParamsStatic($field_object->config, 'lists_cols/' . $field_name, self::$col_params, $errors, true, true);
                     if (!empty($override_params)) {
@@ -458,7 +459,7 @@ class BC_ListTable extends BC_List
                     }
                 }
 
-                // Lists cols de l'objet courant: 
+                // Lists cols de l'objet courant:
                 if ($field_name !== $col_name && $object->config->isDefined('lists_cols/' . $col_name)) {
                     $override_params = self::fetchParamsStatic($object->config, 'lists_cols/' . $col_name, self::$col_params, $errors, true, true);
                     if (!empty($override_params)) {
@@ -466,7 +467,7 @@ class BC_ListTable extends BC_List
                     }
                 }
 
-                // Cols de l'objet courant: 
+                // Cols de l'objet courant:
                 if ($list_name && $object->config->isDefined('lists/' . $list_name . '/cols/' . $col_name)) {
                     $override_params = self::fetchParamsStatic($object->config, 'lists/' . $list_name . '/cols/' . $col_name, self::$col_params, $errors, true, true);
                     if (!empty($override_params)) {
@@ -714,7 +715,7 @@ class BC_ListTable extends BC_List
         return $filters;
     }
 
-    // Gestion des lignes: 
+    // Gestion des lignes:
 
     protected function fetchRows()
     {
@@ -965,8 +966,8 @@ class BC_ListTable extends BC_List
                     BimpCore::addlog('Appel à getxxxSqlKey pour total - intégrer field_alias', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $field_object, array(
                         'Champ' => $field_name
                     ));
-                    $ok = array(); // ajouter object_name_field_name au fur et à mesure des corrections. 
-                    if (in_array($field_object->object_name . '_' . $field_name, $ok)) { // Pour éviter erreur fatale liée au nombre de paramètres. 
+                    $ok = array(); // ajouter object_name_field_name au fur et à mesure des corrections.
+                    if (in_array($field_object->object_name . '_' . $field_name, $ok)) { // Pour éviter erreur fatale liée au nombre de paramètres.
                         $sqlKey = $this->object->{'get' . ucfirst($field_name) . 'SqlKey'}($joins, $field_alias);
                         if ($sqlKey) {
                             $fields[$sqlKey] = $col_name;
@@ -1204,7 +1205,7 @@ class BC_ListTable extends BC_List
         $html .= $this->renderAddObjectRow();
 
         $html .= '</thead>';
-        $html .= '<tbody class="listRows">';
+        $html .= '<tbody class="listRows'.($this->params['no_rows_borders'] ? ' no_borders' : '').'">';
 
         $html .= $this->renderRows();
 
@@ -1550,11 +1551,11 @@ class BC_ListTable extends BC_List
 
             $html .= '<tr class="total_row">';
 
-            // Checkboxes: 
+            // Checkboxes:
             $html .= '<th colspan="2"></th>';
             $html .= '<th>Total</th>';
 
-            // Positions: 
+            // Positions:
             if ($this->params['positions']) {
                 $html .= '<td class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></td>';
             }
@@ -1701,7 +1702,7 @@ class BC_ListTable extends BC_List
 
         $html = '';
 
-        // Lignes sélectionnées: 
+        // Lignes sélectionnées:
         $bulk_actions = array_merge($this->params['bulk_actions'], $this->params['extra_bulk_actions']);
 
         if (count($bulk_actions) && (int) $this->params['checkboxes']) {
@@ -1745,7 +1746,7 @@ class BC_ListTable extends BC_List
             }
         }
 
-        // Actions sur la liste filtrée complète: 
+        // Actions sur la liste filtrée complète:
 
         $actions = $this->params['list_actions'];
 
@@ -1919,7 +1920,7 @@ class BC_ListTable extends BC_List
 
         $isPublic = BimpCore::isContextPublic();
 
-        // Rechargement liste: 
+        // Rechargement liste:
         if (!$isPublic && $this->params['configurable']) {
             $content .= '<div style="text-align: center; margin-bottom: 15px;">';
             $content .= BimpRender::renderButton(array(
@@ -1933,7 +1934,7 @@ class BC_ListTable extends BC_List
             $content .= '</div>';
         }
 
-        // Pagination: 
+        // Pagination:
         if ($this->params['pagination']) {
             $n_values = array(10 => '10', 20 => '20', 30 => '30', 40 => '40', 50 => '50', 70 => '70', 120 => '120');
 
@@ -1954,7 +1955,7 @@ class BC_ListTable extends BC_List
 
         $tools_html = '';
 
-        // Config utilisateur: 
+        // Config utilisateur:
         if (!$isPublic) {
             global $user;
             if (BimpCore::isModuleActive('bimpuserconfig') && BimpObject::objectLoaded($user) && (int) $this->params['configurable']) {
@@ -2250,7 +2251,7 @@ class BC_ListTable extends BC_List
                             $html .= $col_params['col_style'] . ';';
                         }
 
-                        if (isset($col_params['align']) && in_array($col_params['align'], array('center', 'right'))) { // pas left puisque par défaut. 
+                        if (isset($col_params['align']) && in_array($col_params['align'], array('center', 'right'))) { // pas left puisque par défaut.
                             $html .= 'text-align: ' . $col_params['align'] . ';';
                         }
 
@@ -2531,7 +2532,7 @@ class BC_ListTable extends BC_List
                 $this->object->parent = $this->parent;
             }
         } else {
-            // Mode light (1 seule requête SQL): 
+            // Mode light (1 seule requête SQL):
 
             $ids = array();
             $cols = array();
@@ -2682,7 +2683,7 @@ class BC_ListTable extends BC_List
                     }
                 } elseif (method_exists($field_object, 'get' . ucfirst($field_name) . 'csvValue')) {
                     $col_errors = array();
-                    
+
                     $init_method = 'init' . ucfirst($field_name) . 'csvValue';
                     if (method_exists($field_object, $init_method)) {
                         $col_errors = $field_object->$init_method($ids);

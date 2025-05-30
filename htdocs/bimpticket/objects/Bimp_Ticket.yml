@@ -13,7 +13,6 @@ common_fields: 0
 nom_url:
     syntaxe: <ref>
 
-
 header_list_name: default
 header_edit_form: default
 header_btn:
@@ -353,12 +352,6 @@ fields_tables:
             -   field: comment
                 edit: 1
     
-    description:
-        title: Description
-        icon: fas_bars
-        rows:
-            -   field: message
-    
     client_infos:
         title: Infos Marchand
         icon: info-circle
@@ -389,11 +382,11 @@ views:
                         col_md: 6
                         custom:
                             callback: renderContacts
-                    -   type: fields_table
-                        fields_table:
-                            name: description
-                            col_lg: 12
-                            col_md: 12
+                    -   type: custom
+                        custom:
+                                callback: renderDescription
+                        col_lg: 12
+                        col_md: 12
             -   cols:
                     -   type: custom
                         custom:
@@ -402,6 +395,9 @@ views:
                                 params:
                                     - 1
                                     - chat
+                                    - ''
+                                    - 0
+                                    - 0
             -   cols:
                     -   type: list
                         list:

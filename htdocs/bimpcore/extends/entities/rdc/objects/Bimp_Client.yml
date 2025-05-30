@@ -7,11 +7,11 @@ header_edit_form: form_client_rdc
 
 nom_url:
     syntaxe: <name>
-    
+
 labels:
     name: Marchand
     is_female: 0
-        
+
 objects:
     user_attr:
         extends: user
@@ -59,7 +59,7 @@ fields:
         label: Priorité
         type: int
         values:
-            dict: societe_rdc_priorities                    
+            dict: societe_rdc_priorities
     fk_statut_rdc:
         label: Prospection
         type: int
@@ -138,7 +138,7 @@ fields:
         label: Nom de la boutique
     fk_pays:
         default_value: 0
-            
+    
     fournisseur: unset
     code_compta: unset
     outstanding_limit: unset
@@ -162,57 +162,53 @@ fields_tables:
         title: Identité
         icon: id-card
         rows:
-            - field: nom
-            - field: code_compta
-              show:
-                  callback: isClient
-            - field: code_compta_fournisseur
-              show:
-                  callback: isFournisseur
-            - field: is_subsidiary
-            - label: Infos contact
-              value:
-                  callback: displayFullContactInfosNoWeb
-            - label: Adresse
-              value:
-                  callback: displayFullAddress
-            - label: Site internet Marchand
-              value:
-                  callback: getUrlMarchand
-            - field: commentaire_rdc
+            -   field: name_alias
+            -   field: nom
+            -   field: shopid
+            -   field: is_subsidiary
+            -   label: Infos contact
+                value:
+                    callback: displayFullContactInfosNoWeb
+            -   label: Adresse
+                value:
+                    callback: displayFullAddress
+            -   label: Site internet Marchand
+                value:
+                    callback: getUrlMarchand
+            -   field: commentaire_rdc
     
     param_rdc:
         title: Paramètres RDC
         icon: fas_briefcase
         rows:
-            - field: shopid
-            - field: date_maj_mirakl
-            - field: name_alias
-            - label: Lien Mirakl
-              value:
-                  callback: getMiraklLink
-            - field: date_der_contact
-            - field: date_debut_prospect
-            - field: date_ouverture
-            - field: fk_priorite
-#            - field: fk_statut_rdc
-#            - field: date_changement_statut_rdc
-#            - field: fk_statut_kyc
-            - field: delai_ouverture
-            - field: fk_source_rdc
-            - field: presta_source
-#            - field: quality_score
-            - field: contrefacon
-            - field: comment_quality
-            - field: fk_user_attr_rdc
-            - field: fk_categorie_maitre
-            - field: potentiel_catalogue
+            
+            -   field: date_maj_mirakl
+            
+            -   label: Lien Mirakl
+                value:
+                    callback: getMiraklLink
+            -   field: date_der_contact
+            -   field: date_debut_prospect
+            -   field: date_ouverture
+            -   field: fk_priorite
+            #            - field: fk_statut_rdc
+            #            - field: date_changement_statut_rdc
+            #            - field: fk_statut_kyc
+            -   field: delai_ouverture
+            -   field: fk_source_rdc
+            -   field: presta_source
+            #            - field: quality_score
+            -   field: contrefacon
+            -   field: comment_quality
+            -   field: fk_user_attr_rdc
+            -   field: fk_categorie_maitre
+            -   field: potentiel_catalogue
     
     commentaires:
         title: Commentaires
         icon: fas_comment
         rows:
-            - field: commentaire_rdc
+            -   field: commentaire_rdc
     
     infos_comm:
         show: 0
@@ -233,111 +229,111 @@ views:
     default:
         title: nom
         rows:
-            - cols:
-                  - type: fields_table
-                    col_lg: 6
-                    col_md: 6
-                    col_sm: 12
-                    fields_table:
-                        name: identity_rdc
-                  
-                  - type: fields_table
-                    col_lg: 6
-                    col_md: 6
-                    col_sm: 12
-                    fields_table:
-                        name: param_rdc
-                  
-                  - type: custom
-                    col_lg: 6
-                    col_md: 6
-                    col_sm: 12
-                    custom:
-                        callback:
-                            method: renderChildrenList
-                            params:
-                                - concurrence
-                                - default
-                  
+            -   cols:
+                    -   type: fields_table
+                        col_lg: 6
+                        col_md: 6
+                        col_sm: 12
+                        fields_table:
+                            name: identity_rdc
+                    
+                    -   type: fields_table
+                        col_lg: 6
+                        col_md: 6
+                        col_sm: 12
+                        fields_table:
+                            name: param_rdc
+                    
+                    -   type: custom
+                        col_lg: 6
+                        col_md: 6
+                        col_sm: 12
+                        custom:
+                            callback:
+                                method: renderChildrenList
+                                params:
+                                    - concurrence
+                                    - default
+    
     ca:
         title: CA
         rows:
-              - cols:
-                  - type: custom
-                    col_lg: 12
-                    col_md: 12
-                    col_sm: 12
-                    custom:
-                      callback:
-                          method: renderChildrenList
-                          params:
-                              - chiffre_affaire
-                              - default
-                  - type: custom
-                    col_lg: 6
-                    col_md: 12
-                    col_sm: 12
-                    custom:
-                        callback:
-                            method: renderChildrenGraph
-                            params:
-                                - chiffre_affaire
-                                - evol
-                  - type: custom
-                    col_lg: 6
-                    col_md: 12
-                    col_sm: 12
-                    custom:
-                        callback:
-                            method: renderChildrenGraph
-                            params:
-                                - chiffre_affaire
-                                - evol2
-                  - type: custom
-                    col_lg: 6
-                    col_md: 12
-                    col_sm: 12
-                    custom:
-                        callback:
-                            method: renderChildrenGraph
-                            params:
-                                - chiffre_affaire
-                                - rep
-                  - type: custom
-                    col_lg: 6
-                    col_md: 12
-                    col_sm: 12
-                    custom:
-                        callback:
-                            method: renderChildrenGraph
-                            params:
-                                - chiffre_affaire
-                                - rep2
-                  - type: custom
-                    col_lg: 6
-                    col_md: 12
-                    col_sm: 12
-                    custom:
-                        callback:
-                            method: renderChildrenGraph
-                            params:
-                                - chiffre_affaire
-                                - rep3
-                  - type: custom
-                    col_lg: 6
-                    col_md: 12
-                    col_sm: 12
-                    custom:
-                        callback:
-                            method: renderChildrenGraph
-                            params:
-                                - chiffre_affaire
-                                - rep4
+            -   cols:
+                    -   type: custom
+                        col_lg: 12
+                        col_md: 12
+                        col_sm: 12
+                        custom:
+                            callback:
+                                method: renderChildrenList
+                                params:
+                                    - chiffre_affaire
+                                    - default
+                    -   type: custom
+                        col_lg: 6
+                        col_md: 12
+                        col_sm: 12
+                        custom:
+                            callback:
+                                method: renderChildrenGraph
+                                params:
+                                    - chiffre_affaire
+                                    - evol
+                    -   type: custom
+                        col_lg: 6
+                        col_md: 12
+                        col_sm: 12
+                        custom:
+                            callback:
+                                method: renderChildrenGraph
+                                params:
+                                    - chiffre_affaire
+                                    - evol2
+                    -   type: custom
+                        col_lg: 6
+                        col_md: 12
+                        col_sm: 12
+                        custom:
+                            callback:
+                                method: renderChildrenGraph
+                                params:
+                                    - chiffre_affaire
+                                    - rep
+                    -   type: custom
+                        col_lg: 6
+                        col_md: 12
+                        col_sm: 12
+                        custom:
+                            callback:
+                                method: renderChildrenGraph
+                                params:
+                                    - chiffre_affaire
+                                    - rep2
+                    -   type: custom
+                        col_lg: 6
+                        col_md: 12
+                        col_sm: 12
+                        custom:
+                            callback:
+                                method: renderChildrenGraph
+                                params:
+                                    - chiffre_affaire
+                                    - rep3
+                    -   type: custom
+                        col_lg: 6
+                        col_md: 12
+                        col_sm: 12
+                        custom:
+                            callback:
+                                method: renderChildrenGraph
+                                params:
+                                    - chiffre_affaire
+                                    - rep4
 
 forms:
     default:
         extends: form_client_rdc
-        
+    
     form_client_rdc:
         title: Ajout d'un marchand
         rows:
@@ -381,8 +377,8 @@ forms:
                 display_if:
                     field_name: fk_source_rdc
                     show_values:
-                        callback:
-                            method: getIdSourcePresta                
+                        conf: id_source_presta
+
             contrefacon:
                 field: contrefacon
             comment_quality:
@@ -395,19 +391,19 @@ forms:
                 field: commentaire_rdc
             Potenitel catalogue:
                 field: potentiel_catalogue
-                
-                
-                
+    
+    
+    
     formActionRdc:
         title: Choisir une action
         rows:
-            - custom: 1
-              label: Actions
-              input_name: status
-              input:
-                  type: select
-                  options:
-                      callback: getListButtons
+            -   custom: 1
+                label: Actions
+                input_name: status
+                input:
+                    type: select
+                    options:
+                        callback: getListButtons
 
 filters_panels:
     default:
@@ -436,7 +432,7 @@ lists:
         object: client
         add_btn_label: Nouvelle société
         add_form_name: form_client_rdc
-
+    
     rdc:
         configurable: 1
         checkboxes: 1
@@ -482,7 +478,7 @@ stats_lists:
             - fk_statut_kyc
             - fk_group_rdc
             - fk_user_attr_rdc
-                
+
 
 searches:
     default:

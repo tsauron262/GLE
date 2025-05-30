@@ -3,16 +3,16 @@
 class Bimp_Client_ExtEntity extends Bimp_Client
 {
 	public static $statusRdc = array(
-		0 => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
-		1 => array('label' => 'Prospection: demande entrante', 'icon' => 'fas_suitcase', 'classes' => array('important')),
-		2 => array('label' => 'Prospection: lead identifié', 'icon' => 'fas_suitcase', 'classes' => array('important')),
-		3 => array('label' => 'Prospection: prise de contact', 'icon' => 'fas_suitcase', 'classes' => array('important')),
-		4 => array('label' => 'Prospection: contact et présentation ok', 'icon' => 'fas_suitcase', 'classes' => array('important')),
-		5 => array('label' => 'Prospect KO', 'icon' => 'fas_suitcase', 'classes' => array('danger')),
+		0  => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
+		1  => array('label' => 'Prospection: demande entrante', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		2  => array('label' => 'Prospection: lead identifié', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		3  => array('label' => 'Prospection: prise de contact', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		4  => array('label' => 'Prospection: contact et présentation ok', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		5  => array('label' => 'Prospect KO', 'icon' => 'fas_suitcase', 'classes' => array('danger')),
 //				6 => array('label' => 'KYC en cours'),
 //				7 => array('label' => 'MANGOPAY en cours'),
-		8 => array('label' => 'En attente onboarding catalogue', 'icon' => 'fas_handshake', 'classes' => array('important')),
-		9 => array('label' => 'Onboarding catalogue KO', 'icon' => 'fas_handshake', 'classes' => array('danger')),
+		8  => array('label' => 'En attente onboarding catalogue', 'icon' => 'fas_handshake', 'classes' => array('important')),
+		9  => array('label' => 'Onboarding catalogue KO', 'icon' => 'fas_handshake', 'classes' => array('danger')),
 		10 => array('label' => 'Onboarding catalogue OK', 'icon' => 'fas_handshake', 'classes' => array('success')),
 		11 => array('label' => 'Live', 'icon' => 'fas_thumbs-up', 'classes' => array('success')),
 		12 => array('label' => 'Résilié', 'icon' => 'fas_thumbs-down', 'classes' => array('danger')),
@@ -24,40 +24,40 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	const PENDING_APPROVAL = 2;
 	const APPROVED = 3;
 	const REFUSED = 4;
-	const ID_ONBOARDING_OK = 12;		// YANN
+	const ID_ONBOARDING_OK = 12;        // YANN
 	public static $statut_kyc_list = array(
-		0 => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
+		0                        => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
 		self::PENDING_SUBMISSION => array('label' => 'En attente de soumission KYC', 'icon' => 'fas_hourglass', 'classes' => array('important')),
-		self::PENDING_APPROVAL => array('label' => 'Vérification KYC en cours', 'icon' => 'fas_spinner' , 'classes' => array('important')),
-		self::APPROVED => array('label' => 'KYC validé', 'icon' => 'fas_check', 'classes' => array('success')),
-		self::REFUSED => array('label' => 'KYC non valide', 'icon' => 'fas_times', 'classes' => array('danger')),
+		self::PENDING_APPROVAL   => array('label' => 'Vérification KYC en cours', 'icon' => 'fas_spinner', 'classes' => array('important')),
+		self::APPROVED           => array('label' => 'KYC validé', 'icon' => 'fas_check', 'classes' => array('success')),
+		self::REFUSED            => array('label' => 'KYC non valide', 'icon' => 'fas_times', 'classes' => array('danger')),
 	);
 	public static $statut_rdc_live = 11;
 	public static $statut_rdc_prospect_array = array(3, 4);
 
 	public static $actions_selon_statut_rdc = array(
-		0 => array( // N/C
+		0  => array( // N/C
 			1, 2, 3, 4
 		),
-		1 => array( // Prospection: demande entrante
+		1  => array( // Prospection: demande entrante
 			2, 3, 4, 5, 8
 		),
-		2 => array( // Prospection: lead identifié
+		2  => array( // Prospection: lead identifié
 			3, 4, 5, 8
 		),
-		3 => array( // prospection: prise de contact
+		3  => array( // prospection: prise de contact
 			4, 5, 8
 		),
-		4 => array( // Prospection: contact et présentation ok
+		4  => array( // Prospection: contact et présentation ok
 			5, 8
 		),
-		5 => array( // Prospect KO
+		5  => array( // Prospect KO
 			8, 3
 		),
-		8 => array( // En attente onboarding catalogue
+		8  => array( // En attente onboarding catalogue
 			9, 10, 5
 		),
-		9 => array( // Onboarding catalogue KO
+		9  => array( // Onboarding catalogue KO
 			10, 5
 		),
 		10 => array( // Onboarding catalogue OK
@@ -75,15 +75,15 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	);
 
 	public static $group_allowed_actions = array(
-		1 => array('BD'),
-		2 => array('BD'),
-		3 => array('BD'),
-		4 => array('BD'),
-		5 => array('BD'),
-		6 => array('BD'),
-		7 => array('BD'),
-		8 => array('BD'),
-		9 => array('BD'),
+		1  => array('BD'),
+		2  => array('BD'),
+		3  => array('BD'),
+		4  => array('BD'),
+		5  => array('BD'),
+		6  => array('BD'),
+		7  => array('BD'),
+		8  => array('BD'),
+		9  => array('BD'),
 		10 => array('BD'),
 		11 => array(),
 		12 => array('BD'),
@@ -95,6 +95,199 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		0 => array('label' => ' '),
 		1 => array('label' => 'OUI', 'icon' => 'fas_exclamation', 'classes' => array('danger')),
 	);
+
+	// Droits users
+
+	public function canEditField($field_name)
+	{
+		switch ($field_name) {
+			case 'presta_source':
+			case 'fk_categorie_maitre':
+			case 'potentiel_catalogue':
+				return $this->isUserBDKAM();
+
+			case 'fk_priorite':
+			case 'fk_source_rdc':
+			case 'name_alias':
+			case 'nom':
+				return $this->isUserBD();
+
+			case 'contrefacon':
+			case 'comment_quality':
+				return $this->isUserQuality();
+
+			case 'fk_group_rdc':
+			case 'fk_user_attr_rdc':
+				return $this->isUserManager();
+
+			case 'fk_statut_rdc':
+				return 0;
+		}
+		return parent::canEditField($field_name);
+	}
+
+	// Getters booléens
+
+	public function isFieldEditable($field, $force_edit = false)
+	{
+		switch ($field) {
+			case 'shopid':
+				if ($this->getData('shopid')) {
+					return false;
+				} else {
+					return $this->isUserBD();
+				}
+		}
+		return parent::isFieldEditable($field, $force_edit);
+	}
+
+	public function isAdmin()
+	{
+		global $user;
+		return BimpTools::isUserInGroup($user->id, 'Admin');
+	}
+
+	public function isUserBD()
+	{
+		global $user;
+		return BimpTools::isUserInGroup($user->id, 'BD') || BimpTools::isUserInGroup($user->id, 'Qualité') || $this->isUserManager();
+	}
+
+	public function isUserKAM()
+	{
+		global $user;
+		return BimpTools::isUserInGroup($user->id, 'KAM') || BimpTools::isUserInGroup($user->id, 'Qualité') || $this->isUserManager();
+	}
+
+	public function isUserManager()
+	{
+		global $user;
+		return BimpTools::isUserInGroup($user->id, 'MANAGER') || BimpTools::isUserInGroup($user->id, 'ADMIN');
+	}
+
+	public function isUserTECH()
+	{
+		global $user;
+		return BimpTools::isUserInGroup($user->id, 'TECH_RDC') || $this->isUserManager();
+	}
+
+	public function isUserQuality()
+	{
+		global $user;
+		return BimpTools::isUserInGroup($user->id, 'Qualité') || $this->isUserManager();
+	}
+
+	public function isUserBDKAM()
+	{
+		return $this->isUserBD() || $this->isUserKAM();
+	}
+
+	public function isCommentaireStatutKoRequired()
+	{
+		$statut = $this->getData('fk_statut_rdc');
+		if ($statut == 5) { // KO
+			return true;
+		}
+		return false;
+	}
+
+	// Getters params
+
+	public function getActionsButtons()
+	{
+//		echo '<pre>'; print_r($this->data); echo '</pre>';die;
+		$actioncomm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm');
+		$buttons[] = array(
+			'label'   => 'CR échange',
+			'icon'    => 'fas_comment',
+//			'onclick' => $actioncomm->getJsActionOnclick('cr_echange', array('fk_soc' => $this->id), array('form_name' => 'formCREchange'))
+			'onclick' => $actioncomm->getJsLoadModalForm('formCREchange', 'Compte rendu d\\\'échange', array('fields' => array('fk_soc' => $this->id)))
+		);
+
+		$buttons[] = array(
+			'label'   => 'Actions',
+			'icon'    => 'fas_edit',
+			'onclick' => $this->getJsActionOnclick('change_status_rdc', array(), array('form_name' => 'formActionRdc'))
+		);
+
+		if ($this->getData('shopid') > 0) {
+			$buttons[] = array(
+				'label'   => 'Synchro Mirakl',
+				'icon'    => 'fas_sync',
+				'onclick' => $this->getJsActionOnclick('synchroMirakl', array(), array())
+			);
+		}
+
+
+		return $buttons;
+	}
+
+	public function getListButtons()
+	{
+		global $user;
+		$buttons = array();
+
+		$statu = $this->getData('fk_statut_rdc');
+		if (isset(self::$actions_selon_statut_rdc[$statu])) {
+			foreach (self::$actions_selon_statut_rdc[$statu] as $statut) {
+				$listGroup_allowed = self::$group_allowed_actions[$statut];
+				$user_in_group = false;
+				foreach ($listGroup_allowed as $group) {
+					if (BimpTools::isUserInGroup($user->id, $group) || $this->isUserManager()) {
+						$user_in_group = true;
+						break;
+					}
+				}
+				if ($user_in_group) {
+					$buttons[$statut] = array(
+						'label'   => 'Passer le statut à ' . self::$statusRdc[$statut]['label'],
+						'icon'    => 'fas_edit',
+//						'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut), array('form_name' => 'formActionRdc'))
+						'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut))
+					);
+				} else {
+					$buttons[$statut] = array(
+						'label'    => 'Passer le statut à ' . self::$statusRdc[$statut]['label'],
+						'icon'     => 'fas_times',
+						'onclick'  => '',
+						'disabled' => 1,
+						'popover'  => 'Vous n\'avez pas les droits pour effectuer cette action'
+					);
+				}
+			}
+		}
+		return $buttons;
+	}
+
+	public function getDefaultListExtraButtons()
+	{
+		$buttons = array();
+
+		$actioncomm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm');
+		$buttons[] = array(
+			'label'   => 'Ajouter un evenement',
+			'icon'    => 'fas_calendar-plus',
+			'onclick' => $actioncomm->getJsLoadModalForm('formCREchange', 'Compte rendu d\\\'échange', array('fields' => array('fk_soc' => $this->id)))
+		);
+		return $buttons;
+	}
+
+	public function getRefProperty()
+	{
+		return '';
+	}
+
+	public function getStatusProperty()
+	{
+		return '';
+	}
+
+	public function getNameProperties()
+	{
+		return array('name_alias', 'nom');
+	}
+
+	// Getters array
 
 	public static function getUserGroupsArray($include_empty = 1, $nom_url = 0)
 	{
@@ -128,294 +321,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return self::getCacheArray($cache_key, $include_empty);
 	}
 
-    public function getActionsButtons()
+	public function getUserAttrByGroupArray()
 	{
-//		echo '<pre>'; print_r($this->data); echo '</pre>';die;
-		$actioncomm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm');
-		$buttons[] = array(
-			'label'   => 'CR échange',
-			'icon'    => 'fas_comment',
-//			'onclick' => $actioncomm->getJsActionOnclick('cr_echange', array('fk_soc' => $this->id), array('form_name' => 'formCREchange'))
-			'onclick' => $actioncomm->getJsLoadModalForm('formCREchange', 'Compte rendu d\\\'échange', array('fields' => array('fk_soc' => $this->id)))
-		);
-
-		$buttons[] = array(
-			'label'   => 'Actions',
-			'icon'    => 'fas_edit',
-			'onclick' => $this->getJsActionOnclick('change_status_rdc', array(), array('form_name' => 'formActionRdc'))
-		);
-
-		if ($this->getData('shopid') > 0) {
-			$buttons[] = array(
-				'label'   => 'Synchro Mirakl',
-				'icon'    => 'fas_sync',
-				'onclick' => $this->getJsActionOnclick('synchroMirakl', array(), array())
-			);
-		}
-
-
-
-
-		return $buttons;
-	}
-
-    public function getListButtons()
-	{
-		global $user;
-		$buttons = array();
-
-		$statu = $this->getData('fk_statut_rdc');
-		if (isset(self::$actions_selon_statut_rdc[$statu])) {
-			foreach (self::$actions_selon_statut_rdc[$statu] as $statut) {
-				$listGroup_allowed = self::$group_allowed_actions[$statut];
-				$user_in_group = false;
-				foreach ($listGroup_allowed as $group) {
-					if (BimpTools::isUserInGroup($user->id, $group) || $this->isUserManager()) {
-						$user_in_group = true;
-						break;
-					}
-				}
-				if($user_in_group)
-					$buttons[$statut] = array(
-						'label'   => 'Passer le statut à ' . self::$statusRdc[$statut]['label'],
-						'icon'    => 'fas_edit',
-//						'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut), array('form_name' => 'formActionRdc'))
-						'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut))
-					);
-				else
-					$buttons[$statut] = array(
-						'label'   => 'Passer le statut à ' . self::$statusRdc[$statut]['label'],
-						'icon'    => 'fas_times',
-						'onclick' => '',
-						'disabled' => 1,
-						'popover' => 'Vous n\'avez pas les droits pour effectuer cette action'
-					);
-			}
-		}
-		return $buttons;
-	}
-
-	public function getMiraklLink()
-	{
-		if ($this->getData('shopid') > 0) {
-			$url = 'https://mirakl-web.groupe-rueducommerce.fr/mmp/operator/shop/' . $this->getData('shopid');
-			return $this->getHref($url);
-		}
-		else return '';
-	}
-
-	public function getUrlMarchand()	{
-		$html = ' ';
-		if ($this->getData('url')) {
-			$urls = explode("%0D%0A", urlencode($this->getData('url')));
-			foreach ($urls as $url) {
-				$lien = $this->getHref(urldecode($url));
-				if ($html != ' ') {
-					$html .= '<br>';
-				}
-				$html .= $lien;
-			}
-		}
-		return $html;
-	}
-
-	public function getHref($url, $target="_blank")
-	{
-		if (substr($url, 0, 4) != 'http')	{
-			$url = 'https://' . $url;
-		}
-//		$href = '<a href="' . $url . '" target="' . $target . '"><i class="fas fa-external-link-alt"></></a>';
-		$href = '<a href="' . $url . '" target="' . $target . '">' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
-		return $url . " " . $href;
-	}
-
-	public function getDefaultListExtraButtons()	{
-		$buttons = array();
-
-		$actioncomm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm');
-		$buttons[] = array(
-			'label'   => 'Ajouter un evenement',
-			'icon'    => 'fas_calendar-plus',
-			'onclick' => $actioncomm->getJsLoadModalForm('formCREchange', 'Compte rendu d\\\'échange', array('fields' => array('fk_soc' => $this->id)))
-		);
-		return $buttons;
-	}
-
-	public function displayFullContactInfosNoWeb()	{
-		$params = array(
-			'url' => false,
-//			'phone' => true,
-			);
-		return parent::displayFullContactInfos(1, 0, $params) ?: ' ';
-	}
-
-	public function displayFullAddress ($icon = false, $single_line = false)	{
-		return parent::displayFullAddress($icon, $single_line) ?: ' ';
-	}
-
-	public function canEditField($field_name)
-	{
-		switch ($field_name) {
-			case 'presta_source':
-			case 'fk_categorie_maitre':
-			case 'potentiel_catalogue':
-				return $this->isUserBDKAM();
-
-			case 'fk_priorite':
-			case 'fk_source_rdc':
-			case 'name_alias':
-			case 'nom':
-				return $this->isUserBD();
-
-			case 'contrefacon':
-			case 'comment_quality':
-				return $this->isUserQuality();
-
-			case 'fk_group_rdc':
-			case 'fk_user_attr_rdc':
-				return $this->isUserManager();
-
-			case 'fk_statut_rdc':
-				return 0;
-		}
-		return parent::canEditField($field_name);
-	}
-
-	public function isFieldEditable($field, $force_edit = false)
-	{
-		switch ($field) {
-			case 'shopid':
-				if ($this->getData('shopid')) return false;
-				else return $this->isUserBD();
-		}
-		return parent::isFieldEditable($field, $force_edit);
-	}
-
-	public function isAdmin()
-	{
-		global $user;
-		return BimpTools::isUserInGroup($user->id, 'Admin');
-	}
-
-	public function isUserBD()
-	{
-		global $user;
-		return BimpTools::isUserInGroup($user->id,'BD') || BimpTools::isUserInGroup($user->id,'Qualité') || $this->isUserManager();
-	}
-
-	public function isUserKAM()
-	{
-		global $user;
-		return BimpTools::isUserInGroup($user->id,'KAM') || BimpTools::isUserInGroup($user->id,'Qualité') || $this->isUserManager();
-	}
-
-	public function isUserManager()
-	{
-		global $user;
-		return BimpTools::isUserInGroup($user->id,'MANAGER') || BimpTools::isUserInGroup($user->id,'ADMIN');
-	}
-
-	public function isUserTECH()
-	{
-		global $user;
-		return BimpTools::isUserInGroup($user->id,'TECH_RDC')|| $this->isUserManager();
-	}
-
-	public function isUserQuality()
-	{
-		global $user;
-		return BimpTools::isUserInGroup($user->id,'Qualité')|| $this->isUserManager();
-	}
-
-	public function isUserBDKAM()
-	{
-		return $this->isUserBD() || $this->isUserKAM();
-	}
-
-	public function isCommentaireStatutKoRequired()	{
-		$statut = $this->getData('fk_statut_rdc');
-		if ($statut == 5) { // KO
-			return true;
-		}
-		return false;
-	}
-
-	public function renderHeaderStatusExtra()	{
-		$html = '';
-		$tab = self::$statusRdc[$this->getData('fk_statut_rdc')];
-		$classes = '';
-		if (isset($tab['classes'])) {
-			foreach ($tab['classes'] as $class) {
-				$classes .= ($classes!='' ? ', ' : '') . $class;
-			}
-		}
-		$html .= '<div><span class="' .$classes . '">Statut de prospection&nbsp;: ';
-		$icon = '';
-		if(isset($tab['icon'])) {
-			$icon = BimpRender::renderIcon($tab['icon'], 'iconLeft');
-		}
-		$html .= $icon . $tab['label'];
-		$html .= '</span>';
-		if ($this->getData('fk_statut_rdc') == 5) {
-			$html .= '<br />Motif KO&nbsp;: ' . $this->getData('commentaire_statut_ko');
-		}
-		if ($this->getData('date_changement_statut_rdc')) {
-			$html .= '<br />Dernier changement de statut le&nbsp;: ' . date('d / m / Y', strtotime($this->getData('date_changement_statut_rdc')));
-		}
-		$html .= '</div><div>&nbsp;</div>';
-
-		$tab = self::$statut_kyc_list[$this->getData('fk_statut_kyc')];
-		$classes = '';
-		if (isset($tab['classes'])) {
-			foreach ($tab['classes'] as $class) {
-				$classes .= ($classes!='' ? ', ' : '') . $class;
-			}
-		}
-		$html .= '<div class="' .$classes . '">Statut KYC&nbsp;: ';
-		$icon = '';
-		if(isset($tab['icon'])) {
-			$icon = BimpRender::renderIcon($tab['icon'], 'iconLeft');
-		}
-		$html .= $icon . $tab['label'];
-		$html .= '</div><div>&nbsp;</div>';
-
-		return $html;
-	}
-
-	public function getStatusProperty()	{
-		return '';
-	}
-
-//	public function getRefProperty()
-//	{
-//		return 'shopid';
-//	}
-
-	public function getRef($withGeneric = true)
-	{
-		$html = '';
-		if ($this->getData('name_alias')) $html .= $this->getData('name_alias');
-		if ($this->getData('shopid')) {
-			if ($html != '') $html .= '<br>';
-			$html .= 'Shop id : ' . $this->getData('shopid');
-		}
-		return $html;
-	}
-
-	public function getPageTitle()
-	{
-		$html = '';
-		if ($this->getData('name_alias')) $html .= $this->getData('name_alias');
-		if ($this->getData('shopid')) {
-			if ($html != '') $html .= ' - ';
-			$html .= $this->getData('shopid');
-		}
-		if ($html)		return $html;
-
-		return parent::getPageTitle();
-	}
-
-	public function getUserAttrByGroupArray()	{
 		$idGroup = BimpTools::getPostFieldValue('fk_group_rdc', $this->getData('fk_group_rdc'), 'int');
 		$rows = $this->getBdb()->getRows(
 			'user AS u',
@@ -438,26 +345,99 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return $users;
 	}
 
-	public function getIdSourcePresta()	{
-		return array(BimpCore::getConf('id_source_presta'));
+	// Getters Données
+
+	public function getPageTitle()
+	{
+		$html = '';
+		if ($this->getData('name_alias')) {
+			$html .= $this->getData('name_alias');
+		}
+		if ($this->getData('shopid')) {
+			if ($html != '') {
+				$html .= ' - ';
+			}
+			$html .= $this->getData('shopid');
+		}
+		if ($html) {
+			return $html;
+		}
+
+		return parent::getPageTitle();
 	}
 
-	public function renderPageView()
+	public function getRef($withGeneric = true)
 	{
-		$tabs = array();
+		$prop = $this->getRefProperty();
 
-		$tabs[] = array(
-			'id' => 'default',
-			'title' => 'Compte rendu d\'échange',
-			'content' => $this->renderActionsCommView('manuel')
-		);
-		$tabs[] = array(
-			'id' => 'auto',
-			'title' => 'Actions automatiques',
-			'content' => $this->renderActionsCommView('auto'),
-		);
+		if (isset($this->data[$prop]) && $this->data[$prop]) {
+			return $this->data[$prop];
+		}
 
-		return BimpRender::renderNavTabs($tabs);
+		return '';
+	}
+
+	public function getName($withGeneric = true)
+	{
+		$name = '';
+
+		$nom = $this->getData('nom');
+		$alias = $this->getData('name_alias');
+
+		if ($alias) {
+			$name .= $alias;
+		}
+
+		if ($nom && strpos($alias, $nom) === false) {
+			if ($name) {
+				$name .= ' (' . $nom . ')';
+			} else {
+				$name = $nom;
+			}
+		}
+
+		return $name;
+	}
+
+	public function getMiraklLink()
+	{
+		if ($this->getData('shopid') > 0) {
+			$url = 'https://mirakl-web.groupe-rueducommerce.fr/mmp/operator/shop/' . $this->getData('shopid');
+			return $this->getHref($url);
+		} else {
+			return '';
+		}
+	}
+
+	public function getUrlMarchand()
+	{
+		$html = ' ';
+		if ($this->getData('url')) {
+			$urls = explode("%0D%0A", urlencode($this->getData('url')));
+			foreach ($urls as $url) {
+				$lien = $this->getHref(urldecode($url));
+				if ($html != ' ') {
+					$html .= '<br>';
+				}
+				$html .= $lien;
+			}
+		}
+		return $html;
+	}
+
+	public function getHref($url, $target = "_blank")
+	{
+		if (substr($url, 0, 4) != 'http') {
+			$url = 'https://' . $url;
+		}
+//		$href = '<a href="' . $url . '" target="' . $target . '"><i class="fas fa-external-link-alt"></></a>';
+		$href = '<a href="' . $url . '" target="' . $target . '">' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
+		return $url . " " . $href;
+	}
+
+	public function getIdSourcePresta()
+	{
+		return array(BimpCore::getConf('id_source_presta'));
 	}
 
 	public function getFlagImport()
@@ -465,16 +445,93 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$html = '';
 		$import_key = $this->getData('import_key');
 		if ($import_key) {
-			if(strpos($import_key, 'IMP_FLO') !== false)
+			if (strpos($import_key, 'IMP_FLO') !== false) {
 				$html .= '<span class="" title="Importé Florian">';
-			elseif (strpos($import_key, 'IMP_MOALING_') !== false)
+			} elseif (strpos($import_key, 'IMP_MOALING_') !== false) {
 				$html .= '<span class="" title="Importé Moaling">';
-			else
+			} else {
 				$html .= '<span class="success" title="Importé Salesforce">';
+			}
 			$html .= BimpRender::renderIcon('fas_file-import', 'iconRight');
 			$html .= '</span>';
 		}
 		return $html;
+	}
+
+	// Affichages
+
+	public function displayFullContactInfosNoWeb()
+	{
+		$params = array(
+			'url' => false,
+//			'phone' => true,
+		);
+		return parent::displayFullContactInfos(1, 0, $params) ? : ' ';
+	}
+
+	public function displayFullAddress($icon = false, $single_line = false)
+	{
+		return parent::displayFullAddress($icon, $single_line) ? : ' ';
+	}
+
+	// Rendus HTML
+
+	public function renderHeaderStatusExtra()
+	{
+		$html = '';
+		$tab = self::$statusRdc[$this->getData('fk_statut_rdc')];
+		$classes = '';
+		if (isset($tab['classes'])) {
+			foreach ($tab['classes'] as $class) {
+				$classes .= ($classes != '' ? ', ' : '') . $class;
+			}
+		}
+		$html .= '<div><span class="' . $classes . '">Statut de prospection&nbsp;: ';
+		$icon = '';
+		if (isset($tab['icon'])) {
+			$icon = BimpRender::renderIcon($tab['icon'], 'iconLeft');
+		}
+		$html .= $icon . $tab['label'];
+		$html .= '</span>';
+		if ($this->getData('fk_statut_rdc') == 5) {
+			$html .= '<br />Motif KO&nbsp;: ' . $this->getData('commentaire_statut_ko');
+		}
+		if ($this->getData('date_changement_statut_rdc')) {
+			$html .= '<br />Dernier changement de statut le&nbsp;: ' . date('d / m / Y', strtotime($this->getData('date_changement_statut_rdc')));
+		}
+		$html .= '</div><div>&nbsp;</div>';
+
+		$tab = self::$statut_kyc_list[$this->getData('fk_statut_kyc')];
+		$classes = '';
+		if (isset($tab['classes'])) {
+			foreach ($tab['classes'] as $class) {
+				$classes .= ($classes != '' ? ', ' : '') . $class;
+			}
+		}
+		$html .= '<div class="' . $classes . '">Statut KYC&nbsp;: ';
+		$icon = '';
+		if (isset($tab['icon'])) {
+			$icon = BimpRender::renderIcon($tab['icon'], 'iconLeft');
+		}
+		$html .= $icon . $tab['label'];
+		$html .= '</div><div>&nbsp;</div>';
+
+		return $html;
+	}
+
+	public function renderHeaderExtraLeft()
+	{
+		$html = '';
+
+		$shopid = $this->getData('shopid');
+
+		if ($shopid) {
+			$html .= '<div style="font-size: 15px; margin-top: -10px; margin-bottom: 10px;">';
+			$html .= '<span class="info">Shop ID : ' . $shopid .'</span>';
+			$html .= '</div>';
+		}
+
+		return $html . parent::renderHeaderExtraLeft();
 	}
 
 	public function renderActionsCommView($type)
@@ -486,7 +543,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 		$filtre_type = array();
 		$titre = '';
-		switch ($type)	{
+		switch ($type) {
 			case 'manuel':
 				$filtre_type = 'not_in';
 				$titre = 'Liste des échanges';
@@ -506,215 +563,25 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return $list->renderHtml();
 	}
 
-	public function create(&$warnings = array(), $force_create = false)
+	public function renderPageView()
 	{
-		$this->checkAttr();
-		return parent::create($warnings, $force_create);
-	}
+		$tabs = array();
 
-	public function update(&$warnings = array(), $force_update = false)
-	{
-		$errors = array();
-		if ( BimpTools::getPostFieldValue('fk_source_rdc') == BimpCore::getConf('id_source_presta', 20) && strlen(BimpTools::getPostFieldValue('presta_source')) <= 0) {
-			$errors[] = 'Le champ Prestataire/agrégateur est obligatoire';
-		}
-
-		if (BimpTools::getPostFieldValue('contrefacon') == 1 && strlen(BimpTools::getPostFieldValue('comment_quality')) <= 0) {
-			$errors[] = 'Le champ Commentaire qualité est obligatoire';
-		}
-
-		if (count($errors))
-			return $errors;
-
-		$this->checkAttr();
-		$this->AlerteQualite();
-		$this->alertePassage_XX($this->getData('fk_statut_rdc'));
-
-		return parent::update($warnings, $force_update);
-	}
-
-	public function actionSynchroMirakl($data, &$success){
-		$errors = $warnings = array();
-		$success = 'Synchro OK';
-		$this->appelMiraklS20($errors);
-		return array(
-			'errors'   => $errors,
-			'warnings' => $warnings
+		$tabs[] = array(
+			'id'      => 'default',
+			'title'   => 'Compte rendu d\'échange',
+			'content' => $this->renderActionsCommView('manuel')
 		);
+		$tabs[] = array(
+			'id'      => 'auto',
+			'title'   => 'Actions automatiques',
+			'content' => $this->renderActionsCommView('auto'),
+		);
+
+		return BimpRender::renderNavTabs($tabs);
 	}
 
-	/*
-	public function onSave(&$errors = array(), &$warnings = array())
-	{
-		parent::onSave($errors, $warnings);
-	}
-	*/
-
-	public function appelMiraklS20(&$warnings = array())
-	{
-		$shopid = $this->getData('shopid');
-		if(BimpTools::isModuleDoliActif('bimpapi')) {
-			require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
-			$api = BimpAPI::getApiInstance('mirakl');
-			if(!isset($api) || !is_object($api)) {
-				$warnings[] = 'Module API non actif';
-				return;
-			}
-			$data = $api->getShopInfo($shopid);
-			if(!is_array($data)) {
-				$warnings[] = 'Erreur lors de la récupération des données Mirakl';
-				return;
-			}
-
-			$errors = array();
-			if ($data['total_count'] == 0) {
-				$warnings[] = 'ShopId ' . $shopid . ' non trouvé sur mirakl';
-				$this->set('shopid', 0);
-			} else {
-				$shop = $data['shops'][0];
-//				echo '<pre>'; print_r($shop); echo '</pre>';  exit;
-				// traitement des données reçues : mise a jour du tiers
-				$kyc = constant('self::' . $shop['kyc']['status']);
-				if ($kyc)
-					$this->set('fk_statut_kyc', $kyc);
-				$this->set('nom', $shop['pro_details']['corporate_name']);
-				$this->set('name_alias', $shop['shop_name']);
-				$add = $shop['contact_informations']['street1'];
-				if ($shop['contact_informations']['street2']) {
-					$add .= ' ' . $shop['contact_informations']['street2'];
-				}
-				if ($add)
-					$this->set('address', $add);
-				if ($shop['contact_informations']['zip_code'])
-					$this->set('zip', $shop['contact_informations']['zip_code']);
-				if($shop['contact_informations']['city'])
-					$this->set('town', $shop['contact_informations']['city']);
-				if ($shop['contact_informations']['country']) {
-					$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $shop['contact_informations']['country'] . '\'');
-					if ($id_pays) {
-						$this->set('fk_pays', $id_pays);
-					}
-				}
-				if($shop['contact_informations']['email'])
-					$this->set('email', $shop['contact_informations']['email']);
-				if($shop['contact_informations']['phone'])
-					$this->set('phone', $shop['contact_informations']['phone']);
-				if($shop['contact_informations']['site_web'])
-					$this->set('url', $shop['contact_informations']['site_web']);
-
-				$datas = array(
-					'civility' => $this->traduct_civility($shop['contact_informations']['civility']),
-					'lastname' => $shop['contact_informations']['lastname'],
-					'firstname' => $shop['contact_informations']['firstname'],
-					'street1' => $shop['contact_informations']['street1'],
-					'street2' => $shop['contact_informations']['street2'],
-					'zip' => $shop['contact_informations']['zip_code'],
-					'town' => $shop['contact_informations']['city'],
-					'email' => $shop['contact_informations']['email'],
-					'phone' => $shop['contact_informations']['phone'],
-					'poste' => 'Mirakl: Contact principal',
-				);
-				$this->createOrUpdateContacts($datas);
-
-				// traitement des champs additionnels
-				$additional_fields = array();
-				foreach ($shop['shop_additional_fields'] as $value) {
-					$additional_fields[$value['code']] = array('value' => $value['value'], 'type' => $value['type']);
-				}
-//				echo '<pre>'; print_r($additional_fields); echo '</pre>';  exit;
-				if (!empty($additional_fields['lastname-cs']) || !empty($additional_fields['email-cs']) || !empty($additional_fields['address-cs']) || !empty($additional_fields['firstname-cs']) || !empty($additional_fields['phone-cs']) ) {
-					$datas = array(
-						'lastname' => $additional_fields['lastname-cs']['value'],
-						'firstname' => $additional_fields['firstname-cs']['value'],
-						'email' => $additional_fields['email-cs']['value'],
-						'phone' => $additional_fields['phone-cs']['value'],
-						'civility' => $additional_fields['civ-cs']['value'],
-						'street1' => $additional_fields['address-cs']['value'],
-						'street2' => $additional_fields['address-cs-2']['value'],
-						'zip' => $additional_fields['postal-code-cs']['value'],
-						'town' => $additional_fields['city-cs']['value'],
-						'country' => $additional_fields['country-cs']['value'],
-						'poste' => 'Mirakl: Contact CS',
-					);
-					$this->createOrUpdateContacts($datas);
-				}
-				if (!empty($additional_fields['nom-contact-commercial']) || !empty($additional_fields['email-contact-commercial']) || !empty($additional_fields['prenom-contact-commercial']) || !empty($additional_fields['telephone-contact-commercial'])) {
-					$datas = array(
-						'lastname' => $additional_fields['nom-contact-commercial']['value'],
-						'firstname' => $additional_fields['prenom-contact-commercial']['value'],
-						'email' => $additional_fields['email-contact-commercial']['value'],
-						'phone' => $additional_fields['telephone-contact-commercial']['value'],
-						'poste' => 'Mirakl: Contact commercial',
-					);
-					$this->createOrUpdateContacts($datas);
-				}
-				if (!empty($additional_fields['lastname-tech']) || !empty($additional_fields['email-tech']) || !empty($additional_fields['firstname-tech']) || !empty($additional_fields['phone-tech'])) {
-					$datas = array(
-						'lastname' => $additional_fields['lastname-tech']['value'],
-						'firstname' => $additional_fields['firstname-tech']['value'],
-						'email' => $additional_fields['email-tech']['value'],
-						'phone' => $additional_fields['phone-tech']['value'],
-						'civility' => $additional_fields['civ-tech']['value'],
-						'poste' => 'Mirakl: Contact technique',
-					);
-					$this->createOrUpdateContacts($datas);
-				}
-				if (!empty($additional_fields['accounting-lastname']) || !empty($additional_fields['accounting-email']) || !empty($additional_fields['accounting-firstname']) || !empty($additional_fields['accounting-phone'])) {
-					$datas = array(
-						'lastname' => $additional_fields['accounting-lastname']['value'],
-						'firstname' => $additional_fields['accounting-firstname']['value'],
-						'email' => $additional_fields['accounting-email']['value'],
-						'phone' => $additional_fields['accounting-phone']['value'],
-						'poste' => 'Mirakl: Contact comptabilité',
-					);
-					$this->createOrUpdateContacts($datas);
-				}
-
-
-
-				// surcharge attribution
-				if ($shop['assignees'])	{
-					$emailAssign = strtolower($shop['assignees'][0]['email']);
-					$userAttr = $this->getBdb()->getRows(
-						'user AS u',
-						'u.email LIKE \'' . $emailAssign . '\' OR LOCATE(\'' . $emailAssign . '\', ue.alias)',
-						1,'array',array('u.rowid'),null,null,array(
-							'ue' => array(
-								'table' => 'user_extrafields',
-								'on'    => 'u.rowid = ue.fk_object'
-							))
-					);
-					if (isset($userAttr[0]['rowid']) && $userAttr[0]['rowid']) $this->set('fk_user_attr_rdc', $userAttr[0]['rowid']);
-					else $warnings [] = 'Utilisateur d\'attribution non trouvé. ' . $emailAssign;
-				}
-				// surcharge statut
-				if ($shop['shop_state'] === 'SUSPENDED' && !in_array($this->getData('fk_statut_rdc') , array(12, 14))) 	{
-					$this->set('fk_statut_rdc', 13);
-					$this->set('date_changement_statut_rdc', date('Y-m-d', strtotime($shop['last_updated_date'])));
-				}
-				if ($shop['shop_state'] === 'OPEN' && $this->getData('fk_statut_rdc') != self::$statut_rdc_live) {
-					$this->set('fk_statut_rdc', self::$statut_rdc_live);
-					$this->set('date_changement_statut_rdc', date('Y-m-d'));
-					if (!$this->getData('date_ouverture') && $shop['last_updated_date'])
-						$this->set('date_ouverture', date('Y-m-d', strtotime($shop['last_updated_date'])));
-
-					if ($this->getData('date_debut_prospect'))	{
-							$dp = new DateTime($this->getData('date_debut_prospect'));
-							$do = new DateTime($this->getData('date_ouverture'));
-							$diff = $dp->diff($do);
-							if ($diff->invert == 0) {
-								$this->set('delai_ouverture', $diff->format('%a'));
-							}
-					}
-				}
-				$this->set('date_maj_mirakl', date('Y-m-d H:i:s'));
-				$this->update($warnings);
-			}
-		}
-		else{
-			$warnings[] = 'Module API non actif';
-		}
-	}
+	// Traitements
 
 	public function createOrUpdateContacts($datas)
 	{
@@ -749,46 +616,59 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function updateContact($contact, $info)
 	{
-		if($contact->getData('email') == $info['email'])	{
+		if ($contact->getData('email') == $info['email']) {
 			$contact = $this->setObj($contact, $info);
 			$poste = $contact->getData('poste');
 			if (!$poste || $poste && strstr($poste, $info['poste']) === false) {
 				// c'est un nouveau poste, on l'ajoute
-				if ($poste) $poste .= '<br>';
+				if ($poste) {
+					$poste .= '<br>';
+				}
 				$poste .= $info['poste'];
 				$contact->set('poste', $poste);
 			}
 			$err = $contact->update();
-			if($err) return 0;
-			else return 1;
+			if ($err) {
+				return 0;
+			} else {
+				return 1;
+			}
 		}
 		return 0;
 	}
 
-	public function setObj($obj, $contact)	{
+	public function setObj($obj, $contact)
+	{
 		$obj->set('civility', $contact['civility'] ? $this->traduct_civility($contact['civility']) : $obj->getData('civility'));
-		$obj->set('lastname', $contact['lastname'] ?: $obj->getData('lastname'));
-		$obj->set('firstname', $contact['firstname'] ?: $obj->getData('firstname'));
-		$add = $contact['street1'] ?: $this->getData('address');
-		if ($contact['street1'] && $contact['street2'])	$add .= ' ' . $contact['street2'];
-		$obj->set('address', $add);
-		$obj->set('zip', $contact['zip_code'] ?: $this->getData('zip'));
-		$obj->set('town', $contact['city'] ?: $this->getData('town'));
-		$id_pays = 0;
-		if ($contact['country'])	{
-			$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $contact['country'] . '\' OR label LIKE \'' . $contact['country'] . '\'');
-			if ($id_pays)	$obj->set('fk_pays', $id_pays);
+		$obj->set('lastname', $contact['lastname'] ? : $obj->getData('lastname'));
+		$obj->set('firstname', $contact['firstname'] ? : $obj->getData('firstname'));
+		$add = $contact['street1'] ? : $this->getData('address');
+		if ($contact['street1'] && $contact['street2']) {
+			$add .= ' ' . $contact['street2'];
 		}
-		if (!$id_pays)	$obj->set('fk_pays', $this->getData('fk_pays'));
+		$obj->set('address', $add);
+		$obj->set('zip', $contact['zip_code'] ? : $this->getData('zip'));
+		$obj->set('town', $contact['city'] ? : $this->getData('town'));
+		$id_pays = 0;
+		if ($contact['country']) {
+			$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $contact['country'] . '\' OR label LIKE \'' . $contact['country'] . '\'');
+			if ($id_pays) {
+				$obj->set('fk_pays', $id_pays);
+			}
+		}
+		if (!$id_pays) {
+			$obj->set('fk_pays', $this->getData('fk_pays'));
+		}
 		$obj->set('phone', $contact['phone']);
 		$obj->set('email', $contact['email']);
 		return $obj;
 	}
 
-	public function checkAttr() {
+	public function checkAttr()
+	{
 		global $user;
 		$attr = $this->getData('fk_user_attr_rdc');
-		if ($attr != $user->id)	{
+		if ($attr != $user->id) {
 			if ($attr && ($this->getInitData('fk_user_attr_rdc') != $attr)) { // si changement d'attribution
 				$code = 'Attribution_rdc';
 				$sujet = 'Attribution Compte';
@@ -798,13 +678,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		}
 	}
 
-//	public function change_status_rdc() {
-//		if ($this->getInitData('fk_statut_rdc') != $this->getData('fk_statut_rdc')) {
-//			$this->set('date_changement_statut_rdc', date('Y-m-d'));
-//		}
-//	}
-
-	public function traduct_civility($civility) {
+	public function traduct_civility($civility)
+	{
 		switch ($civility) {
 			case 'Mr':
 			case 'M':
@@ -823,49 +698,22 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		}
 	}
 
-	public function actionChange_status_rdc($data, &$warnings = array())
-	{
-		$warnings = array();
-        $errors = array();
-		$success = 'Changement de statut effectué';
-
-		if (!$data['status'])	{
-			$errors[] = 'Aucun statut sélectionné';
-		}
-		else {
-			// update de la date_debut_prospect (si statut_rdc dans la liste des statuts de début de prospection)
-			if (in_array($data['status'], self::$statut_rdc_prospect_array)) {
-				if (empty($this->getData('date_debut_prospect'))) {
-					$this->set('date_debut_prospect', date('Y-m-d'));
-				}
-			}
-		}
-
-		$this->set('fk_statut_rdc', $data['status']);
-		$this->set('date_changement_statut_rdc', date('Y-m-d'));
-
-		$this->update($warnings, true);
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-	}
-
-
 	public function AlerteQualite()
 	{
 		global $user, $langs;
-		if($this->getData('contrefacon') && !$this->getInitData('contrefacon') && $this->getData('fk_user_attr_rdc') != $user->id) 	{
+		if ($this->getData('contrefacon') && !$this->getInitData('contrefacon') && $this->getData('fk_user_attr_rdc') != $user->id) {
 			$code = 'alerte_qualite';
 			$sujet = 'Alerte qualité';
 			$msg = 'Le marchand ' . $this->getLink() . ' a été signalé pour un problème de qualité par ' . $user->getFullName($langs);
-			if ($this->getData('comment_quality'))
+			if ($this->getData('comment_quality')) {
 				$msg .= '<p>Commentaire :<br>' . $this->getData('comment_quality') . '</p>';
+			}
 //			BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
 		}
 	}
 
-	public function alerteOnboarding_catalogue_OK()	{
+	public function alerteOnboarding_catalogue_OK()
+	{
 		global $user, $langs;
 		$code = 'alerte_onboarding_catalogue';
 		$sujet = 'Marchand en "Onboarding catalogue OK"';
@@ -873,7 +721,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 //		BimpUserMsg::envoiMsg($code, $sujet, $msg, self::ID_ONBOARDING_OK);
 	}
 
-	public function alertePassage_live()	{
+	public function alertePassage_live()
+	{
 		global $user, $langs;
 		$code = 'alerte_passage_live';
 		$sujet = 'Marchand en "Live"';
@@ -881,7 +730,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 //		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
 	}
 
-	public function alertePassage_resil()	{
+	public function alertePassage_resil()
+	{
 		global $user, $langs;
 		$code = 'alerte_passage_resil';
 		$sujet = 'Marchand en "Résilié"';
@@ -889,7 +739,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 //		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
 	}
 
-	public function alertePassage_suspendu()	{
+	public function alertePassage_suspendu()
+	{
 		global $user, $langs;
 		$code = 'alerte_passage_suspendu';
 		$sujet = 'Marchand en "Suspendu"';
@@ -897,8 +748,9 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 //		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
 	}
 
-	public function alertePassage_XX($s)	{
-		switch ($s)	{
+	public function alertePassage_XX($s)
+	{
+		switch ($s) {
 			case 10:
 				$this->alerteOnboarding_catalogue_OK();
 				break;
@@ -912,6 +764,252 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$this->alertePassage_suspendu();
 				break;
 		}
+	}
+
+	public function appelMiraklS20(&$warnings = array())
+	{
+		$shopid = $this->getData('shopid');
+		if (BimpTools::isModuleDoliActif('bimpapi')) {
+			require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+			$api = BimpAPI::getApiInstance('mirakl');
+			if (!isset($api) || !is_object($api)) {
+				$warnings[] = 'Module API non actif';
+				return;
+			}
+			$data = $api->getShopInfo($shopid);
+			if (!is_array($data)) {
+				$warnings[] = 'Erreur lors de la récupération des données Mirakl';
+				return;
+			}
+
+			$errors = array();
+			if ($data['total_count'] == 0) {
+				$warnings[] = 'ShopId ' . $shopid . ' non trouvé sur mirakl';
+				$this->set('shopid', 0);
+			} else {
+				$shop = $data['shops'][0];
+//				echo '<pre>'; print_r($shop); echo '</pre>';  exit;
+				// traitement des données reçues : mise a jour du tiers
+				$kyc = constant('self::' . $shop['kyc']['status']);
+				if ($kyc) {
+					$this->set('fk_statut_kyc', $kyc);
+				}
+				$this->set('nom', $shop['pro_details']['corporate_name']);
+				$this->set('name_alias', $shop['shop_name']);
+				$add = $shop['contact_informations']['street1'];
+				if ($shop['contact_informations']['street2']) {
+					$add .= ' ' . $shop['contact_informations']['street2'];
+				}
+				if ($add) {
+					$this->set('address', $add);
+				}
+				if ($shop['contact_informations']['zip_code']) {
+					$this->set('zip', $shop['contact_informations']['zip_code']);
+				}
+				if ($shop['contact_informations']['city']) {
+					$this->set('town', $shop['contact_informations']['city']);
+				}
+				if ($shop['contact_informations']['country']) {
+					$id_pays = $this->db->getValue('c_country', 'rowid', 'code_iso LIKE \'' . $shop['contact_informations']['country'] . '\'');
+					if ($id_pays) {
+						$this->set('fk_pays', $id_pays);
+					}
+				}
+				if ($shop['contact_informations']['email']) {
+					$this->set('email', $shop['contact_informations']['email']);
+				}
+				if ($shop['contact_informations']['phone']) {
+					$this->set('phone', $shop['contact_informations']['phone']);
+				}
+				if ($shop['contact_informations']['site_web']) {
+					$this->set('url', $shop['contact_informations']['site_web']);
+				}
+
+				$datas = array(
+					'civility'  => $this->traduct_civility($shop['contact_informations']['civility']),
+					'lastname'  => $shop['contact_informations']['lastname'],
+					'firstname' => $shop['contact_informations']['firstname'],
+					'street1'   => $shop['contact_informations']['street1'],
+					'street2'   => $shop['contact_informations']['street2'],
+					'zip'       => $shop['contact_informations']['zip_code'],
+					'town'      => $shop['contact_informations']['city'],
+					'email'     => $shop['contact_informations']['email'],
+					'phone'     => $shop['contact_informations']['phone'],
+					'poste'     => 'Mirakl: Contact principal',
+				);
+				$this->createOrUpdateContacts($datas);
+
+				// traitement des champs additionnels
+				$additional_fields = array();
+				foreach ($shop['shop_additional_fields'] as $value) {
+					$additional_fields[$value['code']] = array('value' => $value['value'], 'type' => $value['type']);
+				}
+//				echo '<pre>'; print_r($additional_fields); echo '</pre>';  exit;
+				if (!empty($additional_fields['lastname-cs']) || !empty($additional_fields['email-cs']) || !empty($additional_fields['address-cs']) || !empty($additional_fields['firstname-cs']) || !empty($additional_fields['phone-cs'])) {
+					$datas = array(
+						'lastname'  => $additional_fields['lastname-cs']['value'],
+						'firstname' => $additional_fields['firstname-cs']['value'],
+						'email'     => $additional_fields['email-cs']['value'],
+						'phone'     => $additional_fields['phone-cs']['value'],
+						'civility'  => $additional_fields['civ-cs']['value'],
+						'street1'   => $additional_fields['address-cs']['value'],
+						'street2'   => $additional_fields['address-cs-2']['value'],
+						'zip'       => $additional_fields['postal-code-cs']['value'],
+						'town'      => $additional_fields['city-cs']['value'],
+						'country'   => $additional_fields['country-cs']['value'],
+						'poste'     => 'Mirakl: Contact CS',
+					);
+					$this->createOrUpdateContacts($datas);
+				}
+				if (!empty($additional_fields['nom-contact-commercial']) || !empty($additional_fields['email-contact-commercial']) || !empty($additional_fields['prenom-contact-commercial']) || !empty($additional_fields['telephone-contact-commercial'])) {
+					$datas = array(
+						'lastname'  => $additional_fields['nom-contact-commercial']['value'],
+						'firstname' => $additional_fields['prenom-contact-commercial']['value'],
+						'email'     => $additional_fields['email-contact-commercial']['value'],
+						'phone'     => $additional_fields['telephone-contact-commercial']['value'],
+						'poste'     => 'Mirakl: Contact commercial',
+					);
+					$this->createOrUpdateContacts($datas);
+				}
+				if (!empty($additional_fields['lastname-tech']) || !empty($additional_fields['email-tech']) || !empty($additional_fields['firstname-tech']) || !empty($additional_fields['phone-tech'])) {
+					$datas = array(
+						'lastname'  => $additional_fields['lastname-tech']['value'],
+						'firstname' => $additional_fields['firstname-tech']['value'],
+						'email'     => $additional_fields['email-tech']['value'],
+						'phone'     => $additional_fields['phone-tech']['value'],
+						'civility'  => $additional_fields['civ-tech']['value'],
+						'poste'     => 'Mirakl: Contact technique',
+					);
+					$this->createOrUpdateContacts($datas);
+				}
+				if (!empty($additional_fields['accounting-lastname']) || !empty($additional_fields['accounting-email']) || !empty($additional_fields['accounting-firstname']) || !empty($additional_fields['accounting-phone'])) {
+					$datas = array(
+						'lastname'  => $additional_fields['accounting-lastname']['value'],
+						'firstname' => $additional_fields['accounting-firstname']['value'],
+						'email'     => $additional_fields['accounting-email']['value'],
+						'phone'     => $additional_fields['accounting-phone']['value'],
+						'poste'     => 'Mirakl: Contact comptabilité',
+					);
+					$this->createOrUpdateContacts($datas);
+				}
+
+
+				// surcharge attribution
+				if ($shop['assignees']) {
+					$emailAssign = strtolower($shop['assignees'][0]['email']);
+					$userAttr = $this->getBdb()->getRows(
+						'user AS u',
+						'u.email LIKE \'' . $emailAssign . '\' OR LOCATE(\'' . $emailAssign . '\', ue.alias)',
+						1, 'array', array('u.rowid'), null, null, array(
+							'ue' => array(
+								'table' => 'user_extrafields',
+								'on'    => 'u.rowid = ue.fk_object'
+							)
+						)
+					);
+					if (isset($userAttr[0]['rowid']) && $userAttr[0]['rowid']) {
+						$this->set('fk_user_attr_rdc', $userAttr[0]['rowid']);
+					} else {
+						$warnings [] = 'Utilisateur d\'attribution non trouvé. ' . $emailAssign;
+					}
+				}
+				// surcharge statut
+				if ($shop['shop_state'] === 'SUSPENDED' && !in_array($this->getData('fk_statut_rdc'), array(12, 14))) {
+					$this->set('fk_statut_rdc', 13);
+					$this->set('date_changement_statut_rdc', date('Y-m-d', strtotime($shop['last_updated_date'])));
+				}
+				if ($shop['shop_state'] === 'OPEN' && $this->getData('fk_statut_rdc') != self::$statut_rdc_live) {
+					$this->set('fk_statut_rdc', self::$statut_rdc_live);
+					$this->set('date_changement_statut_rdc', date('Y-m-d'));
+					if (!$this->getData('date_ouverture') && $shop['last_updated_date']) {
+						$this->set('date_ouverture', date('Y-m-d', strtotime($shop['last_updated_date'])));
+					}
+
+					if ($this->getData('date_debut_prospect')) {
+						$dp = new DateTime($this->getData('date_debut_prospect'));
+						$do = new DateTime($this->getData('date_ouverture'));
+						$diff = $dp->diff($do);
+						if ($diff->invert == 0) {
+							$this->set('delai_ouverture', $diff->format('%a'));
+						}
+					}
+				}
+				$this->set('date_maj_mirakl', date('Y-m-d H:i:s'));
+				$this->update($warnings);
+			}
+		} else {
+			$warnings[] = 'Module API non actif';
+		}
+	}
+
+	// Actions
+
+	public function actionChange_status_rdc($data, &$warnings = array())
+	{
+		$warnings = array();
+		$errors = array();
+		$success = 'Changement de statut effectué';
+
+		if (!$data['status']) {
+			$errors[] = 'Aucun statut sélectionné';
+		} else {
+			// update de la date_debut_prospect (si statut_rdc dans la liste des statuts de début de prospection)
+			if (in_array($data['status'], self::$statut_rdc_prospect_array)) {
+				if (empty($this->getData('date_debut_prospect'))) {
+					$this->set('date_debut_prospect', date('Y-m-d'));
+				}
+			}
+		}
+
+		$this->set('fk_statut_rdc', $data['status']);
+		$this->set('date_changement_statut_rdc', date('Y-m-d'));
+
+		$this->update($warnings, true);
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
+	public function actionSynchroMirakl($data, &$success)
+	{
+		$errors = $warnings = array();
+		$success = 'Synchro OK';
+		$this->appelMiraklS20($errors);
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
+	// Overrides
+
+	public function create(&$warnings = array(), $force_create = false)
+	{
+		$this->checkAttr();
+		return parent::create($warnings, $force_create);
+	}
+
+	public function update(&$warnings = array(), $force_update = false)
+	{
+		$errors = array();
+		if (BimpTools::getPostFieldValue('fk_source_rdc') == BimpCore::getConf('id_source_presta', 20) && strlen(BimpTools::getPostFieldValue('presta_source')) <= 0) {
+			$errors[] = 'Le champ Prestataire/agrégateur est obligatoire';
+		}
+
+		if (BimpTools::getPostFieldValue('contrefacon') == 1 && strlen(BimpTools::getPostFieldValue('comment_quality')) <= 0) {
+			$errors[] = 'Le champ Commentaire qualité est obligatoire';
+		}
+
+		if (count($errors)) {
+			return $errors;
+		}
+
+		$this->checkAttr();
+		$this->AlerteQualite();
+		$this->alertePassage_XX($this->getData('fk_statut_rdc'));
+
+		return parent::update($warnings, $force_update);
 	}
 
 }

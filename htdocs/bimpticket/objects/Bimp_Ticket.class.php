@@ -164,21 +164,6 @@ class Bimp_Ticket extends BimpDolObject
 					)
 				))
 			);
-			$buttons[] = array(
-				'label'   => 'E-mail Contact',
-				'icon'    => 'fas_envelope',
-				'onclick' => $note->getJsLoadModalForm('default', 'Envoyer un e-mail à un contact tiers', array(
-					'fields' => array(
-						"obj_type"    => "bimp_object",
-						"obj_module"  => $this->module,
-						"obj_name"    => $this->object_name,
-						"id_obj"      => $this->id,
-						'visibility'  => $note::BN_ALL,
-						'type_author' => $note::BN_AUTHOR_USER,
-						"type_dest"   => $note::BN_DEST_CONTACT
-					)
-				))
-			);
 		}
 
 		return $buttons;
@@ -318,7 +303,7 @@ class Bimp_Ticket extends BimpDolObject
 			$client = $this->getChildObject('client');
 			if (BimpObject::objectLoaded($client)) {
 				$html .= '<div style="margin-top: 10px">';
-				$html .= '<b>Client : </b> ' . $client->getLink();
+				$html .= '<b>Marchand : </b> ' . $client->getLink();
 				$html .= '</div>';
 			}
 		}
@@ -356,7 +341,7 @@ class Bimp_Ticket extends BimpDolObject
 			));
 		} else {
 			$html .= '<span class="danger">';
-			$html .= 'Aucun client sélectionné';
+			$html .= 'Aucun marchand sélectionné';
 			$html .= '</span>';
 			$html .= '<input type="hidden" value="" name="notify_email" />';
 		}
@@ -365,6 +350,18 @@ class Bimp_Ticket extends BimpDolObject
 		return $html;
 	}
 
+	public function renderDescription()
+	{
+		$html = $this->displayDataDefault('message');
+		$title = BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Description';
+
+		$images = $this->renderImages(false);
+		if ($images) {
+			$html .= ($html ? '<br/><br/>' : '') . '<div style="font-size: 14px; border-top: 1px solid #999; margin-top: 10px; padding-top: 10px">' . BimpRender::renderIcon('fas_images', 'iconLeft') . 'Images liées : </div>' . $images;
+		}
+
+		return BimpRender::renderPanel($title, $html, '', array('type' => 'secondary'));
+	}
 	// Traitements :
 
 	public function checkStatus()

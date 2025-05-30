@@ -105,7 +105,7 @@ fields:
         decimals: 6
         unsigned: 0
         viewable: 0
-        filterable: 0
+        filterable: 1
         default_value: 0
         
     exp_periodicity: 

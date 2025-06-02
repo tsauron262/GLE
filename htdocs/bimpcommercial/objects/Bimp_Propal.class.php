@@ -3795,7 +3795,9 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 		if (is_array($rows)) {
 			if (count($rows) > 1000) {
-				bimpcore::addlog('Cron vérfis marges propal : trop de commande à vérifier (' . count($rows) . ') - exécution via BDS nécessaire', Bimp_Log::BIMP_LOG_URGENT, 'bimpcommercial');
+				$msg = 'Cron vérfis marges propal : trop de commande à vérifier (' . count($rows) . ') - exécution via BDS nécessaire';
+				bimpcore::addlog($msg, Bimp_Log::BIMP_LOG_URGENT, 'bimpcommercial');
+				return $msg;
 			} else {
 				foreach ($rows as $r) {
 					$propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Propal', (int) $r['rowid']);

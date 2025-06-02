@@ -286,9 +286,10 @@ class BDS_VerifsProcess extends BDSProcess
 
 						if (BimpObject::objectLoaded($cmde)) {
 							$cmde_errors = $cmde->checkMarge($cmde_info);
-							if ($bdb->update('propal', array('tms' => date('Y-m-d H:i:s')), 'rowid = ' . $id_propal) <= 0) {
-								$cmde_errors[] = 'Err màj tms ' . $bdb->err();
-							}
+							//sinon on tourne en boucle
+//							if ($bdb->update('propal', array('tms' => date('Y-m-d H:i:s')), 'rowid = ' . $id_propal) <= 0) {
+//								$cmde_errors[] = 'Err màj tms ' . $bdb->err();
+//							}
 						} else {
 							$cmde_errors[] = 'Propal #' . $id_propal . ' non trouvée';
 						}

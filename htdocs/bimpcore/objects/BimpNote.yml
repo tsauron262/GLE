@@ -18,6 +18,12 @@ nom_url:
     card: default
 
 objects:
+    user_dest: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_dest
+                
     user_group:
         relation: hasOne
         delete: 0
@@ -117,7 +123,7 @@ fields:
     fk_user_dest:
         label: Utilisateur destinataire
         type: id_object
-        object: user
+        object: user_dest
         input:
             type: search_user
             include_empty: 1
@@ -353,9 +359,9 @@ lists_cols:
         value:
             callback: displayDestinataire
     chatmsg:
-        label: Destinataire(s)
+        label: ''
         value:
-            callback: displayChatmsg
+            callback: displayChatMsg
     parent:
         label: Objet lié
         value:
@@ -437,6 +443,8 @@ lists:
     chat:
         title: Messages
         icon: fas_comments
+        enable_search: 0
+        no_rows_borders: 1
         n: 100
         add_form_name: msg
         add_btn_label: Nouveau message
@@ -447,9 +455,6 @@ lists:
                 type_dest: 1
         cols:
             chatmsg:
-                label: Destinataire(s)
-                value:
-                    callback: displayChatmsg
     
     bal:
         extends: default

@@ -160,7 +160,20 @@ class Bimp_UserGroup extends BimpObject
 
     // Getters données:
 
-    public function getUserGroupUsers($active_only = false)
+	public function getData($field, $default = true, $forDisplay = false)
+	{
+		$return = parent::getData($field, $default);
+		if ($field == 'data_revue' && $forDisplay) {
+			foreach($return as $id => $data) {
+				if (is_array($data) && isset($data['code'])) {
+					$return[$id]['code'] = '******';
+				}
+			}
+		}
+		return $return;
+	}
+
+	public function getUserGroupUsers($active_only = false)
     {
         $list = BimpCache::getGroupUsersList($this->id);
 

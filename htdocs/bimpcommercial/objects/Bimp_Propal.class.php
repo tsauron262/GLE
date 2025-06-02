@@ -3782,7 +3782,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 	{
 		$where = '';
 
-		$last_check_tms = BimpCore::getConf('propal_marges_last_check_tms', '');
+		$last_check_tms = BimpCore::getConf('propals_marges_last_check_tms', '');
 		if ($last_check_tms) {
 			$where = 'tms > \'' . $last_check_tms . '\'';
 		} else {
@@ -3807,7 +3807,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 					}
 				}
 
-				BimpCore::setConf('propal_marges_last_check_tms', date('Y-m-d H:i:s'));
+				BimpCore::setConf('propals_marges_last_check_tms', date('Y-m-d H:i:s'));
 			}
 		}
 

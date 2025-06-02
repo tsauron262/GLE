@@ -1721,7 +1721,7 @@ class BimpObject extends BimpCache
 
 	// Getters données:
 
-	public function getData($field, $default = true)
+	public function getData($field, $default = true, $forDisplay = false)
 	{
 		if ($field === $this->getPrimary() || $field === 'id') {
 			return $this->id;

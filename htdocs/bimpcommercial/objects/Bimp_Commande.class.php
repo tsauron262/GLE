@@ -699,7 +699,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return '';
     }
 
-    public function getData($field, $withDefault = true)
+    public function getData($field, $withDefault = true, $forDisplay = false)
     {
         // Pour mettre à jour mode et cond réglement dans le formulaire en cas de sélection d'un nouveau client ou client facturation.
         if (in_array($field, array('fk_cond_reglement', 'fk_mode_reglement'))) {

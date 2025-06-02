@@ -194,7 +194,7 @@ class notif_ticket extends AbstractNotification {
 		html += '</div>';
 
 		if (element.client) {
-			html += '<div>Client : ' + element.client + '</div>';
+			html += '<div>Marchand : ' + element.client + '</div>';
 		}
 
 		if (element.txt) {

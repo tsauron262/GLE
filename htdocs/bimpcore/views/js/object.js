@@ -526,7 +526,7 @@ function loadModalObjectNotes($button, module, object_name, id_object, list_mode
         bimpAjax.$resultContainer.find('.object_list').each(function () {
             onListLoaded($(this));
         });
-    });
+    }, {}, 'large');
 }
 
 function loadObjectCustomContent($button, $resultContainer, object_data, method, method_params, success_callback) {

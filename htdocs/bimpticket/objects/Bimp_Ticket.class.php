@@ -33,25 +33,7 @@ class Bimp_Ticket extends BimpDolObject
 	);
 
 	public static $types = array();
-
-	const MAIL_TICKET_GENERAL = 'service.marchands@rueducommerce.fr';
-	const TYPE_TICKET_GENERAL = '';
-	const MAIL_TICKET_SIGNALEMENT = 'moderation-mkp@rueducommerce.fr';
-	const TYPE_TICKET_SIGNALEMENT = 'SIGNAL';
-	const MAIL_TICKET_DEMANDE_ENTRANTE = 'marketplace@rueducommerce.fr';
-	const TYPE_TICKET_DEMANDE_ENTRANTE = 'DEMENT';
-	const MAIL_TICKET_QUALITE = 'qualite-marketplace@rueducommerce.fr';
-	const TYPE_TICKET_QUALITE = 'QUA';
-	const MAIL_TICKET_FORMULAIRE = 'partenariat_marketplace@rueducommerce.fr';
-	const TYPE_TICKET_FORMULAIRE = 'FORMU';
-
-	public static $mail_typeTicket = array(
-		self::MAIL_TICKET_GENERAL => self::TYPE_TICKET_GENERAL,
-		self::MAIL_TICKET_SIGNALEMENT => self::TYPE_TICKET_SIGNALEMENT,
-		self::MAIL_TICKET_DEMANDE_ENTRANTE => self::TYPE_TICKET_DEMANDE_ENTRANTE,
-		self::MAIL_TICKET_QUALITE => self::TYPE_TICKET_QUALITE,
-		self::MAIL_TICKET_FORMULAIRE => self::TYPE_TICKET_FORMULAIRE
-	);
+	public static $mail_typeTicket = array(); // A définir dans les entités
 
 	// Droits users :
 
@@ -74,6 +56,12 @@ class Bimp_Ticket extends BimpDolObject
 		}
 
 		return parent::canSetAction($action);
+	}
+
+	public function canDelete()
+	{
+		global $user;
+		return ($user->rights->ticket->delete ? 1 : 0);
 	}
 
 	// Getters booléens:
@@ -176,21 +164,6 @@ class Bimp_Ticket extends BimpDolObject
 					)
 				))
 			);
-			$buttons[] = array(
-				'label'   => 'E-mail Contact',
-				'icon'    => 'fas_envelope',
-				'onclick' => $note->getJsLoadModalForm('default', 'Envoyer un e-mail à un contact tiers', array(
-					'fields' => array(
-						"obj_type"    => "bimp_object",
-						"obj_module"  => $this->module,
-						"obj_name"    => $this->object_name,
-						"id_obj"      => $this->id,
-						'visibility'  => $note::BN_ALL,
-						'type_author' => $note::BN_AUTHOR_USER,
-						"type_dest"   => $note::BN_DEST_CONTACT
-					)
-				))
-			);
 		}
 
 		return $buttons;
@@ -233,6 +206,49 @@ class Bimp_Ticket extends BimpDolObject
 		}
 	}
 
+	// Affichages :
+
+	public function displayLastNoteClient()
+	{
+		$html = '';
+
+		$note = $this->getChildObject('last_note_client');
+
+		if (BimpObject::objectLoaded($note)) {
+			$txt = trim(BimpTools::htmlToString($note->getData('content'), 1200));
+			$html .= '<span class="bs-popover" ' . BimpRender::renderPopoverData($txt, 'bottom', 'true') . ' style="display: inline-block">';
+			$html .= date('d / m / Y H:i', strtotime($note->getData('date_create'))) . '&nbsp;&nbsp;';
+			if ((int) $note->getData('viewed')) {
+				$html .= '<span class="success">';
+				$html .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Lu';
+				$html .= '</span>';
+			} else {
+				$html .= '<span class="danger">';
+				$html .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non lu';
+				$html .= '</span>';
+			}
+			$html .= '</span>';
+		}
+
+		return $html;
+	}
+
+	public function displayNbNotesUnread()
+	{
+		$html = '';
+
+		if ($this->isLoaded($errors)) {
+			$nb = $this->db->getCount('bimpcore_note', 'obj_name = \'Bimp_Ticket\' AND id_obj = \'' . $this->id . '\' AND type_author IN (2,3) AND viewed = 0');
+
+			if (!$nb) {
+				$html .= '<span class="badge badge-success">0</span>';
+			} else {
+				$html .= '<span class="badge badge-danger">' . $nb . '</span>';
+			}
+		}
+
+		return $html;
+	}
 
 	// Rendus HTML :
 
@@ -287,7 +303,7 @@ class Bimp_Ticket extends BimpDolObject
 			$client = $this->getChildObject('client');
 			if (BimpObject::objectLoaded($client)) {
 				$html .= '<div style="margin-top: 10px">';
-				$html .= '<b>Client : </b> ' . $client->getLink();
+				$html .= '<b>Marchand : </b> ' . $client->getLink();
 				$html .= '</div>';
 			}
 		}
@@ -295,6 +311,57 @@ class Bimp_Ticket extends BimpDolObject
 		return $html;
 	}
 
+	public function renderNotifyEmailInput()
+	{
+		$html = '';
+
+		$soc = $this->getChildObject('client');
+		if (BimpObject::objectLoaded($soc)) {
+			$values = array();
+			$email = $soc->getData('email');
+			if ($email) {
+				$values[$email] = 'Tiers (' . $email . ')';
+			}
+
+			$id_contact = (int) BimpTools::getPostFieldValue('id_contact_suivi');
+			if ($id_contact) {
+				/** @var Bimp_Contact $contact */
+				$contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+
+				if (BimpObject::objectLoaded($contact)) {
+					$email = $contact->getData('email');
+					if ($email) {
+						$values[$email] = 'Contact suivi (' . $email . ')';
+					}
+				}
+			}
+
+			return BimpInput::renderInput('select', 'notify_email', 'client', array(
+				'options' => $values
+			));
+		} else {
+			$html .= '<span class="danger">';
+			$html .= 'Aucun marchand sélectionné';
+			$html .= '</span>';
+			$html .= '<input type="hidden" value="" name="notify_email" />';
+		}
+
+
+		return $html;
+	}
+
+	public function renderDescription()
+	{
+		$html = $this->displayDataDefault('message');
+		$title = BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Description';
+
+		$images = $this->renderImages(false);
+		if ($images) {
+			$html .= ($html ? '<br/><br/>' : '') . '<div style="font-size: 14px; border-top: 1px solid #999; margin-top: 10px; padding-top: 10px">' . BimpRender::renderIcon('fas_images', 'iconLeft') . 'Images liées : </div>' . $images;
+		}
+
+		return BimpRender::renderPanel($title, $html, '', array('type' => 'secondary'));
+	}
 	// Traitements :
 
 	public function checkStatus()
@@ -357,6 +424,14 @@ class Bimp_Ticket extends BimpDolObject
 			if (empty($err)) {
 				$this->checkUserAssigned(true, $cur_user_assign);
 			}
+		}
+	}
+
+	public function afterCreateNote($note)
+	{
+		$type_author = $note->getData('type_author');
+		if ($note->getData('type_author') == BimpNote::BN_AUTHOR_SOC || ($type_author == BimpNote::BN_AUTHOR_FREE && $note->getData('email'))) {
+			$this->updateField('id_last_note_client', $note->id);
 		}
 	}
 
@@ -512,6 +587,29 @@ class Bimp_Ticket extends BimpDolObject
 
 	public function create(&$warnings = array(), $force_create = false)
 	{
+		$errors = array();
+
+		$notify = (int) BimpTools::getPostFieldValue('notify', 0, 'int');
+		if ($notify) {
+			$notify_email = BimpTools::getPostFieldValue('notify_email', '', 'alphanohtml');
+			$subject = $this->getData('subject');
+			$msg = $this->getData('message');
+
+			if (!$subject) {
+				$errors[] = 'Sujet obligatoire pour notification du tiers par e-mail';
+			}
+			if (!$msg) {
+				$errors[] = 'Description obligatoire pour notification du tiers par e-mail';
+			}
+			if (!$notify_email) {
+				$errors[] = 'Adresse e-mail absente pour notification du tiers';
+			}
+
+			if (count($errors)) {
+				return $errors;
+			}
+		}
+
 		$this->set('ref', $this->dol_object->getDefaultRef());
 
 		$errors = parent::create($warnings, $force_create);
@@ -531,6 +629,14 @@ class Bimp_Ticket extends BimpDolObject
 
 				if ($id_contact_suivi) {
 					$this->dol_object->add_contact($id_contact_suivi, 'SUPPORTCLI', 'external');
+				}
+			}
+
+			if ($notify) {
+				$mail_errors = array();
+				$mail = new BimpMail($this, $subject, $notify_email, $this->getMailFrom(), $msg);
+				if (!$mail->send($mail_errors)) {
+					$warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de notification à l\'adresse "' . $notify_email . '"');
 				}
 			}
 		}
@@ -677,7 +783,8 @@ class Bimp_Ticket extends BimpDolObject
 				'status_icon'   => $status_icon,
 				'subj'          => $t->getData('subject'),
 				'src'           => $t->getData('origin_email'),
-				'txt'           => $t->displayData("message", 'default', false),
+//				'txt'           => $t->displayData("message", 'default', false),
+				'txt'           => trim(BimpTools::htmlToString($t->getData('message'), 1200, true)),
 				'date_create'   => $t->getData('datec'),
 				'url'           => DOL_URL_ROOT . '/bimpticket/index.php?fc=ticket&id=' . $t->id,
 				'can_begin'     => (int) ($t->canSetAction('newStatus') && $t->isActionAllowed('newStatus') && $status < self::STATUS_IN_PROGRESS && $status >= self::STATUS_READ),
@@ -711,12 +818,12 @@ class Bimp_Ticket extends BimpDolObject
 
 	public function getMailFrom()
 	{
-		$from = self::MAIL_TICKET_GENERAL;
+		$from = static::MAIL_TICKET_GENERAL;
 		$type = $this->getData('type_code');
 
-		$keys = array_values(self::$mail_typeTicket);
+		$keys = array_values(static::$mail_typeTicket);
 		if (!empty($type) && in_array($type, $keys)) {
-			$typeTicket_mail = array_flip(self::$mail_typeTicket);
+			$typeTicket_mail = array_flip(static::$mail_typeTicket);
 			$from = $typeTicket_mail[$type];
 		}
 

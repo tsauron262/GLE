@@ -939,10 +939,18 @@ class BimpController
 					$json_err_code = json_last_error();
 
 					if ($json_err_code == JSON_ERROR_UTF8) {
-						// On tente un encodage utf-8.
-						$result = BimpTools::utf8_encode($result);
-						$result['warnings'] = static::getAndResetAjaxWarnings();
-						$json = json_encode($result);
+						if (isset($result['no_utf8'])) {
+							// on tente d'ignorer les utf8 invalides :
+							$result['JSON_INVALID_UTF8_IGNORE'] = 1;
+							$json = json_encode($result, JSON_INVALID_UTF8_IGNORE);
+						}
+
+						if ($json === false) {
+							// On tente un encodage utf-8.
+							$result = BimpTools::utf8_encode($result);
+							$result['warnings'] = static::getAndResetAjaxWarnings();
+							$json = json_encode($result);
+						}
 
 						if ($json !== false) {
 							die($json);
@@ -1974,17 +1982,19 @@ class BimpController
 						$form = new BC_Form($object, $id_parent, $form_name, 1, true);
 						$form->fields_prefix = $field_prefix;
 						$form->identifier = $form_id;
+						$row_params = array();
 						if (!is_null($form->config_path)) {
 							foreach ($form->params['rows'] as $row) {
 								if ($object->config->isDefined($form->config_path . '/rows/' . $row . '/field')) {
 									$form_field = $object->getConf($form->config_path . '/rows/' . $row . '/field', '');
 									if ($form_field && $form_field === $field_name) {
 										$row_params = BimpComponent::fetchParamsStatic($object->config, $form->config_path . '/rows/' . $row, BC_Form::$row_params);
-										$html = $form->renderFieldRow($field_name, $row_params, 3, true);
+										break;
 									}
 								}
 							}
 						}
+						$html = $form->renderFieldRow($field_name, $row_params, 3, true);
 
 						// Ancienne méthode :
 //                        $field = new BC_Field($object, $field_name, true, 'fields', $force_edit);
@@ -3481,7 +3491,8 @@ class BimpController
 		return array(
 			'errors'        => $errors,
 			'notifications' => $notifs_for_user,
-			'request_id'    => BimpTools::getValue('request_id', 0, 'int')
+			'request_id'    => BimpTools::getValue('request_id', 0, 'int'),
+			'no_utf8'       => 1
 		);
 	}
 

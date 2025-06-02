@@ -22,6 +22,7 @@ class BimpTools
 	public static $sql_operators = array('>', '<', '>=', '<=', '!=');
 	public static $bloquages = array();
 	public static $postTraitment = array();
+	public static $html_purifier = null;
 
 	// Gestion GET / POST
 
@@ -2764,6 +2765,28 @@ class BimpTools
 		return (float) $str_number;
 	}
 
+	public static function htmlToString($html, $max_chars = false, $no_multiple_new_lines = true) {
+		$html = self::replaceBr($html, '[[BR]]');
+		foreach (array('div', 'p') as $tag) {
+			$html = str_replace('</' . $tag . '>', '</' . $tag . '>[[BR]]', $html);
+		}
+
+		$html = dol_string_nohtmltag($html);
+
+		$html = str_replace('[[BR]]', "<br/>", $html);
+
+		if ($no_multiple_new_lines) {
+			$html = preg_replace("(\n+)", '<br/>', $html);
+			$html = preg_replace('/( *<[ \/]*br[ \/]*> *)+/', '<br/>', $html);
+		}
+
+		if ($max_chars && strlen($html) > $max_chars) {
+			$html = substr($html, 0, $max_chars) .' [...]';
+		}
+
+		return $html;
+	}
+
 	public static function getStringNbLines($string, $maxLineChars)
 	{
 		$words = explode(' ', $string);
@@ -4404,6 +4427,50 @@ class BimpTools
 			$ipUser = $_SERVER['HTTP_X_REAL_IP'];
 		}
 		return $ipUser;
+	}
+
+
+	public static function getHtmlPurifier()
+	{
+		if (is_null(self::$html_purifier)) {
+			BimpCore::LoadHtmlPurifier();
+
+			$config = HTMLPurifier_Config::createDefault();
+			$allowed_tags = 'a,b,blockquote,br,dd,del,div,dl,dt,em,font,h1,h2,h3,h4,h5,h6,hr,i,img,li,ol,p,pre,small,span,strong,sub,sup,table,td,th,thead,tr,tt,u,ul';
+			$config->set('HTML.AllowedElements', $allowed_tags);
+
+			$root = '';
+
+			if (defined('PATH_TMP') && PATH_TMP) {
+				$root = PATH_TMP;
+				$path = '/htmlpurifier/serialiser';
+			} else {
+				$root = DOL_DATA_ROOT;
+				$path = '/bimpcore/htmlpurifier/serialiser';
+			}
+
+			if (!is_dir($root . $path)) {
+				BimpTools::makeDirectories($path, $root);
+			}
+
+			$config->set('Cache.SerializerPath', $root . $path);
+
+			self::$html_purifier = new HTMLPurifier($config);
+		}
+
+		return self::$html_purifier;
+	}
+
+	public static function cleanHtml($html)
+	{
+//		if ((int) BimpCore::getConf('pdf_use_html_purifier')) {
+			$purifier = self::getHtmlPurifier();
+			$html = $purifier->purify($html);
+//		} else {
+//			// Envisager d'autres méthodes...
+//		}
+
+		return $html;
 	}
 }
 

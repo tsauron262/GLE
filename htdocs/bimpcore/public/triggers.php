@@ -1,11 +1,12 @@
 <?php
 
 
-define("NOLOGIN", 1);  // This means this output page does not require to be logged.
+//define("NOLOGIN", 1);  // This means this output page does not require to be logged.
 require_once("../../main.inc.php");
 
 
 $action = BimpTools::getPostFieldValue('action', '');
+$errors = array();
 
 
 if($action == 'confirmGrp'){
@@ -24,7 +25,10 @@ if($action == 'confirmGrp'){
         elseif(isset($data['Y:'.date('Y')]['validation_date']))
             $errors[] = 'Validation deja effectuée';
         else{
-            $data['Y:'.date('Y')]['validation_date'] = date('Y-m-d');
+			global $user;
+			$data['Y:'.date('Y')]['validation_date'] = date('Y-m-d');
+			$data['Y:'.date('Y')]['validation_ip'] = BimpTools::getUserIp();
+			$data['Y:'.date('Y')]['validation_user'] = $user->id;
             $errors = BimpTools::merge_array($errors, $grp->updateField('data_revue', $data));
             $success = 'Validation pris en compte';
         }

@@ -39,12 +39,14 @@ fields:
         object: parent_obj
         type: id_object
         depends_on: type_obj
+        
     type_obj:
         label: Type
         values:
             array:
                 callback:
                     method: getTypesObjetsRdc
+                    
     ca:
         label: Chiffre d'Affaire
         type: money

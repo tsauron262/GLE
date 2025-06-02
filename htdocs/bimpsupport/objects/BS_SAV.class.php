@@ -8298,6 +8298,22 @@ ORDER BY a.val_max DESC");
 					$errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $new_client->getData('solvabilite_status')]['label'] . ')';
 				}
 			}
+
+			$id_cond_reglement = $new_client->getData('cond_reglement');
+			if (!$id_cond_reglement) {
+				$id_cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', $new_client->getData('cond_reglement'), 'bimpsupport');
+			}
+			$id_mode_reglement = $new_client->getData('mode_reglement');
+			if (!$id_mode_reglement) {
+				$id_mode_reglement = (int) BimpCore::getConf('sav_mode_reglement', $new_client->getData('mode_reglement'), 'bimpsupport');
+			}
+			if ($id_cond_reglement == 20 && $id_mode_reglement != 2) {
+				$id_cond_reglement = 1;
+			}
+			$prop = $this->getChildObject('propal');
+			$prop->set('fk_cond_reglement', $id_cond_reglement);
+			$prop->set('fk_mode_reglement',  $id_mode_reglement);
+			$prop->update($warnings);
 		}
 
 //        if (!count($errors)) {

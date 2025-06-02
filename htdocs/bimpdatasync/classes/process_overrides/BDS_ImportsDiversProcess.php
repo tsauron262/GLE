@@ -163,7 +163,7 @@ class BDS_ImportsDiversProcess extends BDSProcess
 			'Action' => 'Action',
 			'pt_positif' => 'pt_positif',
 			'risque_identifie' => 'risque_identifie',
-			'commentaire_rdc' => 'Commentaire',
+			'commentaire' => 'Commentaire',
 		);
 
 		$keys = array(
@@ -188,9 +188,9 @@ class BDS_ImportsDiversProcess extends BDSProcess
 				continue;
 			}
 			$ln = array_combine($this->data_persistante['header'], $data);
-			if ($ln['nom_boutique']) {
+			if ($ln['nom_societe']) {
 				$data = $dataFiltres = array();
-				if (!$ln['nom_societe'])	$ln['nom_societe'] = $ln['nom_boutique'];
+//				if (!$ln['nom_societe'])	$ln['nom_societe'] = $ln['nom_boutique'];
 				foreach($ln as $key => $value){
 					$value = utf8_encode($value);
 					if($correspondance2[$key]){
@@ -257,9 +257,10 @@ class BDS_ImportsDiversProcess extends BDSProcess
 					$nomDic = 'societe_rdc_sources';
 					$data['fk_source_rdc'] = $this->getBimpDict($txt, $nomDic);
 				}
+				$data['fk_user_attr_rdc'] = 8;
 				if (strlen($data['import_key']) < 3) {
-					$data['import_key'] = substr('IMP_FLO_' . str_replace(" ", "",$data['name_alias']), 0, 29);
-					$dataFiltres['import_key'] = substr('IMP_FLO_' . str_replace(" ", "",$data['name_alias']), 0, 29);
+					$data['import_key'] = substr('IMP_MOALING_' . str_replace(" ", "",$data['name_alias']), 0, 24);
+					$dataFiltres['import_key'] = substr('IMP_MOALING_' . str_replace(" ", "",$data['name_alias']), 0, 24);
 				}
 				if ($data['url'])	{
 					if(strpos($data['url'], '<br') !== false) {

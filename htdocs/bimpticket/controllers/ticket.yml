@@ -47,16 +47,12 @@ sections:
                         callback:
                             method: renderBimpOjectDivers
                             object: ticket
-    -   type: custom
-        custom:
-            callback:
-                method: renderNotesList
-                object: ticket
-                params:
-                    - 1
-                    - default
-                    - ''
-                    - 0
-                    - 1
-                    - 1
+#    -   type: custom
+#        custom:
+#            callback:
+#                method: renderNotesList
+#                object: ticket
+#                params:
+#                    - 1
+#                    - chat
     

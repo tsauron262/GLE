@@ -20,7 +20,7 @@
     max-width: 65%;
     text-align: center;
 
-    font-size: 1.3em;
+    font-size: 12px;
     line-height: normal;
 }
     
@@ -46,11 +46,11 @@
     color: rgba(0,0,0,0.5);
     font-size: 10px;
 }
+
 .justify-content-end .msg_time{
     left: auto;
     right: 25px;
 }
-    
     
     /* plus spécifique*/
     .img-circle{
@@ -78,8 +78,6 @@
     -ms-flex-pack: start!important;
     justify-content: flex-start!important;
 }
-
-
 
 /* menu */
 .lnMsg{

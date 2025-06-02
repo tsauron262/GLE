@@ -58,7 +58,7 @@ class BimpCore
 		'florian' => 'f.martinez@bimp.fr',
 		'alexis'  => 'al.bernard@bimp.fr',
 		'romain'  => 'r.PELEGRIN@bimp.fr',
-        'peter'   => 'p.tkatchenko@bimp.fr',
+		'peter'   => 'p.tkatchenko@bimp.fr',
 		'franck'  => 'f.lauby@ldlc.com'
 	);
 	public static $html_purifier = null;
@@ -80,7 +80,7 @@ class BimpCore
 			$extends_entity = BimpCore::getExtendsEntity();
 
 			global $user;
-			$use_css_v2 = ((int) self::getConf('use_css_v2') && ($user->login == 'f.martinez' || $user->login == 'e.sirodot' || $user->login == 'admin'));
+			$use_css_v2 = ((int) self::getConf('use_css_v2'));
 
 			$is_context_private = self::isContextPrivate();
 
@@ -172,17 +172,18 @@ class BimpCore
 	{
 		global $user, $conf, $dolibarr_main_url_root;
 		$vars = array(
-			'dol_url_root'               => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : '\'' . $dolibarr_main_url_root . '\'',
-			'entity'                     => $conf->entity,
-			'id_user'                    => (BimpObject::objectLoaded($user) ? $user->id : 0),
-			'bimp_context'               => '\'' . self::getContext() . '\'',
-			'theme'                      => '\'' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '\'',
-			'sessionHideMenu'            => (BimpController::getSessionConf('hideMenu') == "true" ? 1 : 0),
-			'bimp_use_local_storage'     => (int) BimpCore::getConf('use_browser_local_storage'),
-			'bimp_local_storage_prefixe' => '\'' . BimpCore::getConf('bimp_local_storage_prefixe') . '\'',
-			'bimp_debug_local_storage'   => (int) BimpCore::getConf('js_debug_local_storage'),
-			'bimp_debug_notifs'          => (int) BimpCore::getConf('js_debug_notifs'),
-			'dol_token'          => '\'' .newToken(). '\''
+			'dol_url_root'                     => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : '\'' . $dolibarr_main_url_root . '\'',
+			'entity'                           => $conf->entity,
+			'id_user'                          => (BimpObject::objectLoaded($user) ? $user->id : 0),
+			'bimp_context'                     => '\'' . self::getContext() . '\'',
+			'theme'                            => '\'' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '\'',
+			'sessionHideMenu'                  => (BimpController::getSessionConf('hideMenu') == "true" ? 1 : 0),
+			'bimp_use_local_storage'           => (int) BimpCore::getConf('use_browser_local_storage'),
+			'bimp_local_storage_prefixe'       => '\'' . BimpCore::getConf('bimp_local_storage_prefixe') . '\'',
+			'bimp_debug_local_storage'         => (int) BimpCore::getConf('js_debug_local_storage'),
+			'bimp_debug_notifs'                => (int) BimpCore::getConf('js_debug_notifs'),
+			'bimp_notifications_refresh_delay' => (int) BimpCore::getConf('user_notifications_refresh_delay'),
+			'dol_token'                        => '\'' . newToken() . '\''
 		);
 
 		$notifs = '{';
@@ -193,9 +194,8 @@ class BimpCore
 //			if ($user->login == 'f.martinez') {
 //				$config_notification = $notification->getList(array());
 //			} else {
-				$config_notification = $notification->getList(array('active' => 1));
+			$config_notification = $notification->getList(array('active' => 1));
 //			}
-
 
 			foreach ($config_notification as $cn) {
 				if (BimpCore::isModuleActive($cn['module'])) {

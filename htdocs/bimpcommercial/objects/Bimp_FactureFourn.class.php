@@ -1212,48 +1212,44 @@ class Bimp_FactureFourn extends BimpCommAchat
 
     public function actionValidate($data, &$success)
     {
-        $errors = array();
         $warnings = array();
         $infos = array();
 
         $success = 'Facture fournisseur validée avec succès';
-
         $errors = $this->checkDate();
 
-        if (count($errors)) {
-            return $errors;
-        }
+        if (!count($errors)) {
+			if ((int) BimpCore::getConf('USE_ENTREPOT', null, 'bimpcore') && !(int) $this->getData('entrepot')) {
+				$errors[] = 'Entrepôt absent. Veuillez sélectionner un entrepôt avant de valider';
+			} else {
+				BimpTools::resetDolObjectErrors($this->dol_object);
+				global $user, $conf, $langs;
 
-        if ((int) BimpCore::getConf('USE_ENTREPOT', null, 'bimpcore') && !(int) $this->getData('entrepot')) {
-            $errors[] = 'Entrepôt absent. Veuillez sélectionner un entrepôt avant de valider';
-        } else {
-            BimpTools::resetDolObjectErrors($this->dol_object);
-            global $user, $conf, $langs;
+				if ($this->dol_object->validate($user, '', (int) $this->getData('entrepot')) < 0) {
+					$obj_errors = BimpTools::getDolEventsMsgs(array('errors'));
 
-            if ($this->dol_object->validate($user, '', (int) $this->getData('entrepot')) < 0) {
-                $obj_errors = BimpTools::getDolEventsMsgs(array('errors'));
+					if (!count($obj_errors)) {
+						$obj_errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' ne peut pas être validé' . $this->e();
+					}
+					$errors[] = BimpTools::getMsgFromArray($obj_errors);
+				} else {
+					if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
+						$this->fetch($this->id);
+						$this->dol_object->generateDocument($this->getModelPdf(), $langs);
+					}
+				}
 
-                if (!count($obj_errors)) {
-                    $obj_errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' ne peut pas être validé' . $this->e();
-                }
-                $errors[] = BimpTools::getMsgFromArray($obj_errors);
-            } else {
-                if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
-                    $this->fetch($this->id);
-                    $this->dol_object->generateDocument($this->getModelPdf(), $langs);
-                }
-            }
+				$obj_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
 
-            $obj_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
+				if (!empty($obj_warnings)) {
+					$warnings[] = BimpTools::getMsgFromArray($obj_warnings);
+				}
 
-            if (!empty($obj_warnings)) {
-                $warnings[] = BimpTools::getMsgFromArray($obj_warnings);
-            }
-
-            $obj_infos = BimpTools::getDolEventsMsgs(array('mesgs'));
-            if (!empty($obj_infos)) {
-                $infos[] = BimpTools::getMsgFromArray($obj_infos);
-            }
+				$obj_infos = BimpTools::getDolEventsMsgs(array('mesgs'));
+				if (!empty($obj_infos)) {
+					$infos[] = BimpTools::getMsgFromArray($obj_infos);
+				}
+			}
         }
 
         return array(

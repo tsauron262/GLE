@@ -240,6 +240,7 @@ class BDS_VerifsProcess extends BDSProcess
 					$where .= 'tms > \'' . $tms . '\'';
 				}
 			}
+			$where .= ' AND entity IN (' . getEntity('propal') .')';
 
 			$this->debug_content .= '<br/>WHERE : ' . $where . '<br/>';
 
@@ -285,7 +286,7 @@ class BDS_VerifsProcess extends BDSProcess
 
 						if (BimpObject::objectLoaded($cmde)) {
 							$cmde_errors = $cmde->checkMarge($cmde_info);
-							if ($bdb->update('propal', array('tms' => date('Y-m-d H:i:s')), 'rowid = ' . $id_propal) <= 0 . ' AND entity IN (' . (int) getEntity('propal').')') {
+							if ($bdb->update('propal', array('tms' => date('Y-m-d H:i:s')), 'rowid = ' . $id_propal) <= 0) {
 								$cmde_errors[] = 'Err màj tms ' . $bdb->err();
 							}
 						} else {

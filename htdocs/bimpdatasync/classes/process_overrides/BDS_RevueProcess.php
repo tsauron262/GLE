@@ -201,6 +201,7 @@ class BDS_RevueProcess extends BDSProcess
 								$this->Alert('Data revue déjà existante pour '.$data['name']);
 							}
 							else {
+//								$data['mail'] = 't.sauron@bimp.fr';
 								$errors = BimpTools::merge_array($errors, $groupe->appendField('data_revue', array('Y:'.date('Y') => $data)));
 								$bimpMail = new BimpMail($groupe, 'Validation acces groupe ERP', $data['mail'], '', $html);
 								$bimpMail->send($errors);

@@ -277,27 +277,27 @@ class BDS_VerifsProcess extends BDSProcess
 				if (!empty($this->references)) {
 					$this->setCurrentObjectData('bimpcommercial', 'Bimp_Propal');
 					$max_tms = '';
-					foreach ($this->references as $id_commande) {
+					foreach ($this->references as $id_propal) {
 						$this->incProcessed();
 						$cmde_errors = array();
 						$cmde_info = '';
-						$cmde = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_commande);
+						$cmde = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
 
 						if (BimpObject::objectLoaded($cmde)) {
 							$cmde_errors = $cmde->checkMarge($cmde_info);
-							if ($bdb->update('propal', array('tms' => date('Y-m-d H:i:s')), 'rowid = ' . $id_commande) <= 0) {
+							if ($bdb->update('propal', array('tms' => date('Y-m-d H:i:s')), 'rowid = ' . $id_propal) <= 0 . ' AND entity IN (' . (int) getEntity('propal').')') {
 								$cmde_errors[] = 'Err màj tms ' . $bdb->err();
 							}
 						} else {
-							$cmde_errors[] = 'Propal #' . $id_commande . ' non trouvée';
+							$cmde_errors[] = 'Propal #' . $id_propal . ' non trouvée';
 						}
 
 						if (count($cmde_errors)) {
 							$this->incIgnored();
-							$this->Error(BimpTools::getMsgFromArray($cmde_errors, 'Propal #' . $id_commande), $cmde, $id_commande);
+							$this->Error(BimpTools::getMsgFromArray($cmde_errors, 'Propal #' . $id_propal), $cmde, $id_propal);
 						} elseif ($cmde_info) {
 							$this->incUpdated();
-							$this->Success($cmde_info, $cmde, $id_commande);
+							$this->Success($cmde_info, $cmde, $id_propal);
 						}
 
 						$tms = $cmde->dol_object->date_modification;

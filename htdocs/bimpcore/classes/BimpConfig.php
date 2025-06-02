@@ -214,69 +214,113 @@ class BimpConfig
 				}
 
 				// Traitement des fichiers étendus:
-				if ($check_extends && isset($params['extends'])) {
-					$sub_dir = '';
-					if (!is_null($this->instance)) {
-						if (is_a($this->instance, 'BimpObject')) {
-							$sub_dir = 'objects';
-						} elseif (is_a($this->instance, 'BimpController')) {
-							$sub_dir = 'controllers';
-						}
-					}
-					$parent_file = DOL_DOCUMENT_ROOT . '/';
-					$extends_module = '';
-					$extends_object = '';
+				if ($check_extends) {
+					if (isset($params['traits'])) {
+						foreach ($params['traits'] as $trait) {
+							$trait_module = '';
+							$trait_name = '';
 
-					if (isset($params['extends']['module'])) {
-						$extends_module = $params['extends']['module'];
-						if (isset($params['extends']['object_name']) && $params['extends']['object_name']) {
-							$extends_object = $params['extends']['object_name'];
-						} else {
-							$errors[] = 'Nom du fichier d\'extension absent dans le fichier "' . $file . '"';
-						}
-					} elseif (is_string($params['extends']) && (isset($this->instance->module) || $this->module)) {
-						if (isset($this->instance->module)) {
-							$extends_module = $this->instance->module;
-						} else {
-							$extends_module = $this->module;
-						}
-
-						$extends_object = $params['extends'];
-					} else {
-						$errors[] = 'Nom du module absent du fichier de configuration "' . $file . '"';
-					}
-
-					if ($extends_module && $extends_object) {
-						$parent_file .= $extends_module . '/' . $sub_dir . '/' . $extends_object . '.yml';
-						if (is_file($parent_file)) {
-							$parent_params = $this->getParamsFromFile($extends_module, $sub_dir, $extends_object, $errors, true);
-
-							if (!empty($parent_params)) {
-								if (self::$debug) {
-									$html .= BimpRender::renderFoldableContainer('PARENT PARAMS', '<pre>' . print_r($parent_params, 1) . '</pre>', array(
-										'open'        => false,
-										'offset_left' => true
-									));
-								}
-
-								$params = $this->mergeParams($parent_params, $params, false);
-
-								if (self::$debug) {
-									$html .= BimpRender::renderFoldableContainer('PARAMS AFTER PARENT EXTENDS', '<pre>' . print_r($params, 1) . '</pre>', array(
-										'open'        => false,
-										'offset_left' => true
-									));
-								}
+							if (preg_match('/^(.+)\/(.+)$/', $trait, $matches)) {
+								$trait_module = $matches[1];
+								$trait_name = $matches[2];
+							} else {
+								$trait_module = $this->module;
+								$trait_name = $trait;
 							}
 
-							if (is_object($this->instance) && property_exists($this->instance, 'extends')) {
-								$this->instance->extends[] = array(
-									'module'      => $extends_module,
-									'object_name' => $extends_object
-								);
+							if ($trait_module && $trait_name) {
+								$trait_file = DOL_DOCUMENT_ROOT . '/' . $trait_module . '/traits/' . $trait_name . '.yml';
+								if (file_exists($trait_file)) {
+									$trait_params = $this->getParamsFromFile($trait_module, 'traits', $trait_name, $errors, true);
+
+									if (!empty($trait_params)) {
+										if (self::$debug) {
+											$html .= BimpRender::renderFoldableContainer('TRAIT PARAMS', '<pre>' . print_r($trait_params, 1) . '</pre>', array(
+												'open'        => false,
+												'offset_left' => true
+											));
+										}
+
+										$params = $this->mergeParams($params, $trait_params, false);
+
+										if (self::$debug) {
+											$html .= BimpRender::renderFoldableContainer('PARAMS AFTER TRAIT', '<pre>' . print_r($params, 1) . '</pre>', array(
+												'open'        => false,
+												'offset_left' => true
+											));
+										}
+									}
+								} else {
+									$errors[] = 'Le fichier de trait "' . $trait_file . '" n\'existe pas';
+								}
 							}
+						}
+					}
+
+					if (isset($params['extends'])) {
+						$sub_dir = '';
+						if (!is_null($this->instance)) {
+							if (is_a($this->instance, 'BimpObject')) {
+								$sub_dir = 'objects';
+							} elseif (is_a($this->instance, 'BimpController')) {
+								$sub_dir = 'controllers';
+							}
+						}
+						$parent_file = DOL_DOCUMENT_ROOT . '/';
+						$extends_module = '';
+						$extends_object = '';
+
+						if (isset($params['extends']['module'])) {
+							$extends_module = $params['extends']['module'];
+							if (isset($params['extends']['object_name']) && $params['extends']['object_name']) {
+								$extends_object = $params['extends']['object_name'];
+							} else {
+								$errors[] = 'Nom du fichier d\'extension absent dans le fichier "' . $file . '"';
+							}
+						} elseif (is_string($params['extends']) && (isset($this->instance->module) || $this->module)) {
+							if (isset($this->instance->module)) {
+								$extends_module = $this->instance->module;
+							} else {
+								$extends_module = $this->module;
+							}
+
+							$extends_object = $params['extends'];
 						} else {
-							$errors[] = 'Le fichier étendu "' . $parent_file . '" n\'existe pas';
+							$errors[] = 'Nom du module absent du fichier de configuration "' . $file . '"';
+						}
+
+						if ($extends_module && $extends_object) {
+							$parent_file .= $extends_module . '/' . $sub_dir . '/' . $extends_object . '.yml';
+							if (is_file($parent_file)) {
+								$parent_params = $this->getParamsFromFile($extends_module, $sub_dir, $extends_object, $errors, true);
+
+								if (!empty($parent_params)) {
+									if (self::$debug) {
+										$html .= BimpRender::renderFoldableContainer('PARENT PARAMS', '<pre>' . print_r($parent_params, 1) . '</pre>', array(
+											'open'        => false,
+											'offset_left' => true
+										));
+									}
+
+									$params = $this->mergeParams($parent_params, $params, false);
+
+									if (self::$debug) {
+										$html .= BimpRender::renderFoldableContainer('PARAMS AFTER PARENT EXTENDS', '<pre>' . print_r($params, 1) . '</pre>', array(
+											'open'        => false,
+											'offset_left' => true
+										));
+									}
+								}
+
+								if (is_object($this->instance) && property_exists($this->instance, 'extends')) {
+									$this->instance->extends[] = array(
+										'module'      => $extends_module,
+										'object_name' => $extends_object
+									);
+								}
+							} else {
+								$errors[] = 'Le fichier étendu "' . $parent_file . '" n\'existe pas';
+							}
 						}
 					}
 				}

@@ -340,7 +340,14 @@ views:
             -   cols:
                     -   type: custom
                         custom:
-                            callback: renderNotesList
+                            callback: 
+                                method: renderNotesList
+                                params:
+                                    - 1
+                                    - default
+                                    - ''
+                                    - 0
+                                    - 0
                             
             -   cols:
                     -   type: fields_table

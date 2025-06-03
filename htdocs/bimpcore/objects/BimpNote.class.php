@@ -660,17 +660,21 @@ class BimpNote extends BimpObject
 
 		switch ((int) $this->getData('type_dest')) {
 			case self::BN_DEST_USER:
-				if ($with_icon) {
-					$html .= BimpRender::renderIcon('fas_user', 'iconLeft');
+				if ((int) $this->getData('fk_user_dest')) {
+					if ($with_icon) {
+						$html .= BimpRender::renderIcon('fas_user', 'iconLeft');
+					}
+					$html .= $this->displayData('fk_user_dest', 'nom_url', $display_input_value, $no_html);
 				}
-				$html .= $this->displayData('fk_user_dest', 'nom_url', $display_input_value, $no_html);
 				break;
 
 			case self::BN_DEST_GROUP:
-				if ($with_icon) {
-					$html .= BimpRender::renderIcon('fas_users', 'iconLeft');
+				if ((int) $this->getData('fk_group_dest')) {
+					if ($with_icon) {
+						$html .= BimpRender::renderIcon('fas_users', 'iconLeft');
+					}
+					$html .= $this->displayData('fk_group_dest', 'nom_url', $display_input_value, $no_html);
 				}
-				$html .= $this->displayData('fk_group_dest', 'nom_url', $display_input_value, $no_html);
 				break;
 
 			case self::BN_DEST_SOC:
@@ -833,7 +837,7 @@ class BimpNote extends BimpObject
 			$html .= '<span class="bimp_chat_dest">À : ' . $dest . '</span>';
 		}
 		if ($buttons) {
-			$html .= '<span class="bimp_chat_buttons">'.$buttons.'</span>';
+			$html .= '<span class="bimp_chat_buttons">' . $buttons . '</span>';
 		}
 		$html .= '</div>';
 

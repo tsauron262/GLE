@@ -29,7 +29,7 @@ fields:
     
     content:
         label: Contenu
-        type: text
+        type: html
         input: 
             field_path: 1
             field_path_module:

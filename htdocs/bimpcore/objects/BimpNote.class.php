@@ -83,20 +83,17 @@ class BimpNote extends BimpObject
 			case 'setAsViewed':
 				if ($this->isLoaded()) {
 					if ($this->getData('user_create') == $user->id && $this->getData('type_author') == self::BN_AUTHOR_USER) {
-						$errors[] = 'L\'utilisateur connecté est l\'auteur';
 						return 0;
 					}
 
 					if (!$this->isUserDest()) {
-						$errors[] = 'Vous ne faites pas partie des destinataires';
 						return 0;
 					}
 				}
 				return 1;
 
 			case 'repondre':
-				if ($user->id == (int) $this->getData('user_create')) {
-					$errors[] = 'L\'utilisateur connecté est l\'auteur de la note';
+				if ($this->isLoaded() && $user->id == (int) $this->getData('user_create')) {
 					return 0;
 				}
 				return 1;
@@ -171,10 +168,6 @@ class BimpNote extends BimpObject
 		switch ($action) {
 			case 'repondre':
 				if ($this->isLoaded()) {
-//                    if ((int) $this->getData('type_author') !== self::BN_AUTHOR_USER && (int) $this->getData('type_author') !== self::BN_AUTHOR_GROUP) {
-//                        $errors[] = 'L\'auteur n\'est pas un utilisateur'; // Nécessaire dans l'immédiat (pour prolease) mais le système sera revu.
-//                        return 0;
-//                    }
 					global $user;
 					if ($this->getData('user_create') == $user->id) {
 						$errors[] = 'L\'utilisateur connecté est l\'auteur';

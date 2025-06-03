@@ -1,21 +1,31 @@
+extends:
+    module: bimpusertools
+    object_name: BimpShare
+
 table: bimp_user_share
 
-fields: 
-    obj_module: 
-        label: Module
-        
-    obj_name: 
-        label: Nom objet
-        
-    id_obj: 
-        label: ID objet
-        
+labels: 
+    name: partage utilisateur
+    name_plur: partages utilisateurs
+    
+fields:         
     id_user: 
         label: Utilisateur
         type: id_object
         object: user
-        
-    can_edit: 
-        label: Peux éditer
-        type: bool
-        default_value: 0
+        input: 
+            type: search_user
+
+lists_cols: 
+    obj: 
+        label: Objet
+        value: 
+            callback: displayObj
+lists: 
+    default:
+        title: Partages utilisateurs
+        icon: fas_user
+        cols:
+            id_user: 
+            can_edit: 
+                edit: 1

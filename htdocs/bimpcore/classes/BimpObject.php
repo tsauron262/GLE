@@ -634,6 +634,33 @@ class BimpObject extends BimpCache
 		return $this->config->getFromCurrentPath($path, $default_value, $required, $data_type);
 	}
 
+	public function getTraits($name_only = true)
+	{
+		$traits = array();
+
+		foreach ($this->getConf('traits', array(), false, 'array') as $trait) {
+			if (strpos($trait, '/') > 0) {
+				$data = explode('/', $trait);
+				$module = $data[0];
+				$name = $data[1];
+			} else {
+				$module = $this->module;
+				$name = $trait;
+			}
+
+			if ($name_only) {
+				$traits[] = $name;
+			} else {
+				$traits[] = array(
+					'module' => $module,
+					'name'   => $name
+				);
+			}
+		}
+
+		return $traits;
+	}
+
 	public function getPrimary()
 	{
 		if (empty($this->params)) {
@@ -1694,7 +1721,7 @@ class BimpObject extends BimpCache
 
 	// Getters données:
 
-	public function getData($field, $default = true)
+	public function getData($field, $default = true, $forDisplay = false)
 	{
 		if ($field === $this->getPrimary() || $field === 'id') {
 			return $this->id;
@@ -3302,7 +3329,7 @@ class BimpObject extends BimpCache
 
 								foreach ($child_filters as $field_name => $filter_data) {
 //									if (!isset($filters[$alias . '.' . $field_name])) {
-									if($filter_data != ''){
+									if ($filter_data != '') {
 										$filters[$alias . '.' . $field_name] = $filter_data;
 									}
 								}
@@ -4849,6 +4876,13 @@ class BimpObject extends BimpCache
 			}
 		}
 		$this->config->setCurrentPath($prev_path);
+
+		foreach ($this->getTraits() as $trait) {
+			if (method_exists($this, $trait . '_validatePost')) {
+				$errors = array_merge($errors, $this->{$trait . '_validatePost'}());
+			}
+		}
+
 		return $errors;
 	}
 
@@ -5063,6 +5097,12 @@ class BimpObject extends BimpCache
 			}
 			$value = $this->getData($field);
 			$errors = BimpTools::merge_array($errors, $this->validateValue($field, $value));
+		}
+
+		foreach ($this->getTraits() as $trait) {
+			if (method_exists($this, $trait . '_validate')) {
+				$errors = array_merge($errors, $this->{$trait . '_validate'}());
+			}
 		}
 
 		return $errors;
@@ -5373,6 +5413,14 @@ class BimpObject extends BimpCache
 			$errors = $this->validate();
 
 			if (!count($errors)) {
+				foreach ($this->getTraits() as $trait) {
+					if (method_exists($this, $trait . '_create')) {
+						$errors = array_merge($errors, $this->{$trait . '_create'}($warnings, $force_create));
+					}
+				}
+			}
+			
+			if (!count($errors)) {
 				if ($this->use_commom_fields) {
 					$dc = $this->getData('date_create');
 					if (is_null($dc) || !$dc) {
@@ -5526,6 +5574,14 @@ class BimpObject extends BimpCache
 				$errors[] = 'ID ' . $this->getLabel('of_the') . ' Absent';
 			} else {
 				$errors = $this->validate();
+
+				if (!count($errors)) {
+					foreach ($this->getTraits() as $trait) {
+						if (method_exists($this, $trait . '_update')) {
+							$errors = array_merge($errors, $this->{$trait . '_update'}($warnings, $force_create));
+						}
+					}
+				}
 
 				if (!count($errors)) {
 					$status_prop = $this->getStatusProperty();
@@ -7675,43 +7731,48 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		return (int) $this->db->getCount('bimpcore_note', $where);
 	}
 
-	public function renderNotesList($filter_by_user = true, $list_name = "default", $suffixe = "", $archive = false, $withLinked = true)
+	public function renderNotesList($filter_by_user = true, $list_name = "default", $suffixe = "", $archive = false, $withLinked = true, $linked_only = false)
 	{
+		$html = '';
+
 		if ($this->isLoaded()) {
-			if ($archive) {
-				$note = BimpObject::getInstance('bimpcore', 'BimpNoteArchive');
-			} else {
-				$note = BimpObject::getInstance('bimpcore', 'BimpNote');
-			}
-
-			$note->set('obj_type', 'bimp_object');
-			$note->set('obj_module', $this->module);
-			$note->set('obj_name', $this->object_name);
-			$note->set('id_obj', $this->id);
-
-			$list = new BC_ListTable($note, $list_name);
-			$list->addIdentifierSuffix($suffixe);
-			$list->addFieldFilterValue('obj_type', 'bimp_object');
-			$list->addFieldFilterValue('obj_module', $this->module);
-			$list->addFieldFilterValue('obj_name', $this->object_name);
-			$list->addFieldFilterValue('id_obj', $this->id);
-			$list->addObjectChangeReload($this->object_name);
-
-			if ($filter_by_user) {
-				$filters = BimpNote::getFiltersByUser();
-				foreach ($filters as $field => $filter) {
-					$list->addFieldFilterValue($field, $filter);
+			if (!$linked_only) {
+				if ($archive) {
+					$note = BimpObject::getInstance('bimpcore', 'BimpNoteArchive');
+				} else {
+					$note = BimpObject::getInstance('bimpcore', 'BimpNote');
 				}
-			}
 
-			if (!BimpCore::isModeDev()) { // ça fait planter flodev...
-				if (BimpCore::getConf('date_archive', '') != '') {
+				$note->set('obj_type', 'bimp_object');
+				$note->set('obj_module', $this->module);
+				$note->set('obj_name', $this->object_name);
+				$note->set('id_obj', $this->id);
+
+				$list = new BC_ListTable($note, $list_name);
+				$list->addIdentifierSuffix($suffixe);
+				$list->addFieldFilterValue('obj_type', 'bimp_object');
+				$list->addFieldFilterValue('obj_module', $this->module);
+				$list->addFieldFilterValue('obj_name', $this->object_name);
+				$list->addFieldFilterValue('id_obj', $this->id);
+				$list->addObjectChangeReload($this->object_name);
+
+				if ($filter_by_user) {
+					$filters = BimpNote::getFiltersByUser();
+					foreach ($filters as $field => $filter) {
+						$list->addFieldFilterValue($field, $filter);
+					}
+				}
+
+				$html .= $list->renderHtml();
+
+				if (!$archive && BimpCore::getConf('date_archive', '') != '') {
 					$list_model = '';
-					$btnHisto = '<div id="notes_archives_' . $this->object_name . '_' . $list->identifier . '_container">';
-					$btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_" . $this->object_name . '_' . $list->identifier . "_container')", array($filter_by_user, $list_model, $suffixe, true, $withLinked)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
-					$btnHisto .= '</div>';
+					$html .= '<div id="notes_archives_' . $this->object_name . '_' . $list->identifier . '_container">';
+					$html .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_" . $this->object_name . '_' . $list->identifier . "_container')", array($filter_by_user, $list_model, $suffixe, true, $withLinked)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
+					$html .= '</div>';
 				}
-
+			}
+			if (!BimpCore::isModeDev()) { // ça fait planter flodev...
 				$sup = '';
 				if ($withLinked && $withLinked !== 'false' && !is_a($this, 'Bimp_Societe') && !is_a($this, 'Bimp_Product')) {
 					global $modeCSV;
@@ -7719,6 +7780,10 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 					$modeCSV = true; // Pour éviter certains process trop lourds.
 
 					$linkedObjects = $this->getFullLinkedObjetsArray(false);
+
+					$html .= '<pre>';
+					$html .= print_r($linkedObjects, 1);
+					$html .= '</pre>';
 					if (count($linkedObjects) > 0) {
 						$filterLinked = array('linked' => array('or' => array()));
 						foreach ($linkedObjects as $data_linked => $inut) {
@@ -7747,12 +7812,14 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 					$modeCSV = $prev_modeCSV;
 				}
-			}
 
-			return $list->renderHtml() . $sup . ($archive == false ? $btnHisto : '');
+				$html .= $sup;
+			}
+		} else {
+			$html .= BimpRender::renderAlerts('Impossible d\'afficher la liste des notes (ID ' . $this->getLabel('of_the') . ' absent)');
 		}
 
-		return BimpRender::renderAlerts('Impossible d\'afficher la liste des notes (ID ' . $this->getLabel('of_the') . ' absent)');
+		return $html;
 	}
 
 	// Rendus HTML
@@ -12071,7 +12138,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 					if (isset($this->dol_object) && isset($this->dol_object->element)) {
 						$objName = $this->dol_object->element;
 					}
-					if(is_a($this, 'Bimp_Client')){
+					if (is_a($this, 'Bimp_Client')) {
 						$objName = "client";
 					}
 					if ($objName == "order_supplier") {

@@ -2358,7 +2358,7 @@ class BimpCache
 		if (!isset(self::$cache[$cache_key])) {
 			self::$cache[$cache_key] = array();
 
-			$rows = self::getBdb()->getRows('usergroup_user', '`fk_usergroup` = ' . (int) $id_group, null, 'array', array('fk_user'));
+			$rows = self::getBdb()->getRows('usergroup_user', '`fk_usergroup` = ' . (int) $id_group .' AND entity IN ('.getEntity('usergroup').')', null, 'array', array('fk_user'));
 			if (is_array($rows)) {
 				foreach ($rows as $r) {
 					self::$cache[$cache_key][] = (int) $r['fk_user'];

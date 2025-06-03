@@ -76,6 +76,11 @@ class devController extends BimpController
             $html .= '</a>';
         }
 
+		$bimpObject = BimpObject::getInstance('bimpcore', 'BimpObject');
+		$html .= '<span class="btn btn-default" onclick="'.$bimpObject->getJsActionOnclick('eraseCache').'">';
+		$html .= BimpRender::renderIcon('fas_eraser', 'iconLeft') . 'Vider le cache serveur';
+		$html .= '</span>';
+
         if (!BimpCore::isModeDev()) {
             $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/synopsistools/git_pull.php" target="_blank">';
             $html .= 'GIT PULL' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
@@ -85,7 +90,6 @@ class devController extends BimpController
             $html .= 'GIT PULL ALL' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';
         }
-
 
         $html .= '</div>';
 

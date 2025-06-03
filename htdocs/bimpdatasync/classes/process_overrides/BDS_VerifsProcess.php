@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-	public static $current_version = 13;
+	public static $current_version = 14;
 	public static $default_public_title = 'Vérifications et corrections diverses';
 
 	// Vérifs marges factures :
@@ -198,6 +198,121 @@ class BDS_VerifsProcess extends BDSProcess
 					$new_tms = date('Y-m-d H:i:s', $max_tms);
 					if (!$cur_tms || $new_tms > $cur_tms) {
 						BimpCore::setConf('commandes_marges_last_check_tms', $new_tms);
+					}
+				}
+				break;
+		}
+
+		return $result;
+	}
+
+	// Vérifs marges propal :
+
+	public function initCheckPropalsMargin(&$data, &$errors = array())
+	{
+		$date_from = $this->getOption('date_from', '');
+		$date_to = $this->getOption('date_to', '');
+		$nbElementsPerIteration = $this->getOption('nb_elements_per_iterations', 100);
+
+		if (!preg_match('/^[0-9]+$/', $nbElementsPerIteration) || !(int) $nbElementsPerIteration) {
+			$errors[] = 'Le nombre d\'élements par itération doit être un nombre entier positif';
+		}
+
+		if ($date_from && $date_to && $date_from > $date_to) {
+			$errors[] = 'La date de début doit être inférieure à la date de fin';
+		}
+
+		if (!count($errors)) {
+//            $where = 'tms > \'2023-02-03 10:16:35\' AND (tms < \'2024-05-21 00:00:00\' OR date_creation > \'2023-01-01 00:00:00\')';
+
+			$where = '';
+
+			if ($date_from || $date_to) {
+				if ($date_from) {
+					$where .= 'tms >= \'' . $date_from . ' 00:00:00\'';
+				}
+				if ($date_to) {
+					$where .= ($where ? ' AND ' : '') . 'tms <= \'' . $date_to . ' 23:59:59\'';
+				}
+			} else {
+				$tms = BimpCore::getConf('propals_marges_last_check_tms', '');
+				if ($tms) {
+					$where .= 'tms > \'' . $tms . '\'';
+				}
+			}
+			$where .= ' AND entity IN (' . getEntity('propal') .')';
+
+			$this->debug_content .= '<br/>WHERE : ' . $where . '<br/>';
+
+			$rows = $this->db->getRows('propal', $where, null, 'array', array('rowid'), 'tms', 'asc');
+			$elements = array();
+
+			if (is_array($rows)) {
+				foreach ($rows as $r) {
+					$elements[] = (int) $r['rowid'];
+				}
+			}
+
+			if (empty($elements)) {
+				$errors[] = 'Aucune propal a traiter trouvée';
+			} else {
+				$data['steps'] = array(
+					'check_margins' => array(
+						'label'                  => 'Vérifications des marges',
+						'on_error'               => 'continue',
+						'elements'               => $elements,
+						'nbElementsPerIteration' => (int) $nbElementsPerIteration
+					)
+				);
+			}
+		}
+	}
+
+	public function executeCheckPropalsMargin($step_name, &$errors = array(), $extra_data = array())
+	{
+		$result = array();
+		$bdb = BimpCache::getBdb();
+
+		switch ($step_name) {
+			case 'check_margins':
+				if (!empty($this->references)) {
+					$this->setCurrentObjectData('bimpcommercial', 'Bimp_Propal');
+					$max_tms = '';
+					foreach ($this->references as $id_propal) {
+						$this->incProcessed();
+						$cmde_errors = array();
+						$cmde_info = '';
+						$cmde = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_propal);
+
+						if (BimpObject::objectLoaded($cmde)) {
+							$cmde_errors = $cmde->checkMarge($cmde_info);
+							//sinon on tourne en boucle
+//							if ($bdb->update('propal', array('tms' => date('Y-m-d H:i:s')), 'rowid = ' . $id_propal) <= 0) {
+//								$cmde_errors[] = 'Err màj tms ' . $bdb->err();
+//							}
+						} else {
+							$cmde_errors[] = 'Propal #' . $id_propal . ' non trouvée';
+						}
+
+						if (count($cmde_errors)) {
+							$this->incIgnored();
+							$this->Error(BimpTools::getMsgFromArray($cmde_errors, 'Propal #' . $id_propal), $cmde, $id_propal);
+						} elseif ($cmde_info) {
+							$this->incUpdated();
+							$this->Success($cmde_info, $cmde, $id_propal);
+						}
+
+						$tms = $cmde->dol_object->date_modification;
+
+						if (!$max_tms || $tms > $max_tms) {
+							$max_tms = $tms;
+						}
+					}
+
+					$cur_tms = BimpCore::getConf('propals_marges_last_check_tms', '');
+					$new_tms = date('Y-m-d H:i:s', $max_tms);
+					if (!$cur_tms || $new_tms > $cur_tms) {
+						BimpCore::setConf('propals_marges_last_check_tms', $new_tms);
 					}
 				}
 				break;
@@ -2019,6 +2134,42 @@ class BDS_VerifsProcess extends BDSProcess
 				'use_report'    => 1,
 				'reports_delay' => 30
 			), true, $errors, $warnings);
+		}
+
+
+		if ($cur_version < 14) {
+			// Opération "Vérif des marges des commandes":
+			$op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+				'id_process'    => (int) $id_process,
+				'title'         => 'Vérif des marges des propal',
+				'name'          => 'checkPropalsMargin',
+				'description'   => '',
+				'warning'       => '',
+				'active'        => 1,
+				'use_report'    => 1,
+				'reports_delay' => 30
+			), true, $errors, $warnings);
+
+			if (BimpObject::objectLoaded($op)) {
+				$op_options = array();
+
+				$id_option = (int) $bdb->getValue('bds_process_option', 'id', 'id_process = ' . $id_process . ' AND name = \'date_from\'');
+				if ($id_option) {
+					$op_options[] = $id_option;
+				}
+				$id_option = (int) $bdb->getValue('bds_process_option', 'id', 'id_process = ' . $id_process . ' AND name = \'date_to\'');
+				if ($id_option) {
+					$op_options[] = $id_option;
+				}
+				$id_option = (int) $bdb->getValue('bds_process_option', 'id', 'id_process = ' . $id_process . ' AND name = \'nb_elements_per_iterations\'');
+				if ($id_option) {
+					$op_options[] = $id_option;
+				}
+
+				if (!empty($op_options)) {
+					$warnings = array_merge($warnings, $op->addAssociates('options', $op_options));
+				}
+			}
 		}
 
 		return $errors;

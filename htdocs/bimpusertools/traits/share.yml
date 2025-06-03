@@ -8,3 +8,18 @@ fields:
         values: 
             array: ownerTypes
         default_value: 1
+
+lists_cols:
+    share_owner:
+        label: Propriétaire
+        value: 
+            callback: share_displayOwner
+    share_users: 
+        label: Partage utilisateurs
+        value: 
+            callback: share_renderShareUsers
+    share_usergroups:
+        label: Partage groupes
+        value:
+            callback: share_renderShareUserGroups
+        

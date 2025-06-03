@@ -8,33 +8,48 @@ trait share
 		2 => 'Groupe'
 	);
 
-	public function canEdit()
+	// Droits utilisateurs :
+	public function share_canEdit()
 	{
 		global $user;
 
-		if ($this->isOwner($user->id)) {
+		if (!$this->isLoaded($errors)) {
 			return 1;
 		}
 
-		if ($this->isSharedToUser($user->id, true)) {
+		if ($this->share_isUserOwner($user->id)) {
+			return 1;
+		}
+
+		if ($this->share_isSharedToUser($user->id, true)) {
 			return 1;
 		}
 
 		return 0;
 	}
 
-	public function canDelete()
+	public function share_canDelete()
 	{
+		if (!$this->isLoaded($errors)) {
+			return 1;
+		}
+
 		global $user;
 
-		if ($this->isOwner($user->id)) {
+		if ($this->share_isUserOwner($user->id)) {
 			return 1;
 		}
 
 		return 0;
 	}
 
-	public function isUserOwner($id_user = null)
+	public function canEditShares()
+	{
+		return $this->share_isUserOwner();
+	}
+
+	// Getters booléens :
+	public function share_isUserOwner($id_user = null)
 	{
 		if (is_null($id_user)) {
 			global $user;
@@ -45,19 +60,20 @@ trait share
 			return 0;
 		}
 
-		switch ($this->getData('onwer_type')) {
+		switch ($this->getData('owner_type')) {
 			case 1:
-				return (int) ($id_user === (int) $this->getData('id_owner'));
+				return ($id_user == (int) $this->getData('id_owner'));
 
 			case 2:
+				BimpObject::loadClass('bimpcore', 'Bimp_UserGroup');
 				$userGroups = Bimp_UserGroup::getUserUserGroupsList($id_user);
-				return (int) (in_array((int) $this->getData('id_owner'), $userGroups));
+				return (in_array((int) $this->getData('id_owner'), $userGroups));
 		}
 
 		return 0;
 	}
 
-	public function isSharedToUser($id_user = null, $can_edit_only = false)
+	public function share_isSharedToUser($id_user = null, $can_edit_only = false)
 	{
 		if (!$this->isLoaded()) {
 			return 0;
@@ -74,7 +90,7 @@ trait share
 
 		$filters = array(
 			'obj_module' => $this->module,
-			'obj_name'   => $this->obj_name,
+			'obj_name'   => $this->object_name,
 			'id_obj'     => $this->id,
 			'id_user'    => $id_user
 		);
@@ -87,12 +103,14 @@ trait share
 			return 1;
 		}
 
+		BimpObject::loadClass('bimpcore', 'Bimp_UserGroup');
+
 		$userGroups = Bimp_UserGroup::getUserUserGroupsList($id_user);
 
 		if (!empty($userGroups)) {
 			$filters = array(
 				'obj_module' => $this->module,
-				'obj_name'   => $this->obj_name,
+				'obj_name'   => $this->object_name,
 				'id_obj'     => $this->id,
 				'id_group'   => $userGroups
 			);
@@ -109,7 +127,81 @@ trait share
 		return 0;
 	}
 
-	public function getUserSharedObjectsIds($id_user = null)
+	// Getters params :
+
+	public function share_getListsExtraButtons()
+	{
+		$buttons = array();
+
+		if ($this->isLoaded()) {
+			if ($this->canEdit()) {
+				$title = 'Partages ' . $this->getLabel('of_the') . ' ' . $this->getName();
+				$buttons[] = array(
+					'label'   => 'Partages',
+					'icon'    => 'fas_share-alt',
+					'onclick' => $this->getJsLoadModalCustomContent('share_renderShareLists', $title)
+				);
+			}
+		}
+
+		return $buttons;
+	}
+
+	public function share_getUserFilter($alias = 'a')
+	{
+		global $user;
+		$id_user = $user->id;
+		BimpObject::loadClass('bimpcore', 'Bimp_UserGroup');
+		$user_groups = Bimp_UserGroup::getUserUserGroupsList($id_user);
+		$primary = $this->getPrimary();
+
+		$filter = array(
+			'or' => array(
+				'and_owner_user'        => array(
+					'and_fields' => array(
+						$alias . '.owner_type' => 1,
+						$alias . '.id_owner'   => $id_user
+					)
+				),
+				$alias . '.' . $primary => array(
+					'or_field' => array(
+						array(
+							'in' => '(SELECT DISTINCT a_user_share.id_obj FROM ' . MAIN_DB_PREFIX . 'bimp_user_share a_user_share WHERE a_user_share.obj_module = \'' . $this->module . '\' AND a_user_share.obj_name = \'' . $this->object_name . '\' AND a_user_share.id_user = ' . (int) $id_user . ')'
+						)
+					)
+				)
+			)
+		);
+
+		if (!empty($user_groups)) {
+			$filter['or']['and_owner_group'] = array(
+				'and_fields' => array(
+					$alias . '.owner_type' => 2,
+					$alias . '.id_owner'   => $user_groups
+				)
+			);
+
+			$filter['or'][$alias . '.' . $primary ]['or_field'][] = array(
+				'in' => '(SELECT DISTINCT a_usergroup_share.id_obj FROM ' . MAIN_DB_PREFIX . 'bimp_usergroup_share a_usergroup_share WHERE a_usergroup_share.obj_module = \'' . $this->module. '\' AND a_usergroup_share.obj_name = \'' . $this->object_name . '\' AND a_usergroup_share.id_group IN (' . implode(',', $user_groups) . '))'
+			);
+		}
+
+		return $filter;
+	}
+
+	public function share_getObjListFilters()
+	{
+		return array(
+			array(
+				'name'   => 'obj_user_filters',
+				'filter' => $this->share_getUserFilter('a')
+			)
+		);
+	}
+
+	// Getters données :
+
+	public function share_getUseObjectsIds($id_user = null, $filters = array(), $joins = array())
 	{
 		if (is_null($id_user)) {
 			global $user;
@@ -124,31 +216,45 @@ trait share
 		$primary = $this->getPrimary();
 		$table = $this->getTable();
 
-		$user_groups = implode(',', Bimp_UserGroup::getUserUserGroupsList($id_user));
+		BimpObject::loadClass('bimpcore', 'Bimp_UserGroup');
+		$user_groups = Bimp_UserGroup::getUserUserGroupsList($id_user);
 
-		$sql = 'SELECT DISTINCT a.' . $primary . ' as id_obj, DISTINCT us.id_obj as id_obj_user, ugs.id_obj as id_obj_group';
-		$sql .= ' FROM ' . MAIN_DB_PREFIX . $table . ' a';
-		$sql .= ', ' . MAIN_DB_PREFIX . 'bimp_user_share us';
-		$sql .= ', ' . MAIN_DB_PREFIX . 'bimp_usergroup_share ugs';
-		$sql .= ' WHERE ';
-		$sql .= '((a.owner_type = 1 AND id_owner = ' . $id_user . ') OR (a.owner_type = 2 AND id_owner IN (' . $user_groups . ')))';
-		$sql .= ' OR (us.obj_module = \'' . $this->module . '\' AND us.obj_name = \'' . $this->object_name . '\' AND us.id_user = ' . $id_user . ')';
-		$sql .= ' OR (ugs.obj_module = \'' . $this->module . '\' AND ugs.obj_name = \'' . $this->object_name . '\' AND ugs.id_group IN ' . $user_groups . ')';
+		$joins['us'] = array(
+			'table' => 'bimp_user_share',
+			'on'    => 'us.obj_module = \'' . $this->module . '\' AND us.obj_name = \'' . $this->object_name . '\' AND us.id_obj = a.' . $primary
+		);
 
+		$joins['ugs'] = array(
+			'table' => 'bimp_usergroup_share',
+			'on'    => 'ugs.obj_module = \'' . $this->module . '\' AND ugs.obj_name = \'' . $this->object_name . '\' AND ugs.id_obj = a.' . $primary
+		);
+
+		$filters['or_share'] = array(
+			'or' => array(
+				'and_owner_user'  => array(
+					'and_fields' => array(
+						'a.owner_type' => 1,
+						'a.id_owner'   => $id_user
+					)
+				),
+				'and_owner_group' => array(
+					'and_fields' => array(
+						'a.owner_type' => 2,
+						'a.id_owner'   => $user_groups
+					)
+				),
+				'us.id_user'      => $id_user,
+				'ugs.id_group'    => $user_groups
+			)
+		);
+
+		$sql = BimpTools::getSqlFullSelectQuery($table, array('DISTINCT a.' . $primary . ' as id'), $filters, $joins);
 		$rows = $this->db->executeS($sql, 'array');
 
 		if (is_array($rows)) {
 			foreach ($rows as $r) {
-				if ((int) $r['id_obj'] && !in_array((int) $r['id_obj'], $objects)) {
-					$objects[] = (int) $r['id_obj'];
-					continue;
-				}
-				if ((int) $r['id_obj_user'] && !in_array((int) $r['id_obj_user'], $objects)) {
-					$objects[] = (int) $r['id_obj_user'];
-					continue;
-				}
-				if ((int) $r['id_obj_group'] && !in_array((int) $r['id_obj_group'], $objects)) {
-					$objects[] = (int) $r['id_obj_group'];
+				if ((int) $r['id'] && !in_array((int) $r['id'], $objects)) {
+					$objects[] = (int) $r['id'];
 				}
 			}
 		}
@@ -156,7 +262,41 @@ trait share
 		return $objects;
 	}
 
-	public function renderSharedUsers()
+	// Affichages :
+
+	public function share_displayOwner()
+	{
+		$id_owner = (int) $this->getData('id_owner');
+
+		if (!$id_owner) {
+			return '';
+		}
+
+		$html = '';
+
+		switch ((int) $this->getData('owner_type')) {
+			case 1:
+				$user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('id_owner'));
+				if (BimpObject::objectLoaded($user)) {
+					$html .= $user->getLink();
+				} else {
+					$html .= '<span class="error">Utilisateur introuvable</span>';
+				}
+				break;
+
+			case 2:
+				$group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $this->getData('id_owner'));
+				if (BimpObject::objectLoaded($group)) {
+					$html .= $group->getLink();
+				}
+				break;
+		}
+
+		return $html;
+	}
+
+	// Rendus HTML
+	public function share_renderShareUsers()
 	{
 		$html = '';
 
@@ -170,21 +310,20 @@ trait share
 			$rows = $this->db->getRows('bimp_user_share', BimpTools::getSqlWhere($filters, '', ''), null, 'array', array('id_user'));
 
 			if (is_array($rows) && !empty($rows)) {
-				$html .= '<ul>';
 				foreach ($rows as $r) {
 					$user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $r['id_user']);
 					if (BimpObject::objectLoaded($user)) {
-						$html .= '<li>' . $user->getLink() . '</li>';
+						$html .= ($html ? '<br/>' : '') . $user->getLink();
 					}
 				}
-				$html .= '</ul>';
 			}
 		}
 
 		return $html;
 	}
 
-	public function renderSharedUserGroups() {
+	public function share_renderShareUserGroups()
+	{
 		$html = '';
 
 		if ($this->isLoaded()) {
@@ -197,17 +336,49 @@ trait share
 			$rows = $this->db->getRows('bimp_usergroup_share', BimpTools::getSqlWhere($filters, '', ''), null, 'array', array('id_group'));
 
 			if (is_array($rows) && !empty($rows)) {
-				$html .= '<ul>';
 				foreach ($rows as $r) {
 					$group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $r['id_group']);
 					if (BimpObject::objectLoaded($group)) {
-						$html .= '<li>' . $group->getLink() . '</li>';
+						$html .= ($html ? '<br/>' : '') . $group->getLink();
 					}
 				}
-				$html .= '</ul>';
 			}
 		}
 
 		return $html;
+	}
+
+	public function share_renderShareLists()
+	{
+		$html = '';
+
+		$userShare = BimpObject::getInstance('bimpusertools', 'BimpUserShare');
+		$list = new BC_ListTable($userShare, 'obj');
+		$list->addFieldFilterValue('obj_module', $this->module);
+		$list->addFieldFilterValue('obj_name', $this->object_name);
+		$list->addFieldFilterValue('id_obj', $this->id);
+		$html .= $list->renderHtml();
+
+		$groupShare = BimpObject::getInstance('bimpusertools', 'BimpUserGroupShare');
+		$list = new BC_ListTable($groupShare, 'obj');
+		$list->addFieldFilterValue('obj_module', $this->module);
+		$list->addFieldFilterValue('obj_name', $this->object_name);
+		$list->addFieldFilterValue('id_obj', $this->id);
+		$html .= $list->renderHtml();
+
+		return $html;
+	}
+
+
+	// Overrides :
+	public function share_create(&$warnings = array(), $force_create = false)
+	{
+		if (!(int) $this->getData('id_owner')) {
+			global $user;
+			$this->set('id_owner', $user->id);
+			$this->set('owner_type', 1);
+		}
+
+		return array();
 	}
 }

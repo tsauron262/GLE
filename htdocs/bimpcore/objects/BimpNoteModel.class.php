@@ -1,30 +1,32 @@
 <?php
 
+require_once DOL_DOCUMENT_ROOT . '/bimpusertools/traits/share.php';
+
 class BimpNoteModel extends BimpObject
 {
+	public static $traits = array('share');
+	use share;
 
 	// Getters droits users :
 
 	public function canView()
 	{
 		return 1;
-		global $user;
-		return (int) $user->admin;
 	}
 
 	public function canCreate()
 	{
-		return $this->canView();
+		return 1;
 	}
 
 	public function canEdit()
 	{
-		return $this->canCreate();
+		return $this->share_canEdit();
 	}
 
 	public function canDelete()
 	{
-		return $this->canCreate();
+		return $this->share_canDelete();
 	}
 
 	public function canSetAction($action)
@@ -42,7 +44,41 @@ class BimpNoteModel extends BimpObject
 
 	// Getters params:
 
+	public function getListsExtraButtons()
+	{
+		return $this->share_getListsExtraButtons();
+	}
+
 	// Getters array:
+
+	public function getModelsArray($obj_module, $obj_name, $user_filters = true, $active_only = true, $include_empty = true) {
+		$modeles = ($include_empty ? array(0 => '') : array());
+
+		if ($obj_module && $obj_name) {
+			$filters = array(
+				'obj_module' => $obj_module,
+				'obj_name'   => $obj_name,
+				'active'     => 1
+			);
+
+			if ($active_only) {
+				$filters['active'] = 1;
+			}
+
+			if ($user_filters) {
+				$filters['obj_user_filters'] = $this->share_getUserFilter('a');
+			}
+
+			$rows = $this->getList($filters, null, null, 'id', 'ASC', 'array', array('id', 'name'));
+
+			if (!empty($rows)) {
+				foreach ($rows as $r) {
+					$modeles[$r['id']] = $r['name'];
+				}
+			}
+		}
+		return $modeles;
+	}
 
 	// Getters données:
 
@@ -78,5 +114,4 @@ class BimpNoteModel extends BimpObject
 	// Actions:
 
 	// Overrides:
-
 }

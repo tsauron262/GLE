@@ -33,25 +33,7 @@ class Bimp_Ticket extends BimpDolObject
 	);
 
 	public static $types = array();
-
-	const MAIL_TICKET_GENERAL = 'service.marchands@rueducommerce.fr';
-	const TYPE_TICKET_GENERAL = '';
-	const MAIL_TICKET_SIGNALEMENT = 'moderation-mkp@rueducommerce.fr';
-	const TYPE_TICKET_SIGNALEMENT = 'SIGNAL';
-	const MAIL_TICKET_DEMANDE_ENTRANTE = 'marketplace@rueducommerce.fr';
-	const TYPE_TICKET_DEMANDE_ENTRANTE = 'DEMENT';
-	const MAIL_TICKET_QUALITE = 'qualite-marketplace@rueducommerce.fr';
-	const TYPE_TICKET_QUALITE = 'QUA';
-	const MAIL_TICKET_FORMULAIRE = 'partenariat_marketplace@rueducommerce.fr';
-	const TYPE_TICKET_FORMULAIRE = 'FORMU';
-
-	public static $mail_typeTicket = array(
-		self::MAIL_TICKET_GENERAL          => self::TYPE_TICKET_GENERAL,
-		self::MAIL_TICKET_SIGNALEMENT      => self::TYPE_TICKET_SIGNALEMENT,
-		self::MAIL_TICKET_DEMANDE_ENTRANTE => self::TYPE_TICKET_DEMANDE_ENTRANTE,
-		self::MAIL_TICKET_QUALITE          => self::TYPE_TICKET_QUALITE,
-		self::MAIL_TICKET_FORMULAIRE       => self::TYPE_TICKET_FORMULAIRE
-	);
+	public static $mail_typeTicket = array(); // A définir dans les entités
 
 	// Droits users :
 
@@ -179,21 +161,6 @@ class Bimp_Ticket extends BimpDolObject
 						'visibility'  => $note::BN_ALL,
 						'type_author' => $note::BN_AUTHOR_USER,
 						"type_dest"   => $note::BN_DEST_SOC
-					)
-				))
-			);
-			$buttons[] = array(
-				'label'   => 'E-mail Contact',
-				'icon'    => 'fas_envelope',
-				'onclick' => $note->getJsLoadModalForm('default', 'Envoyer un e-mail à un contact tiers', array(
-					'fields' => array(
-						"obj_type"    => "bimp_object",
-						"obj_module"  => $this->module,
-						"obj_name"    => $this->object_name,
-						"id_obj"      => $this->id,
-						'visibility'  => $note::BN_ALL,
-						'type_author' => $note::BN_AUTHOR_USER,
-						"type_dest"   => $note::BN_DEST_CONTACT
 					)
 				))
 			);
@@ -336,7 +303,7 @@ class Bimp_Ticket extends BimpDolObject
 			$client = $this->getChildObject('client');
 			if (BimpObject::objectLoaded($client)) {
 				$html .= '<div style="margin-top: 10px">';
-				$html .= '<b>Client : </b> ' . $client->getLink();
+				$html .= '<b>Marchand : </b> ' . $client->getLink();
 				$html .= '</div>';
 			}
 		}
@@ -374,7 +341,7 @@ class Bimp_Ticket extends BimpDolObject
 			));
 		} else {
 			$html .= '<span class="danger">';
-			$html .= 'Aucun client sélectionné';
+			$html .= 'Aucun marchand sélectionné';
 			$html .= '</span>';
 			$html .= '<input type="hidden" value="" name="notify_email" />';
 		}
@@ -383,6 +350,18 @@ class Bimp_Ticket extends BimpDolObject
 		return $html;
 	}
 
+	public function renderDescription()
+	{
+		$html = $this->displayDataDefault('message');
+		$title = BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Description';
+
+		$images = $this->renderImages(false);
+		if ($images) {
+			$html .= ($html ? '<br/><br/>' : '') . '<div style="font-size: 14px; border-top: 1px solid #999; margin-top: 10px; padding-top: 10px">' . BimpRender::renderIcon('fas_images', 'iconLeft') . 'Images liées : </div>' . $images;
+		}
+
+		return BimpRender::renderPanel($title, $html, '', array('type' => 'secondary'));
+	}
 	// Traitements :
 
 	public function checkStatus()
@@ -839,12 +818,12 @@ class Bimp_Ticket extends BimpDolObject
 
 	public function getMailFrom()
 	{
-		$from = self::MAIL_TICKET_GENERAL;
+		$from = static::MAIL_TICKET_GENERAL;
 		$type = $this->getData('type_code');
 
-		$keys = array_values(self::$mail_typeTicket);
+		$keys = array_values(static::$mail_typeTicket);
 		if (!empty($type) && in_array($type, $keys)) {
-			$typeTicket_mail = array_flip(self::$mail_typeTicket);
+			$typeTicket_mail = array_flip(static::$mail_typeTicket);
 			$from = $typeTicket_mail[$type];
 		}
 

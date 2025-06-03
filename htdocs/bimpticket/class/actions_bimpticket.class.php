@@ -116,6 +116,11 @@ class ActionsBimpticket
 							if (isset($Bimp_Ticket::$mail_typeTicket[$to_email])) {
 								$type_code = $Bimp_Ticket::$mail_typeTicket[$to_email];
 								break;
+							} elseif (preg_match('/^(.+)\.com$/',  $to_email, $matches)) {
+								if (isset($Bimp_Ticket::$mail_typeTicket[$matches[1] .'.fr'])) {
+									$type_code = $Bimp_Ticket::$mail_typeTicket[$matches[1] .'.fr'];
+									break;
+								}
 							}
 						}
 
@@ -134,6 +139,9 @@ class ActionsBimpticket
 							$ticket->add_contact($contact_static->id, 'SUPPORTCLI', 'external');
 						}
 
+						if (!$ticket->getData('fk_user_assign')) {
+							$ticket->updateField('fk_user_assign', 0);
+						}
 						$traite = 1;
 					}
 				} else {

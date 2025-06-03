@@ -15,6 +15,7 @@ echo '<body style="padding: 30px">';
 BimpCore::displayHeaderFiles();
 
 global $db, $user;
+$bdb = new BimpDb($db);
 
 if (!BimpObject::objectLoaded($user)) {
 	echo BimpRender::renderAlerts('Aucun utilisateur connecté');
@@ -26,96 +27,8 @@ if (!$user->admin) {
 	exit;
 }
 
-$Bimp_Ticket = null;
-
-BimpObject::loadClass('bimpticket', 'Bimp_Ticket', $Bimp_Ticket);
-if (!$Bimp_Ticket) {
-	echo BimpRender::renderAlerts('Impossible de charger la classe Bimp_Ticket');
-	exit;
-}
-
-echo 'VALS : <pre>' . print_r($Bimp_Ticket::$mail_typeTicket, 1) . '</pre>';
-
-$type_code = '';
-$to_email = 'qualite-marketplace@rueducommerce.com';
-
-if (isset($Bimp_Ticket::$mail_typeTicket[$to_email])) {
-	$type_code = $Bimp_Ticket::$mail_typeTicket[$to_email];
-} elseif (preg_match('/^(.+)\.com$/', $to_email, $matches)) {
-	if (isset($Bimp_Ticket::$mail_typeTicket[$matches[1] . '.fr'])) {
-		$type_code = $Bimp_Ticket::$mail_typeTicket[$matches[1] . '.fr'];
-	}
-}
-
-echo '<br/>TYPE : "' . $type_code .'"';
-
-
-
-//$bdb = BimpCache::getBdb(true);
-//
-//$where = '';
-//
-//$id_ticket = (int) BimpTools::getValue('id_ticket', 0, 'int');
-//if ((int) BimpTools::getValue('all', 0, 'int')) {
-//	$where = 1;
-//} else {
-//	if ($id_ticket) {
-//		$where = 'rowid = ' . $id_ticket;
-//	}
-//}
-//
-//if ($where) {
-//	$rows = $bdb->getRows('ticket', $where, null, 'array', array('rowid', 'message'), 'rowid', 'DESC');
-//
-//	if (is_array($rows)) {
-//		foreach ($rows as $r) {
-//			$new_txt = BimpTools::cleanHtml($r['message']);
-//
-//			if ($new_txt != $r['message']) {
-//				echo 'UP TICKET ' . $r['rowid'] . ' : ';
-//
-//				if ($bdb->update('ticket', array(
-//						'message' => $new_txt
-//					), 'rowid = ' . (int) $r['rowid']) <= 0) {
-//					echo 'FAIL - ' . $bdb->err();
-//				} else {
-//					echo 'OK';
-//				}
-//				echo '<br/>';
-//			} else {
-//				echo 'NO UP TICKET ' . $r['rowid'] . '<br/>';
-//			}
-//		}
-//	} else {
-//		echo 'ERR ' . $bdb->err();
-//	}
-//
-//	$rows = $bdb->getRows('bimpcore_note', 'obj_name = \'Bimp_Ticket\'' . ($id_ticket ? ' AND id_obj = ' . $id_ticket : ''), null, 'array', array('id', 'content'), 'id', 'DESC');
-//	if (is_array($rows)) {
-//		foreach ($rows as $r) {
-//			$new_txt = BimpTools::cleanHtml($r['content']);
-//
-//			if ($new_txt != $r['content']) {
-//				echo 'UP NOTE ' . $r['id'] . ' : ';
-//
-//				if ($bdb->update('bimpcore_note', array(
-//						'content' => $new_txt
-//					), 'id = ' . (int) $r['id']) <= 0) {
-//					echo 'FAIL - ' . $bdb->err();
-//				} else {
-//					echo 'OK';
-//				}
-//				echo '<br/>';
-//			} else {
-//				echo 'NO UP NOTE ' . $r['ID'] . '<br/>';
-//			}
-//		}
-//	} else {
-//		echo 'ERR ' . $bdb->err();
-//	}
-//} else {
-//	echo 'FILTRES ABSENTS';
-//}
+$model = BimpObject::getInstance('bimpcore', 'BimpNoteModel');
+$list = $model->get
 
 echo '<br/>FIN';
 echo '</body></html>';

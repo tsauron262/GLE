@@ -900,57 +900,39 @@ class BimpNote extends BimpObject
 	{
 		$html = '';
 
-		$modeles = array(
-			0 => ''
-		);
-
-		$module = $this->getData('obj_module');
+		$obj_module = $this->getData('obj_module');
 		$obj_name = $this->getData('obj_name');
 
-		if ($module && $obj_name) {
-			$filters = array(
-				'obj_module' => $module,
-				'obj_name'   => $obj_name
-			);
+		if ($obj_module && $obj_name) {
+			$modele = BimpObject::getInstance('bimpcore', 'BimpNoteModel');
+			$modele->set('obj_module', $obj_module);
+			$modele->set('obj_name', $obj_name);
 
-//			if ($active_only) {
-//				$filters['active'] = 1;
-//			}
-
-			foreach (BimpCache::getBimpObjectObjects('bimpcore', 'BimpNoteModel', $filters) as $modele) {
-				$modeles[$modele->id] = $modele->getData('name');
-			}
-		}
-
-		$html .= BimpInput::renderInput('select', 'note_modele', 0, array(
-			'options' => $modeles
-		));
-
-		$model = BimpObject::getInstance('bimpcore', 'BimpNoteModel');
-		$model = BimpObject::getInstance('bimpcore', 'BimpNoteModel');
-		$model->set('obj_module', $module);
-		$model->set('obj_name', $obj_name);
-
-		if ($model->can('view')) {
-			$html .= '<div class="buttonsContainer" style="text-align: right; margin-top: 10px">';
-
-			$obj = BimpObject::getInstance($module, $obj_name);
-			$onclick = $model->getJsLoadModalList('obj', array(
-				'title'         => 'Modèles de notes des ' . $obj->getLabel('name_plur'),
-				'extra_filters' => array(
-					'obj_module' => $module,
-					'obj_name'   => $obj_name
-				)
+			$html .= BimpInput::renderInput('select', 'note_modele', 0, array(
+				'options' => $modele->getModelsArray($obj_module, $obj_name)
 			));
-			$html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-			$html .= BimpRender::renderIcon('far_file-alt', 'iconLeft') . 'Gérer les modèles';
-			$html .= '</span>';
 
-			$onclick = 'reloadObjectInput($(this).findParentByClass(\'object_form\').attr(\'id\'), \'note_modele\', {obj_module: \'' . $module . '\', obj_name: \'' . $obj_name . '\'});';
-			$html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-			$html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
-			$html .= '</span>';
-			$html .= '</div>';
+			if ($modele->can('view')) {
+				$html .= '<div class="buttonsContainer" style="text-align: right; margin-top: 10px">';
+
+				$obj = BimpObject::getInstance($obj_module, $obj_name);
+				$onclick = $modele->getJsLoadModalList('obj', array(
+					'title'         => 'Modèles de notes des ' . $obj->getLabel('name_plur'),
+					'extra_filters' => array(
+						'obj_module' => $obj_module,
+						'obj_name'   => $obj_name
+					)
+				));
+				$html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+				$html .= BimpRender::renderIcon('far_file-alt', 'iconLeft') . 'Gérer les modèles';
+				$html .= '</span>';
+
+				$onclick = 'reloadObjectInput($(this).findParentByClass(\'object_form\').attr(\'id\'), \'note_modele\', {obj_module: \'' . $obj_module . '\', obj_name: \'' . $obj_name . '\'});';
+				$html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+				$html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+				$html .= '</span>';
+				$html .= '</div>';
+			}
 		}
 
 		return $html;

@@ -32,6 +32,8 @@ class Bimp_Ticket extends BimpDolObject
 		self::STATUS_TRANSFERED     => array('label' => 'Transféré', 'icon' => 'fas_sign-out-alt', 'classes' => array('important')),
 	);
 
+	const MAIL_TICKET_GENERAL = 'test@test.fr';
+
 	public static $types = array();
 	public static $mail_typeTicket = array(); // A définir dans les entités
 
@@ -818,15 +820,16 @@ class Bimp_Ticket extends BimpDolObject
 
 	public function getMailFrom()
 	{
-		$from = static::MAIL_TICKET_GENERAL;
+		$from = '';
 		$type = $this->getData('type_code');
 
-		$keys = array_values(static::$mail_typeTicket);
-		if (!empty($type) && in_array($type, $keys)) {
-			$typeTicket_mail = array_flip(static::$mail_typeTicket);
-			$from = $typeTicket_mail[$type];
+		if ($type) {
+			$from = array_search($type, static::$mail_typeTicket);
 		}
 
+		if (!$from) {
+			$from = static::MAIL_TICKET_GENERAL;
+		}
 		return $from;
 	}
 

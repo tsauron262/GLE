@@ -144,6 +144,10 @@ class BS_ApplePart extends BimpObject
 
 		if (is_array($options)) {
 			foreach ($options as $code => $option) {
+				if ($code == 'NOCHG') {
+					$option['price'] = 0;
+				}
+
 				if (isset($option['price'])) {
 					$label = BimpTools::displayMoneyValue((float) $option['price'], 'EUR');
 

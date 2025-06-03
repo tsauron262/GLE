@@ -911,15 +911,21 @@ function loadSavedFilters(filters_id, id_list_filters, full_panel_html) {
             full_panel_html = 1;
         }
 
-        if (!id_list_filters || isNaN(id_list_filters)) {
-            removeAllListFilters(filters_id);
-            return;
-        }
+		if (full_panel_html) {
+			var $container = $filters.findParentByClass('listFiltersPanelContainer');
+		} else {
+			var $container = $filters.find('.load_saved_filters_container');
+		}
 
-        if (full_panel_html) {
-            var $container = $filters.findParentByClass('listFiltersPanelContainer');
-        } else {
-            var $container = $filters.find('.load_saved_filters_container');
+		if (typeof reportHash === 'function')	{
+			if(!isNaN(id_list_filters)) {
+				reportHash($container, id_list_filters);
+			}
+		}
+		
+		if (!id_list_filters || isNaN(id_list_filters)) {
+			removeAllListFilters(filters_id);
+            return;
         }
 
         var id_filters_config = 0;

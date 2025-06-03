@@ -1862,13 +1862,14 @@ class BimpController
 				}
 				if (!is_null($form_id)) {
 					$form->identifier = $form_id;
-				} else {
+				} /*else {
 					$form_id = $form->identifier;
-				}
+				}*/
 				if (count($form->errors)) {
 					$errors = $form->errors;
 				} else {
 					$html = $form->renderHtml();
+					$form_id = $form->identifier;
 				}
 			}
 		}

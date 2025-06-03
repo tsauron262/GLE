@@ -39,7 +39,8 @@ class BimpCore
 			'bimp_api'          => '/bimpapi/views/js/bimp_api.js',
 			'bimpDocumentation' => '/bimpcore/views/js/BimpDocumentation.js',
 			'bds_operations'    => '/bimpdatasync/views/js/operations.js',
-			'touch_punch'       => '/bimpcore/views/js/jquery.ui.touch-punch.min.js'
+			'touch_punch'       => '/bimpcore/views/js/jquery.ui.touch-punch.min.js',
+			'hashurl'          => '/bimpcore/views/js/hashurl.js',
 		),
 		'css' => array(
 			'fonts'          => '/bimpcore/views/css/fonts.css',

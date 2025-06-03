@@ -476,7 +476,7 @@ class BimpUserMsg
 		),
 		'fiche_inter_non_liee'                       => array(    // \BT_ficheInter::setSigned
 			'label'  => 'Cette fiche d’intervention a été validée, mais n’est liée à aucune commande et à aucun contrat. Merci de faire les vérifications nécessaires et de corriger si cela est une erreur.',
-			'dests'  => 'to::dispatch@bimpf.fr,object::client_commerciaux',
+			'dests'  => 'to::dispatch@bimp.fr,object::client_commerciaux',
 			'params' => array('only_first_commercial' => 1),
 			'module' => 'bimptechnique',
 		),

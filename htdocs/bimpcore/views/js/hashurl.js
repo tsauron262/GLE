@@ -128,6 +128,7 @@ function onClicTab(typeTab, idTab) {
 function afficherOngletSelonHash()	{
 	var hash = window.location.hash;
 	if (hash) {
+		const classListToChange = ['active', 'in'];
 		var objHash = parseChaineToObjet(hash);
 		// console.log(objHash);
 		if(objHash['mt'])	{
@@ -145,13 +146,24 @@ function afficherOngletSelonHash()	{
 			// desactiver le contenu de l'onglet actuellement actif
 			var currentContent = document.querySelector('#navtabs_content_maintabs div.active');
 			var newContent = document.querySelector('#navtabs_content_maintabs div[id="' + objHash['mt'] + '"]');
-			const classListToChange = ['active', 'in'];
+			// const classListToChange = ['active', 'in'];
 			if (currentContent && currentContent !== newContent) {
 				currentContent.classList.remove(...classListToChange);
 			}
 			// Activer le contenu de l'onglet objHash['mt']
 			if (newContent && !newContent.classList.contains('active')) {
 				newContent.classList.add(...classListToChange);
+			}
+			if(objHash['st'] === undefined) {
+				// Si l'onglet secondaire n'est pas défini, on cheche l'onglet secondaire actif
+				var ul = newContent.firstChild;
+				var activeSubTab = document.querySelector('#navtabs_' + ul.dataset.navtabs_id + ' li.active');
+				if (activeSubTab) {
+					var activeSubContent = document.getElementById(activeSubTab.dataset.navtab_id);
+					if (activeSubContent) {
+						activeSubContent.classList.add(...classListToChange);
+					}
+				}
 			}
 		}
 		if(objHash['st'])	{
@@ -191,7 +203,7 @@ function afficherOngletSelonHash()	{
 				currentSubContent = document.querySelector(subDivName + ' div.active');
 				newSubContent = document.querySelector(subDivName + ' div[id="' + objHash['st'] + '"]');
 			}
-			const classListToChange = ['active', 'in'];
+			// const classListToChange = ['active', 'in'];
 			if (currentSubContent && currentSubContent !== newSubContent) {
 				currentSubContent.classList.remove(...classListToChange);
 			}

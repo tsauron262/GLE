@@ -297,6 +297,9 @@ class BS_ApplePart extends BimpObject
 			case 'STOCK':
 				return (float) $this->getData('stock_price');
 
+			case 'NOCHG':
+				return 0;
+
 			default:
 				$priceOptions = $this->getData('price_options');
 				if (isset($priceOptions[$type]['price'])) {
@@ -364,6 +367,10 @@ class BS_ApplePart extends BimpObject
 
 	public static function convertPrixStatic($type, $prix, $ref, $isIphone, $price_type = 'STOCK')
 	{
+		if ($price_type === 'NOCHG') {
+			return 0;
+		}
+
 		if (BimpCore::isEntity('actimac')) {
 			// modif demandée par Mickaël Muller pour actimac:
 			if (in_array($ref, self::$back_glass_refs)) {

@@ -3921,7 +3921,7 @@ class gsxController extends BimpController
                             foreach ($part['pricingOptions'] as $price_option) {
                                 if (isset($price_option['code'])) {
                                     $price_options[$price_option['code']] = array(
-                                        'price'       => $price_option['price'],
+                                        'price'       => ($price_option['code'] === 'NOCHG' ? 0 : $price_option['price']),
                                         'description' => $price_option['description']
                                     );
                                 }

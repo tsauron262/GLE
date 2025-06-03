@@ -108,11 +108,16 @@ function updateBookMark() {
 			}
 		}
 
-		var get = cible.getAttribute('rel').split('%23');
-		var newrel = get[0];
-		var newhastag = encodeURIComponent(window.location.hash);
-		newrel += newhastag;
-		cible.setAttribute('rel', newrel);
+		if(cible) {
+			var get = cible.getAttribute('rel').split('%23');
+			var newrel = get[0];
+			var newhastag = encodeURIComponent(window.location.hash);
+			newrel += newhastag;
+			cible.setAttribute('rel', newrel);
+		}
+		else {
+			console.log('newbookmark non trouvé dans le formulaire actionbookmark.');
+		}
 	}
 }
 
@@ -251,6 +256,7 @@ function chargerFiltreSelonHash() {
 }
 
 $(window).on('hashchange',function(){
+	console.log('hashchange');
 	updateBookMark();
 	if(window.location.hash) {
 		afficherOngletSelonHash();

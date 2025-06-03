@@ -2059,7 +2059,7 @@ class BimpController
 				} else {
 					$params['child_name'] = $child_name;
 					$params['object_label'] = BimpTools::getValue('object_label', '', 'alphanohtml');
-					$params['fields_prefixe'] = BimpTools::getValue('fields_prefixe', '', 'aZ09');
+					$params['fields_prefixe'] = BimpTools::getValue('fields_prefixe', '', 'alphanohtml');
 
 					$html .= $child->renderFiltersSelect($params);
 				}

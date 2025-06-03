@@ -100,4 +100,47 @@ class cron extends BimpCron
 		}
 
 	}
+
+
+	public function dailyProcess()
+	{
+		$retCron = array();
+		if ($this->updateMirakl() != 1) {
+			$retCron[] = 'Erreur lors de la mise à jour des données Mirakl';
+		}
+
+
+		if (count($retCron)) {
+			$this->output = implode("<br>", $retCron);
+			return 1;
+		}
+		$this->output = 'Tâches cron effectuées avec succès';
+		return 0;
+	}
+
+	public function updateMirakl()	{
+		$err = array();
+		// faire la liste des marchands à mettre à jour (Date de mise à jour Mirakl vide ou > 1 jour)
+		$marchands = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client');
+		$list = $marchands->getList(array(
+			'date_maj_mirakl' => array('custom' => 'date_maj_mirakl <= DATE_SUB(NOW(), INTERVAL 1 DAY) OR date_maj_mirakl IS NULL'),
+			'shopid' => '> 0',
+		));
+		foreach ($list as $element) {
+//			echo '<pre>'; print_r($element); echo '</pre>';
+//			exit;
+			$socMarchand = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $element['rowid']);
+			$err0 = $socMarchand->appelMiraklS20();
+			if ($err0[0]) {
+				$err[] = implode(",", $err0[0]);
+			}
+			if (count($err) > 0) {
+				BimpCore::addlog('Erreur lors de l\'envoi des messages relanceEnAttenteOnboarding : ' . implode(', ', $err), 4);
+				return 0;
+			} else {
+				return 1;
+			}
+		}
+	}
+
 }

@@ -15,13 +15,15 @@ class AlertProduit extends BimpObject
     static $errors = array();
 
     const TYPE_DEVIS_LIGNE = 101;
+    const TYPE_COMMANDE_LIGNE = 201;
 
     public static $type_piece = Array(
         self::TYPE_DEVIS       => Array('label' => 'Devis', 'icon' => 'fas_file-invoice', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Propal', 'table' => 'propal'),
         self::TYPE_DEVIS_LIGNE => Array('label' => 'Ligne de Devis', 'icon' => 'fas_file-invoice', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_PropalLine', 'table' => 'propaldet'),
         self::TYPE_FACTURE     => Array('label' => 'Facture', 'icon' => 'fas_file-invoice-dollar', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Facture', 'table' => 'facture'),
         self::TYPE_COMMANDE    => Array('label' => 'Commande', 'icon' => 'fas_dolly', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Commande', 'table' => 'commande'),
-        self::TYPE_CONTRAT     => Array('label' => 'Contrat', 'icon' => 'fas_retweet', 'module' => 'bimpcontract', 'obj_name' => 'BContract_contrat', 'table' => 'contrat'),
+		self::TYPE_COMMANDE_LIGNE => Array('label' => 'Ligne de Commande', 'icon' => 'fas_file-invoice', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_CommandeLine', 'table' => 'commandedet'),
+		self::TYPE_CONTRAT     => Array('label' => 'Contrat', 'icon' => 'fas_retweet', 'module' => 'bimpcontract', 'obj_name' => 'BContract_contrat', 'table' => 'contrat'),
     );
 
     // Type de pièce
@@ -46,7 +48,7 @@ class AlertProduit extends BimpObject
     // et appel traiteAlerte sur chaque instance
     public static function traiteAlertes($object, $name_trigger, $errors, $warnings)
     {
-
+		exit(var_dump($object, $name_trigger, $errors, $warnings));
 
         $id_type = null;
         foreach (self::$type_piece as $k => $t) {
@@ -72,7 +74,7 @@ class AlertProduit extends BimpObject
         if (!(int) $this->getData('active')) {
             return;
         }
-        
+
         if ($this->isObjectQualified($object)) {
             if ($this->getData('type_notif') == 0) {
                 $this->sendMessage($object, $errors, $warnings);

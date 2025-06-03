@@ -2033,6 +2033,7 @@ function setPaginationEvents($list) {
 			var hashExistant = window.location.hash;
 			if (hashExistant) {
 				result = parseChaineToObjet(hashExistant);
+				console.log(result);
 				if (result['ct']) {
 					var ct = JSON.parse(result['ct'].replaceAll('%22', '"'));
 					for (const [divId, params] of Object.entries(ct)) {

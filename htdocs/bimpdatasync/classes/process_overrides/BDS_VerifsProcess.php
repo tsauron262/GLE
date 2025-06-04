@@ -240,7 +240,7 @@ class BDS_VerifsProcess extends BDSProcess
 					$where .= 'tms > \'' . $tms . '\'';
 				}
 			}
-			$where .= ' AND entity IN (' . getEntity('propal') .')';
+			$where .= ($where ? ' AND ' : '') . 'entity IN (' . getEntity('propal') . ')';
 
 			$this->debug_content .= '<br/>WHERE : ' . $where . '<br/>';
 

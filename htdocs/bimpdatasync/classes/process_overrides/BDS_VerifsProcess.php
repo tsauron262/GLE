@@ -251,6 +251,8 @@ class BDS_VerifsProcess extends BDSProcess
 				foreach ($rows as $r) {
 					$elements[] = (int) $r['rowid'];
 				}
+			} else {
+				$errors[] = $this->db->err();
 			}
 
 			if (empty($elements)) {
@@ -2138,7 +2140,7 @@ class BDS_VerifsProcess extends BDSProcess
 
 
 		if ($cur_version < 14) {
-			// Opération "Vérif des marges des commandes":
+			// Opération "Vérif des marges des propales":
 			$op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
 				'id_process'    => (int) $id_process,
 				'title'         => 'Vérif des marges des propal',

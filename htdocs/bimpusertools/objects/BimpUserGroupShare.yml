@@ -1,21 +1,26 @@
+extends:
+    module: bimpusertools
+    object_name: BimpShare
+
 table: bimp_usergroup_share
 
-fields:
-    obj_module:
-        label: Module
-    
-    obj_name:
-        label: Nom objet
-    
-    id_obj:
-        label: ID objet
-    
+labels:
+    name: partage groupe
+    name_plur: partages groupes
+
+fields:    
     id_group:
         label: Groupe
         type: id_object
         object: group
-    
-    can_edit:
-        label: Peux éditer
-        type: bool
-        default_value: 0
+        input:
+            type: search_group
+        
+lists:
+    default:
+        title: Partages groupes
+        icon: fas_users
+        cols:
+            id_group:
+            can_edit:
+                edit: 1

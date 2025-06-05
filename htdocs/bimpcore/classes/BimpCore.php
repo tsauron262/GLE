@@ -1878,11 +1878,13 @@ class BimpCore
 		$content .= '</div>';
 
 		// Toutes mes tâches:
-		$content .= '<div style="margin-bottom: 12px">';
-		$content .= '<a href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=user&id=' . $user->id . '&navtab-maintabs=tasks&navtab-tasks=my_tasks">';
-		$content .= BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Toutes mes tâches';
-		$content .= '</a>';
-		$content .= '</div>';
+		if (BimpCore::isModuleActive('bimptask')) {
+			$content .= '<div style="margin-bottom: 12px">';
+			$content .= '<a href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=user&id=' . $user->id . '&navtab-maintabs=tasks&navtab-tasks=my_tasks">';
+			$content .= BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Toutes mes tâches';
+			$content .= '</a>';
+			$content .= '</div>';
+		}
 
 		// Logout:
 		$content .= '<div style="margin-top: 10px; text-align: center">';

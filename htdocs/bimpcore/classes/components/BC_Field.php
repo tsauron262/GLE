@@ -159,7 +159,7 @@ class BC_Field extends BimpComponent
 
 		parent::__construct($object, $name, $path);
 
-		$this->value = $this->object->getData($name);
+		$this->value = $this->object->getData($name, true, true);
 
 		if (is_null($this->value) && !is_null($this->params['default_value'])) {
 			$this->value = $this->params['default_value'];
@@ -801,7 +801,7 @@ class BC_Field extends BimpComponent
 		if (isset($this->params['display_if']['field_name'])) {
 			$field = $this->params['display_if']['field_name'];
 			if ($field && $this->object->field_exists($field)) {
-				$field_value = $this->object->getData($field);
+				$field_value = $this->object->getData($field, true, true);
 
 				if (isset($this->params['display_if']['show_values'])) {
 					$show_values = $this->params['display_if']['show_values'];
@@ -1332,7 +1332,7 @@ class BC_Field extends BimpComponent
 
 										default:
 											if ($obj->field_exists($option)) {
-												$value = $obj->getData($option);
+												$value = $obj->getData($option, true, true);
 											} else {
 												$value = $this->value;
 											}
@@ -1376,6 +1376,10 @@ class BC_Field extends BimpComponent
 						} else {
 							$value = str_replace(".", ",", $this->value);
 						}
+						break;
+
+					case 'json':
+						$value = BimpRender::renderRecursiveArrayContent($this->value, array('no_html'=>1));
 						break;
 
 					default:

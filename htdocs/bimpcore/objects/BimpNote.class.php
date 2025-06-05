@@ -83,20 +83,17 @@ class BimpNote extends BimpObject
 			case 'setAsViewed':
 				if ($this->isLoaded()) {
 					if ($this->getData('user_create') == $user->id && $this->getData('type_author') == self::BN_AUTHOR_USER) {
-						$errors[] = 'L\'utilisateur connecté est l\'auteur';
 						return 0;
 					}
 
 					if (!$this->isUserDest()) {
-						$errors[] = 'Vous ne faites pas partie des destinataires';
 						return 0;
 					}
 				}
 				return 1;
 
 			case 'repondre':
-				if ($user->id == (int) $this->getData('user_create')) {
-					$errors[] = 'L\'utilisateur connecté est l\'auteur de la note';
+				if ($this->isLoaded() && $user->id == (int) $this->getData('user_create')) {
 					return 0;
 				}
 				return 1;
@@ -171,10 +168,6 @@ class BimpNote extends BimpObject
 		switch ($action) {
 			case 'repondre':
 				if ($this->isLoaded()) {
-//                    if ((int) $this->getData('type_author') !== self::BN_AUTHOR_USER && (int) $this->getData('type_author') !== self::BN_AUTHOR_GROUP) {
-//                        $errors[] = 'L\'auteur n\'est pas un utilisateur'; // Nécessaire dans l'immédiat (pour prolease) mais le système sera revu.
-//                        return 0;
-//                    }
 					global $user;
 					if ($this->getData('user_create') == $user->id) {
 						$errors[] = 'L\'utilisateur connecté est l\'auteur';
@@ -667,17 +660,21 @@ class BimpNote extends BimpObject
 
 		switch ((int) $this->getData('type_dest')) {
 			case self::BN_DEST_USER:
-				if ($with_icon) {
-					$html .= BimpRender::renderIcon('fas_user', 'iconLeft');
+				if ((int) $this->getData('fk_user_dest')) {
+					if ($with_icon) {
+						$html .= BimpRender::renderIcon('fas_user', 'iconLeft');
+					}
+					$html .= $this->displayData('fk_user_dest', 'nom_url', $display_input_value, $no_html);
 				}
-				$html .= $this->displayData('fk_user_dest', 'nom_url', $display_input_value, $no_html);
 				break;
 
 			case self::BN_DEST_GROUP:
-				if ($with_icon) {
-					$html .= BimpRender::renderIcon('fas_users', 'iconLeft');
+				if ((int) $this->getData('fk_group_dest')) {
+					if ($with_icon) {
+						$html .= BimpRender::renderIcon('fas_users', 'iconLeft');
+					}
+					$html .= $this->displayData('fk_group_dest', 'nom_url', $display_input_value, $no_html);
 				}
-				$html .= $this->displayData('fk_group_dest', 'nom_url', $display_input_value, $no_html);
 				break;
 
 			case self::BN_DEST_SOC:
@@ -840,7 +837,7 @@ class BimpNote extends BimpObject
 			$html .= '<span class="bimp_chat_dest">À : ' . $dest . '</span>';
 		}
 		if ($buttons) {
-			$html .= '<span class="bimp_chat_buttons">'.$buttons.'</span>';
+			$html .= '<span class="bimp_chat_buttons">' . $buttons . '</span>';
 		}
 		$html .= '</div>';
 
@@ -900,57 +897,39 @@ class BimpNote extends BimpObject
 	{
 		$html = '';
 
-		$modeles = array(
-			0 => ''
-		);
-
-		$module = $this->getData('obj_module');
+		$obj_module = $this->getData('obj_module');
 		$obj_name = $this->getData('obj_name');
 
-		if ($module && $obj_name) {
-			$filters = array(
-				'obj_module' => $module,
-				'obj_name'   => $obj_name
-			);
+		if ($obj_module && $obj_name) {
+			$modele = BimpObject::getInstance('bimpcore', 'BimpNoteModel');
+			$modele->set('obj_module', $obj_module);
+			$modele->set('obj_name', $obj_name);
 
-//			if ($active_only) {
-//				$filters['active'] = 1;
-//			}
-
-			foreach (BimpCache::getBimpObjectObjects('bimpcore', 'BimpNoteModel', $filters) as $modele) {
-				$modeles[$modele->id] = $modele->getData('name');
-			}
-		}
-
-		$html .= BimpInput::renderInput('select', 'note_modele', 0, array(
-			'options' => $modeles
-		));
-
-		$model = BimpObject::getInstance('bimpcore', 'BimpNoteModel');
-		$model = BimpObject::getInstance('bimpcore', 'BimpNoteModel');
-		$model->set('obj_module', $module);
-		$model->set('obj_name', $obj_name);
-
-		if ($model->can('view')) {
-			$html .= '<div class="buttonsContainer" style="text-align: right; margin-top: 10px">';
-
-			$obj = BimpObject::getInstance($module, $obj_name);
-			$onclick = $model->getJsLoadModalList('obj', array(
-				'title'         => 'Modèles de notes des ' . $obj->getLabel('name_plur'),
-				'extra_filters' => array(
-					'obj_module' => $module,
-					'obj_name'   => $obj_name
-				)
+			$html .= BimpInput::renderInput('select', 'note_modele', 0, array(
+				'options' => $modele->getModelsArray($obj_module, $obj_name)
 			));
-			$html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-			$html .= BimpRender::renderIcon('far_file-alt', 'iconLeft') . 'Gérer les modèles';
-			$html .= '</span>';
 
-			$onclick = 'reloadObjectInput($(this).findParentByClass(\'object_form\').attr(\'id\'), \'note_modele\', {obj_module: \'' . $module . '\', obj_name: \'' . $obj_name . '\'});';
-			$html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-			$html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
-			$html .= '</span>';
-			$html .= '</div>';
+			if ($modele->can('view')) {
+				$html .= '<div class="buttonsContainer" style="text-align: right; margin-top: 10px">';
+
+				$obj = BimpObject::getInstance($obj_module, $obj_name);
+				$onclick = $modele->getJsLoadModalList('obj', array(
+					'title'         => 'Modèles de notes des ' . $obj->getLabel('name_plur'),
+					'extra_filters' => array(
+						'obj_module' => $obj_module,
+						'obj_name'   => $obj_name
+					)
+				));
+				$html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+				$html .= BimpRender::renderIcon('far_file-alt', 'iconLeft') . 'Gérer les modèles';
+				$html .= '</span>';
+
+				$onclick = 'reloadObjectInput($(this).findParentByClass(\'object_form\').attr(\'id\'), \'note_modele\', {obj_module: \'' . $obj_module . '\', obj_name: \'' . $obj_name . '\'});';
+				$html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+				$html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+				$html .= '</span>';
+				$html .= '</div>';
+			}
 		}
 
 		return $html;

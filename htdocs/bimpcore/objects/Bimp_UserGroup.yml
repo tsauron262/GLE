@@ -135,6 +135,7 @@ fields_tables:
             - field: secteur
             - field: note
             - field: fk_user
+            - field: data_revue
 
 views:
     default: 

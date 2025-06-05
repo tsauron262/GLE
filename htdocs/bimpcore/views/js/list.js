@@ -569,7 +569,7 @@ function saveAllRowsModifications(list_id, $button) {
 	});
 }
 
-function addObjectFromList(list_id, $button) {
+function addObjectFromList(list_id, $button, $add_form_name = '', extra_data = {}) {
 	var $list = $('#' + list_id);
 
 	if (!$list.length) {
@@ -593,17 +593,41 @@ function addObjectFromList(list_id, $button) {
 		'object_name': $list.data('object_name'),
 		'id_object': 0
 	};
+	
+	if (typeof(extra_data) !== 'undefined') {
+		for (var key in extra_data) {
+			data[key] = extra_data[key];
+		}
+	}
 
 	$row.find('.inputContainer').each(function () {
 		var field_name = $(this).data('field_name');
 		if (field_name) {
 			data[field_name] = getInputValue($(this));
 		}
-//        var $input = $(this).find('[name=' + field_name + ']');
-//        if ($input.length) {
-//            data[field_name] = $input.val();
-//        }
 	});
+
+	var $values_input = $list.find('input[name=' + $add_form_name + '_add_form_values]');
+	if ($values_input.length) {
+		
+		var values = JSON.parse($values_input.val());
+		console.log('VALUES');
+		console.log(values);
+		if (typeof(values.fields) !== 'undefined') {
+			console.log('FIELDS');
+			console.log(values.fields);
+			for (var field in values.fields) {
+				data[field] = values.fields[field];
+			}
+		} else {
+			bimp_msg('FAIL 2', 'danger');
+		}
+	} else {
+		bimp_msg('FAIL 1', 'danger');
+	}
+
+	console.log('DATA');
+	console.log(data);
 
 	BimpAjax('saveObject', data, null, {
 		$button: $button,

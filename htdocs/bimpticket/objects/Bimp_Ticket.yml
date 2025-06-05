@@ -382,9 +382,10 @@ views:
                         col_md: 6
                         custom:
                             callback: renderContacts
+            -   cols:
                     -   type: custom
                         custom:
-                                callback: renderDescription
+                            callback: renderDescription
                         col_lg: 12
                         col_md: 12
             -   cols:

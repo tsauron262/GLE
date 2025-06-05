@@ -431,9 +431,12 @@ lists:
         checkboxes: 1
         filters_panel: default
         bulk_actions:
-            -   label: supprimer les tickets sélectionnés
+            -   label: Supprimer les tickets sélectionnés
                 icon: fas_trash-alt
                 onclick: deleteSelectedObjects('list_id', $(this))
+            -   label: Ignorer les tickets sélectionnés
+                icon: fas_times-circle
+                onclick: setSelectedObjectsAction($(this), 'list_id', 'ignore')
         sort_field: datec
         sort_way: desc
         n: 10
@@ -444,6 +447,8 @@ lists:
         delete_btn: 1
         page_btn: 1
         modal_view: default
+        extra_btn : 
+            callback: getListsExtraButtons
         cols:
             ref:
             fk_statut:

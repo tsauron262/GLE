@@ -142,7 +142,7 @@ class cron extends BimpCron
 			return 1;
 		} else {
 			$verif = $bdd->getRows('societe', 'date_maj_mirakl >= DATE_SUB(NOW(), INTERVAL 1 DAY)', null, 'array', array('rowid'));
-			$this->output = 'Données Mirakl effectuée avec succès pour ' . count($verif) . ' marchands';
+			$this->output = 'Données Mirakl à jour pour ' . count($verif) . ' marchands';
 			return 0;
 		}
 	}

@@ -58,7 +58,7 @@ class PropalPDF extends BimpCommDocumentPDF
         } else {
             $this->errors[] = 'Aucune proposition commerciale spécifiée';
         }
-        
+
         $secteur = $this->bimpCommObject->getData('ef_type');
 
         if (BimpCore::isEntity('actimac')) {
@@ -100,12 +100,12 @@ class PropalPDF extends BimpCommDocumentPDF
         $html = '';
         $html .= '<div>';
 
-        // Réf client: 
+        // Réf client:
         if ($this->propal->ref_client) {
             $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('RefCustomer') . ' : </span>' . $this->langs->convToOutputCharset($this->propal->ref_client) . '<br/>';
         }
 
-        // Dates: 
+        // Dates:
         if (!empty($this->propal->date)) {
             $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('Date') . ' : </span>' . dol_print_date($this->propal->date, "day", false, $this->langs) . '<br/>';
         }
@@ -114,7 +114,7 @@ class PropalPDF extends BimpCommDocumentPDF
             $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('DateEndPropal') . ' : </span>' . dol_print_date($this->propal->fin_validite, "day", false, $this->langs, true) . '<br/>';
         }
 
-        // Code client: 
+        // Code client:
         if (isset($this->propal->thirdparty->code_client)) {
             $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('CustomerCode') . ' : </span>' . $this->langs->transnoentities($this->propal->thirdparty->code_client) . '<br/>';
         }
@@ -161,7 +161,7 @@ class PropalPDF extends BimpCommDocumentPDF
             $html .= '</td></tr>';
         }
 
-        // Conditions de paiement: 
+        // Conditions de paiement:
         if (empty($conf->global->PROPALE_PDF_HIDE_PAYMENTTERMCOND) && ($this->object->cond_reglement_code || $this->object->cond_reglement)) {
             $html .= '<tr><td>';
             $html .= '<strong>' . $this->langs->transnoentities("PaymentConditions") . ': </strong><br/>';
@@ -171,7 +171,7 @@ class PropalPDF extends BimpCommDocumentPDF
             $html .= '</td></tr>';
         }
 
-        // Mode de paiement: 
+        // Mode de paiement:
         if ($this->object->mode_reglement_code && $this->object->mode_reglement_code != 'CHQ' && $this->object->mode_reglement_code != 'VIR') {
             $html .= '<tr><td>';
             $html .= '<strong>' . $this->langs->transnoentities("PaymentMode") . '</strong>:<br/>';
@@ -208,7 +208,7 @@ class PropalPDF extends BimpCommDocumentPDF
             }
         }
 
-        $id_default_account = BimpCore::getConf('id_default_bank_account', (!empty($conf->global->FACTURE_RIB_NUMBER) ? $conf->global->FACTURE_RIB_NUMBER : 0));
+		$id_default_account = $this->bimpCommObject->getDefaultBankAccount();
         if (!empty($this->object->fk_account) || !empty($this->object->fk_bank) || $id_default_account) {
             $html .= '<tr><td>';
             $bankid = (!empty($this->object->fk_account) ? $this->object->fk_account : (!empty($this->object->fk_bank) ? $this->object->fk_bank : $id_default_account));

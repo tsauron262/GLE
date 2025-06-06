@@ -459,7 +459,7 @@ class BimpController
 	public function display()
 	{
 		global $user, $bc_panels_super_id;
-		$bc_panels_super_id = 'fc_' . $this->module . '_' . $this->controller;
+		$bc_panels_super_id = 'fc_' . $this->module . '_' . $this->controller . '_';
 
 		if (BimpTools::isSubmit('ajax')) {
 			$this->ajaxProcess();
@@ -878,7 +878,7 @@ class BimpController
 		global $bc_panels_super_id;
 
 		if (BimpTools::isSubmit('modal_idx')) {
-			$bc_panels_super_id .= 'modal_' . BimpTools::getValue('modal_idx', 0, 'int');
+			$bc_panels_super_id .= 'modal_' . BimpTools::getValue('modal_idx', 0, 'int') . '_';
 		}
 
 		header('Content-Type: application/json');

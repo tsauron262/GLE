@@ -19,6 +19,7 @@ class Bimp_Ticket extends BimpDolObject
 	const STATUS_CLOSED = 8;
 	const STATUS_CANCELED = 9;
 	const STATUS_TRANSFERED = 11;
+	const STATUS_IGNORED = 12;
 
 	public static $status_list = array(
 		self::STATUS_DRAFT          => array('label' => 'Nouveau', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
@@ -30,6 +31,7 @@ class Bimp_Ticket extends BimpDolObject
 		self::STATUS_CLOSED         => array('label' => 'Terminé', 'icon' => 'fas_check', 'classes' => array('success')),
 		self::STATUS_CANCELED       => array('label' => 'Annulé', 'icon' => 'fas_times', 'classes' => array('danger')),
 		self::STATUS_TRANSFERED     => array('label' => 'Transféré', 'icon' => 'fas_sign-out-alt', 'classes' => array('important')),
+		self::STATUS_IGNORED        => array('label' => 'Ignoré', 'icon' => 'fas_times-circle', 'classes' => array('danger')),
 	);
 
 	const MAIL_TICKET_GENERAL = 'test@test.fr';
@@ -45,6 +47,7 @@ class Bimp_Ticket extends BimpDolObject
 
 		switch ($action) {
 			case 'assign':
+			case 'ignore':
 				return $user->admin || $user->rights->bimpticket->assign;
 
 			case 'newStatus':
@@ -75,6 +78,15 @@ class Bimp_Ticket extends BimpDolObject
 				if ($this->isLoaded()) {
 					if ((int) $this->getData('fk_statut') >= self::STATUS_CLOSED) {
 						$errors[] = 'Ticket déjà fermé';
+						return 0;
+					}
+				}
+				return 1;
+
+			case 'ignore':
+				if ($this->isLoaded()) {
+					if ((int) $this->getData('fk_statut') >= self::STATUS_IN_PROGRESS) {
+						$errors[] = 'Le statut actuel de ce ticket ne permet pas de l\'ignorer';
 						return 0;
 					}
 				}
@@ -114,6 +126,15 @@ class Bimp_Ticket extends BimpDolObject
 				'icon'    => 'fas_user-plus',
 				'onclick' => $this->getJsActionOnclick('assign', array(), array(
 					'form_name' => 'assign'
+				))
+			);
+		}
+		if ($this->isActionAllowed('ignore') && $this->canSetAction('ignore')) {
+			$buttons[] = array(
+				'label'   => 'Ignorer',
+				'icon'    => 'fas_times-circle',
+				'onclick' => $this->getJsActionOnclick('ignore', array(), array(
+					'confirm_msg' => 'Veuillez confirmer'
 				))
 			);
 		}
@@ -166,6 +187,25 @@ class Bimp_Ticket extends BimpDolObject
 					)
 				))
 			);
+		}
+
+		return $buttons;
+	}
+
+	public function getListsExtraButtons()
+	{
+		$buttons = array();
+
+		if ($this->isLoaded()) {
+			if ($this->isActionAllowed('ignore') && $this->canSetAction('ignore')) {
+				$buttons[] = array(
+					'label'   => 'Ignorer',
+					'icon'    => 'fas_times-circle',
+					'onclick' => $this->getJsActionOnclick('ignore', array(), array(
+						'confirm_mag' => 'Veuillez confirmer',
+					))
+				);
+			}
 		}
 
 		return $buttons;
@@ -364,6 +404,7 @@ class Bimp_Ticket extends BimpDolObject
 
 		return BimpRender::renderPanel($title, $html, '', array('type' => 'secondary'));
 	}
+
 	// Traitements :
 
 	public function checkStatus()
@@ -477,6 +518,28 @@ class Bimp_Ticket extends BimpDolObject
 						$warnings[] = 'Le tcket #' . $id . ' n\'existe plus';
 					}
 				}
+			}
+		}
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
+
+	public function actionIgnore($data, &$success = '')
+	{
+		$errors = array();
+		$warnings = array();
+
+
+		if ($this->isLoaded($errors)) {
+			$success = 'Ticket ignoré';
+			$errors = $this->updateField('fk_statut', self::STATUS_IGNORED);
+
+			if (!count($errors)) {
+				$this->addObjectLog('Ticket ignoré', 'IGNORED');
 			}
 		}
 

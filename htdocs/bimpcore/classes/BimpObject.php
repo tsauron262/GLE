@@ -5419,7 +5419,7 @@ class BimpObject extends BimpCache
 					}
 				}
 			}
-			
+
 			if (!count($errors)) {
 				if ($this->use_commom_fields) {
 					$dc = $this->getData('date_create');
@@ -7781,9 +7781,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 					$linkedObjects = $this->getFullLinkedObjetsArray(false);
 
-					$html .= '<pre>';
-					$html .= print_r($linkedObjects, 1);
-					$html .= '</pre>';
 					if (count($linkedObjects) > 0) {
 						$filterLinked = array('linked' => array('or' => array()));
 						foreach ($linkedObjects as $data_linked => $inut) {

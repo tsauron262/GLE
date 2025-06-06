@@ -881,6 +881,27 @@ class Bimp_Propal extends Bimp_PropalTemp
 		return $actions;
 	}
 
+	public function getDefaultListExtraButtons()
+	{
+		$buttons = parent::getDefaultListExtraButtons();
+		if ($this->isActionAllowed('close')) {
+			if ($this->canSetAction('close')) {
+				$buttons[] = array(
+					'label'   => 'Devis Refusé',
+					'icon'    => 'times',
+					'onclick' => $this->getJsActionOnclick('close', array(
+						'new_status' => 3
+					), array(
+						'form_name' => 'close'
+					))
+				);
+			}
+		}
+
+
+		return $buttons;
+	}
+
 	public function getActionsButtons()
 	{
 		global $langs, $user;

@@ -121,6 +121,7 @@ class cron extends BimpCron
 	}
 
 	public function updateMirakl()	{
+		$warnings = array();
 		$err = array();
 		// faire la liste des marchands à mettre à jour (Date de mise à jour Mirakl vide ou > 1 jour) et shopid > 0
 		global $db;
@@ -129,9 +130,9 @@ class cron extends BimpCron
 		foreach ($list as $element) {
 			// on ne met à jour que les marchands
 			$socMarchand = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $element['rowid']);
-			$err0 = $socMarchand->appelMiraklS20();
-			if ($err0[0]) {
-				$err[] = implode(",", $err0[0]);
+			$socMarchand->appelMiraklS20($warnings);
+			if ($warnings) {
+				$err[] = implode(",", $warnings);
 			}
 		}
 

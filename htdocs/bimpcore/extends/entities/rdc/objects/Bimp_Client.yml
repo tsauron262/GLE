@@ -199,7 +199,9 @@ fields_tables:
             -   field: presta_source
             #            - field: quality_score
             -   field: contrefacon
-            -   field: comment_quality
+            -   label: Commentaire qualité
+                value:
+                    callback: getCommentQuality
             -   field: fk_user_attr_rdc
             -   field: fk_categorie_maitre
             -   field: potentiel_catalogue

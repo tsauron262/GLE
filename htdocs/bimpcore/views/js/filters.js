@@ -917,16 +917,33 @@ function loadSavedFilters(filters_id, id_list_filters, full_panel_html) {
 			var $container = $filters.find('.load_saved_filters_container');
 		}
 
+		if (!id_list_filters || isNaN(id_list_filters)) {
+			var list_identifier = $filters.data('list_identifier');
+			removeAllListFilters(filters_id);
+			if(typeof parseChaineToObjet === 'function' && window.location.hash) {
+				var hash = window.location.hash;
+				if(hash.indexOf(list_identifier) > -1) {
+					var result = parseChaineToObjet(hash);
+					var ct = JSON.parse(result.ct.replaceAll('%22', '"'));
+					for (const [divId, params] of Object.entries(ct)) {
+						for (const [param, id] of Object.entries(params)) {
+							if (param == 'fl') {
+								ct[divId][param] = 0;
+							}
+						}
+					}
+					var newCt = JSON.stringify(ct);
+					window.location.hash = newCt;
+				}
+			}
+            return;
+        }
+		
 		if (typeof reportHash === 'function')	{
 			if(!isNaN(id_list_filters)) {
 				reportHash($container, id_list_filters);
 			}
 		}
-		
-		if (!id_list_filters || isNaN(id_list_filters)) {
-			removeAllListFilters(filters_id);
-            return;
-        }
 
         var id_filters_config = 0;
 

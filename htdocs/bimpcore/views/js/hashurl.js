@@ -173,17 +173,28 @@ function afficherOngletSelonHash()	{
 		}
 		if(objHash['st'])	{
 			// Désactiver l'onglet actuellement actif
-			var subTabName = '#navtabs_' + (objHash['mt'] || 'card') + '_tabs';
+			var tab = objHash['mt'];
+			if (!objHash['mt']) {
+				// Si l'onglet principal n'est pas défini, on cheche l'onglet principal actif
+				var liElement = document.querySelector('li[data-navtab_id="' + objHash['st'] + '"]');
+				var onclickAttr = liElement.getAttribute('onclick');
+				var matches = onclickAttr.match(/onClicTab\(\s*'([^']+)'/);
+				if (matches && matches[1]) {
+					tab = matches[1];
+				}
+				console.log('TAB : ' , tab);
+			}
+			var subTabName = '#navtabs_' + tab + '_tabs';
 
 			var currentSubTab = document.querySelector(subTabName + ' li.active');
 			var newSubTab = document.querySelector(subTabName + ' li[data-navtab_id="' + objHash['st'] + '"]');
 			if (!currentSubTab && !newSubTab) {
-				subTabName = '#navtabs_' + (objHash['mt'] || 'card') + '_view';
+				subTabName = '#navtabs_' + tab + '_view';
 				currentSubTab = document.querySelector(subTabName + ' li.active');
 				newSubTab = document.querySelector(subTabName + ' li[data-navtab_id="' + objHash['st'] + '"]');
 			}
 			if (!currentSubTab && !newSubTab) {
-				subTabName = '#navtabs_' + (objHash['mt'] || 'card');
+				subTabName = '#navtabs_' + tab;
 				currentSubTab = document.querySelector(subTabName + ' li.active');
 				newSubTab = document.querySelector(subTabName + ' li[data-navtab_id="' + objHash['st'] + '"]');
 			}
@@ -195,16 +206,16 @@ function afficherOngletSelonHash()	{
 				newSubTab.classList.add('active');
 			}
 			// desactiver le contenu de l'onglet actuellement actif
-			var subDivName = '#navtabs_content_' + (objHash['mt'] || 'card') + '_tabs';
+			var subDivName = '#navtabs_content_' + tab + '_tabs';
 			var currentSubContent = document.querySelector(subDivName + ' div.active');
 			var newSubContent = document.querySelector(subDivName + ' div[id="' + objHash['st'] + '"]');
 			if (!currentSubContent && !newSubContent) {
-				subDivName = '#navtabs_content_' + (objHash['mt'] || 'card') + '_view';
+				subDivName = '#navtabs_content_' + tab + '_view';
 				currentSubContent = document.querySelector(subDivName + ' div.active');
 				newSubContent = document.querySelector(subDivName + ' div[id="' + objHash['st'] + '"]');
 			}
 			if (!currentSubContent && !newSubContent) {
-				subDivName = '#navtabs_content_' + (objHash['mt'] || 'card');
+				subDivName = '#navtabs_content_' + tab;
 				currentSubContent = document.querySelector(subDivName + ' div.active');
 				newSubContent = document.querySelector(subDivName + ' div[id="' + objHash['st'] + '"]');
 			}
@@ -249,26 +260,69 @@ function chargerFiltreSelonHash() {
 							}
 						}
 					}
+					if (param === 'pa') {
+						if (id) {
+							var pageButtons = document.getElementById(divId + '_pagination');
+							var pageSpans = pageButtons.querySelectorAll('.pageBtn');
+							var pageCourante = null;
+							var pageMax = null;
+							pageSpans.forEach(function(span) {
+								var page = parseInt(span.getAttribute('data-p'), 10);
+								// Vérifie si c'est la page active (courante)
+								if (span.classList.contains('active')) {
+									pageCourante = page;
+								}
+								// pageMax sera mis à jour à chaque itération, le dernier "data-p" est supposé être le max
+								if (pageMax === null || page > pageMax) {
+									pageMax = page;
+								}
+							});
+							if (pageCourante !== id) {
+								if (id > pageMax) {
+									var p = pageMax;
+								}
+								else {
+									var p = id;
+								}
+								// console.log('Chargement de la page :', p, 'pour le divId :', divId);
+								var $list = $('#' + divId);
+								loadPage($list, p);
+							}
+						}
+					}
 				}
 			}
 		}
 	}
 }
 
-$(window).on('hashchange',function(){
-	console.log('hashchange');
-	updateBookMark();
-	if(window.location.hash) {
-		afficherOngletSelonHash();
-		// chargerFiltreSelonHash();
-	}
-});
-$(window).on("load", function () {
-	updateBookMark();
-	if(window.location.hash) {
-		afficherOngletSelonHash();
-		// chargerFiltreSelonHash();
-	}
-});
+function viderFiltres()	{
+	var filters = document.querySelectorAll('.object_component.object_filters_panel');
+	filters.forEach(function(filter) {
+		var select = filter.querySelector('select#id_filters_to_load');
+		if (select) {
+			select.value = '';
+			select.dispatchEvent(new Event('change'));
+		}
+	});
+}
 
-$(window).on();
+$(document).ready(function () {
+	$(window).on('hashchange', function () {
+		console.log('hashchange');
+		updateBookMark();
+		afficherOngletSelonHash();
+		chargerFiltreSelonHash();
+		if (!window.location.hash) {
+			viderFiltres();
+		}
+	});
+});
+	$(window).on("load", function () {
+		updateBookMark();
+		if (window.location.hash) {
+			afficherOngletSelonHash();
+			chargerFiltreSelonHash();
+		}
+	});
+

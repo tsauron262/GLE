@@ -458,8 +458,22 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return $html;
 	}
 
+	public function getCommentQuality()	{
+		define('MAX_COMMENT_QUALITY_LENGTH', 150);
+		$comment = $this->getData('comment_quality');
+		if ($comment) {
+			if (strlen($comment) > MAX_COMMENT_QUALITY_LENGTH) {
+				$short = substr($comment, 0, MAX_COMMENT_QUALITY_LENGTH);
+				$ret = '<span class="bs-popover"';
+				$ret .= BimpRender::renderPopoverData($comment);
+				$ret .= '>' . $short . '</span>';
+				return $ret;
+			}
+			else return $comment;
+		}
+		return '';
+	}
 	// Affichages
-
 	public function displayFullContactInfosNoWeb()
 	{
 		$params = array(
@@ -578,7 +592,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			'content' => $this->renderActionsCommView('auto'),
 		);
 
-		return BimpRender::renderNavTabs($tabs);
+		return BimpRender::renderNavTabs($tabs, 'actioncomm');
 	}
 
 	// Traitements

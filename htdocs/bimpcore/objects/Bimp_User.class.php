@@ -1081,7 +1081,7 @@ class Bimp_User extends BimpObject
 				'content'       => $this->renderTicketsView(),
 			);
 		}
-		
+
 		$tabs[] = array(
 			'id'            => 'ldap',
 			'title'         => BimpRender::renderIcon('link', 'iconLeft') . 'LDAP',
@@ -1744,7 +1744,7 @@ class Bimp_User extends BimpObject
 		}
 
 		if (!empty($tabs)) {
-			return BimpRender::renderNavTabs($tabs, 'entities_perms');
+			return BimpRender::renderNavTabs($tabs, 'entities_perms', array('niveau3' => 1));
 		}
 
 		return '';

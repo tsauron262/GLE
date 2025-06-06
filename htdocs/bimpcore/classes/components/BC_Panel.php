@@ -20,6 +20,8 @@ class BC_Panel extends BimpComponent
 
     public function __construct(BimpObject $object, $name, $path, $content_only = false, $level = 1, $title = null, $icon = null, $id_config = null)
     {
+		global $bc_panels_super_id;
+
         $this->params_def['title'] = array();
         $this->params_def['icon'] = array();
         $this->params_def['panel'] = array('data_type' => 'bool', 'default' => 1);
@@ -48,7 +50,7 @@ class BC_Panel extends BimpComponent
         $this->content_only = (int) $content_only;
         $this->level = $level;
 //        $this->identifier = $object->object_name . '_' . ($name ? $name . '_' : '') . static::$type . '_' . BimpTools::randomPassword(10, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', false);
-        $this->identifier = $object->object_name . '_' . ($name ? $name . '_' : '') . static::$type;
+        $this->identifier = $bc_panels_super_id . $object->object_name . '_' . ($name ? $name . '_' : '') . static::$type;
 
         if (BimpObject::objectLoaded($object)) {
             $this->identifier .= '_' . $object->id;

@@ -1339,11 +1339,16 @@ function loadPage($list, page, modeAppend) {
 		return;
 	}
 
+	var pageactuel = $list.find('input[name=param_p]').val();
 	$list.find('input[name=param_p]').val(page);
 
 	reloadObjectList($list.attr('id'), undefined, undefined, undefined, modeAppend, 250);
 	
 	if (typeof defHashFiltre === 'function') 	{
+		var hash = window.location.hash;
+		if (hash.indexOf($list.attr('id')) < 0 && page != pageactuel) {
+			defHashFiltre('pa', $list.attr('id'), pageactuel);
+		}
 		defHashFiltre('pa', $list.attr('id'), page);
 	}
 }
@@ -2063,7 +2068,6 @@ function setPaginationEvents($list) {
 										else {
 											var p = id;
 										}
-										console.log('Chargement de la page :', p, 'pour le divId :', divId);
 										loadPage($list, p);
 									}
 								}

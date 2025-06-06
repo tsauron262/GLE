@@ -48,7 +48,7 @@ class AlertProduit extends BimpObject
     // et appel traiteAlerte sur chaque instance
     public static function traiteAlertes($object, $name_trigger, $errors, $warnings)
     {
-		exit(var_dump($object, $name_trigger, $errors, $warnings));
+//		exit(var_dump($object, $name_trigger, $errors, $warnings));
 
         $id_type = null;
         foreach (self::$type_piece as $k => $t) {

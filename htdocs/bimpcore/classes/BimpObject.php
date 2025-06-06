@@ -2310,7 +2310,7 @@ class BimpObject extends BimpCache
 				$caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
 				if ($caisse->isLoaded()) {
 					if ($caisse->isValid()) {
-						$fk_account (int) $caisse->getData('id_account');
+						$fk_account = (int) $caisse->getData('id_account');
 					}
 				}
 			}

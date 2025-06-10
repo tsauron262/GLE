@@ -224,6 +224,7 @@ class ActionsBimpticket
 			BimpCore::addLog('Erreurs collecte e-mail', 4, 'bimpcore', $parameters['objectemail'], array(
 				'Erreurs' => $errors
 			));
+			global $user;
 			if ($user->login == 'f.martinez') {
 				echo 'Err - <pre>' . print_r($errors, 1) . '</pre>';
 				exit;

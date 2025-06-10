@@ -48,8 +48,6 @@ class AlertProduit extends BimpObject
     // et appel traiteAlerte sur chaque instance
     public static function traiteAlertes($object, $name_trigger, $errors, $warnings)
     {
-		exit(var_dump($object, $name_trigger, $errors, $warnings));
-
         $id_type = null;
         foreach (self::$type_piece as $k => $t) {
             if ($t['obj_name'] == $object->object_name)
@@ -77,7 +75,21 @@ class AlertProduit extends BimpObject
 
         if ($this->isObjectQualified($object)) {
             if ($this->getData('type_notif') == 0) {
-                $this->sendMessage($object, $errors, $warnings);
+				$objectForMessage = $object;
+				if ($this->getData('msgOnParent')) $objectForMessage = $object->getParentInstance();
+				$envoiOK = true;
+				if ($this->getData('checkIfNoteNonLue')) {	// avant d'envoyer le message, on verifie si il n'y a pas de message non lu contenant le message de notification (bimpcore_note)
+					$notes = $objectForMessage->getNotes();
+					foreach ($notes as $note) {
+						$c = $note->getData('content');
+						if ((stripos($c, $this->getData('message_notif')) !== false) && $note->getData('viewed') == 0) {
+							$envoiOK = false;
+						}
+					}
+				}
+                if ($envoiOK) {
+					$this->sendMessage($objectForMessage, $errors, $warnings);
+				}
             } else {
                 $this->sendAlert($errors, $warnings);
             }
@@ -89,6 +101,11 @@ class AlertProduit extends BimpObject
     {
 
         $filtre = $this->getData('filtre_piece');
+
+		if($this->getData('searchByCallback') && method_exists($this, $this->getData('callbackFunction'))) {
+			$nomFonction = $this->getData('callbackFunction');
+			return $this->$nomFonction($object);
+		}
 
         if (!isset($filtre[$object->getPrimary()]['values'])) {
             $filtre[$object->getPrimary()]['values'] = array();

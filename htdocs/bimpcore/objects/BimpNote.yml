@@ -297,10 +297,9 @@ forms:
             -   custom: 1
                 label: Destinataire
                 input_name: email_dest
-                hidden: 1
-                input:
-                    type: hidden
-                value: custom
+                type: select
+                options: 
+                    callback: getEmailDestsArray
             -   custom: 1
                 label: E-mail destinataire
                 input_name: email_dest_custom

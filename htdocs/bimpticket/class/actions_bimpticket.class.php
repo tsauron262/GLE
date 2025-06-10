@@ -163,7 +163,7 @@ class ActionsBimpticket
 						$contact_static = new Contact($db);
 						$contact_static->fetch(0, null, '', $Bimp_Ticket->getData('origin_email'));
 						if ($contact_static->id > 0 and $contact_static->fk_soc == $Bimp_Ticket->getData('fk_soc')) {
-							$Bimp_Ticket->add_contact($contact_static->id, 'SUPPORTCLI', 'external');
+							$ticket->add_contact($contact_static->id, 'SUPPORTCLI', 'external');
 						}
 						$traite = 1;
 					}

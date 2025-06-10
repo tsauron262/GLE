@@ -77,7 +77,7 @@ class ActionsBimpticket
 
 	function doCollectImapOneCollector($parameters, &$object, &$action, $hookmanager)
 	{
-		global $db;
+		global $db, $user;
 		$bdb = BimpCache::getBdb();
 
 		$errors = array();
@@ -105,7 +105,13 @@ class ActionsBimpticket
 			if (!is_array($cc)) {
 				$cc = explode(', ', BimpTools::cleanEmailsStr($cc));
 			}
+
+			if ($user->login == 'f.martinez') {
+				echo '<pre>' . print_r($parameters, 1) . '</pre>';
+				echo '<pre>' . print_r($cc, 1) . '</pre>';
+			}
 		}
+
 
 //		echo '<pre>' . print_r($matches[2], true) . '</pre>';
 		switch ($action) {
@@ -224,7 +230,6 @@ class ActionsBimpticket
 			BimpCore::addLog('Erreurs collecte e-mail', 4, 'bimpcore', $parameters['objectemail'], array(
 				'Erreurs' => $errors
 			));
-			global $user;
 			if ($user->login == 'f.martinez') {
 				echo 'Err - <pre>' . print_r($errors, 1) . '</pre>';
 				exit;

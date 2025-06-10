@@ -1259,9 +1259,9 @@ function bimp_reloadPage() {
     }
 
     var tab = '';
-    if (window.location.hash) {
-        tab = window.location.hash.replace('#', '');
-    }
+    // if (window.location.hash) {
+    //     tab = window.location.hash.replace('#', '');
+    // }
 
     var params = getUrlParams();
 

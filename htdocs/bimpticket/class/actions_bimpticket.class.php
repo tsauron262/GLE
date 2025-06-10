@@ -101,9 +101,10 @@ class ActionsBimpticket
 
 		$cc = array();
 		if (!empty($parameters['cc'])) {
-			$cc = $parameters['cc'];
-			if (!is_array($cc)) {
-				$cc = explode(', ', BimpTools::cleanEmailsStr($cc));
+			foreach ($parameters['cc']->get() as $cc_data) {
+				if (isset($cc_data->mail)) {
+					$cc[] = $cc_data->mail;
+				}
 			}
 
 			if ($user->login == 'f.martinez') {
@@ -130,9 +131,9 @@ class ActionsBimpticket
 							if (isset($Bimp_Ticket::$mail_typeTicket[$to_email])) {
 								$type_code = $Bimp_Ticket::$mail_typeTicket[$to_email];
 								break;
-							} elseif (preg_match('/^(.+)\.com$/',  $to_email, $matches)) {
-								if (isset($Bimp_Ticket::$mail_typeTicket[$matches[1] .'.fr'])) {
-									$type_code = $Bimp_Ticket::$mail_typeTicket[$matches[1] .'.fr'];
+							} elseif (preg_match('/^(.+)\.com$/', $to_email, $matches)) {
+								if (isset($Bimp_Ticket::$mail_typeTicket[$matches[1] . '.fr'])) {
+									$type_code = $Bimp_Ticket::$mail_typeTicket[$matches[1] . '.fr'];
 									break;
 								}
 							}
@@ -188,28 +189,28 @@ class ActionsBimpticket
 
 //						$id_note = (int) $bdb->getValue('bimpcore_note', 'id', 'obj_name = \'Bimp_Ticket\' AND id_obj = ' . $bimp_ticket->id . ' AND content = \'' . $msg . '\'');
 //						if (!$id_note) {
-							$id_user_assign = (int) $bimp_ticket->getData('fk_user_assign');
-							$id_soc = (int) $bimp_ticket->getData('fk_soc');
-							$errors = $bimp_ticket->addNote(BimpTools::cleanHtml($msg), 20, 0, 0, $parameters['from'], ($id_soc ? 2 : 3), ($id_user_assign) ? 1 : 0, 0, $id_user_assign, 0, $id_soc, $cc);
+						$id_user_assign = (int) $bimp_ticket->getData('fk_user_assign');
+						$id_soc = (int) $bimp_ticket->getData('fk_soc');
+						$errors = $bimp_ticket->addNote(BimpTools::cleanHtml($msg), 20, 0, 0, $parameters['from'], ($id_soc ? 2 : 3), ($id_user_assign) ? 1 : 0, 0, $id_user_assign, 0, $id_soc, $cc);
 
-							if (!count($errors)) {
-								$traite = 1;
+						if (!count($errors)) {
+							$traite = 1;
 
-								if (!empty($parameters['attachments'])) {
-									$destdir = $bimp_ticket->getFilesDir();
-									if (!dol_is_dir($destdir)) {
-										dol_mkdir($destdir);
-									}
+							if (!empty($parameters['attachments'])) {
+								$destdir = $bimp_ticket->getFilesDir();
+								if (!dol_is_dir($destdir)) {
+									dol_mkdir($destdir);
+								}
 
-									foreach ($parameters['attachments'] as $attachment) {
-										$filename = $attachment->getName();
-										$content = $attachment->getContent();
-										if (!file_put_contents($destdir . $filename, $content)) {
-											$errors[] = 'Echec de l\'enregistrement de la pièce jointe ' . $filename;
-										}
+								foreach ($parameters['attachments'] as $attachment) {
+									$filename = $attachment->getName();
+									$content = $attachment->getContent();
+									if (!file_put_contents($destdir . $filename, $content)) {
+										$errors[] = 'Echec de l\'enregistrement de la pièce jointe ' . $filename;
 									}
 								}
 							}
+						}
 //						}
 					} else {
 						$errors[] = 'Pas de ticket trouvé pour ' . str_replace(array('<', '>'), '', $headers['References']);

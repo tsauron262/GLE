@@ -781,7 +781,7 @@ class BimpObject extends BimpCache
 
 	public function getFilesDirComplexe($module = true, $path_tmp = false)
 	{
-		if ($this->isLoaded()) {
+		if ($this->isLoaded() || !$module) {
 			$more = '';
 			if($module) {
 				if ($this->getEntity_name() && $this->getData('entity') > 1) {

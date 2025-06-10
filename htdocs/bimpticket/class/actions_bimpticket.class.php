@@ -107,10 +107,10 @@ class ActionsBimpticket
 				}
 			}
 
-			if ($user->login == 'f.martinez') {
-				echo '<pre>' . print_r($parameters['cc'], 1) . '</pre>';
-				echo '<pre>' . print_r($cc, 1) . '</pre>';
-			}
+//			if ($user->login == 'f.martinez') {
+//				echo '<pre>' . print_r($parameters['cc'], 1) . '</pre>';
+//				echo '<pre>' . print_r($cc, 1) . '</pre>';
+//			}
 		}
 
 
@@ -231,10 +231,10 @@ class ActionsBimpticket
 			BimpCore::addLog('Erreurs collecte e-mail', 4, 'bimpcore', $parameters['objectemail'], array(
 				'Erreurs' => $errors
 			));
-			if ($user->login == 'f.martinez') {
-				echo 'Err - <pre>' . print_r($errors, 1) . '</pre>';
-				exit;
-			}
+//			if ($user->login == 'f.martinez') {
+//				echo 'Err - <pre>' . print_r($errors, 1) . '</pre>';
+//				exit;
+//			}
 			return -1;
 		}
 

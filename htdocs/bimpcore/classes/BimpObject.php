@@ -775,14 +775,24 @@ class BimpObject extends BimpCache
 		return null;
 	}
 
-	public function getFilesDir()
+	public function getFilesDir($module = true, $path_tmp = false)
 	{
 		if ($this->isLoaded()) {
 			$more = '';
 			if ($this->getEntity_name() && $this->getData('entity') > 1) {
 				$more .= '/' . $this->getData('entity');
 			}
-			return DOL_DATA_ROOT . $more . '/bimpcore/' . $this->module . '/' . $this->object_name . '/' . $this->id . '/';
+			if($path_tmp){
+				$path = DOL_DATA_ROOT;
+			}
+			else{
+				$path = DOL_DATA_ROOT;
+			}
+			$path .= $more. '/bimpcore/';
+			if($module) {
+				$path .= $this->module . '/' . $this->object_name . '/' . $this->id . '/';
+			}
+			return  $path;
 		}
 
 		return '';
@@ -11297,7 +11307,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				global $user;
 				require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
 				$fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
-				$dir = PATH_TMP . '/bimpcore/';
+				$dir = $this->getFilesDir(false, true);
 
 				$pdf = new BimpConcatPdf();
 				$pdf->concatFiles($dir . $fileName, $files, 'F');
@@ -11354,7 +11364,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 				if (!empty($files)) {
 					global $user;
-					$dir = PATH_TMP . '/bimpcore/';
+					$dir = $this->getFilesDir(false, true);
 					$fileName = 'zip_' . $this->dol_object->element . '_' . $user->id . '.zip';
 					if (file_exists($dir . $fileName)) {
 						unlink($dir . $fileName);

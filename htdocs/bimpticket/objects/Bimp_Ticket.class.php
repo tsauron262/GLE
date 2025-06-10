@@ -881,15 +881,44 @@ class Bimp_Ticket extends BimpDolObject
 
 	public function getMailToContacts()
 	{
-		$contacts = $return = array();
-		$contacts = $this->dol_object->liste_contact(-1, 'external');
-		foreach ($contacts as $contact) {
-			$return[$contact['email']] = $contact['lastname'] . ' ' . $contact['firstname'] . ' (' . $contact['email'] . ')';
-		}
+		$return = array();
+		$client = $this->getChildObject('client');
 
 		$origin_email = $this->getData('origin_email');
-		if ($origin_email && !isset($return[$origin_email])) {
+		if ($origin_email) {
 			$return[$origin_email] = 'E-mail d\'origine (' . $origin_email . ')';
+		}
+
+		if (BimpObject::objectLoaded($client) && $client->field_exists('email')) {
+			$email = $client->getData('email');
+			if ($email) { // Si l'e-mail est le même que celui d'origine, on écrase le libellé (pour avoir le nom du client)
+				$return[$email] = BimpTools::ucfirst($client->getLabel()) . ' "' . $client->getName() . '" : ' . $email;
+			}
+		}
+
+		// Liste contacts ticket :
+		$contacts_tiket = $this->dol_object->liste_contact(-1, 'external');
+		foreach ($contacts_tiket as $contact) {
+			if (!empty($contact['email']) && !isset($return[$contact['email']])) {
+				$return[$contact['email']] = $contact['libelle'] . ' : ' . $contact['firstname'] . ' ' . strtoupper($contact['lastname']) . ' (' . $contact['email'] . ')';
+			}
+		}
+
+		// Autres contacts client :
+		if (is_a($client, 'Bimp_Societe')) {
+			$contacts = BimpCache::getSocieteContactsArray($client->id, false, '', true);
+
+			if (!empty($contacts)) {
+				foreach ($contacts as $id_contact => $contact_label) {
+					$contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+					if (BimpObject::objectLoaded($contact)) {
+						$email = $contact->getData('email');
+						if ($email && !isset($return[$email])) {
+							$return[$email] = 'Contact "' . $contact_label . '" : ' . $email;
+						}
+					}
+				}
+			}
 		}
 
 		return $return;

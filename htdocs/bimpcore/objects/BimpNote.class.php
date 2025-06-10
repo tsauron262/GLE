@@ -369,30 +369,8 @@ class BimpNote extends BimpObject
 		$parent = $this->getParentInstance();
 
 		if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpObject')) {
-			$client = $parent->getChildObject('client');
-
-			if (BimpObject::objectLoaded($client) && $client->field_exists('email')) {
-				$email = $client->getData('email');
-
-				if ($email) {
-					$emails['soc_' . $client->id] = BimpTools::ucfirst($client->getLabel()) . ' "' . $client->getName() . '" : ' . $email;
-				}
-
-				if (is_a($client, 'Bimp_Societe')) {
-					$contacts = BimpCache::getSocieteContactsArray($client->id, false, '', true);
-
-					if (!empty($contacts)) {
-						foreach ($contacts as $id_contact => $contact_label) {
-							$contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
-							if (BimpObject::objectLoaded($contact)) {
-								$email = $contact->getData('email');
-								if ($email) {
-									$emails['contact_' . $id_contact] = 'Contact "' . $contact_label . '" : ' . $email;
-								}
-							}
-						}
-					}
-				}
+			if (method_exists($parent, 'getMailToContacts')) {
+				$emails = $parent->getMailToContacts();
 			}
 		}
 
@@ -614,18 +592,6 @@ class BimpNote extends BimpObject
 		}
 
 		return $cc;
-	}
-
-	public function getMailToContacts()
-	{
-		$parent = $this->getParentInstance();
-		if ($parent && $parent->isLoaded()) {
-			if (method_exists($parent, 'getMailToContacts')) {
-				return $parent->getMailToContacts();
-			}
-		}
-
-		return array();
 	}
 
 	public function getParentMsgId() {}

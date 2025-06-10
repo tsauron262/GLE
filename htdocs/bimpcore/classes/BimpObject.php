@@ -783,8 +783,16 @@ class BimpObject extends BimpCache
 	{
 		if ($this->isLoaded()) {
 			$more = '';
-			if ($this->getEntity_name() && $this->getData('entity') > 1) {
-				$more .= '/' . $this->getData('entity');
+			if($module) {
+				if ($this->getEntity_name() && $this->getData('entity') > 1) {
+					$more .= '/' . $this->getData('entity');
+				}
+			}
+			else{
+				global $conf;
+				if($conf->entity > 0){
+					$more .= '/' . $conf->entity;
+				}
 			}
 			if($path_tmp){
 				$path = DOL_DATA_ROOT;

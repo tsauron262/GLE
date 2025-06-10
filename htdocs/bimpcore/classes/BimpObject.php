@@ -11320,7 +11320,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
 				$fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
 				$dir = $this->getFilesDirComplexe(false, true);
-die('test'.$dir);
+
 				$pdf = new BimpConcatPdf();
 				$pdf->concatFiles($dir . $fileName, $files, 'F');
 
@@ -11363,7 +11363,7 @@ die('test'.$dir);
 						continue;
 					}
 
-					$dir = $obj->getFilesDir();
+					$dir = $obj->getFilesDirComplexe(false, true);
 					$filename = $obj->getPdfNamePrincipal();
 
 					if (!file_exists($dir . $filename)) {

@@ -217,18 +217,6 @@ forms:
                         show_values: 2
                     type_email_dest:
                         show_values: custom
-#            email_with_cc: 
-#                custom: 1
-#                show: 
-#                    callback: hasEmailCc
-#                label: Insérer les adresses e-mails en copie
-#                input_name: email_with_cc
-#                input: 
-#                    type: toggle
-#                display_if:
-#                    field_name: type_dest
-#                    show_values: 2
-#                value: 1
             email_to_copy:
                 custom: 1
                 label: Copies e-mail
@@ -239,7 +227,6 @@ forms:
                 display_if:
                     field_name: type_dest
                     show_values: 2
-#                depends_on: email_with_cc,obj_module,obj_name,id_obj
                 value: 
                     callback: getEmailToCc
             email_from:

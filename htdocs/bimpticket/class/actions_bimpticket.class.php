@@ -133,26 +133,30 @@ class ActionsBimpticket
 						}
 
 						// correction des object avec des accents
+						$up = false;
 						$s = str_replace("_", " ", mb_decode_mimeheader($Bimp_Ticket->getData('subject')));
-						$Bimp_Ticket->updateField('subject', $s);
+						$Bimp_Ticket->set('subject', $s);
 						if ($type_code != '') {
-							$Bimp_Ticket->updateField('type_code', $type_code);
+							$Bimp_Ticket->set('type_code', $type_code);
 						}
 						$Bimp_Ticket->addObjectLog(BimpTools::cleanHtml($Bimp_Ticket->getData('message')));
-						$Bimp_Ticket->updateField("message", BimpTools::cleanHtml($msg));
+						$Bimp_Ticket->set("message", BimpTools::cleanHtml($msg));
+						if (!$Bimp_Ticket->getData('fk_user_assign')) {
+							$Bimp_Ticket->set('fk_user_assign', 0);
+						}
+						if (!empty($cc)) {
+							$Bimp_Ticket->set('emails_cc', $cc);
+						}
+
+						$up_errors = $Bimp_Ticket->update($warnings, true);
+						if (count($up_errors)) {
+							$errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du ticket ' . $Bimp_Ticket->getRef());
+						}
 
 						$contact_static = new Contact($db);
 						$contact_static->fetch(0, null, '', $Bimp_Ticket->getData('origin_email'));
 						if ($contact_static->id > 0 and $contact_static->fk_soc == $Bimp_Ticket->getData('fk_soc')) {
-							$ticket->add_contact($contact_static->id, 'SUPPORTCLI', 'external');
-						}
-
-						if (!$ticket->getData('fk_user_assign')) {
-							$ticket->updateField('fk_user_assign', 0);
-						}
-
-						if (!empty($cc)) {
-							$ticket->updateField('emails_cc', $cc);
+							$Bimp_Ticket->add_contact($contact_static->id, 'SUPPORTCLI', 'external');
 						}
 						$traite = 1;
 					}

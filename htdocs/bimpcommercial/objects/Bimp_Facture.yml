@@ -125,7 +125,7 @@ fields:
         input: 
             type: select_mysoc_account
         default_value:
-            conf: id_default_bank_account
+            callback: getDefaultBankAccount
     centre: 
         label: Centre
         dol_extra_field: 1

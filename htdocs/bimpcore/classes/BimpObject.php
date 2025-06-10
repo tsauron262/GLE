@@ -2295,6 +2295,13 @@ class BimpObject extends BimpCache
 
 	public function getDefaultBankAccount()
 	{
+		global $conf;
+		$fk_account = BimpCore::getConf('id_default_bank_account', (!empty($conf->global->FACTURE_RIB_NUMBER) ? $conf->global->FACTURE_RIB_NUMBER : 0));
+		$dataSecteur = BimpCache::getSecteursData();
+		if(isset($dataSecteur[$this->getSecteur()]['id_default_bank_account']) && (int) $dataSecteur[$this->getSecteur()]['id_default_bank_account'] > 0) {
+			$fk_account = (int) $dataSecteur[$this->getSecteur()]['id_default_bank_account'];
+		}
+
 		if ((int) BimpCore::getConf('use_caisse_for_payments')) {
 			global $user;
 			$caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
@@ -2303,13 +2310,12 @@ class BimpObject extends BimpCache
 				$caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
 				if ($caisse->isLoaded()) {
 					if ($caisse->isValid()) {
-						return (int) $caisse->getData('id_account');
+						$fk_account = (int) $caisse->getData('id_account');
 					}
 				}
 			}
 		}
-
-		return (int) BimpCore::getConf('id_default_bank_account');
+		return (int) $fk_account;
 	}
 
 	public function getInfoGraph($graphName = '', $option = array())

@@ -879,7 +879,7 @@ class Bimp_Ticket extends BimpDolObject
 		return $data;
 	}
 
-	public function getMailToContacts()
+	public function getEmailDestsArray()
 	{
 		$return = array();
 		$client = $this->getChildObject('client');

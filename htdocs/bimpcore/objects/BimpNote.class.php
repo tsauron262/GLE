@@ -369,8 +369,8 @@ class BimpNote extends BimpObject
 		$parent = $this->getParentInstance();
 
 		if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpObject')) {
-			if (method_exists($parent, 'getMailToContacts')) {
-				$emails = $parent->getMailToContacts();
+			if (method_exists($parent, 'getEmailDestsArray')) {
+				$emails = $parent->getEmailDestsArray();
 			}
 		}
 

@@ -1869,13 +1869,14 @@ class BimpController
 				}
 				if (!is_null($form_id)) {
 					$form->identifier = $form_id;
-				} else {
+				} /*else {
 					$form_id = $form->identifier;
-				}
+				}*/
 				if (count($form->errors)) {
 					$errors = $form->errors;
 				} else {
 					$html = $form->renderHtml();
+					$form_id = $form->identifier;
 				}
 			}
 		}
@@ -2065,7 +2066,7 @@ class BimpController
 				} else {
 					$params['child_name'] = $child_name;
 					$params['object_label'] = BimpTools::getValue('object_label', '', 'alphanohtml');
-					$params['fields_prefixe'] = BimpTools::getValue('fields_prefixe', '', 'aZ09');
+					$params['fields_prefixe'] = BimpTools::getValue('fields_prefixe', '', 'alphanohtml');
 
 					$html .= $child->renderFiltersSelect($params);
 				}

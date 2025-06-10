@@ -706,7 +706,7 @@ forms:
                   field_name: id_facture
                   show_values: 0
               value: 
-                  conf: id_default_bank_account
+                  callback: getDefaultBankAccount
             - custom: 1
               label: Avoirs client à utiliser
               input_name: id_remises_list

@@ -84,7 +84,7 @@ class commandesController extends BimpController
             $graph->addFieldFilterValue('fk_statut', $filtres);
         }
 
-        
+
         $html = $list->renderHtml();
         if(isset($graph))
             $html .= $graph->renderHtml();
@@ -175,6 +175,7 @@ class commandesController extends BimpController
                     'id_product' => 0
                         ), $params);
         $tabs = array();
+		$isN3 = ($params['id_client'] != 0 || $params['id_fourn'] != 0 || $params['id_product'] != 0) ? 1 : 0;
 
         if (!(int) $params['id_client']) {
             $this->getSocid();
@@ -186,7 +187,7 @@ class commandesController extends BimpController
 
         $line_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
 
-        // Overview: 
+        // Overview:
         $content = '<div class="periods_overview_content">';
         $content .= $line_instance->renderPeriodsToProcessOverview($params);
         $content .= '</div>';
@@ -225,7 +226,7 @@ class commandesController extends BimpController
         $html .= '</div>';
 
         if (!(int) $params['id_fourn']) {
-            // Livraisons: 
+            // Livraisons:
             $tabs[] = array(
                 'id'            => 'exp_periods_tab',
                 'title'         => BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Livraisons périodiques',
@@ -233,7 +234,7 @@ class commandesController extends BimpController
                 'ajax_callback' => $line_instance->getJsLoadCustomContent('renderPeriodsList', '$(\'#exp_periods_tab .nav_tab_ajax_result\')', array('exp', $params['id_client'], $params['id_product']), array('button' => ''))
             );
 
-            // Facturations: 
+            // Facturations:
             $tabs[] = array(
                 'id'            => 'fac_periods_tab',
                 'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Facturations périodiques',
@@ -242,7 +243,7 @@ class commandesController extends BimpController
             );
         }
 
-        // Achats: 
+        // Achats:
         $tabs[] = array(
             'id'            => 'achat_periods_tab',
             'title'         => BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft') . 'Achats périodiques',
@@ -250,7 +251,7 @@ class commandesController extends BimpController
             'ajax_callback' => $line_instance->getJsLoadCustomContent('renderPeriodsList', '$(\'#achat_periods_tab .nav_tab_ajax_result\')', array('achat', $params['id_client'], $params['id_product'], $params['id_fourn']), array('button' => ''))
         );
 
-        $html .= BimpRender::renderNavTabs($tabs);
+        $html .= BimpRender::renderNavTabs($tabs, 'product_periodicity_view_tab', array('niveau3' => $isN3));
 
         return $html;
     }

@@ -775,14 +775,36 @@ class BimpObject extends BimpCache
 		return null;
 	}
 
-	public function getFilesDir()
+	public function getFilesDir(){
+		return $this->getFilesDirComplexe();
+	}
+
+	public function getFilesDirComplexe($module = true, $path_tmp = false)
 	{
-		if ($this->isLoaded()) {
+		if ($this->isLoaded() || !$module) {
 			$more = '';
-			if ($this->getEntity_name() && $this->getData('entity') > 1) {
-				$more .= '/' . $this->getData('entity');
+			if($module) {
+				if ($this->getEntity_name() && $this->getData('entity') > 1) {
+					$more .= '/' . $this->getData('entity');
+				}
 			}
-			return DOL_DATA_ROOT . $more . '/bimpcore/' . $this->module . '/' . $this->object_name . '/' . $this->id . '/';
+			else{
+				global $conf;
+				if($conf->entity > 0){
+					$more .= '/' . $conf->entity;
+				}
+			}
+			if($path_tmp){
+				$path = PATH_TMP;
+			}
+			else{
+				$path = DOL_DATA_ROOT;
+			}
+			$path .= $more. '/bimpcore/';
+			if($module) {
+				$path .= $this->module . '/' . $this->object_name . '/' . $this->id . '/';
+			}
+			return  $path;
 		}
 
 		return '';
@@ -2295,6 +2317,13 @@ class BimpObject extends BimpCache
 
 	public function getDefaultBankAccount()
 	{
+		global $conf;
+		$fk_account = BimpCore::getConf('id_default_bank_account', (!empty($conf->global->FACTURE_RIB_NUMBER) ? $conf->global->FACTURE_RIB_NUMBER : 0));
+		$dataSecteur = BimpCache::getSecteursData();
+		if(isset($dataSecteur[$this->getSecteur()]['id_default_bank_account']) && (int) $dataSecteur[$this->getSecteur()]['id_default_bank_account'] > 0) {
+			$fk_account = (int) $dataSecteur[$this->getSecteur()]['id_default_bank_account'];
+		}
+
 		if ((int) BimpCore::getConf('use_caisse_for_payments')) {
 			global $user;
 			$caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
@@ -2303,13 +2332,12 @@ class BimpObject extends BimpCache
 				$caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
 				if ($caisse->isLoaded()) {
 					if ($caisse->isValid()) {
-						return (int) $caisse->getData('id_account');
+						$fk_account = (int) $caisse->getData('id_account');
 					}
 				}
 			}
 		}
-
-		return (int) BimpCore::getConf('id_default_bank_account');
+		return (int) $fk_account;
 	}
 
 	public function getInfoGraph($graphName = '', $option = array())
@@ -8115,7 +8143,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				$html .= '</div>';
 			}
 		} else {
-			$html .= BimpRender::renderAlerts(BimpTools::ucfirst($this->getLabel('this')) . ' n\'existe plus');
 
 			$url = $this->getListPageUrl();
 
@@ -8137,6 +8164,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 						}
 					}
 				}
+				$html .= BimpRender::renderAlerts(BimpTools::ucfirst($this->getLabel('this')) . ' n\'existe plus');
 				$html .= '<div class="buttonsContainer align-center">';
 				$html .= '<button class="btn btn-large btn-primary" onclick="window.location = \'' . $url . '\'">';
 				$html .= BimpRender::renderIcon('fas_list', 'iconLeft') . 'Liste des ' . $this->getLabel('name_plur');
@@ -11296,7 +11324,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				global $user;
 				require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
 				$fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
-				$dir = PATH_TMP . '/bimpcore/';
+				$dir = $this->getFilesDirComplexe(false, true);
 
 				$pdf = new BimpConcatPdf();
 				$pdf->concatFiles($dir . $fileName, $files, 'F');
@@ -11353,7 +11381,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 				if (!empty($files)) {
 					global $user;
-					$dir = PATH_TMP . '/bimpcore/';
+					$dir = $this->getFilesDirComplexe(false, true);
+
 					$fileName = 'zip_' . $this->dol_object->element . '_' . $user->id . '.zip';
 					if (file_exists($dir . $fileName)) {
 						unlink($dir . $fileName);

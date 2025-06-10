@@ -3420,7 +3420,9 @@ class BimpCache
 				foreach ($rows as $r) {
 					self::$cache[$cache_key][$r->clef] = array(
 						'valeur'     => $r->valeur,
-						'email_from' => $r->email_from
+						'email_from' => $r->email_from,
+						'public_entity' => $r->public_entity,
+						'fk_bank_account_def' => $r->fk_bank_account_def
 					);
 				}
 			}

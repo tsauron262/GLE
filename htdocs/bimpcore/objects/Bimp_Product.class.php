@@ -3209,7 +3209,7 @@ class Bimp_Product extends BimpObject
                 unset($list);
                 $list = null;
 
-                $html = BimpRender::renderNavTabs($tabs, 'product_propales_lists');
+                $html = BimpRender::renderNavTabs($tabs, 'product_propales_lists', array('niveau3' => 1));
                 break;
 
             case 'commandes':
@@ -3243,7 +3243,7 @@ class Bimp_Product extends BimpObject
                 unset($list);
                 $list = null;
 
-                $html = BimpRender::renderNavTabs($tabs, 'product_commandes_lists');
+                $html = BimpRender::renderNavTabs($tabs, 'product_commandes_lists', array('niveau3' => 1));
                 break;
 
             case 'factures':
@@ -3277,7 +3277,7 @@ class Bimp_Product extends BimpObject
                 unset($list);
                 $list = null;
 
-                $html = BimpRender::renderNavTabs($tabs, 'product_factures_lists');
+                $html = BimpRender::renderNavTabs($tabs, 'product_factures_lists', array('niveau3' => 1));
                 break;
 
             case 'commandes_fourn':
@@ -3311,7 +3311,7 @@ class Bimp_Product extends BimpObject
                 unset($list);
                 $list = null;
 
-                $html = BimpRender::renderNavTabs($tabs, 'product_commandes_fourn_lists');
+                $html = BimpRender::renderNavTabs($tabs, 'product_commandes_fourn_lists', array('niveau3' => 1));
                 break;
 
             case 'factures_fourn':
@@ -3345,7 +3345,7 @@ class Bimp_Product extends BimpObject
                 unset($list);
                 $list = null;
 
-                $html = BimpRender::renderNavTabs($tabs, 'product_factures_fourn_lists');
+                $html = BimpRender::renderNavTabs($tabs, 'product_factures_fourn_lists', array('niveau3' => 1));
                 break;
 
             case 'contrats':
@@ -3378,7 +3378,7 @@ class Bimp_Product extends BimpObject
                 unset($list);
                 $list = null;
 
-                $html = BimpRender::renderNavTabs($tabs, 'product_contrats_lists');
+                $html = BimpRender::renderNavTabs($tabs, 'product_contrats_lists', array('niveau3' => 1));
                 break;
 
             case 'events':

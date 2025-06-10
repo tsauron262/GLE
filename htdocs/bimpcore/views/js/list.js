@@ -1339,9 +1339,18 @@ function loadPage($list, page, modeAppend) {
 		return;
 	}
 
+	var pageactuel = $list.find('input[name=param_p]').val();
 	$list.find('input[name=param_p]').val(page);
 
 	reloadObjectList($list.attr('id'), undefined, undefined, undefined, modeAppend, 250);
+	
+	if (typeof defHashFiltre === 'function') 	{
+		var hash = window.location.hash;
+		if (hash.indexOf($list.attr('id')) < 0 && page != pageactuel) {
+			defHashFiltre('pa', $list.attr('id'), pageactuel);
+		}
+		defHashFiltre('pa', $list.attr('id'), page);
+	}
 }
 
 function deactivateSorting($list) {
@@ -1730,6 +1739,7 @@ function onListLoaded($list) {
 	}
 
 	checkListWidth($list);
+	chargerFiltreSelonHash();
 }
 
 function onListRefeshed($list) {
@@ -2023,7 +2033,50 @@ function setPaginationEvents($list) {
 //                $listPagination.find('.nextButtonAppend').click();
 //            }
 //        });
-
+		
+		if (typeof parseChaineToObjet === 'function') {
+			var hashExistant = window.location.hash;
+			if (hashExistant) {
+				result = parseChaineToObjet(hashExistant);
+				console.log(result);
+				if (result['ct']) {
+					var ct = JSON.parse(result['ct'].replaceAll('%22', '"'));
+					for (const [divId, params] of Object.entries(ct)) {
+						if (divId !== $list.attr('id')) continue;
+						for (const [param, id] of Object.entries(params)) {
+							if (param === 'pa') {
+								if (id) {
+									var pageButtons = document.getElementById(divId + '_pagination');
+									var pageSpans = pageButtons.querySelectorAll('.pageBtn');
+									var pageCourante = null;
+									var pageMax = null;
+									pageSpans.forEach(function(span) {
+										var page = parseInt(span.getAttribute('data-p'), 10);
+										// Vérifie si c'est la page active (courante)
+										if (span.classList.contains('active')) {
+											pageCourante = page;
+										}
+										// pageMax sera mis à jour à chaque itération, le dernier "data-p" est supposé être le max
+										if (pageMax === null || page > pageMax) {
+											pageMax = page;
+										}
+									});
+									if (pageCourante !== id) {
+										if (id > pageMax) {
+											var p = pageMax;
+										}
+										else {
+											var p = id;
+										}
+										loadPage($list, p);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 
 		var $next = $((this)).find('.nextButtonAppend');
 		if ($next.length) {

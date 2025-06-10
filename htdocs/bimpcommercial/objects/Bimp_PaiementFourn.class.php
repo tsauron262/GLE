@@ -15,7 +15,7 @@ class Bimp_PaiementFourn extends BimpObject
         BimpObject::__construct($module, $object_name);
     }
 
-    // Getters: 
+    // Getters:
 
     public function getFourn()
     {
@@ -82,7 +82,7 @@ class Bimp_PaiementFourn extends BimpObject
         return 0;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function DisplayAccount()
     {
@@ -99,7 +99,7 @@ class Bimp_PaiementFourn extends BimpObject
         return '';
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderCaisseInput()
     {
@@ -108,6 +108,7 @@ class Bimp_PaiementFourn extends BimpObject
 
     public function renderFacturesAmountsInputs()
     {
+		$html = '';
         $id_fourn = (int) $this->getFourn();
 
         if (!$id_fourn) {
@@ -269,7 +270,7 @@ class Bimp_PaiementFourn extends BimpObject
         return $html;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayType()
     {
@@ -277,8 +278,8 @@ class Bimp_PaiementFourn extends BimpObject
             return $this->displayData('fk_paiement');
         }
     }
-    
-    
+
+
     public function validatePost()
     {
         $errors = parent::validatePost();
@@ -310,7 +311,7 @@ class Bimp_PaiementFourn extends BimpObject
         return $errors;
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function create(&$warnings = array(), $force_create = false)
     {
@@ -318,7 +319,7 @@ class Bimp_PaiementFourn extends BimpObject
 
         global $db, $user, $conf;
 
-        $id_account = (int) BimpTools::getPostFieldValue('id_account', BimpCore::getConf('id_default_bank_account', 0), 'int');
+        $id_account = (int) BimpTools::getPostFieldValue('id_account', $this->getDefaultBankAccount(), 'int');
         $account = null;
 
         if ($id_account) {
@@ -374,7 +375,7 @@ class Bimp_PaiementFourn extends BimpObject
         BimpTools::loadDolClass('compta/facture', 'facture');
         $factures = array();
 
-        // Calcul du total payé par facture. 
+        // Calcul du total payé par facture.
         while (BimpTools::isSubmit('amount_' . $i)) {
             $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0, 'int');
             $amount = (float) BimpTools::getValue('amount_' . $i, 0, 'float');
@@ -425,7 +426,7 @@ class Bimp_PaiementFourn extends BimpObject
         }
 
         if (!count($errors)) {
-            // Insertion des avoirs éventuels: 
+            // Insertion des avoirs éventuels:
             $i = 1;
             while (BimpTools::isSubmit('amount_' . $i)) {
                 $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0, 'int');

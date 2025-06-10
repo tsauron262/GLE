@@ -3767,7 +3767,7 @@ class BimpComm extends BimpDolObject
 				$id_bank_account = (int) $caisse->getData('id_account');
 			}
 			if (!$id_bank_account) {
-				$id_bank_account = (int) BimpCore::getConf('id_default_bank_account', 0);
+				$id_bank_account = (int) $this->getDefaultBankAccount();
 			}
 		}
 

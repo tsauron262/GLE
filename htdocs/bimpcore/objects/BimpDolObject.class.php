@@ -37,6 +37,7 @@ class BimpDolObject extends BimpObject
 		14  => "Bureautique",
 		15  => "Formation",
 		16  => "Sécurité",
+		75  => "Gestion",
 		100 => "Autre (ne pas utiliser)"
 	];
 

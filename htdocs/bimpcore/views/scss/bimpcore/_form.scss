@@ -239,9 +239,14 @@ input, select {
     padding-left: 15px;
   }
 
-  .addValueInputContainer button.addValueBtn {
-    margin-left: 15px;
+  .addValueInputContainer {
+    display: flex;
+    
+    button.addValueBtn {
+      margin-left: 15px;
+    }
   }
+
 
   .input_card_container {
     padding-top: 15px;

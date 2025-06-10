@@ -5606,7 +5606,7 @@ class BimpObject extends BimpCache
 				if (!count($errors)) {
 					foreach ($this->getTraits() as $trait) {
 						if (method_exists($this, $trait . '_update')) {
-							$errors = array_merge($errors, $this->{$trait . '_update'}($warnings, $force_create));
+							$errors = array_merge($errors, $this->{$trait . '_update'}($warnings, $force_update));
 						}
 					}
 				}
@@ -7667,7 +7667,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 	// Gestion des notes:
 
-	public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0, $fk_user_dest = 0, $delete_on_view = 0, $id_societe = 0)
+	public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0, $fk_user_dest = 0, $delete_on_view = 0, $id_societe = 0, $email_cc = array())
 	{
 		$errors = array();
 
@@ -7690,6 +7690,10 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			$visibility = BimpNote::BN_MEMBERS;
 		}
 
+		if (is_array($email_cc)) {
+			$email_cc = implode(', ', $email_cc);
+		}
+
 		$errors = $note->validateArray(array(
 			'obj_type'       => 'bimp_object',
 			'obj_module'     => $this->module,
@@ -7705,7 +7709,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			'fk_group_dest'  => $fk_group_dest,
 			'fk_user_dest'   => $fk_user_dest,
 			'delete_on_view' => $delete_on_view,
-			'id_societe'     => $id_societe
+			'id_societe'     => $id_societe,
+			'email_cc'       => $email_cc
 		));
 
 		if (!count($errors)) {

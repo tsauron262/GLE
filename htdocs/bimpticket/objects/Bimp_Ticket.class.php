@@ -645,6 +645,15 @@ class Bimp_Ticket extends BimpDolObject
 			if (BimpObject::objectLoaded($user)) {
 				$this->set('fk_user_update', $user->id);
 			}
+
+			$emails_cc = $this->getData('emails_cc');
+			if (!empty($emails_cc)) {
+				foreach ($emails_cc as $key => $email) {
+					if (!BimpValidate::isEmail($email)) {
+						$errors[] = 'Adresse e-mail en copie invalide : ' . $email;
+					}
+				}
+			}
 		}
 
 		return $errors;
@@ -894,6 +903,11 @@ class Bimp_Ticket extends BimpDolObject
 			$from = static::MAIL_TICKET_GENERAL;
 		}
 		return $from;
+	}
+
+	public function getEMailToCc()
+	{
+		return $this->getData('emails_cc');
 	}
 
 	public function getObjectMail()

@@ -186,6 +186,12 @@ fields:
             hashtags: 1
             rows: 3
             auto_expand: 1
+    
+    emails_cc:
+        label: Emails en copie
+        type: items_list
+        items_data_type: string
+        items_delimiter: ', '
 
 forms:
     default:
@@ -195,6 +201,7 @@ forms:
             -   field: subject
             -   field: message
             -   field: comment
+            -   field: emails_cc
     
     create:
         rows:
@@ -349,6 +356,7 @@ fields_tables:
         rows:
             -   field: type_code
             -   field: subject
+            -   field: emails_cc
             -   field: comment
                 edit: 1
     
@@ -448,7 +456,7 @@ lists:
         delete_btn: 1
         page_btn: 1
         modal_view: default
-        extra_btn : 
+        extra_btn:
             callback: getListsExtraButtons
         cols:
             ref:

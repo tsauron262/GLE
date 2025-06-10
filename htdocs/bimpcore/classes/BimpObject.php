@@ -776,7 +776,7 @@ class BimpObject extends BimpCache
 	}
 
 	public function getFilesDir(){
-		return $this->getFilesDir();
+		return $this->getFilesDirComplexe();
 	}
 
 	public function getFilesDirComplexe($module = true, $path_tmp = false)

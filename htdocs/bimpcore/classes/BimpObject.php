@@ -795,7 +795,7 @@ class BimpObject extends BimpCache
 				}
 			}
 			if($path_tmp){
-				$path = DOL_DATA_ROOT;
+				$path = PATH_TMP;
 			}
 			else{
 				$path = DOL_DATA_ROOT;

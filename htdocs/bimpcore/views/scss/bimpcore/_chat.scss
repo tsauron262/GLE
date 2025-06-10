@@ -86,6 +86,12 @@
     color: $gray-darker;
     font-style: italic;
   }
+  
+  .bimp_chat_dest, 
+  .bimp_chat_buttons {
+    display: inline-block;
+    vertical-align: top;
+  } 
 
   .bimp_chat_date {
     display: inline-block;

@@ -9607,6 +9607,9 @@ input.error, select.error {
   margin: 8px 0;
   padding-left: 15px;
 }
+.inputContainer .addValueInputContainer {
+  display: flex;
+}
 .inputContainer .addValueInputContainer button.addValueBtn {
   margin-left: 15px;
 }
@@ -12208,6 +12211,11 @@ div.bv_demandes_panel .user_demande {
   font-size: 11px;
   color: #282828;
   font-style: italic;
+}
+.bimp_chat_msg .bimp_chat_dest,
+.bimp_chat_msg .bimp_chat_buttons {
+  display: inline-block;
+  vertical-align: top;
 }
 .bimp_chat_msg .bimp_chat_date {
   display: inline-block;

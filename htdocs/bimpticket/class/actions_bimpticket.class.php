@@ -99,6 +99,14 @@ class ActionsBimpticket
 			$to_emails[] = $to->mail;
 		}
 
+		$cc = array();
+		if (!empty($parameters['cc'])) {
+			$cc = $parameters['cc'];
+			if (!is_array($cc)) {
+				$cc = explode(', ', BimpTools::cleanEmailsStr($cc));
+			}
+		}
+
 //		echo '<pre>' . print_r($matches[2], true) . '</pre>';
 		switch ($action) {
 			case 'hookBimpticketResponse':
@@ -142,6 +150,10 @@ class ActionsBimpticket
 						if (!$ticket->getData('fk_user_assign')) {
 							$ticket->updateField('fk_user_assign', 0);
 						}
+
+						if (!empty($cc)) {
+							$ticket->updateField('emails_cc', $cc);
+						}
 						$traite = 1;
 					}
 				} else {
@@ -168,7 +180,7 @@ class ActionsBimpticket
 //						if (!$id_note) {
 							$id_user_assign = (int) $bimp_ticket->getData('fk_user_assign');
 							$id_soc = (int) $bimp_ticket->getData('fk_soc');
-							$errors = $bimp_ticket->addNote(BimpTools::cleanHtml($msg), 20, 0, 0, $parameters['from'], ($id_soc ? 2 : 3), ($id_user_assign) ? 1 : 0, 0, $id_user_assign, 0, $id_soc);
+							$errors = $bimp_ticket->addNote(BimpTools::cleanHtml($msg), 20, 0, 0, $parameters['from'], ($id_soc ? 2 : 3), ($id_user_assign) ? 1 : 0, 0, $id_user_assign, 0, $id_soc, $cc);
 
 							if (!count($errors)) {
 								$traite = 1;

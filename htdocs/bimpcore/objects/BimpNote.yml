@@ -162,6 +162,10 @@ fields:
             show_values: 4
         values:
             array: userUserGroups
+            
+    email_cc: 
+        label: Emails en copie
+        type: text
 
 forms:
     default:
@@ -213,16 +217,31 @@ forms:
                         show_values: 2
                     type_email_dest:
                         show_values: custom
-            mail_to_copy:
+#            email_with_cc: 
+#                custom: 1
+#                show: 
+#                    callback: hasEmailCc
+#                label: Insérer les adresses e-mails en copie
+#                input_name: email_with_cc
+#                input: 
+#                    type: toggle
+#                display_if:
+#                    field_name: type_dest
+#                    show_values: 2
+#                value: 1
+            email_to_copy:
                 custom: 1
-                label: Copies à
-                input_name: mail_to_copy
+                label: Copies e-mail
+                input_name: email_to_copy
                 input:
                     type: text
-                    help: Vous pouvez saisir plusieurs adresses e-mail en les séparant par des virgules
+                    multiple: 1
                 display_if:
                     field_name: type_dest
                     show_values: 2
+#                depends_on: email_with_cc,obj_module,obj_name,id_obj
+                value: 
+                    callback: getEmailToCc
             email_from:
                 custom: 1
                 label: Emetteur
@@ -311,11 +330,11 @@ forms:
                     type_email_dest:
                         show_values: custom
             -   custom: 1
-                label: Copies à
-                input_name: mail_to_copy
+                label: Copies e-mail
+                input_name: email_to_copy
                 input:
                     type: text
-                    help: Vous pouvez saisir plusieurs adresses e-mail en les séparant par des virgules
+                    multiple: 1
                 display_if:
                     field_name: type_dest
                     show_values: 2

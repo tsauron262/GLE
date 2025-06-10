@@ -93,9 +93,6 @@ class BimpNote extends BimpObject
 				return 1;
 
 			case 'repondre':
-				if ($this->isLoaded() && $user->id == (int) $this->getData('user_create')) {
-					return 0;
-				}
 				return 1;
 		}
 
@@ -169,7 +166,7 @@ class BimpNote extends BimpObject
 			case 'repondre':
 				if ($this->isLoaded()) {
 					global $user;
-					if ($this->getData('user_create') == $user->id) {
+					if ((int) $this->getData('type_author') === self::BN_AUTHOR_USER && $this->getData('user_create') == $user->id) {
 						$errors[] = 'L\'utilisateur connecté est l\'auteur';
 						return 0;
 					}
@@ -235,6 +232,11 @@ class BimpNote extends BimpObject
 		}
 
 		return 0;
+	}
+
+	public function hasEmailCc()
+	{
+		return (int) !empty($this->getEMailToCc());
 	}
 
 	// Getters Overrides BimpObject:
@@ -482,18 +484,16 @@ class BimpNote extends BimpObject
 		return $return;
 	}
 
-	public function getJsRepondre()
+	public function getJsRepondre($with_email_cc = false)
 	{
 		$filtre = array(
 			"content"       => "",
 			"id"            => "",
 			"type_dest"     => "",
 			"fk_group_dest" => "",
-			"fk_user_dest"  => "",
-			"type_dest"     => "",
-			"id"            => ""
+			"fk_user_dest"  => $this->getData("user_create")
 		);
-		$filtre['fk_user_dest'] = $this->getData("user_create");
+
 		if ($this->getData('type_author') == self::BN_AUTHOR_USER) {
 			$filtre['type_dest'] = self::BN_DEST_USER;
 		} elseif ($this->getData('type_author') == self::BN_AUTHOR_GROUP) {
@@ -503,6 +503,18 @@ class BimpNote extends BimpObject
 			$filtre['type_dest'] = self::BN_DEST_SOC;
 			$filtre['mail_dest'] = $this->getData("email");
 		}
+
+		if ($with_email_cc) {
+			$email_cc = $this->getData('email_cc');
+
+			if ($email_cc) {
+				$filtre['email_to_copy'] = explode(',', str_replace(' ', '', BimpTools::cleanEmailsStr($email_cc)));
+//				echo $email_cc . '<pre>' . print_r($filtre, 1) . '</pre>';
+//				exit;
+			}
+		}
+
+
 		return $this->getJsActionOnclick('repondre', $filtre, array(
 				'form_name' => 'rep'
 			)
@@ -564,7 +576,7 @@ class BimpNote extends BimpObject
 		}
 
 		$parent = $this->getParentInstance();
-		if ($parent && $parent->isLoaded()) {
+		if (BimpObject::objectLoaded($parent)) {
 			if (method_exists($parent, 'getMailTo')) {
 				return $parent->getMailTo();
 			} elseif ($parent->getData('email') != '') {
@@ -578,6 +590,30 @@ class BimpNote extends BimpObject
 		}
 
 		return '';
+	}
+
+	public function getEMailToCc($return_array = true)
+	{
+		$cc = '';
+
+//		if ((int) BimpTools::getPostFieldValue('email_with_cc', 0, 'int')) {
+			$parent = $this->getParentInstance();
+			if (BimpObject::objectLoaded($parent)) {
+				if (method_exists($parent, 'getEMailToCc')) {
+					$cc = $parent->getEMailToCc();
+				}
+			}
+//		}
+
+		if ($return_array && !is_array($cc)) {
+			$cc = explode(',', str_replace(' ', '', BimpTools::cleanEmailsStr($cc)));
+		}
+
+		if (!$return_array && is_array($cc)) {
+			$cc = implode(', ', $cc);
+		}
+
+		return $cc;
 	}
 
 	public function getMailToContacts()
@@ -800,6 +836,7 @@ class BimpNote extends BimpObject
 
 		$author = $this->displayAuthor(false, true, true);
 		$dest = $this->displayDestinataire(false, true, true);
+		$email_cc = $this->getData('email_cc');
 
 		$parent = $this->getParentInstance();
 		if ($parent && is_a($parent, 'Bimp_Ticket')) {
@@ -813,7 +850,11 @@ class BimpNote extends BimpObject
 			$buttons .= BimpRender::renderRowButton('Vu', 'far_envelope-open', $this->getJsActionOnclick('setAsViewed'));
 		}
 		if ($this->isActionAllowed('repondre') && $this->canSetAction('repondre')) {
-			$buttons .= BimpRender::renderRowButton('Répondre', 'fas_share', $this->getJsRepondre());
+			$buttons .= BimpRender::renderRowButton('Répondre', 'fas_reply', $this->getJsRepondre());
+
+			if ($email_cc) {
+				$buttons .= BimpRender::renderRowButton('Répondre à tous', 'fas_reply-all', $this->getJsRepondre(true));
+			}
 		}
 
 		$html .= '<div class="bimp_chat_msg_container ' . $side . '">';
@@ -834,10 +875,14 @@ class BimpNote extends BimpObject
 
 		$html .= '<div class="bimp_chat_msg_footer">';
 		if ($dest) {
-			$html .= '<span class="bimp_chat_dest">À : ' . $dest . '</span>';
+			$html .= '<div class="bimp_chat_dest">À : ' . $dest;
+			if ($email_cc) {
+				$html .= '<br/>CC : ' . $email_cc;
+			}
+			$html .= '</div>';
 		}
 		if ($buttons) {
-			$html .= '<span class="bimp_chat_buttons">' . $buttons . '</span>';
+			$html .= '<div class="bimp_chat_buttons">' . $buttons . '</div>';
 		}
 		$html .= '</div>';
 
@@ -1167,7 +1212,7 @@ class BimpNote extends BimpObject
 		$errors = array();
 		$content = $this->getData('content');
 		$email_to = '';
-		$emails_copy = '';
+		$email_cc = '';
 		$email_from = '';
 
 		$type_dest = $this->getData('type_dest');
@@ -1207,10 +1252,25 @@ class BimpNote extends BimpObject
 						$errors[] = 'Adresse e-mail du destinataire invalide : "' . $email_to . '"';
 					}
 				}
+
+
 			}
 
 			$email_from = BimpTools::cleanEmailsStr(BimpTools::getPostFieldValue('email_from', '', 'email'));
-			$emails_copy = BimpTools::cleanEmailsStr(BimpTools::getPostFieldValue('mail_to_copy', '', 'alphanohtml'));
+			$emails_copy = BimpTools::getPostFieldValue('email_to_copy', array(), 'array');
+
+			if (!empty($emails_copy)) {
+				foreach ($emails_copy as $email_copy) {
+					$email_copy = BimpTools::cleanEmailsStr($email_copy);
+					if (!BimpValidate::isEmail($email_copy)) {
+						$errors[] = 'Adresse e-mail en copie invalide : "' . $email_copy . '"';
+					} else {
+						$email_cc .= ($email_cc ? ', ' : '') . $email_copy;
+					}
+				}
+
+				$this->set('email_cc', $email_cc);
+			}
 
 			$this->set('email', $email_to);
 		}
@@ -1243,7 +1303,7 @@ class BimpNote extends BimpObject
 				}
 
 				$email_errors = array();
-				$bimpMail = new BimpMail($this->getParentInstance(), $subject, $email_to, ($email_from ? $email_from : $this->getMailFrom()), $html, '', $emails_copy, '', 0, '', $messageId);
+				$bimpMail = new BimpMail($this->getParentInstance(), $subject, $email_to, ($email_from ? $email_from : $this->getMailFrom()), $html, '', $email_cc, '', 0, '', $messageId);
 				if (!$bimpMail->send($email_errors)) {
 					$errors[] = BimpTools::getMsgFromArray($email_errors, 'Echec de l\'envoi de l\'e-mail');
 				}

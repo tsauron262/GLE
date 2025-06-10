@@ -575,12 +575,12 @@ class BimpNote extends BimpObject
 		$cc = '';
 
 //		if ((int) BimpTools::getPostFieldValue('email_with_cc', 0, 'int')) {
-			$parent = $this->getParentInstance();
-			if (BimpObject::objectLoaded($parent)) {
-				if (method_exists($parent, 'getEMailToCc')) {
-					$cc = $parent->getEMailToCc();
-				}
+		$parent = $this->getParentInstance();
+		if (BimpObject::objectLoaded($parent)) {
+			if (method_exists($parent, 'getEMailToCc')) {
+				$cc = $parent->getEMailToCc();
 			}
+		}
 //		}
 
 		if ($return_array && !is_array($cc)) {
@@ -1185,41 +1185,19 @@ class BimpNote extends BimpObject
 		if ($type_dest == self::BN_DEST_SOC) {
 			$this->set('visiblity', self::BN_ALL);
 
-			$type_email = BimpTools::getPostFieldValue('type_email_dest', '', 'aZ09');
+			$email_to = BimpTools::getPostFieldValue('email_dest', '', 'alphanohtml');
 
-			if (!$type_email) {
-				$errors[] = 'Aucun destinataire sélectionné pour l\'envoi par e-mail';
+			if ($email_to == 'custom') {
+				$email_to = BimpTools::getPostFieldValue('email_dest_custom', '', 'email');
+			}
+
+			if (!$email_to) {
+				$errors[] = 'Adresse e-mail du destinataire absente';
 			} else {
-				if ($type_email == 'custom') {
-					$email_to = BimpTools::getPostFieldValue('email_dest_custom', '', 'email');
-				} elseif (preg_match('/^(.+)_(\d+)$/', $type_email, $matches)) {
-					switch ($matches[1]) {
-						case 'soc':
-							$soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $matches[2]);
-							if (BimpObject::objectLoaded($soc)) {
-								$email_to = $soc->getData('email');
-							}
-							break;
-
-						case 'contact':
-							$contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $matches[2]);
-							if (BimpObject::objectLoaded($contact)) {
-								$email_to = $contact->getData('email');
-							}
-							break;
-					}
+				$email_to = BimpTools::cleanEmailsStr($email_to);
+				if (!BimpValidate::isEmail($email_to)) {
+					$errors[] = 'Adresse e-mail du destinataire invalide : "' . $email_to . '"';
 				}
-
-				if (!$email_to) {
-					$errors[] = 'Adresse e-mail du destinataire absente';
-				} else {
-					$email_to = BimpTools::cleanEmailsStr($email_to);
-					if (!BimpValidate::isEmail($email_to)) {
-						$errors[] = 'Adresse e-mail du destinataire invalide : "' . $email_to . '"';
-					}
-				}
-
-
 			}
 
 			$email_from = BimpTools::cleanEmailsStr(BimpTools::getPostFieldValue('email_from', '', 'email'));

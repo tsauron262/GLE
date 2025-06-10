@@ -194,10 +194,10 @@ forms:
                 field: fk_user_dest
             fk_group_dest:
                 field: fk_group_dest
-            mail_dest:
+            email_dest:
                 custom: 1
                 label: Destinataire
-                input_name: type_email_dest
+                input_name: email_dest
                 input:
                     type: select
                     options:
@@ -212,10 +212,10 @@ forms:
                 input:
                     type: text
                 display_if:
-                    fields_names: type_dest,type_email_dest
+                    fields_names: type_dest,email_dest
                     type_dest:
                         show_values: 2
-                    type_email_dest:
+                    email_dest:
                         show_values: custom
             email_to_copy:
                 custom: 1
@@ -298,7 +298,7 @@ forms:
                 edit: 0
             -   custom: 1
                 label: Destinataire
-                input_name: type_email_dest
+                input_name: email_dest
                 hidden: 1
                 input:
                     type: hidden
@@ -311,10 +311,10 @@ forms:
                 value:
                     callback: getMailTo
                 display_if:
-                    fields_names: type_dest,type_email_dest
+                    fields_names: type_dest,email_dest
                     type_dest:
                         show_values: 2
-                    type_email_dest:
+                    email_dest:
                         show_values: custom
             -   custom: 1
                 label: Copies e-mail

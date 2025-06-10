@@ -886,7 +886,12 @@ class Bimp_Ticket extends BimpDolObject
 		foreach ($contacts as $contact) {
 			$return[$contact['email']] = $contact['lastname'] . ' ' . $contact['firstname'] . ' (' . $contact['email'] . ')';
 		}
-//		echo '<pre>';print_r($contacts);
+
+		$origin_email = $this->getData('origin_email');
+		if ($origin_email && !isset($return[$origin_email])) {
+			$return[$origin_email] = 'E-mail d\'origine (' . $origin_email . ')';
+		}
+
 		return $return;
 	}
 

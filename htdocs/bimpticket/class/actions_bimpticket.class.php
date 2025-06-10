@@ -107,7 +107,7 @@ class ActionsBimpticket
 			}
 
 			if ($user->login == 'f.martinez') {
-				echo '<pre>' . print_r($parameters, 1) . '</pre>';
+				echo '<pre>' . print_r($parameters['cc'], 1) . '</pre>';
 				echo '<pre>' . print_r($cc, 1) . '</pre>';
 			}
 		}

@@ -76,8 +76,6 @@ fields:
         label: Société
         type: id_object
         object: societe
-        input:
-            type: search_societe
         display_if:
             field_name: type_author
             show_values: 2

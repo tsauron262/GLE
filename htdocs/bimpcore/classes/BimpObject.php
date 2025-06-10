@@ -8138,7 +8138,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				$html .= '</div>';
 			}
 		} else {
-			$html .= BimpRender::renderAlerts(BimpTools::ucfirst($this->getLabel('this')) . ' n\'existe plus');
 
 			$url = $this->getListPageUrl();
 
@@ -8160,6 +8159,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 						}
 					}
 				}
+				$html .= BimpRender::renderAlerts(BimpTools::ucfirst($this->getLabel('this')) . ' n\'existe plus');
 				$html .= '<div class="buttonsContainer align-center">';
 				$html .= '<button class="btn btn-large btn-primary" onclick="window.location = \'' . $url . '\'">';
 				$html .= BimpRender::renderIcon('fas_list', 'iconLeft') . 'Liste des ' . $this->getLabel('name_plur');

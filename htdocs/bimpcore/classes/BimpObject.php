@@ -11363,7 +11363,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 						continue;
 					}
 
-					$dir = $obj->getFilesDirComplexe(false, true);
+					$dir = $obj->getFilesDir();
 					$filename = $obj->getPdfNamePrincipal();
 
 					if (!file_exists($dir . $filename)) {
@@ -11377,6 +11377,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				if (!empty($files)) {
 					global $user;
 					$dir = $this->getFilesDirComplexe(false, true);
+					die('test'.$dir);
 					$fileName = 'zip_' . $this->dol_object->element . '_' . $user->id . '.zip';
 					if (file_exists($dir . $fileName)) {
 						unlink($dir . $fileName);

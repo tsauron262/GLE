@@ -472,14 +472,21 @@ class BimpNote extends BimpObject
 			"fk_user_dest"  => $this->getData("user_create")
 		);
 
-		if ($this->getData('type_author') == self::BN_AUTHOR_USER) {
-			$filtre['type_dest'] = self::BN_DEST_USER;
-		} elseif ($this->getData('type_author') == self::BN_AUTHOR_GROUP) {
-			$filtre['type_dest'] = self::BN_DEST_GROUP;
-			$filtre['fk_group_dest'] = $this->getData("fk_group_author");
-		} elseif ($this->getData('type_author') == self::BN_AUTHOR_SOC) {
-			$filtre['type_dest'] = self::BN_DEST_SOC;
-			$filtre['mail_dest'] = $this->getData("email");
+		switch ($this->getData('type_author')) {
+			case self::BN_AUTHOR_USER:
+				$filtre['type_dest'] = self::BN_DEST_USER;
+				break;
+
+			case self::BN_AUTHOR_GROUP:
+				$filtre['type_dest'] = self::BN_DEST_GROUP;
+				$filtre['fk_group_dest'] = $this->getData("fk_group_author");
+				break;
+
+			case self::BN_AUTHOR_SOC:
+			case self::BN_AUTHOR_FREE:
+				$filtre['type_dest'] = self::BN_DEST_SOC;
+				$filtre['email_dest'] = $this->getData("email");
+				break;
 		}
 
 		if ($with_email_cc) {
@@ -487,11 +494,8 @@ class BimpNote extends BimpObject
 
 			if ($email_cc) {
 				$filtre['email_to_copy'] = explode(',', str_replace(' ', '', BimpTools::cleanEmailsStr($email_cc)));
-//				echo $email_cc . '<pre>' . print_r($filtre, 1) . '</pre>';
-//				exit;
 			}
 		}
-
 
 		return $this->getJsActionOnclick('repondre', $filtre, array(
 				'form_name' => 'rep'

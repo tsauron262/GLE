@@ -11311,7 +11311,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				global $user;
 				require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
 				$fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
-				$dir = $this->getFilesDir(false, true);
+				$dir = $this->getFilesDirComplexe(false, true);
 
 				$pdf = new BimpConcatPdf();
 				$pdf->concatFiles($dir . $fileName, $files, 'F');
@@ -11368,7 +11368,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 				if (!empty($files)) {
 					global $user;
-					$dir = $this->getFilesDir(false, true);
+					$dir = $this->getFilesDirComplexe(false, true);
 					$fileName = 'zip_' . $this->dol_object->element . '_' . $user->id . '.zip';
 					if (file_exists($dir . $fileName)) {
 						unlink($dir . $fileName);

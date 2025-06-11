@@ -1,16 +1,22 @@
 function onEMailSelectChange($select) {
+	bimp_msg('ici', 'info');
     if ($.isOk($select)) {
+		bimp_msg('la', 'info');
         var $inputContainer = $select.findParentByClass('inputContainer');
 
         if ($.isOk($inputContainer)) {
+			bimp_msg('here', 'info');
             var field_name = $inputContainer.data('field_name');
             if (field_name) {
+				bimp_msg('ICI', 'info');
                 if ($select.val() === 'custom') {
+					bimp_msg('LA 1', 'info');
                     $inputContainer.find('.selectMailHelp').slideUp(250);
                     $inputContainer.find('.mail_custom_value').find('input').attr('name', field_name + '_add_value');
                     $select.attr('name', field_name + 'add_value_select');
                     $inputContainer.find('.mail_custom_value').slideDown(250);
                 } else {
+					bimp_msg('LA 2', 'info');
                     $inputContainer.find('.mail_custom_value').find('input').attr('name', field_name + '_add_value_custom');
                     $select.attr('name', field_name + '_add_value');
                     if($inputContainer.find('.emails_select.principal').val() !== 'custom'){

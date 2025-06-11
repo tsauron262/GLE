@@ -812,7 +812,7 @@ class BimpNote extends BimpObject
 		if ($parent && is_a($parent, 'Bimp_Ticket')) {
 			$side = ($this->getData('type_author') == self::BN_AUTHOR_SOC || $this->getData('type_author') == self::BN_AUTHOR_FREE) ? "left" : "right";
 		} else {
-			$side = ($this->isUserDest() ? "left" : ($this->isUserAuthor() ? "right" : ""));
+			$side = ($this->isUserAuthor() ? "right" : "left");
 		}
 
 		$buttons = '';

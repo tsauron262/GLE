@@ -1417,6 +1417,10 @@ class EmailCollector extends CommonObject
 					array_push($criteria, array("SINCE" => date('j-M-Y', $fromdate - 1)));	// -1 is to add a security to no forgot some email
 				}
 				//$search.=($search?' ':'').'SINCE 8-Apr-2022';
+
+				if ($user->login == 'f.martinez') {
+					die('DATE : ' . $fromdate);
+				}
 			}
 
 			dol_syslog("IMAP search string = ".var_export($criteria, true));

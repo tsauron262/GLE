@@ -850,8 +850,11 @@ class BimpNote extends BimpObject
 		$html .= '</div>';
 
 		$html .= '<div class="bimp_chat_msg_footer">';
-		if ($dest) {
-			$html .= '<div class="bimp_chat_dest">À : ' . $dest;
+		if ($dest || $email_cc) {
+			$html .= '<div class="bimp_chat_dest">';
+			if ($dest) {
+				$html .= 'À : ' . $dest;
+			}
 			if ($email_cc) {
 				$html .= '<br/>CC : ' . $email_cc;
 			}

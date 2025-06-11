@@ -1,14 +1,14 @@
 function onEMailSelectChange($select) {
-	bimp_msg('ici', 'info');
+	// bimp_msg('ici', 'info');
     if ($.isOk($select)) {
-		bimp_msg('la', 'info');
+		// bimp_msg('la', 'info');
         var $inputContainer = $select.findParentByClass('inputContainer');
 
         if ($.isOk($inputContainer)) {
-			bimp_msg('here', 'info');
+			// bimp_msg('here', 'info');
             var field_name = $inputContainer.data('field_name');
             if (field_name) {
-				bimp_msg('ICI', 'info');
+				// bimp_msg('ICI', 'info');
                 if ($select.val() === 'custom') {
 					bimp_msg('LA 1', 'info');
                     $inputContainer.find('.selectMailHelp').slideUp(250);
@@ -68,7 +68,7 @@ function onMailFormLoaded($form) {
 
 $(document).ready(function () {
     $('body').on('formLoaded', function (e) {
-        if (/^.*_email_form_.*$/.test(e.$form.attr('id'))) {
+        if (/^.*_form_email.*$/.test(e.$form.attr('class'))) {
             onMailFormLoaded(e.$form);
         }
     });

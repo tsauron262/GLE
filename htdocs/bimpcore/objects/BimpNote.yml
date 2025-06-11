@@ -221,12 +221,16 @@ forms:
                 input_name: email_to_copy
                 input:
                     type: text
+#                    type: select
+#                    options:
+#                        callback: getEmailToCcArray
                     multiple: 1
                 display_if:
                     field_name: type_dest
                     show_values: 2
                 value: 
                     callback: getEmailToCc
+#                    callback: getEmailCcToAddArray
             email_from:
                 custom: 1
                 label: Emetteur

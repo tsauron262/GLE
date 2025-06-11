@@ -379,6 +379,12 @@ class BimpNote extends BimpObject
 		return $emails;
 	}
 
+	public function getEmailCcToAddArray()
+	{
+		// todo
+		return array();
+	}
+
 	// Getters données:
 
 	public static function getFiltersByUser($id_user = null)

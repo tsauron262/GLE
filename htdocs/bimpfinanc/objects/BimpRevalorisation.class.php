@@ -16,7 +16,7 @@ class BimpRevalorisation extends BimpObject
 		20 => array('label' => 'Attente équipements', 'icon' => 'fas_pause-circle', 'classes' => array('warning')),
 		1  => array('label' => 'Acceptée', 'icon' => 'fas_check', 'classes' => array('success')),
 		2  => array('label' => 'Refusée', 'icon' => 'fas_times', 'classes' => array('danger')),
-		3  => array('label' => 'Non applcable (commande hors ERP)', 'icon' => 'fas_times', 'classes' => array('info')),
+		3  => array('label' => 'Non applicable (commande hors ERP)', 'icon' => 'fas_times', 'classes' => array('info')),
 	);
 	public static $types = array(
 		'crt'            => 'CRT',

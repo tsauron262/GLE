@@ -1505,7 +1505,9 @@ class Bimp_Facture extends BimpComm
 			$buttons[] = array(
 				'label'   => 'Vérifier remises arrières',
 				'icon'    => 'fas_search-dollar',
-				'onclick' => $this->getJsActionOnclick('checkRa', array(), array())
+				'onclick' => $this->getJsActionOnclick('checkRa', array(), array(
+					'form_name'      => 'check_ra',
+				))
 			);
 		}
 
@@ -6143,9 +6145,10 @@ class Bimp_Facture extends BimpComm
 		$success = 'Vérification effectuée';
 
 		$lines = $this->getLines('not_text');
+		$recreate = (int) BimpTools::getPostFieldValue('recreate_revals', 0, 'int');
 
 		foreach ($lines as $line) {
-			$line->checkRemisesArrieres($errors, $warnings);
+			$line->checkRemisesArrieres($errors, $warnings, false, $recreate);
 		}
 
 		return array(

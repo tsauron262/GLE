@@ -369,36 +369,20 @@ class BimpNote extends BimpObject
 		$parent = $this->getParentInstance();
 
 		if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpObject')) {
-			$client = $parent->getChildObject('client');
-
-			if (BimpObject::objectLoaded($client) && $client->field_exists('email')) {
-				$email = $client->getData('email');
-
-				if ($email) {
-					$emails['soc_' . $client->id] = BimpTools::ucfirst($client->getLabel()) . ' "' . $client->getName() . '" : ' . $email;
-				}
-
-				if (is_a($client, 'Bimp_Societe')) {
-					$contacts = BimpCache::getSocieteContactsArray($client->id, false, '', true);
-
-					if (!empty($contacts)) {
-						foreach ($contacts as $id_contact => $contact_label) {
-							$contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
-							if (BimpObject::objectLoaded($contact)) {
-								$email = $contact->getData('email');
-								if ($email) {
-									$emails['contact_' . $id_contact] = 'Contact "' . $contact_label . '" : ' . $email;
-								}
-							}
-						}
-					}
-				}
+			if (method_exists($parent, 'getEmailDestsArray')) {
+				$emails = $parent->getEmailDestsArray();
 			}
 		}
 
 		$emails['custom'] = 'Autre';
 
 		return $emails;
+	}
+
+	public function getEmailCcToAddArray()
+	{
+		// todo
+		return array();
 	}
 
 	// Getters données:
@@ -494,14 +478,21 @@ class BimpNote extends BimpObject
 			"fk_user_dest"  => $this->getData("user_create")
 		);
 
-		if ($this->getData('type_author') == self::BN_AUTHOR_USER) {
-			$filtre['type_dest'] = self::BN_DEST_USER;
-		} elseif ($this->getData('type_author') == self::BN_AUTHOR_GROUP) {
-			$filtre['type_dest'] = self::BN_DEST_GROUP;
-			$filtre['fk_group_dest'] = $this->getData("fk_group_author");
-		} elseif ($this->getData('type_author') == self::BN_AUTHOR_SOC) {
-			$filtre['type_dest'] = self::BN_DEST_SOC;
-			$filtre['mail_dest'] = $this->getData("email");
+		switch ($this->getData('type_author')) {
+			case self::BN_AUTHOR_USER:
+				$filtre['type_dest'] = self::BN_DEST_USER;
+				break;
+
+			case self::BN_AUTHOR_GROUP:
+				$filtre['type_dest'] = self::BN_DEST_GROUP;
+				$filtre['fk_group_dest'] = $this->getData("fk_group_author");
+				break;
+
+			case self::BN_AUTHOR_SOC:
+			case self::BN_AUTHOR_FREE:
+				$filtre['type_dest'] = self::BN_DEST_SOC;
+				$filtre['email_dest'] = $this->getData("email");
+				break;
 		}
 
 		if ($with_email_cc) {
@@ -509,11 +500,8 @@ class BimpNote extends BimpObject
 
 			if ($email_cc) {
 				$filtre['email_to_copy'] = explode(',', str_replace(' ', '', BimpTools::cleanEmailsStr($email_cc)));
-//				echo $email_cc . '<pre>' . print_r($filtre, 1) . '</pre>';
-//				exit;
 			}
 		}
-
 
 		return $this->getJsActionOnclick('repondre', $filtre, array(
 				'form_name' => 'rep'
@@ -597,12 +585,12 @@ class BimpNote extends BimpObject
 		$cc = '';
 
 //		if ((int) BimpTools::getPostFieldValue('email_with_cc', 0, 'int')) {
-			$parent = $this->getParentInstance();
-			if (BimpObject::objectLoaded($parent)) {
-				if (method_exists($parent, 'getEMailToCc')) {
-					$cc = $parent->getEMailToCc();
-				}
+		$parent = $this->getParentInstance();
+		if (BimpObject::objectLoaded($parent)) {
+			if (method_exists($parent, 'getEMailToCc')) {
+				$cc = $parent->getEMailToCc();
 			}
+		}
 //		}
 
 		if ($return_array && !is_array($cc)) {
@@ -614,18 +602,6 @@ class BimpNote extends BimpObject
 		}
 
 		return $cc;
-	}
-
-	public function getMailToContacts()
-	{
-		$parent = $this->getParentInstance();
-		if ($parent && $parent->isLoaded()) {
-			if (method_exists($parent, 'getMailToContacts')) {
-				return $parent->getMailToContacts();
-			}
-		}
-
-		return array();
 	}
 
 	public function getParentMsgId() {}
@@ -842,7 +818,7 @@ class BimpNote extends BimpObject
 		if ($parent && is_a($parent, 'Bimp_Ticket')) {
 			$side = ($this->getData('type_author') == self::BN_AUTHOR_SOC || $this->getData('type_author') == self::BN_AUTHOR_FREE) ? "left" : "right";
 		} else {
-			$side = ($this->isUserDest() ? "left" : ($this->isUserAuthor() ? "right" : ""));
+			$side = ($this->isUserAuthor() ? "right" : "left");
 		}
 
 		$buttons = '';
@@ -874,8 +850,11 @@ class BimpNote extends BimpObject
 		$html .= '</div>';
 
 		$html .= '<div class="bimp_chat_msg_footer">';
-		if ($dest) {
-			$html .= '<div class="bimp_chat_dest">À : ' . $dest;
+		if ($dest || $email_cc) {
+			$html .= '<div class="bimp_chat_dest">';
+			if ($dest) {
+				$html .= 'À : ' . $dest;
+			}
 			if ($email_cc) {
 				$html .= '<br/>CC : ' . $email_cc;
 			}
@@ -889,50 +868,6 @@ class BimpNote extends BimpObject
 		$html .= '</div>';
 		$html .= '</div>';
 
-		return $html;
-	}
-
-	public function displayChatMsg_old($style = '', $checkview = false)
-	{
-		global $user;
-		$html = "";
-
-		$author = $this->displayAuthor(false, true);
-
-		$parent = $this->getParentInstance();
-		if ($parent && is_a($parent, 'Bimp_Ticket')) {
-			$position = ($this->getData('type_author') == self::BN_AUTHOR_SOC || $this->getData('type_author') == self::BN_AUTHOR_FREE) ? "start" : "end";
-		} else {
-			$position = ($this->isUserDest() ? "start" : ($this->isUserAuthor() ? "end" : ""));
-		}
-
-		$html .= '<div class="d-flex justify-content-' . $position . ($style == "petit" ? ' petit' : '') . ' mb-4">';
-
-		$html .= BimpTools::getBadge($this->getInitiales($author), ($style == "petit" ? '35' : '55'), ($this->getData('type_author') == self::BN_AUTHOR_USER ? 'info' : 'warnings'), $author);
-
-		$html .= '<div class="msg_cotainer">' . $this->displayData("content");
-		if ($style != "petit" && $this->getData('user_create') != $user->id) {
-			$html .= '<span class="rowButton bs-popover"><i class="fas fa-share link" onclick="' . $this->getJsRepondre() . '"></i></span>';
-		}
-		if ($style != "petit" && $this->isActionAllowed('setAsViewed') && $this->canSetAction('setAsViewed')) {
-			$html .= '<span class="rowButton bs-popover"><i class="far fa5-envelope-open" onclick="' . $this->getJsActionOnclick('setAsViewed') . '"></i></span>';
-		}
-
-		$html .= '<span class="msg_time">' . dol_print_date($this->db->db->jdate($this->getData("date_create")), "%d/%m/%y %H:%M:%S") . '</span>
-                                                                </div>';
-		if ($this->getData('type_dest') != self::BN_DEST_NO) {
-			$dest = $this->displayDestinataire(false, true);
-			if ($dest != "") {
-				$html .= BimpTools::getBadge($this->getInitiales($dest), ($style == "petit" ? '28' : '45'), ($this->getData('type_dest') == self::BN_DEST_USER ? 'info' : 'warnings'), $dest);
-			}
-		}
-		$html .= "";
-
-		$html .= '</div>';
-
-		if ($checkview && !(int) $this->getData('viewed') && $this->isUserDest()) {
-			$this->updateField('viewed', 1);
-		}
 		return $html;
 	}
 
@@ -1219,41 +1154,19 @@ class BimpNote extends BimpObject
 		if ($type_dest == self::BN_DEST_SOC) {
 			$this->set('visiblity', self::BN_ALL);
 
-			$type_email = BimpTools::getPostFieldValue('type_email_dest', '', 'aZ09');
+			$email_to = BimpTools::getPostFieldValue('email_dest', '', 'alphanohtml');
 
-			if (!$type_email) {
-				$errors[] = 'Aucun destinataire sélectionné pour l\'envoi par e-mail';
+			if ($email_to == 'custom') {
+				$email_to = BimpTools::getPostFieldValue('email_dest_custom', '', 'email');
+			}
+
+			if (!$email_to) {
+				$errors[] = 'Adresse e-mail du destinataire absente';
 			} else {
-				if ($type_email == 'custom') {
-					$email_to = BimpTools::getPostFieldValue('email_dest_custom', '', 'email');
-				} elseif (preg_match('/^(.+)_(\d+)$/', $type_email, $matches)) {
-					switch ($matches[1]) {
-						case 'soc':
-							$soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $matches[2]);
-							if (BimpObject::objectLoaded($soc)) {
-								$email_to = $soc->getData('email');
-							}
-							break;
-
-						case 'contact':
-							$contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $matches[2]);
-							if (BimpObject::objectLoaded($contact)) {
-								$email_to = $contact->getData('email');
-							}
-							break;
-					}
+				$email_to = BimpTools::cleanEmailsStr($email_to);
+				if (!BimpValidate::isEmail($email_to)) {
+					$errors[] = 'Adresse e-mail du destinataire invalide : "' . $email_to . '"';
 				}
-
-				if (!$email_to) {
-					$errors[] = 'Adresse e-mail du destinataire absente';
-				} else {
-					$email_to = BimpTools::cleanEmailsStr($email_to);
-					if (!BimpValidate::isEmail($email_to)) {
-						$errors[] = 'Adresse e-mail du destinataire invalide : "' . $email_to . '"';
-					}
-				}
-
-
 			}
 
 			$email_from = BimpTools::cleanEmailsStr(BimpTools::getPostFieldValue('email_from', '', 'email'));

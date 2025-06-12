@@ -76,8 +76,6 @@ fields:
         label: Société
         type: id_object
         object: societe
-        input:
-            type: search_societe
         display_if:
             field_name: type_author
             show_values: 2
@@ -194,10 +192,10 @@ forms:
                 field: fk_user_dest
             fk_group_dest:
                 field: fk_group_dest
-            mail_dest:
+            email_dest:
                 custom: 1
                 label: Destinataire
-                input_name: type_email_dest
+                input_name: email_dest
                 input:
                     type: select
                     options:
@@ -212,36 +210,27 @@ forms:
                 input:
                     type: text
                 display_if:
-                    fields_names: type_dest,type_email_dest
+                    fields_names: type_dest,email_dest
                     type_dest:
                         show_values: 2
-                    type_email_dest:
+                    email_dest:
                         show_values: custom
-#            email_with_cc: 
-#                custom: 1
-#                show: 
-#                    callback: hasEmailCc
-#                label: Insérer les adresses e-mails en copie
-#                input_name: email_with_cc
-#                input: 
-#                    type: toggle
-#                display_if:
-#                    field_name: type_dest
-#                    show_values: 2
-#                value: 1
             email_to_copy:
                 custom: 1
                 label: Copies e-mail
                 input_name: email_to_copy
                 input:
                     type: text
+#                    type: select
+#                    options:
+#                        callback: getEmailToCcArray
                     multiple: 1
                 display_if:
                     field_name: type_dest
                     show_values: 2
-#                depends_on: email_with_cc,obj_module,obj_name,id_obj
                 value: 
                     callback: getEmailToCc
+#                    callback: getEmailCcToAddArray
             email_from:
                 custom: 1
                 label: Emetteur
@@ -311,11 +300,11 @@ forms:
                 edit: 0
             -   custom: 1
                 label: Destinataire
-                input_name: type_email_dest
-                hidden: 1
-                input:
-                    type: hidden
-                value: custom
+                input_name: email_dest
+                input: 
+                    type: select
+                    options: 
+                        callback: getEmailDestsArray
             -   custom: 1
                 label: E-mail destinataire
                 input_name: email_dest_custom
@@ -324,10 +313,10 @@ forms:
                 value:
                     callback: getMailTo
                 display_if:
-                    fields_names: type_dest,type_email_dest
+                    fields_names: type_dest,email_dest
                     type_dest:
                         show_values: 2
-                    type_email_dest:
+                    email_dest:
                         show_values: custom
             -   custom: 1
                 label: Copies e-mail

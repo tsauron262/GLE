@@ -550,7 +550,6 @@ class BimpRender
 				$html .= '<li role="presentation" class="' . ($tab['id'] === $active ? ' active' : '');
 				$html .= ($params['li_extra_class'] ? ' ' . $params['li_extra_class'] : '');
 				$html .= '" data-navtab_id="' . $tab['id'] . '"';
-				if(!isset($params['niveau3']) || $params['niveau3'] == 0) $html .= ' onClick="onClicTab(\'' . $tabs_id . '\', \'' . $tab['id'] . '\');"';
 				$html .= '>';
 				$html .= '<a href="#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab"';
 				if (isset($tab['ajax']) && (int) $tab['ajax']) {

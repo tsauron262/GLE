@@ -777,6 +777,29 @@ function removeAllListFilters(filters_id) {
     } else {
         bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
     }
+	if(window.location.hash) {
+		var list_identifier = $filters.data('list_identifier');
+		
+		var hash = window.location.hash;
+		hash = hash.substring(1); // Enlever le #
+		var elements = hash.split('&');
+		var values = Object.entries(elements);
+		var ct = {};
+		var indexct = -1;
+		values.forEach(([key, value]) => {
+			var parts = value.split('=');
+			if (parts[0] === 'ct') {
+				indexct = key;
+				ct = JSON.parse(decodeURIComponent(parts[1]).replaceAll('%22', '"'));
+				delete ct[list_identifier].fl;
+			}
+		});
+		if (indexct !== -1) {
+			elements[indexct] = 'ct=' + JSON.stringify(ct).replaceAll('"', '%22');
+			hash = elements.join('&');
+			window.location.hash = hash;
+		}
+	}
 }
 
 function saveListFilters($button, filters_id, id_list_filters) {
@@ -920,28 +943,12 @@ function loadSavedFilters(filters_id, id_list_filters, full_panel_html) {
 		if (!id_list_filters || isNaN(id_list_filters)) {
 			var list_identifier = $filters.data('list_identifier');
 			removeAllListFilters(filters_id);
-			if(typeof parseChaineToObjet === 'function' && window.location.hash) {
-				var hash = window.location.hash;
-				if(hash.indexOf(list_identifier) > -1) {
-					var result = parseChaineToObjet(hash);
-					var ct = JSON.parse(result.ct.replaceAll('%22', '"'));
-					for (const [divId, params] of Object.entries(ct)) {
-						for (const [param, id] of Object.entries(params)) {
-							if (param == 'fl') {
-								ct[divId][param] = 0;
-							}
-						}
-					}
-					var newCt = JSON.stringify(ct);
-					window.location.hash = newCt;
-				}
-			}
             return;
         }
 		
-		if (typeof reportHash === 'function')	{
+		if (typeof reportFilterHash === 'function')	{
 			if(!isNaN(id_list_filters)) {
-				reportHash($container, id_list_filters);
+				reportFilterHash($container, id_list_filters);
 			}
 		}
 

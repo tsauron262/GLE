@@ -866,7 +866,7 @@ class Bimp_FactureLine extends ObjectLine
 					$tot_ra[$ra_type]['amount'] += ($remise_arriere->getRemiseAmount() * $this->qty);
 					$tot_ra[$ra_type]['label'] .= ($tot_ra[$ra_type]['label'] ? ' / ' : '') . $remise_arriere->getData('label');
 				} else {
-					$tot_ra[$ra_type] += $remise_arriere->getRemiseAmount();
+					$tot_ra[$ra_type] += ($remise_arriere->getRemiseAmount() * $this->qty);
 				}
 			}
 		}

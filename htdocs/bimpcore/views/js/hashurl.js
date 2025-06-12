@@ -1,101 +1,18 @@
-// function listenIdFiltersToLoad() {
-// 	var id = document.getElementById('id_filters_to_load').value;
-// 	alert('id_filters_to_load: ' + id);
-// 	defHashFiltre('fl', idDiv, id);
-// }
+var bimp_hashReady = true;
 
-function defHashFiltre(param, idDiv=null, idFiltre) {
-	var hashExistant = window.location.hash;
-	var newHash = '';
-	const page = ['mt', 'st'];
-	const liste = ['fl', 'pa'];
-	var result = {}
-	if (page.indexOf(param) > -1) {
-		if (hashExistant === '') {
-			newHash = param + '=' + idFiltre;
-			// window.location.hash = newHash;
-		} else {
-			result = parseChaineToObjet(hashExistant.substring(1));
-			if (param === 'mt' && result['mt'] !== idFiltre) {
-				delete result['st'];
-				delete result['ct'];
+function ecrireHash(paramNav) {
+	if (bimp_hashReady) {
+		console.log('ecrireHash', paramNav);
+		var hashExistant = window.location.hash;
+		var newHash = '';
+		for (var valueParam of paramNav) {
+			if (newHash !== '') {
+				newHash += '&';
 			}
-			if( param === 'st' && result['st'] !== idFiltre) {
-				delete result['ct'];
-			}
-			result[param] = idFiltre;
+			newHash += valueParam;
 		}
+		window.location.hash = newHash;
 	}
-	else if (liste.indexOf(param) > -1) {
-		if (hashExistant === '')	{
-			var t = new Object();
-			t[idDiv] = {[param] : idFiltre};
-			const j = JSON.stringify(t);
-			newHash = 'ct=' + j;
-			// window.location.hash = newHash;
-		} else {
-			result = parseChaineToObjet(hashExistant.substring(1));
-			if (result['ct']) {
-				var ct = JSON.parse(result['ct'].replaceAll('%22', '"'));
-				if (ct[idDiv]) {
-					ct[idDiv][param] = idFiltre;
-				} else {
-					ct[idDiv] = {[param] : idFiltre};
-				}
-				const j = JSON.stringify(ct);
-				result['ct'] = j;
-			}
-			else {
-				var t = new Object();
-				t[idDiv] = {[param] : idFiltre};
-				result['ct'] = JSON.stringify(t);
-			}
-		}
-	}
-
-
-	var tableau = Object.entries(result);
-	for (const [key, value] of tableau) {
-		if (newHash.length > 0) {
-			newHash += '+';
-		}
-		newHash += key + '=' + value;
-	}
-	window.location.hash = newHash;
-	updateBookMark();
-}
-
-function parseChaineToObjet(chaine) {
-	if(chaine.substring(0, 1) === '#')	{
-		chaine = chaine.substring(1);
-	}
-	var elements = chaine.split('+');
-	var result = {};
-
-	$.each(elements, function(i, value) {
-		var parts = value.split('=');
-		result[parts[0]] = parts[1];
-	});
-	return result;
-}
-
-function reportHash(c, id) {
-	const innerDivId = c.prevObject[0].id;
-	const innerDiv = document.getElementById(innerDivId);
-	var idDiv = '';
-
-	let parent = innerDiv.parentElement;
-	while (parent) {
-		if (parent.tagName === 'DIV' && parent.id && parent.id !== innerDivId) {
-			idDiv = parent.id;
-			break;
-		}
-		parent = parent.parentElement;
-	}
-	if (!parent) {
-		console.log('Aucune div parente avec un id trouvé.');
-	}
-	defHashFiltre('fl', idDiv, id);
 }
 
 function updateBookMark() {
@@ -116,139 +33,113 @@ function updateBookMark() {
 			cible.setAttribute('rel', newrel);
 		}
 		else {
-			console.log('newbookmark non trouvé dans le formulaire actionbookmark.');
+			console.log('newbookmark non trouve dans le formulaire actionbookmark.');
 		}
 	}
 }
 
-function onClicTab(typeTab, idTab) {
-	if (typeTab === 'maintabs') {
-		defHashFiltre('mt', null, idTab);
+function reportFilterHash(c, id) {
+	const innerDivId = c.prevObject[0].id;
+	const innerDiv = document.getElementById(innerDivId);
+	var idDiv = '';
+
+	let parent = innerDiv.parentElement;
+	while (parent) {
+		if (parent.tagName === 'DIV' && parent.id && parent.id !== innerDivId) {
+			idDiv = parent.id;
+			break;
+		}
+		parent = parent.parentElement;
+	}
+	if (!parent) {
+		console.log('Aucune div parente avec un id trouvé.');
 	}
 	else {
-		defHashFiltre('st', null, idTab);
-	}
-}
-
-function afficherOngletSelonHash()	{
-	var hash = window.location.hash;
-	if (hash) {
-		const classListToChange = ['active', 'in'];
-		var objHash = parseChaineToObjet(hash);
-		// console.log(objHash);
-		if(objHash['mt'])	{
-			// Désactiver l'onglet actuellement actif
-			var currentTab = document.querySelector('#navtabs_maintabs li.active');
-			var newTab = document.querySelector('#navtabs_maintabs li[data-navtab_id="' + objHash['mt'] + '"]');
-			if (currentTab && currentTab !== newTab) {
-				currentTab.classList.remove('active');
-			}
-			// Activer l'onglet objHash['mt']
-			
-			if (newTab && !newTab.classList.contains('active')) {
-				newTab.classList.add('active');
-			}
-			// desactiver le contenu de l'onglet actuellement actif
-			var currentContent = document.querySelector('#navtabs_content_maintabs div.active');
-			var newContent = document.querySelector('#navtabs_content_maintabs div[id="' + objHash['mt'] + '"]');
-			// const classListToChange = ['active', 'in'];
-			if (currentContent && currentContent !== newContent) {
-				currentContent.classList.remove(...classListToChange);
-			}
-			// Activer le contenu de l'onglet objHash['mt']
-			if (newContent && !newContent.classList.contains('active')) {
-				newContent.classList.add(...classListToChange);
-			}
-			if(objHash['st'] === undefined) {
-				// Si l'onglet secondaire n'est pas défini, on cheche l'onglet secondaire actif
-				var ul = newContent.firstChild;
-				var activeSubTab = document.querySelector('#navtabs_' + ul.dataset.navtabs_id + ' li.active');
-				if (activeSubTab) {
-					var activeSubContent = document.getElementById(activeSubTab.dataset.navtab_id);
-					if (activeSubContent) {
-						activeSubContent.classList.add(...classListToChange);
-					}
+		var hash = window.location.hash;
+		hash = hash.substring(1); // Enlever le #
+		var elements = hash.split('&');
+		var values = Object.entries(elements);
+		var ct = {};
+		var indexct = -1;
+		values.forEach(([key, value]) => {
+			var parts = value.split('=');
+			if (parts[0] === 'ct') {
+				indexct = key;
+				ct = JSON.parse(decodeURIComponent(parts[1]).replaceAll('%22', '"'));
+				if (typeof ct[idDiv] === 'undefined') {
+					ct[idDiv] = {fl: id};
+				}
+				else {
+					ct[idDiv].fl = id;
 				}
 			}
+		});
+		if (indexct !== -1) {
+			elements[indexct] = 'ct=' + JSON.stringify(ct).replaceAll('"', '%22');
+			hash = elements.join('&');
+			window.location.hash = hash;
 		}
-		if(objHash['st'])	{
-			// Désactiver l'onglet actuellement actif
-			var tab = objHash['mt'];
-			if (!objHash['mt']) {
-				// Si l'onglet principal n'est pas défini, on cheche l'onglet principal actif
-				var liElement = document.querySelector('li[data-navtab_id="' + objHash['st'] + '"]');
-				var onclickAttr = liElement.getAttribute('onclick');
-				var matches = onclickAttr.match(/onClicTab\(\s*'([^']+)'/);
-				if (matches && matches[1]) {
-					tab = matches[1];
-				}
-				console.log('TAB : ' , tab);
-			}
-			var subTabName = '#navtabs_' + tab + '_tabs';
-
-			var currentSubTab = document.querySelector(subTabName + ' li.active');
-			var newSubTab = document.querySelector(subTabName + ' li[data-navtab_id="' + objHash['st'] + '"]');
-			if (!currentSubTab && !newSubTab) {
-				subTabName = '#navtabs_' + tab + '_view';
-				currentSubTab = document.querySelector(subTabName + ' li.active');
-				newSubTab = document.querySelector(subTabName + ' li[data-navtab_id="' + objHash['st'] + '"]');
-			}
-			if (!currentSubTab && !newSubTab) {
-				subTabName = '#navtabs_' + tab;
-				currentSubTab = document.querySelector(subTabName + ' li.active');
-				newSubTab = document.querySelector(subTabName + ' li[data-navtab_id="' + objHash['st'] + '"]');
-			}
-			if (currentSubTab && currentSubTab !== newSubTab) {
-				currentSubTab.classList.remove('active');
-			}
-			// Activer l'onglet objHash['st']
-			if (newSubTab && !newSubTab.classList.contains('active')) {
-				newSubTab.classList.add('active');
-			}
-			// desactiver le contenu de l'onglet actuellement actif
-			var subDivName = '#navtabs_content_' + tab + '_tabs';
-			var currentSubContent = document.querySelector(subDivName + ' div.active');
-			var newSubContent = document.querySelector(subDivName + ' div[id="' + objHash['st'] + '"]');
-			if (!currentSubContent && !newSubContent) {
-				subDivName = '#navtabs_content_' + tab + '_view';
-				currentSubContent = document.querySelector(subDivName + ' div.active');
-				newSubContent = document.querySelector(subDivName + ' div[id="' + objHash['st'] + '"]');
-			}
-			if (!currentSubContent && !newSubContent) {
-				subDivName = '#navtabs_content_' + tab;
-				currentSubContent = document.querySelector(subDivName + ' div.active');
-				newSubContent = document.querySelector(subDivName + ' div[id="' + objHash['st'] + '"]');
-			}
-			// const classListToChange = ['active', 'in'];
-			if (currentSubContent && currentSubContent !== newSubContent) {
-				currentSubContent.classList.remove(...classListToChange);
-			}
-			
-			// Activer le contenu de l'onglet objHash['st']
-			if (newSubContent && !newSubContent.classList.contains('active')) {
-				newSubContent.classList.add(...classListToChange);
-				if(newSubTab) {
-					var a = newSubTab.firstChild;
-					var cmd = a.getAttribute('data-ajax_callback');
-					if (cmd) {
-						cmd = cmd.replaceAll('&quot;', '"');
-						eval(cmd);
-					}
-				}
-			}
+		else {
+			ct[idDiv] = {fl: id};
+			elements.push('ct=' + JSON.stringify(ct).replaceAll('"', '%22'));
+			hash = elements.join('&');
+			window.location.hash = hash;
 		}
 	}
 }
 
-function chargerFiltreSelonHash() {
-	if (window.location.hash) {
-		// var result = decoupeHash(window.location.hash);
-		var result = parseChaineToObjet(window.location.hash);
-		if (result.ct) {
-			var ct = JSON.parse(result.ct.replaceAll('%22', '"'));
+function reportPageHash(c, p) {
+	var divId = c[0].id;
+	// console.log('reportPageHash', divId, p);
+	if (divId) {
+		var hash = window.location.hash;
+		hash = hash.substring(1); // Enlever le #
+		var elements = hash.split('&');
+		var values = Object.entries(elements);
+		values.forEach(([index, value]) => {
+			var parts = value.split('=');
+			if (parts[0] === 'ct') {
+				var ct = JSON.parse(decodeURIComponent(parts[1]).replaceAll('%22', '"'));
+				if (ct[divId]) {
+					ct[divId].pa = p;
+				} else {
+					ct[divId] = {pa: p};
+				}
+				elements[index] = 'ct=' + JSON.stringify(ct).replaceAll('"', '%22');
+			}
+		});
+		console.log('reportPageHash', elements, p);
+	}
+}
+
+function traitementHash(hash) {
+	hash = window.location.hash.replaceAll('#', '');
+	// console.log('traitementHash', hash);
+	var elements = hash.split('&');
+	const values = Object.values(elements);
+	var isCtPresent = false;
+	var isFlPresent = false;
+	var isPaPresent = false;
+	values.forEach(value => {
+		var parts = value.split('=');
+		if(parts[0] != 'ct') {
+			// console.log(parts);
+			const aTag = document.querySelector('li[data-navtab_id="' + parts[1] + '"] a');
+			if (aTag) {
+				bimp_hashReady = false;
+				$(aTag).tab('show'); // Affiche l'onglet correspondant
+				setTimeout(function() {
+					bimp_hashReady = true;
+				}, 1000);
+			}
+		}
+		else {
+			isCtPresent = true;
+			var ct = JSON.parse(decodeURIComponent(parts[1]).replaceAll('%22', '"'));
+			// console.log(parts, ct);
 			for (const [divId, params] of Object.entries(ct)) {
-				// console.log(divId, params);
-				for (const [param, id] of Object.entries(params)) {
+				var isPaPresent = false;
+				for (var [param, id] of Object.entries(params)) {
 					if (param === 'fl') {
 						var div = document.getElementById(divId);
 						if (div) {
@@ -261,38 +152,111 @@ function chargerFiltreSelonHash() {
 						}
 					}
 					if (param === 'pa') {
-						if (id) {
-							var pageButtons = document.getElementById(divId + '_pagination');
-							var pageSpans = pageButtons.querySelectorAll('.pageBtn');
-							var pageCourante = null;
-							var pageMax = null;
-							pageSpans.forEach(function(span) {
-								var page = parseInt(span.getAttribute('data-p'), 10);
-								// Vérifie si c'est la page active (courante)
-								if (span.classList.contains('active')) {
-									pageCourante = page;
+						isPaPresent = true;
+						var $list = $('#' + divId);
+						// depuis $list, trouver la page max
+						var pageButtons = document.getElementById(divId + '_pagination');
+						var pageSpans = pageButtons.querySelectorAll('.pageBtn');
+						var pageCourante = null;
+						var pageMax = null;
+						pageSpans.forEach(function(span) {
+							var page = parseInt(span.getAttribute('data-p'), 10);
+							// Vérifie si c'est la page active (courante)
+							if (span.classList.contains('active')) {
+								pageCourante = page;
+							}
+							// pageMax sera mis à jour à chaque itération, le dernier "data-p" est supposé être le max
+							if (pageMax === null || page > pageMax) {
+								pageMax = page;
+							}
+						});
+						// console.log($list);
+						if (id === 0) id = 1;
+						if (id > pageMax) id = pageMax;
+						if (pageCourante !== id) {
+							loadPage($list, id);
+						}
+					}
+				}
+				if (!isPaPresent) 	{
+					// console.log('Paramètre:', param, ', ID:', id, ', Div ID:', divId, ', isPaPresent:', isPaPresent);
+					// Si on n'a pas trouvé de paramètre pa, on charge la première page
+					var $list = $('#' + divId);
+					if ($list.length) {
+						loadPage($list, 1);
+					}
+				}
+			}
+		}
+	});
+	if(!isCtPresent) {
+		// Aucun ct trouvé dans le hash on vide les filtres
+		viderFiltres();
+	}
+}
+
+function chargerFiltreSelonHash() {
+	if (window.location.hash) {
+		var hash = window.location.hash.replaceAll('#', '');
+		var elements = hash.split('&');
+		const values = Object.values(elements);
+		values.forEach(value => {
+			var parts = value.split('=');
+			if(parts[0] === 'ct') {
+				var ct = JSON.parse(parts[1].replaceAll('%22', '"'));
+				for (const [divId, params] of Object.entries(ct)) {
+					// console.log(divId, params);
+					for (const [param, id] of Object.entries(params)) {
+						// console.log('Paramètre:', param, ', ID:', id, ', Div ID:', divId);
+						if (param === 'fl') {
+							var div = document.getElementById(divId);
+							// console.log('Div trouvée :', div);
+							if (div) {
+								var $input = $(div.querySelector('select#id_filters_to_load'));
+								if ($input.length) {
+									var filters_panel = $input.findParentByClass('object_component object_filters_panel').attr('id');
+									$input.val(id).change();
+									loadSavedFilters(filters_panel, id, 1);
 								}
-								// pageMax sera mis à jour à chaque itération, le dernier "data-p" est supposé être le max
-								if (pageMax === null || page > pageMax) {
-									pageMax = page;
+							}
+						}
+						else if (param === 'pa') {
+							if (id) {
+								var pageButtons = document.getElementById(divId + '_pagination');
+								if (!pageButtons) {
+									// console.warn('Pagination non trouvée pour le div:', divId);
+									return;
 								}
-							});
-							if (pageCourante !== id) {
-								if (id > pageMax) {
-									var p = pageMax;
+								var pageSpans = pageButtons.querySelectorAll('.pageBtn');
+								var pageCourante = null;
+								var pageMax = null;
+								pageSpans.forEach(function(span) {
+									var page = parseInt(span.getAttribute('data-p'), 10);
+									// Vérifie si c'est la page active (courante)
+									if (span.classList.contains('active')) {
+										pageCourante = page;
+									}
+									// pageMax sera mis à jour à chaque itération, le dernier "data-p" est supposé être le max
+									if (pageMax === null || page > pageMax) {
+										pageMax = page;
+									}
+								});
+								if (pageCourante !== id) {
+									if (id > pageMax) {
+										var p = pageMax;
+									}
+									else {
+										var p = id;
+									}
+									var $list = $('#' + divId);
+									loadPage($list, p);
 								}
-								else {
-									var p = id;
-								}
-								// console.log('Chargement de la page :', p, 'pour le divId :', divId);
-								var $list = $('#' + divId);
-								loadPage($list, p);
 							}
 						}
 					}
 				}
 			}
-		}
+		});
 	}
 }
 
@@ -307,22 +271,28 @@ function viderFiltres()	{
 	});
 }
 
-$(document).ready(function () {
-	$(window).on('hashchange', function () {
-		console.log('hashchange');
-		updateBookMark();
-		afficherOngletSelonHash();
-		chargerFiltreSelonHash();
-		if (!window.location.hash) {
-			viderFiltres();
-		}
-	});
+$(window).on('hashchange', function () {
+	// console.log('changement de hash.');
+	if( window.location.hash) {
+		traitementHash(window.location.hash);
+	}
+	else {
+		ecrireHash(getTabsParams());
+		viderFiltres();
+	}
+	updateBookMark();
 });
-	$(window).on("load", function () {
-		updateBookMark();
-		if (window.location.hash) {
-			afficherOngletSelonHash();
-			chargerFiltreSelonHash();
-		}
-	});
 
+$(document).ready(function () {
+	$('body').on('bimp_ready', function () {
+		if (window.location.hash) {
+			traitementHash(window.location.hash);
+		}
+		else ecrireHash(getTabsParams());
+		updateBookMark();
+	});
+	$('body').on('listLoaded', function () {
+		chargerFiltreSelonHash();
+	});
+	
+});

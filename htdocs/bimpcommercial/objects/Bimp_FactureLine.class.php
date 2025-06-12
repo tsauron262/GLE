@@ -943,7 +943,7 @@ class Bimp_FactureLine extends ObjectLine
 					}
 
 					if (!count($reval_errors)) {
-						$reval = BimpObject::createBimpObject('bimpfinanc', 'BimpRevalorisation', array(
+						BimpObject::createBimpObject('bimpfinanc', 'BimpRevalorisation', array(
 							'id_facture'      => (int) $facture->id,
 							'id_facture_line' => (int) $this->id,
 							'type'            => $type_ra,

@@ -9650,6 +9650,7 @@ input.error, select.error {
 }
 .inputContainer .addValueInputContainer button.addValueBtn {
   margin-left: 15px;
+  height: fit-content;
 }
 .inputContainer .input_card_container {
   padding-top: 15px;

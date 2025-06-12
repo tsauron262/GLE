@@ -482,7 +482,7 @@ fields:
             no_autocorrect: 1
     pword_admin:
         label: Mot de passe admin
-        required: 1
+        required: 0
         user_edit: 1
         input:
             no_autocorrect: 1

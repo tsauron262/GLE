@@ -1,0 +1,1 @@
+Contrats d'abonnement : ajout de la possiblité de saisir un prix d'achat exceptionnel pour chaque ligne 

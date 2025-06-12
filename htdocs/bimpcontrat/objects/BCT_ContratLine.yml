@@ -40,6 +40,16 @@ objects:
             id_object:
                 field_value: fk_product_fournisseur_price
     
+    custom_pa_fourn:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Fournisseur
+            id_object:
+                field_value: custom_pa_id_fourn
+                
     user_author:
         extends: user
         instance:
@@ -175,9 +185,24 @@ fields:
         type: money
         depends_on: fk_product,fk_product_fournisseur_price
         display_if:
-            field_name: achat_periodicity
-            hide_values: 0
+            fields_names: achat_periodicity,fk_product_fournisseur_price
+            achat_periodicity: 
+                hide_values: 0
+            fk_product_fournisseur_price: 
+                show_values: 0
     
+    custom_pa_id_fourn: 
+        label: Fournisseur (PA exceptionnel)
+        type: id_object
+        default_value: 0
+        object: custom_pa_fourn
+        display_if:
+            fields_names: achat_periodicity,fk_product_fournisseur_price
+            achat_periodicity:
+                hide_values: 0
+            fk_product_fournisseur_price:
+                show_values: 0
+        
     total_ht:
         label: Total HT
         type: money
@@ -471,21 +496,11 @@ forms:
             -   title: Achat
             -   field: date_achat_start
             -   field: achat_periodicity
-            #            - custom: 1
-            #              label: Type de prix d'achat
-            #              input_name: type_pa
-            #              data_type: int
-            #              input:
-            #                  type: select
-            #                  options:
-            #                      pa_fourn: Prix fournisseur
-            #                      custom: Personnalisé
             -   field: fk_product_fournisseur_price
-            #              display_if:
-            #                  field_name: type_pa
-            #                  hide_values: custom
-            #            - field: achat_id_fourn
+                label: Prix d'achat
+            -   field: custom_pa_id_fourn
             -   field: buy_price_ht
+                label: Prix d'achat exceptionnel HT
     
     activate:
         rows:

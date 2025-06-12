@@ -444,6 +444,7 @@ lists:
             type: 
             date: 
             desc: 
+            qty: 
             total: 
             status:  
             commissions:

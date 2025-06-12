@@ -83,7 +83,7 @@ class FixeTabs_bimpmsg extends FixeTabs_module {
     function displayHead() {
         $html = '';
         $html .= '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimpmsg/views/css/notesMsg.css"/>';
-        $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpmsg/views/js/notesMsg.js"></script>';
+//        $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpmsg/views/js/notesMsg.js"></script>'; // fichier vide
         return $html;
     }
 }

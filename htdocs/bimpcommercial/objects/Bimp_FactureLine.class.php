@@ -954,12 +954,12 @@ class Bimp_FactureLine extends ObjectLine
 							'equipments'      => $equipments,
 							'serials'         => implode("\n", $serials)
 						), true, $reval_errors);
+					}
 
-						if (count($reval_errors)) {
-							$errors[] = BimpTools::getMsgFromArray($reval_errors, 'Ligne n° ' . $this->getData('position') . ' : échec de la création d\'une nouvelle revalorisation de type "' . BimpRevalorisation::$types[$type_ra]) . '"' . ($ra_label ? ' (remise arrière "' . $ra_label . '")' : '');
-						} else {
-							$infos[] = 'Ligne n° ' . $this->getData('position') . ' recréation complète de la revalorisation de type "' . BimpRevalorisation::$types[$type_ra] . '" - Montant total : ' . $ra_amount;
-						}
+					if (count($reval_errors)) {
+						$errors[] = BimpTools::getMsgFromArray($reval_errors, 'Ligne n° ' . $this->getData('position') . ' : échec de la création d\'une nouvelle revalorisation de type "' . BimpRevalorisation::$types[$type_ra]) . '"' . ($ra_label ? ' (remise arrière "' . $ra_label . '")' : '');
+					} else {
+						$infos[] = 'Ligne n° ' . $this->getData('position') . ' recréation complète de la revalorisation de type "' . BimpRevalorisation::$types[$type_ra] . '" - Montant total : ' . $ra_amount;
 					}
 				} else {
 					$diff = $ra_amount - $tot_reval;

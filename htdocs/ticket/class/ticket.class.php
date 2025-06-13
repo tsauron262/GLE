@@ -421,7 +421,10 @@ class Ticket extends CommonObject
 
 		if (isset($this->message)) {
 			$this->message = trim($this->message);
-			if (dol_strlen($this->message) > 65000) {
+			/*moddrsi*/
+			if (dol_strlen($this->message) > 100000) {
+//			if (dol_strlen($this->message) > 65000) {
+			/*fmoddrsi*/
 				$this->errors[] = 'ErrorFieldTooLong';
 				dol_syslog(get_class($this).'::create error -1 message too long', LOG_ERR);
 				$result = -1;

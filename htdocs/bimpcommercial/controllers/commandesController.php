@@ -251,7 +251,7 @@ class commandesController extends BimpController
             'ajax_callback' => $line_instance->getJsLoadCustomContent('renderPeriodsList', '$(\'#achat_periods_tab .nav_tab_ajax_result\')', array('achat', $params['id_client'], $params['id_product'], $params['id_fourn']), array('button' => ''))
         );
 
-        $html .= BimpRender::renderNavTabs($tabs, 'product_periodicity_view_tab', array('niveau3' => $isN3));
+        $html .= BimpRender::renderNavTabs($tabs, 'product_periodicity_view_tab');
 
         return $html;
     }

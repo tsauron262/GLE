@@ -68,6 +68,7 @@ class Bimp_ActionComm_ExtEntity extends Bimp_ActionComm {
 		}
 
 		$errors =  parent::create($warnings, $force_create);
+
 		if (!$errors) {
 			$id = $this->getData('fk_soc');
 			$fk_action = $this->getData('fk_action');
@@ -87,6 +88,8 @@ class Bimp_ActionComm_ExtEntity extends Bimp_ActionComm {
 				}
 			}
 		}
+
+		return $errors;
 	}
 
 	public function onSave(&$errors = [], &$warnings = [])

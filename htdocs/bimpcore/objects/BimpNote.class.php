@@ -818,7 +818,7 @@ class BimpNote extends BimpObject
 		if ($parent && is_a($parent, 'Bimp_Ticket')) {
 			$side = ($this->getData('type_author') == self::BN_AUTHOR_SOC || $this->getData('type_author') == self::BN_AUTHOR_FREE) ? "left" : "right";
 		} else {
-			$side = ($this->isUserDest() ? "left" : ($this->isUserAuthor() ? "right" : ""));
+			$side = ($this->isUserAuthor() ? "right" : "left");
 		}
 
 		$buttons = '';
@@ -868,50 +868,6 @@ class BimpNote extends BimpObject
 		$html .= '</div>';
 		$html .= '</div>';
 
-		return $html;
-	}
-
-	public function displayChatMsg_old($style = '', $checkview = false)
-	{
-		global $user;
-		$html = "";
-
-		$author = $this->displayAuthor(false, true);
-
-		$parent = $this->getParentInstance();
-		if ($parent && is_a($parent, 'Bimp_Ticket')) {
-			$position = ($this->getData('type_author') == self::BN_AUTHOR_SOC || $this->getData('type_author') == self::BN_AUTHOR_FREE) ? "start" : "end";
-		} else {
-			$position = ($this->isUserDest() ? "start" : ($this->isUserAuthor() ? "end" : ""));
-		}
-
-		$html .= '<div class="d-flex justify-content-' . $position . ($style == "petit" ? ' petit' : '') . ' mb-4">';
-
-		$html .= BimpTools::getBadge($this->getInitiales($author), ($style == "petit" ? '35' : '55'), ($this->getData('type_author') == self::BN_AUTHOR_USER ? 'info' : 'warnings'), $author);
-
-		$html .= '<div class="msg_cotainer">' . $this->displayData("content");
-		if ($style != "petit" && $this->getData('user_create') != $user->id) {
-			$html .= '<span class="rowButton bs-popover"><i class="fas fa-share link" onclick="' . $this->getJsRepondre() . '"></i></span>';
-		}
-		if ($style != "petit" && $this->isActionAllowed('setAsViewed') && $this->canSetAction('setAsViewed')) {
-			$html .= '<span class="rowButton bs-popover"><i class="far fa5-envelope-open" onclick="' . $this->getJsActionOnclick('setAsViewed') . '"></i></span>';
-		}
-
-		$html .= '<span class="msg_time">' . dol_print_date($this->db->db->jdate($this->getData("date_create")), "%d/%m/%y %H:%M:%S") . '</span>
-                                                                </div>';
-		if ($this->getData('type_dest') != self::BN_DEST_NO) {
-			$dest = $this->displayDestinataire(false, true);
-			if ($dest != "") {
-				$html .= BimpTools::getBadge($this->getInitiales($dest), ($style == "petit" ? '28' : '45'), ($this->getData('type_dest') == self::BN_DEST_USER ? 'info' : 'warnings'), $dest);
-			}
-		}
-		$html .= "";
-
-		$html .= '</div>';
-
-		if ($checkview && !(int) $this->getData('viewed') && $this->isUserDest()) {
-			$this->updateField('viewed', 1);
-		}
 		return $html;
 	}
 

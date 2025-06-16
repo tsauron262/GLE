@@ -2950,7 +2950,7 @@ class BimpCache
 						'token'                  => $centre->getData('token'),        // 11
 						'id_group'               => $centre->getData('id_group'),
 						'infos'                  => "",
-						'rdv_alllowed'           => $centre->getData('rdv_allowed', 1)
+						'rdv_alllowed'           => (int) $centre->getData('rdv_allowed')
 					);
 				}
 			} else {

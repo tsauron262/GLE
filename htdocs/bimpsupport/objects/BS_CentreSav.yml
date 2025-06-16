@@ -86,6 +86,11 @@ fields:
     warning:
         label: Warning
         type: text
+        
+    rdv_alllowed: 
+        label: RDV SAV autorisés
+        type: bool
+        default_value: 1
 
 lists:
     default:
@@ -118,6 +123,8 @@ lists:
             tel:
             active:
                 edit: 1
+            rdv_alllowed: 
+                edit: 1
 
 fields_tables:
     infos:
@@ -146,6 +153,9 @@ fields_tables:
                 field: tel
             active:
                 field: active
+                edit: 1
+            rdv_alllowed: 
+                field: rdv_alllowed
                 edit: 1
             token:
                 field: token

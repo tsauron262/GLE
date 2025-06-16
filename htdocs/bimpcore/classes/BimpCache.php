@@ -2950,7 +2950,7 @@ class BimpCache
 						'token'                  => $centre->getData('token'),        // 11
 						'id_group'               => $centre->getData('id_group'),
 						'infos'                  => "",
-						'rdv_allowed'           => (int) $centre->getData('rdv_allowed')
+						'rdv_allowed'            => (int) $centre->getData('rdv_allowed')
 					);
 				}
 			} else {
@@ -2975,7 +2975,7 @@ class BimpCache
 						'token'                  => $centre[11],
 						'id_group'               => $centre['idGroup'],
 						'infos'                  => (isset($centre[12]) ? $centre[12] : 1),
-						'rdv_allowed'           => 1
+						'rdv_allowed'            => 1
 					);
 				}
 			}
@@ -2986,12 +2986,14 @@ class BimpCache
 
 	public static function getCentresArray($activ_only = false, $label_key = 'label', $include_empty = true, $rdv_allowed_only = false)
 	{
-		global $user;
-		
 		$cache_key = 'centres_sav_array';
 
 		if ($activ_only) {
 			$cache_key .= '_active_only';
+		}
+
+		if ($rdv_allowed_only) {
+			$cache_key .= '_rdv_only';
 		}
 
 		if (!isset(self::$cache[$cache_key])) {
@@ -3008,11 +3010,6 @@ class BimpCache
 
 				self::$cache[$cache_key][$code] = $centre[$label_key];
 			}
-		}
-		
-		if ($user->login == 'f.martinez') {
-			echo '<pre>' . print_r(self::$cache[$cache_key], 1) . '</pre>';
-			exit;
 		}
 
 		return self::getCacheArray($cache_key, $include_empty, '', '');

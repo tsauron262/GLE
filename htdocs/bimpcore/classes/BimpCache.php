@@ -2986,6 +2986,8 @@ class BimpCache
 
 	public static function getCentresArray($activ_only = false, $label_key = 'label', $include_empty = true, $rdv_allowed_only = false)
 	{
+		global $user;
+		
 		$cache_key = 'centres_sav_array';
 
 		if ($activ_only) {
@@ -3006,6 +3008,11 @@ class BimpCache
 
 				self::$cache[$cache_key][$code] = $centre[$label_key];
 			}
+		}
+		
+		if ($user->login == 'f.martinez') {
+			echo '<pre>' . print_r(self::$cache[$cache_key], 1) . '</pre>';
+			exit;
 		}
 
 		return self::getCacheArray($cache_key, $include_empty, '', '');

@@ -46,9 +46,11 @@ if ($lock_msg) {
 				$prev_pull_infos = json_decode(file_get_contents($pull_infos_file), 1);
 				if (isset($prev_pull_infos['idx'])) {
 					$pull_idx = (int) $prev_pull_infos['idx'] + 1;
-					echo '<br/>Pull idx : ' . $pull_idx . '<br/>';
 				}
+			} else {
+				echo '<br/>PAS DE PULL INFOS FILE<br/>';
 			}
+			echo '<br/>Pull idx : ' . $pull_idx . '<br/>';
 		} else {
 			echo '<br/>**********<br/>/!\ Dossier bimpressources absent <br/>**********<br/><br/>';
 		}

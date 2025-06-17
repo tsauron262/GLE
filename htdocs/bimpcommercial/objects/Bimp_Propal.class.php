@@ -2,9 +2,9 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 
-if (BimpCore::getVersion() && BimpCore::getVersion()) {
-	if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getVersion() . '/objects/BimpComm.class.php')) {
-		require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getVersion() . '/objects/BimpComm.class.php';
+if (BimpCore::getExtendsVersion() && BimpCore::getExtendsVersion()) {
+	if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getExtendsVersion() . '/objects/BimpComm.class.php')) {
+		require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getExtendsVersion() . '/objects/BimpComm.class.php';
 	}
 }
 

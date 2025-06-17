@@ -31,32 +31,26 @@ if (!$user->admin) {
 }
 
 $pull_infos_file = DOL_DOCUMENT_ROOT . '/bimpressources/pull_infos.json';
-$pull_idx = 0;
-
 $pull_info = json_decode(file_get_contents($pull_infos_file), true);
-if (isset($pull_info['idx'])) {
-	$pull_idx = (int) $pull_info['idx'];
-} else {
-	echo 'PAS DE PULL INFOS<br/>';
+
+echo 'INFOS PULL : <pre>' . print_r($pull_info, 1) . '</pre>';
+
+if (!empty($pull_info)) {
+	if (!$pull_info['end']) {
+		echo '<br/>Forçage fin de pull : ';
+		$pull_info['end'] = date('Y-m-d H:i:s');
+		if (file_put_contents($pull_infos_file, json_encode($pull_info))) {
+			echo 'OK';
+		} else {
+			echo 'FAIL';
+		}
+		echo '<br/><br/>';
+	}
 }
 
-$pull_idx++;
-echo '<br/>Pull idx : ' . $pull_idx . '<br/>';
+$no_erp_updates = false;
+BimpCore::checkErpUpdates(true);
 
-$pull_info = array(
-	'idx'   => $pull_idx,
-	'start' => date('Y-m-d H:i:s'),
-	'end'   => ''
-);
-
-echo 'NEW PULL INFOS<pre>' . print_r($pull_info, 1) . '</pre>';
-if (file_put_contents($pull_infos_file, json_encode($pull_info))) {
-	echo 'OK';
-} else {
-	echo 'FAIL';
-}
-
-echo '<br/>FIN';
 echo '</body></html>';
 
 //llxFooter();

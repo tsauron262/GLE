@@ -214,10 +214,10 @@ abstract class BimpAPI
 				}
 			}
 
-			if (BimpCore::getVersion()) {
-				if (file_exists(DOL_DOCUMENT_ROOT . '/bimpapi/extends/version/' . BimpCore::getVersion() . '/classes/apis/' . $api_class . '.php')) {
+			if (BimpCore::getExtendsVersion()) {
+				if (file_exists(DOL_DOCUMENT_ROOT . '/bimpapi/extends/version/' . BimpCore::getExtendsVersion() . '/classes/apis/' . $api_class . '.php')) {
 					$final_class = $api_class . '_ExtVersion';
-					require_once DOL_DOCUMENT_ROOT . '/bimpapi/extends/version/' . BimpCore::getVersion() . '/classes/apis/' . $api_class . '.php';
+					require_once DOL_DOCUMENT_ROOT . '/bimpapi/extends/version/' . BimpCore::getExtendsVersion() . '/classes/apis/' . $api_class . '.php';
 				}
 			}
 

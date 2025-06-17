@@ -99,4 +99,4 @@ phpstan_custom.neon
 !/htdocs/synopsiscaldav/caldav/vendor/
 /htdocs/bimpcore/site.html
 /htdocs/bimpflo/
-#/htdocs/bimpressources/pull_infos.json
+/htdocs/bimpressources/pull_infos.json

@@ -955,6 +955,9 @@ class BimpCore
 			}
 
 			if (!count($errors)) {
+				if ($debug_mode) {
+					sleep(10); // pour tests à suppr.
+				}
 				$tbdb = BimpCache::getBdb(); // Avec transactions
 
 				// Pour chaque type de mise à jour, on actualise les infos en base pour vérifier qu'un autre utilisateur n'a pas pris le lead (via token)

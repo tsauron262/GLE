@@ -1085,6 +1085,10 @@ class BimpCore
 						} else {
 							$global_infos['end'] = date('Y-m-d H:i:s');
 							upUpdatesInfos($bdb, $errors, $global_infos);
+
+							BimpCore::addLog('Maj globale effectuée avec succès', 1, 'maj', null, array(
+								'infos' => $global_infos
+							), true);
 						}
 					} elseif ($debug_mode) {
 						echo 'Màj globale : token invalide.<br/>';
@@ -1155,6 +1159,10 @@ class BimpCore
 						} else {
 							$version_infos['end'] = date('Y-m-d H:i:s');
 							upUpdatesInfos($bdb, $errors, $version_infos, 'version', $ext_version);
+
+							BimpCore::addLog('Maj version effectuée avec succès', 1, 'maj', null, array(
+								'infos' => $version_infos
+							), true);
 						}
 					} elseif ($debug_mode) {
 						echo 'Màj version : token invalide.<br/>';
@@ -1226,6 +1234,10 @@ class BimpCore
 						} else {
 							$entity_infos['end'] = date('Y-m-d H:i:s');
 							upUpdatesInfos($bdb, $errors, $entity_infos, 'entity', $ext_entity);
+
+							BimpCore::addLog('Maj entité effectuée avec succès', 1, 'maj', null, array(
+								'infos' => $entity_infos
+							), true);
 						}
 					}
 				}

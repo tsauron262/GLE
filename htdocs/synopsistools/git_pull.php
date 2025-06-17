@@ -37,7 +37,7 @@ if ($lock_msg) {
 	echo '<form><input type="hidden" name="go" value="1"/><input type="text" name="branche" value="' . $branche . '"/><br/><input type="submit" value="Go"/></form>';
 
 	if ($ok && $branche != '') {
-		$ressources_dir = DOL_DOCUMENT_ROOT . '/bimpressources/';
+		$ressources_dir = __DIR__ . '/../bimpressources/';
 		$pull_infos_file = $ressources_dir . 'pull_infos.json';
 
 		$pull_idx = 1;

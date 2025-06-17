@@ -82,7 +82,7 @@ if ($lock_msg) {
 		//);
 
 		foreach ($tabHook as $hook) {
-			$dir = DOL_DOCUMENT_ROOT . '/synopsistools/git_hook/' . $hook['url'];
+			$dir = __DIR__ . '/synopsistools/git_hook/' . $hook['url'];
 			echo '<textarea style="width: 780px; height: 380px">';
 			$ch = curl_init($hook['url']);
 			$file_name = PATH_TMP . '/secret.json';

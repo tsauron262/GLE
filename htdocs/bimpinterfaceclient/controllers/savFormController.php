@@ -849,7 +849,7 @@ class savFormController extends BimpPublicController
                 }
             }
         } else {
-            $centres = BimpCache::getCentresArray(true, 'label', true);
+            $centres = BimpCache::getCentresArray(true, 'label', true, true);
             asort($centres);
             $html .= BimpInput::renderInput('select', 'sav_centre', '', array('options' => $centres, 'extra_class' => 'required'));
         }

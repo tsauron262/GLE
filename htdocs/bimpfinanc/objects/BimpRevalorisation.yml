@@ -10,151 +10,151 @@ parent_id_property: id_facture
 
 list_page_url:
     controller: index
-    url_params: 
+    url_params:
         tab: revalorisations
-    
+
 header_list_name: default
-header_btn: 
+header_btn:
     callback: getActionsButtons
 
-labels: 
+labels:
     name: Revalorisation
     is_female: 1
 
-objects: 
-    facture_line: 
+objects:
+    facture_line:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcommercial
                 name: Bimp_FactureLine
-            id_object: 
+            id_object:
                 field_value: id_facture_line
-                
-    user_processed: 
+    
+    user_processed:
         extends: user
-        instance: 
-            id_object: 
+        instance:
+            id_object:
                 field_value: id_user_processed
-                
-    user_commission: 
+    
+    user_commission:
         extends: commission
-        instance: 
-            id_object: 
+        instance:
+            id_object:
                 field_value: id_user_commission
-                
+    
     commission_apporteur:
         relation: hasOne
         delete: 0
         instance:
-            bimp_object: 
+            bimp_object:
                 module: bimpfinanc
                 name: Bimp_CommissionApporteur
-            id_object: 
+            id_object:
                 field_value: id_commission_apporteur
-                
-    entrepot_commission: 
+    
+    entrepot_commission:
         extends: commission
-        instance: 
-            id_object: 
+        instance:
+            id_object:
                 field_value: id_entrepot_commission
-                                    
-fields: 
-    id_facture: 
+
+fields:
+    id_facture:
         label: Facture
         type: id_object
         object: facture
-        input: 
+        input:
             card: light
         required: 1
-        
+    
     id_facture_line:
         label: Ligne de facture
         type: id_object
         object: facture_line
-        input: 
+        input:
             type: select
-            options: 
+            options:
                 array: factureLines
-        display_if: 
+        display_if:
             field_name: id_facture
             hide_values: 0
         depends_on: id_facture
         required: 1
-
-    id_user_commission: 
+    
+    id_user_commission:
         label: Commission utilisateur
         type: id_object
         object: user_commission
         default_value: 0
-
-    id_commission_apporteur: 
+    
+    id_commission_apporteur:
         label: Commission apporteur
         type: id_object
         object: commission_apporteur
         default_value: 0
-        
-    id_entrepot_commission: 
+    
+    id_entrepot_commission:
         label: Commission entrepôt
         type: id_object
         object: entrepot_commission
         default_value: 0
     
-    type: 
+    type:
         label: Type
-        values: 
+        values:
             array: types
         required: 1
-            
-    date: 
+    
+    date:
         label: Date
         type: date
         required: 1
-        
-    amount: 
+    
+    amount:
         label: Montant unitaire
-        input: 
+        input:
             help: Indiquez le montant unitaire à soustraire du prix d'achat.</br>(Valeur négative si le prix d'achat doit être augmenté).
         type: money
         unsigned: 0
         required: 1
-        
-    qty: 
+    
+    qty:
         label: Qté
         type: qty
         decimals: 4
-        default_value: 
+        default_value:
             callback: getDefaultQty
-        
-    status: 
+    
+    status:
         label: Statut
         type: int
-        values: 
+        values:
             array: status_list
         default_value: 0
-        
-    date_processed: 
+    
+    date_processed:
         label: traitée le
         type: date
-        
-    id_user_processed: 
+    
+    id_user_processed:
         label: Traitée par
         type: id_object
         object: user_processed
-        
-    note: 
+    
+    note:
         label: Note
         type: text
-        input: 
+        input:
             rows: 1
             auto_expand: 1
         no_strip_tags: 1
-            
+    
     serial:
         label: N° de série
         type: text
-        
+    
     equipments:
         label: Equipements
         type: items_list
@@ -169,196 +169,196 @@ fields:
                 field_value: qty
             items:
                 callback: getAvailableEquipmentsArray
-                
-forms: 
-    default: 
-        rows: 
-            - field: id_facture
-              show: 
-                  callback: isNotLoaded
-            - field: id_facture_line
-              show: 
-                  callback: isNotLoaded
-            - field: type
-            - field: date
-            - field: amount
-              label: Différence unitaire à corriger
-            - field: qty
-            - field: note
-            - field: serial
-            
+
+forms:
+    default:
+        rows:
+            -   field: id_facture
+                show:
+                    callback: isNotLoaded
+            -   field: id_facture_line
+                show:
+                    callback: isNotLoaded
+            -   field: type
+            -   field: date
+            -   field: amount
+                label: Différence unitaire à corriger
+            -   field: qty
+            -   field: note
+            -   field: serial
+    
     add_global:
         title: Ajouter une revalorisation sur la globalité de la facture
-        rows: 
-            - field: id_facture
-              show: 
-                  callback: isNotLoaded
-            - field: id_facture_line
-              hidden: 1
-            - field: type
-            - field: date
-            - field: amount
-              label: Différence unitaire à corriger
-            - field: note
-            - custom: 1
-              hidden: 1
-              input_name: global
-              input: 
-                  type: hidden
-              value: 1
-        
-    add_to_commission: 
+        rows:
+            -   field: id_facture
+                show:
+                    callback: isNotLoaded
+            -   field: id_facture_line
+                hidden: 1
+            -   field: type
+            -   field: date
+            -   field: amount
+                label: Différence unitaire à corriger
+            -   field: note
+            -   custom: 1
+                hidden: 1
+                input_name: global
+                input:
+                    type: hidden
+                value: 1
+    
+    add_to_commission:
         title: Ajout à une commission
-        rows:       
-            - custom: 1
-              label: Commission
-              input_name: id_commission
-              data_type: id
-              required: 1
-              input: 
-                  type: select
-                  options: 
-                      array: draftCommission
-                      
+        rows:
+            -   custom: 1
+                label: Commission
+                input_name: id_commission
+                data_type: id
+                required: 1
+                input:
+                    type: select
+                    options:
+                        array: draftCommission
+    
     setSerial:
         title: Saisie du numéro de série
-        rows:       
-            - custom: 1
-              label: Serial
-              input_name: serial
-              data_type: text
-              required: 1
-              input: 
-                  type: text
-                  
-    set_equipments: 
+        rows:
+            -   custom: 1
+                label: Serial
+                input_name: serial
+                data_type: text
+                required: 1
+                input:
+                    type: text
+    
+    set_equipments:
         title: Attribution des équipments
-        rows: 
-            - field: equipments
-                  
-fields_tables: 
-    infos: 
+        rows:
+            -   field: equipments
+
+fields_tables:
+    infos:
         title: Informations
         icon: fas_info-circle
-        rows: 
-            - field: type
-            - field: date
-            - field: amount
-            - field: qty
-              edit: 1
-            - label: Total
-              value: 
-                  callback: displayTotal
-            - field: status
-            - field: note
-            - field: serial
-            - field: id_user_commission
-              display: nom_url
-              show: 
-                  field_value: id_user_commission
-            - field: id_entrepot_commission
-              display: nom_url
-              show: 
-                  field_value: id_entrepot_commission
-            - field: id_commission_apporteur
-              show: 
-                  field_value: id_commission_apporteur
-            
-    elements: 
+        rows:
+            -   field: type
+            -   field: date
+            -   field: amount
+            -   field: qty
+                edit: 1
+            -   label: Total
+                value:
+                    callback: displayTotal
+            -   field: status
+            -   field: note
+            -   field: serial
+            -   field: id_user_commission
+                display: nom_url
+                show:
+                    field_value: id_user_commission
+            -   field: id_entrepot_commission
+                display: nom_url
+                show:
+                    field_value: id_entrepot_commission
+            -   field: id_commission_apporteur
+                show:
+                    field_value: id_commission_apporteur
+    
+    elements:
         title: Eléments liés
         icon: fas_link
-        rows: 
-            - field: id_facture
-              display: card
-            - label: Ligne de facture
-              value: 
-                  callback: displayDesc
-            - field: equipments
-              
-views: 
-    default: 
-        rows: 
-            - cols: 
-                - type: object_header
-            - cols: 
-                  - type: fields_table
-                    col_lg: 6
-                    col_md: 6
-                    fields_table: 
-                        name: infos
-                  
-                  - type: fields_table
-                    col_lg: 6
-                    col_md: 6
-                    fields_table:
-                        name: elements
-            
-filters: 
-    id_product: 
+        rows:
+            -   field: id_facture
+                display: card
+            -   label: Ligne de facture
+                value:
+                    callback: displayDesc
+            -   field: equipments
+
+views:
+    default:
+        rows:
+            -   cols:
+                    -   type: object_header
+            -   cols:
+                    -   type: fields_table
+                        col_lg: 6
+                        col_md: 6
+                        fields_table:
+                            name: infos
+                    
+                    -   type: fields_table
+                        col_lg: 6
+                        col_md: 6
+                        fields_table:
+                            name: elements
+
+filters:
+    id_product:
         label: Produit
         object: product
         data_type: id_object
         type: value
-        input: 
-              type: search_product
-        display: 
-          nom_url_libelle: 
-              type: callback
-              method: displayProduct
-                
-filters_panels: 
-    default: 
-        filters: 
+        input:
+            type: search_product
+        display:
+            nom_url_libelle:
+                type: callback
+                method: displayProduct
+
+filters_panels:
+    default:
+        filters:
             status:
             type:
             date:
             amount:
             facture:ef_type:
             facture:entrepot:
-            id_product: 
-            
-lists_cols: 
-    commercial: 
+            id_product:
+
+lists_cols:
+    commercial:
         label: Commercial facture
-        value: 
-            callback: 
+        value:
+            callback:
                 method: displayCommercial
                 object: facture
-        search: 
-            input: 
+        search:
+            input:
                 type: search_user
-    desc: 
+    desc:
         label: Désignation
-        value: 
+        value:
             callback: displayDesc
-    qty: 
+    qty:
         edit: 1
-    total: 
+    total:
         label: Total
-        value: 
+        value:
             callback: displayTotal
-    commissions: 
+    commissions:
         label: Commissions
-        value: 
+        value:
             callback: displayCommissions
-    
-lists: 
-    default: 
+
+lists:
+    default:
         title: Liste des revalorisations
         checkboxes: 1
         configurable: 1
         bulk_actions:
-            - label: supprimer les revalorisations sélectionnées
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
-            - label: Valider les revalorisations sélectionnées
-              icon: fas_trash-alt
-              onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'1'}, '', 'Valider les revalorisations', true)
-            - label: Refuser les revalorisations sélectionnées
-              icon: fas_trash-alt
-              onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'2'}, '', 'Refuser les revalorisations', true)
-#        list_filters: 
-#            callback: getListFilters
+            -   label: supprimer les revalorisations sélectionnées
+                icon: fas_trash-alt
+                onclick: deleteSelectedObjects('list_id', $(this))
+            -   label: Valider les revalorisations sélectionnées
+                icon: fas_trash-alt
+                onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'1'}, '', 'Valider les revalorisations', true)
+            -   label: Refuser les revalorisations sélectionnées
+                icon: fas_trash-alt
+                onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'2'}, '', 'Refuser les revalorisations', true)
+        #        list_filters: 
+        #            callback: getListFilters
         filters_panel: default
         sort_field: id
         sort_way: desc
@@ -369,56 +369,56 @@ lists:
         edit_btn: 1
         edit_form: default
         delete_btn: 1
-        extra_btn: 
+        extra_btn:
             callback: getActionsButtons
-        cols: 
-            id_facture: 
-            type: 
-            commercial: 
-            date: 
-            desc: 
-            amount: 
-            qty: 
+        cols:
+            id_facture:
+            type:
+            commercial:
+            date:
+            desc:
+            amount:
+            qty:
             total:
-            status: 
-            commissions: 
-            equipments: 
-            serial: 
-        
-    commission: 
+            status:
+            commissions:
+            equipments:
+            serial:
+    
+    commission:
         configurable: 1
         enable_search: 0
         pagination: 1
         n: 20
         sort_field: id
         sort_way: asc
-        extra_btn: 
-            callback: 
+        extra_btn:
+            callback:
                 method: getCommissionListButtons
         modal_view: default
-        cols: 
-            id_facture: 
-            type: 
-            date: 
-            desc: 
-            total: 
-            status: 
-                
-    user_commission: 
+        cols:
+            id_facture:
+            type:
+            date:
+            desc:
+            total:
+            status:
+    
+    user_commission:
         extends: commission
-        extra_btn: 
-            callback: 
-                params: 
+        extra_btn:
+            callback:
+                params:
                     - 1
-                    
-    entrepot_commission: 
+    
+    entrepot_commission:
         extends: commission
-        extra_btn: 
-            callback: 
-                params: 
+        extra_btn:
+            callback:
+                params:
                     - 2
-                
-    facture: 
+    
+    facture:
         objects_change_reload: Bimp_Facture,Bimp_FactureLine
         pagination: 1
         n: 20
@@ -426,7 +426,7 @@ lists:
         sort_way: asc
         add_form_name: add_global
         add_btn: 1
-        extra_btn: 
+        extra_btn:
             callback: getActionsButtons
         edit_btn: 1
         edit_form: default
@@ -434,19 +434,22 @@ lists:
         checkboxes: 1
         delete_btn: 1
         bulk_actions:
-            - label: Valider les revalorisations sélectionnées
-              icon: fas_check
-              onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'1'}, '', 'Valider les revalorisations', true)
-            - label: Refuser les revalorisations sélectionnées
-              icon: fas_times
-              onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'2'}, '', 'Refuser les revalorisations', true)
-        cols: 
-            type: 
-            date: 
-            desc: 
-            qty: 
-            total: 
-            status:  
+            -   label: Supprimer les revalorisations sélectionnées
+                icon: fas_trash-alt
+                onclick: deleteSelectedObjects('list_id', $(this))
+            -   label: Valider les revalorisations sélectionnées
+                icon: fas_check
+                onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'1'}, '', 'Valider les revalorisations', true)
+            -   label: Refuser les revalorisations sélectionnées
+                icon: fas_times
+                onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'2'}, '', 'Refuser les revalorisations', true)
+        cols:
+            type:
+            date:
+            desc:
+            qty:
+            total:
+            status:
             commissions:
-            equipments: 
+            equipments:
             serial: 

@@ -725,7 +725,7 @@ function setCommonEvents($container) {
     $container.find('a[data-toggle="tab"]').each(function () {
         if (!parseInt($(this).data('toggle_tab_event_init'))) {
             $(this).on('shown.bs.tab', function (e) {
-				console.log('pppp'+ getTabsParams()); 
+				ecrireHash(getTabsParams());
                 var target = '' + e.target;
                 var tab_id = target.replace(/^.*#(.*)$/, '$1');
 

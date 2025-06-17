@@ -1744,7 +1744,7 @@ class Bimp_User extends BimpObject
 		}
 
 		if (!empty($tabs)) {
-			return BimpRender::renderNavTabs($tabs, 'entities_perms', array('niveau3' => 1));
+			return BimpRender::renderNavTabs($tabs, 'entities_perms');
 		}
 
 		return '';

@@ -194,6 +194,10 @@ class BimpRevalorisation extends BimpObject
 
 	public function isDeletable($force_delete = false, &$errors = array())
 	{
+		if ($force_delete) {
+			return 1;
+		}
+
 		if ((int) $this->getData('status') === 1) {
 			return 0;
 		}

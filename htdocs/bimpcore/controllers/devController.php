@@ -91,7 +91,7 @@ class devController extends BimpController
 			$html .= '</a>';
 		}
 
-		if ((int) BimpCore::getConf('use_erp_updates_v2', 0)) {
+		if ((int) BimpCore::getConf('use_erp_updates_v2', null)) {
 			$html .= '<a class="btn btn-danger" href="' . DOL_URL_ROOT . '/bimpcore/maj_erp.php" target="_blank">';
 			$html .= 'DEBUG MAJ ERP' . BimpRender::renderIcon('fas_wrench', 'iconRight');
 			$html .= '</a>';

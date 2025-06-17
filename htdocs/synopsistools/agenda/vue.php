@@ -20,7 +20,7 @@ if (isset($_REQUEST['timeTranche']))
     $_REQUEST['chevauche'] = (isset($_REQUEST['chevauche']) && $_REQUEST['chevauche'] == 'on') ? 'true' : 'false';
 
 
-$timeTranche = (isset($_SESSION['paraAgenda']['timeTranche'])? $_SESSION['paraAgenda']['timeTranche'] : 30);
+$timeTranche = (isset($_SESSION['paraAgenda']['timeTranche'])? $_SESSION['paraAgenda']['timeTranche'] : 2);
 $timeTranche = (isset($_REQUEST['timeTranche'])? $_REQUEST['timeTranche'] : $timeTranche);
 
 $tabPara = getPara();

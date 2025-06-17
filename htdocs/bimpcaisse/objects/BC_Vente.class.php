@@ -2645,7 +2645,7 @@ class BC_Vente extends BimpObject
         $id_account = (int) $caisse->getData('id_account');
 
         if (!$id_account) {
-            $id_account = (int) BimpCore::getConf('id_default_bank_account');
+            $id_account = $this->getDefaultBankAccount();
         }
 
         $account = $caisse->getChildObject('account');

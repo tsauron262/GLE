@@ -593,7 +593,7 @@ function addObjectFromList(list_id, $button, $add_form_name = '', extra_data = {
 		'object_name': $list.data('object_name'),
 		'id_object': 0
 	};
-	
+
 	if (typeof(extra_data) !== 'undefined') {
 		for (var key in extra_data) {
 			data[key] = extra_data[key];
@@ -609,7 +609,7 @@ function addObjectFromList(list_id, $button, $add_form_name = '', extra_data = {
 
 	var $values_input = $list.find('input[name=' + $add_form_name + '_add_form_values]');
 	if ($values_input.length) {
-		
+
 		var values = JSON.parse($values_input.val());
 		console.log('VALUES');
 		console.log(values);
@@ -1339,9 +1339,32 @@ function loadPage($list, page, modeAppend) {
 		return;
 	}
 
+	var pageactuel = $list.find('input[name=param_p]').val();
 	$list.find('input[name=param_p]').val(page);
 
 	reloadObjectList($list.attr('id'), undefined, undefined, undefined, modeAppend, 250);
+
+	if (pageactuel !== page) {
+		var hashExistant = window.location.hash;
+		var pos = hashExistant.indexOf('&ct=');
+		if (pos > 0) {
+			var hash = hashExistant.substring(pos + 4).replaceAll('%22', '"');
+			var cts = JSON.parse(hash);
+			// console.log(cts);
+
+			Object.entries(cts).forEach(([keyList, value]) => {
+				if (keyList === $list.attr('id') && value.pa !== page) {
+					cts[keyList].pa = page;
+				}
+			});
+			var navs = getTabsParams();
+			var newHash = '';
+			Object.values(navs).forEach(value => {
+				newHash += '&' + value;
+			});
+			window.location.hash = newHash + '&ct=' + JSON.stringify(cts)
+		}
+	}
 }
 
 function deactivateSorting($list) {
@@ -1730,6 +1753,31 @@ function onListLoaded($list) {
 	}
 
 	checkListWidth($list);
+	// chargerFiltreSelonHash();
+
+	/*var hash = window.location.hash.replaceAll('#', '');
+	var elements = hash.split('&');
+	const values = Object.values(elements);
+	values.forEach(value => {
+		var parts = value.split('=');
+		if (parts[0] === 'ct') {
+			var ct = JSON.parse(decodeURIComponent(parts[1]).replaceAll('%22', '"'));
+			// console.log(parts, ct);
+			for (const [divId, params] of Object.entries(ct)) {
+				if(divId === $list.attr('id')) {
+					console.log('Liste chargée:', $list.attr('id'));
+					for (const [param, id] of Object.entries(params)) {
+						if (param === 'pa') {
+							// var $list = $('#' + divId);
+							console.log($list);
+							// loadPage($list, id);
+						}
+						console.log('Paramètre:', param, 'ID:', id, 'Div ID:', divId);
+					}
+				}
+			}
+		}
+	});*/
 }
 
 function onListRefeshed($list) {
@@ -2014,16 +2062,9 @@ function setPaginationEvents($list) {
 				});
 			}
 		}
-
-//        var $listPagination = $(this);
-//        $(window).scroll(function(){
-//            var span = $listPagination.find("span.loadIfVisible");//renvoie la position par rapport au haut de page et la gauche de la page
-//            var positionVisbleBAs = ($(window).scrollTop()+window.innerHeight);
-//            if(span.length > 0 && positionVisbleBAs > span.offset().top){
-//                $listPagination.find('.nextButtonAppend').click();
-//            }
-//        });
-
+		// console.log('$list', $list);
+		// console.log('setPaginationEvents: ' + window.location.hash + $list.attr('id') + ', p=' + p);
+		
 
 		var $next = $((this)).find('.nextButtonAppend');
 		if ($next.length) {

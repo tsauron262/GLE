@@ -3505,7 +3505,10 @@ class EmailCollector extends CommonObject
 								'subject' => $subject,
 								'header' => $header,
 								'attachments' => $attachments,
-								'new'		=> $this->isNew
+								'new'		=> $this->isNew,
+								/*moddrsi (20.0)*/
+								'cc' => $sendtocc
+								/*fmoddrsi*/
 							);
 							$reshook = $hookmanager->executeHooks('doCollectImapOneCollector', $parameters, $this, $operation['type']);
 

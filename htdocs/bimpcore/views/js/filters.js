@@ -777,6 +777,29 @@ function removeAllListFilters(filters_id) {
     } else {
         bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
     }
+	if(window.location.hash) {
+		var list_identifier = $filters.data('list_identifier');
+		
+		var hash = window.location.hash;
+		hash = hash.substring(1); // Enlever le #
+		var elements = hash.split('&');
+		var values = Object.entries(elements);
+		var ct = {};
+		var indexct = -1;
+		values.forEach(([key, value]) => {
+			var parts = value.split('=');
+			if (parts[0] === 'ct') {
+				indexct = key;
+				ct = JSON.parse(decodeURIComponent(parts[1]).replaceAll('%22', '"'));
+				delete ct[list_identifier].fl;
+			}
+		});
+		if (indexct !== -1) {
+			elements[indexct] = 'ct=' + JSON.stringify(ct).replaceAll('"', '%22');
+			hash = elements.join('&');
+			window.location.hash = hash;
+		}
+	}
 }
 
 function saveListFilters($button, filters_id, id_list_filters) {
@@ -911,16 +934,23 @@ function loadSavedFilters(filters_id, id_list_filters, full_panel_html) {
             full_panel_html = 1;
         }
 
-        if (!id_list_filters || isNaN(id_list_filters)) {
-            removeAllListFilters(filters_id);
+		if (full_panel_html) {
+			var $container = $filters.findParentByClass('listFiltersPanelContainer');
+		} else {
+			var $container = $filters.find('.load_saved_filters_container');
+		}
+
+		if (!id_list_filters || isNaN(id_list_filters)) {
+			var list_identifier = $filters.data('list_identifier');
+			removeAllListFilters(filters_id);
             return;
         }
-
-        if (full_panel_html) {
-            var $container = $filters.findParentByClass('listFiltersPanelContainer');
-        } else {
-            var $container = $filters.find('.load_saved_filters_container');
-        }
+		
+		if (typeof reportFilterHash === 'function')	{
+			if(!isNaN(id_list_filters)) {
+				reportFilterHash($container, id_list_filters);
+			}
+		}
 
         var id_filters_config = 0;
 

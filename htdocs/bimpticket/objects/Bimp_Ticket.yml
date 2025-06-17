@@ -101,7 +101,7 @@ fields:
         default_value: ''
     
     origin_email:
-        label: Adresse Email source
+        label: E-mail orgine
     
     fk_soc:
         label: Marchand
@@ -186,6 +186,12 @@ fields:
             hashtags: 1
             rows: 3
             auto_expand: 1
+    
+    emails_cc:
+        label: E-mails en copie
+        type: items_list
+        items_data_type: string
+        items_delimiter: ', '
 
 forms:
     default:
@@ -195,6 +201,7 @@ forms:
             -   field: subject
             -   field: message
             -   field: comment
+            -   field: emails_cc
     
     create:
         rows:
@@ -349,6 +356,8 @@ fields_tables:
         rows:
             -   field: type_code
             -   field: subject
+            -   field: origin_email
+            -   field: emails_cc
             -   field: comment
                 edit: 1
     
@@ -432,9 +441,12 @@ lists:
         checkboxes: 1
         filters_panel: default
         bulk_actions:
-            -   label: supprimer les tickets sélectionnés
+            -   label: Supprimer les tickets sélectionnés
                 icon: fas_trash-alt
                 onclick: deleteSelectedObjects('list_id', $(this))
+            -   label: Ignorer les tickets sélectionnés
+                icon: fas_times-circle
+                onclick: setSelectedObjectsAction($(this), 'list_id', 'ignore')
         sort_field: datec
         sort_way: desc
         n: 10
@@ -445,6 +457,8 @@ lists:
         delete_btn: 1
         page_btn: 1
         modal_view: default
+        extra_btn:
+            callback: getListsExtraButtons
         cols:
             ref:
             fk_statut:

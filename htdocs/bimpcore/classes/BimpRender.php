@@ -549,7 +549,8 @@ class BimpRender
 			foreach ($tabs as $tab) {
 				$html .= '<li role="presentation" class="' . ($tab['id'] === $active ? ' active' : '');
 				$html .= ($params['li_extra_class'] ? ' ' . $params['li_extra_class'] : '');
-				$html .= '" data-navtab_id="' . $tab['id'] . '">';
+				$html .= '" data-navtab_id="' . $tab['id'] . '"';
+				$html .= '>';
 				$html .= '<a href="#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab"';
 				if (isset($tab['ajax']) && (int) $tab['ajax']) {
 					$html .= ' data-ajax="1"';

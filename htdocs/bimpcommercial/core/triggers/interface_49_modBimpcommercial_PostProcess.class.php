@@ -13,13 +13,13 @@ class InterfacePostProcess extends BimpCommTriggers
 
         $object_name = '';
         $action_name = '';
-
+//exit(var_dump($action, $object->object_name, $object->element, $object->id));
         $bimpObject = $this->getBimpCommObject($action, $object, $object_name, $action_name, $warnings);
 
         if (BimpObject::objectLoaded($bimpObject)) {
             $obj_errors = BimpTools::getDolEventsMsgs(array('errors'), false);
             if (empty($obj_errors)) {
-                
+
                 BimpObject::loadClass('bimpalert', 'AlertProduit');
                 if (class_exists('AlertProduit')) {
                     AlertProduit::traiteAlertes($bimpObject, $action_name, $errors, $warnings);

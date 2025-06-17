@@ -3387,7 +3387,7 @@ function setInputsEvents($container) {
 				});
 
 				$input.keyup(function (e) {
-					if (e.key === 'Alt' || e.key === 'Enter') {
+					if (/*e.key === 'Alt' || */e.key === 'Enter') { // pas de alt car pertube la saisie de certains caractères (@ par ex.)  
 						e.preventDefault();
 						e.stopPropagation();
 						$btn.click();

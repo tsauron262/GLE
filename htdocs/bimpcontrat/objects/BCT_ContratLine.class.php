@@ -1519,7 +1519,7 @@ class BCT_ContratLine extends BimpObject
 					$date_fin = date('Y-m-d', strtotime($date_fin));
 				}
 
-				// Date prochaine achat :
+				// Date prochain achat :
 				$date_next_achat = $this->getDateNextAchat($check_date, $errors);
 				if (!$date_next_achat) {
 					$errors[] = 'Date de prochain achat non définie';
@@ -2882,7 +2882,7 @@ class BCT_ContratLine extends BimpObject
 			$html .= 'Nb périodes achetées: <span class="' . $class . '">' . $nb_periods_bought . ' sur ' . $nb_total_periods_achat . '</span>';
 
 			if ($nb_periods_bought < $nb_total_periods_achat) {
-				$html .= '<br/>Prochaine achat : ' . $this->displayNextAchatDate(true);
+				$html .= '<br/>Prochain achat : ' . $this->displayNextAchatDate(true);
 			}
 
 			if ($periods_data['nb_periods_never_bought'] > 0 || $periods_data['nb_periods_bought_never_fac'] > 0) {
@@ -3066,7 +3066,27 @@ class BCT_ContratLine extends BimpObject
 							$html .= '<span class="danger">Le prix d\'achat fournisseur #' . $this->getData('fk_product_fournisseur_price') . ' n\'existe plus</span>';
 						}
 					} else {
-						$html .= '<span class="danger">Aucun prix d\'achat fournisseur spécifié</span>';
+						$pa_ht = $this->getData('buy_price_ht');
+
+						if ($pa_ht) {
+							$html .= '<b>Prix d\'achat HT exceptionnel: </b>' . BimpTools::displayMoneyValue($pa_ht);
+						} else {
+							$html .= '<span class="danger">Aucun prix d\'achat spécifié</span>';
+						}
+
+						$html .= '<br/>';
+
+						$custom_pa_id_fourn = (int) $this->getData('custom_pa_id_fourn');
+						if (!$custom_pa_id_fourn) {
+							$html .= '<span class="danger">Aucun prix d\'achat spécifié</span>';
+						} else {
+							$custom_pa_fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', $custom_pa_id_fourn);
+							if (BimpObject::objectLoaded($custom_pa_fourn)) {
+								$html .= '<b>Fournisseur : </b>' . $custom_pa_fourn->getLink();
+							} else {
+								$html .= '<span class="danger">Le fournisseur #'.$custom_pa_id_fourn.' n\'existe plus</span>';
+							}
+						}
 					}
 
 					$html .= '<br/><br/>';
@@ -3288,12 +3308,12 @@ class BCT_ContratLine extends BimpObject
 	public function renderFournPriceInput()
 	{
 		if ((int) $this->getData('line_type') == self::TYPE_ABO) {
-			$fourn_prices = array(0 => '');
-
 			if ((int) $this->getData('fk_product')) {
 				BimpObject::loadClass('bimpcore', 'Bimp_Product');
 				$fourn_prices = Bimp_Product::getFournisseursPriceArray((int) $this->getData('fk_product'));
 			}
+
+			$fourn_prices[0] = 'Prix d\'achat exceptionnel';
 
 			return BimpInput::renderInput('select', 'fk_product_fournisseur_price', (int) $this->getInputValue('fk_product_fournisseur_price'), array(
 				'options' => $fourn_prices
@@ -3877,9 +3897,9 @@ class BCT_ContratLine extends BimpObject
 			$pa_ht_fourn = 0;
 
 			$id_pfp = (int) $line->getData('fk_product_fournisseur_price');
-			if (!$id_pfp) {
+			if (!$id_pfp && !$pa_ht_line) {
 				$line_errors[] = 'Aucun prix d\'achat fournisseur sélectionné pour cette ligne de contrat';
-			} else {
+			} elseif ($id_pfp) {
 				$pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_pfp);
 				if (!BimpObject::objectLoaded($pfp)) {
 					$line_errors[] = 'Le prix d\'achat fournisseur #' . $id_pfp . ' n\'existe plus';
@@ -3887,6 +3907,8 @@ class BCT_ContratLine extends BimpObject
 					$id_fourn = $pfp->getData('fk_soc');
 					$pa_ht_fourn = $pfp->getData('price');
 				}
+			} else {
+				$id_fourn = (int) $line->getData('custom_pa_id_fourn');
 			}
 
 			if ($id_fourn_filter && $id_fourn != $id_fourn_filter) {
@@ -8518,6 +8540,14 @@ class BCT_ContratLine extends BimpObject
 								$nb_periods = $duration / $fac_periodicity;
 								$this->set('qty', $qty_per_period * $nb_periods);
 							}
+						}
+					}
+
+					$achat_periodicity = (int) $this->getData('achat_periodicity');
+
+					if ($achat_periodicity) {
+						if (!(int) $this->getData('fk_product_fournisseur_price') && !(int) $this->getData('custom_pa_id_fourn')) {
+							$errors[] = 'Aucun fournisseur sélectionné pour le prix d\'achat exceptionnel';
 						}
 					}
 					break;

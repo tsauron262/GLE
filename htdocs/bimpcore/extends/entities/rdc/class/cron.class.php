@@ -4,6 +4,8 @@ require_once DOL_DOCUMENT_ROOT.'/bimpcore/classes/BimpCron.php';
 
 class cron extends BimpCron
 {
+	const API_BI = 2;
+
 	public function weeklyProcess()
 	{
 		$retCron = array();
@@ -99,5 +101,62 @@ class cron extends BimpCron
 			return 1;
 		}
 
+	}
+
+
+	public function dailyProcess()
+	{
+		$retCron = array();
+//		if ($this->updateMirakl() != 1) {
+//			$retCron[] = 'Erreur lors de la mise à jour des données Mirakl';
+//		}
+
+
+		if (count($retCron)) {
+			$this->output = implode("<br>", $retCron);
+			return 1;
+		}
+		$this->output = 'Tâches cron effectuées avec succès';
+		return 0;
+	}
+
+	public function updateMirakl()	{
+		$warnings = array();
+		$err = array();
+		// faire la liste des marchands à mettre à jour (Date de mise à jour Mirakl vide ou > 1 jour) et shopid > 0
+		global $db;
+		$bdd = new BimpDb($db);
+		$list = $bdd->getRows('societe', 'shopid > 0 AND (date_maj_mirakl <= DATE_SUB(NOW(), INTERVAL 1 DAY) OR date_maj_mirakl IS NULL)', 250, 'array', array('rowid'));
+		foreach ($list as $element) {
+			// on ne met à jour que les marchands
+			$socMarchand = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $element['rowid']);
+			$socMarchand->appelMiraklS20($warnings);
+			if ($warnings) {
+				$err[] = implode(",", $warnings);
+			}
+		}
+
+		if (count($err) > 0) {
+			$this->output = 'Erreur lors de la mise à jour des données Mirakl : ' . implode(', ', $err);
+			BimpCore::addlog('Erreur lors de la mise a jour Mirakl : ' . implode(', ', $err), 4);
+			return 1;
+		} else {
+			$verif = $bdd->getRows('societe', 'date_maj_mirakl >= DATE_SUB(NOW(), INTERVAL 1 DAY)', null, 'array', array('rowid'));
+			$this->output = 'Données Mirakl à jour pour ' . count($verif) . ' marchands';
+			return 0;
+		}
+	}
+
+	public function updateCaByPowerBi()
+	{
+		$warnings = array();
+		$errors = array();
+		require_once DOL_DOCUMENT_ROOT . 'bimpapi/BimpApi_Lib.php';
+		$api = BimpAPI::getApiInstance('bi');
+		//$api = BimpCache::getBimpObjectInstance('bimpapi', 'BiAPI');
+		$api->majCaWithNbDay(10, $warnings, $errors);
+
+		$this->output = 'Mise à jour du CA effectuée avec succès : ' . implode(', ', $warnings);
+		return 0;
 	}
 }

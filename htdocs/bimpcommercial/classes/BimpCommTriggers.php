@@ -12,7 +12,8 @@ abstract class BimpCommTriggers extends DolibarrTriggers
         'BILL'             => 'Bimp_Facture',
         'ORDER_SUPPLIER'   => 'Bimp_CommandeFourn',
         'BILL_SUPPLIER'    => 'Bimp_FactureFourn',
-        'PAYMENT_CUSTOMER' => 'Bimp_Paiement'
+        'PAYMENT_CUSTOMER' => 'Bimp_Paiement',
+		'commandedet'		 => 'Bimp_CommandeLine',
     );
 
     public function getBimpCommObject($action, $object, &$object_name = '', &$action_name = '', &$errors = array())
@@ -38,11 +39,11 @@ abstract class BimpCommTriggers extends DolibarrTriggers
             if (BimpObject::objectLoaded($bimpObject)) {
                 if (!$bimpObject->noFetchOnTrigger && !$forceDontFetch) { // noFetchOnTrigger : true lorsqu'on fait un create / update depuis le bimpObject => dans ce cas ne pas re-fetcher l'objet sinon écrasement des données.
                     $bimpObject->fetch((int) $object->id);
-                    
-                    // On alimente $bimpObject avec les données de $object: 
+
+                    // On alimente $bimpObject avec les données de $object:
                     $bimpObject->dol_object = $object;
                     $bimpObject->hydrateFromDolObject();
-                    
+
                     if (method_exists($bimpObject, 'checkLines')) {
                         $bimpObject->checkLines();
                     }

@@ -67,6 +67,7 @@ if (!$action) {
 		'correct_stock_facture_depuis_inventaire'	=> 'Correction des stocks des factures depuis inventaire',
 		'check_attribut_entity'						=> 'Vérifier les attributs par entité',
 		'test_divers'								=> 'Test divers',
+		'users_bdd'									=> 'List Users BDD',
 	);
 
 	$path = pathinfo(__FILE__);
@@ -664,6 +665,46 @@ VALUES
 		break;
 	case 'test_divers':
 		BimpUserMsg::envoiMsg('paiements_non_identif_auto', 'Paiements non identifiés', 'msg de test');
+		break;
+
+	case 'users_bdd':
+		$tabResult = array();
+		$req = 'select user,host from mysql.user;';
+		$sql = $db->query($req);
+		echo '<h1>'.$req.'</h1>';
+		while($ln = $db->fetch_object($sql)) {
+			$tabResult[$ln->User] = array();
+//			echo '<br/><h2>' . $ln->User . '@' . $ln->Host.'<h2>';
+			$req2 = 'show grants for "' . $ln->User . '"@"' . $ln->Host.'";';
+			$sql2 = $db->query($req2);
+			$tabResult[$ln->User][$req2] = array();
+//			echo '<h3>'.$req2.'</h3>';
+			while($ln2 = $db->fetch_array($sql2)) {
+				if((stripos($ln2[0], $db->database_name) !== false || stripos($ln2[0], 'ERP_PROD') === false) && stripos($ln2[0], 'GRANT USAGE ON') === false){
+					$priv = $ln2[0];
+					$tab = explode('password', $priv);
+					if(isset($tab[1])){
+						$priv = $tab[0].'****';
+					}
+					$tab = explode('PASSWORD', $priv);
+					if(isset($tab[1])){
+						$priv = $tab[0].'****';
+					}
+					if(stripos($priv, 'ALL PRIVILEGES') !== false){
+						$priv = '<span class="error">'.$priv.'</span>';
+					}
+					else{
+						$priv = '<span class="success">'.$priv.'</span>';
+					}
+					$tabResult[$ln->User][$req2][] = $priv;
+				}
+//					echo '<br/><h4>' . $ln2[0].'<h4>';
+			}
+			if(!count($tabResult[$ln->User][$req2]))
+				$tabResult[$ln->User][$req2][] = '<span class="success">Aucun privilège</span>';
+		}
+//		echo '<pre>'.print_r($tabResult,1).'</pre>';
+		echo BimpRender::renderRecursiveArrayContent($tabResult);
 		break;
 
 	default:

@@ -19,6 +19,7 @@ class Bimp_Ticket extends BimpDolObject
 	const STATUS_CLOSED = 8;
 	const STATUS_CANCELED = 9;
 	const STATUS_TRANSFERED = 11;
+	const STATUS_IGNORED = 12;
 
 	public static $status_list = array(
 		self::STATUS_DRAFT          => array('label' => 'Nouveau', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
@@ -30,6 +31,7 @@ class Bimp_Ticket extends BimpDolObject
 		self::STATUS_CLOSED         => array('label' => 'Terminé', 'icon' => 'fas_check', 'classes' => array('success')),
 		self::STATUS_CANCELED       => array('label' => 'Annulé', 'icon' => 'fas_times', 'classes' => array('danger')),
 		self::STATUS_TRANSFERED     => array('label' => 'Transféré', 'icon' => 'fas_sign-out-alt', 'classes' => array('important')),
+		self::STATUS_IGNORED        => array('label' => 'Ignoré', 'icon' => 'fas_times-circle', 'classes' => array('danger')),
 	);
 
 	const MAIL_TICKET_GENERAL = 'test@test.fr';
@@ -45,6 +47,7 @@ class Bimp_Ticket extends BimpDolObject
 
 		switch ($action) {
 			case 'assign':
+			case 'ignore':
 				return $user->admin || $user->rights->bimpticket->assign;
 
 			case 'newStatus':
@@ -75,6 +78,15 @@ class Bimp_Ticket extends BimpDolObject
 				if ($this->isLoaded()) {
 					if ((int) $this->getData('fk_statut') >= self::STATUS_CLOSED) {
 						$errors[] = 'Ticket déjà fermé';
+						return 0;
+					}
+				}
+				return 1;
+
+			case 'ignore':
+				if ($this->isLoaded()) {
+					if ((int) $this->getData('fk_statut') >= self::STATUS_IN_PROGRESS) {
+						$errors[] = 'Le statut actuel de ce ticket ne permet pas de l\'ignorer';
 						return 0;
 					}
 				}
@@ -114,6 +126,15 @@ class Bimp_Ticket extends BimpDolObject
 				'icon'    => 'fas_user-plus',
 				'onclick' => $this->getJsActionOnclick('assign', array(), array(
 					'form_name' => 'assign'
+				))
+			);
+		}
+		if ($this->isActionAllowed('ignore') && $this->canSetAction('ignore')) {
+			$buttons[] = array(
+				'label'   => 'Ignorer',
+				'icon'    => 'fas_times-circle',
+				'onclick' => $this->getJsActionOnclick('ignore', array(), array(
+					'confirm_msg' => 'Veuillez confirmer'
 				))
 			);
 		}
@@ -166,6 +187,25 @@ class Bimp_Ticket extends BimpDolObject
 					)
 				))
 			);
+		}
+
+		return $buttons;
+	}
+
+	public function getListsExtraButtons()
+	{
+		$buttons = array();
+
+		if ($this->isLoaded()) {
+			if ($this->isActionAllowed('ignore') && $this->canSetAction('ignore')) {
+				$buttons[] = array(
+					'label'   => 'Ignorer',
+					'icon'    => 'fas_times-circle',
+					'onclick' => $this->getJsActionOnclick('ignore', array(), array(
+						'confirm_mag' => 'Veuillez confirmer',
+					))
+				);
+			}
 		}
 
 		return $buttons;
@@ -364,6 +404,7 @@ class Bimp_Ticket extends BimpDolObject
 
 		return BimpRender::renderPanel($title, $html, '', array('type' => 'secondary'));
 	}
+
 	// Traitements :
 
 	public function checkStatus()
@@ -486,6 +527,28 @@ class Bimp_Ticket extends BimpDolObject
 		);
 	}
 
+
+	public function actionIgnore($data, &$success = '')
+	{
+		$errors = array();
+		$warnings = array();
+
+
+		if ($this->isLoaded($errors)) {
+			$success = 'Ticket ignoré';
+			$errors = $this->updateField('fk_statut', self::STATUS_IGNORED);
+
+			if (!count($errors)) {
+				$this->addObjectLog('Ticket ignoré', 'IGNORED');
+			}
+		}
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
 	public function actionNewStatus($data, &$success = '')
 	{
 		$errors = array();
@@ -581,6 +644,15 @@ class Bimp_Ticket extends BimpDolObject
 
 			if (BimpObject::objectLoaded($user)) {
 				$this->set('fk_user_update', $user->id);
+			}
+
+			$emails_cc = $this->getData('emails_cc');
+			if (!empty($emails_cc)) {
+				foreach ($emails_cc as $key => $email) {
+					if (!BimpValidate::isEmail($email)) {
+						$errors[] = 'Adresse e-mail en copie invalide : ' . $email;
+					}
+				}
 			}
 		}
 
@@ -807,14 +879,48 @@ class Bimp_Ticket extends BimpDolObject
 		return $data;
 	}
 
-	public function getMailToContacts()
+	public function getEmailDestsArray()
 	{
-		$contacts = $return = array();
-		$contacts = $this->dol_object->liste_contact(-1, 'external');
-		foreach ($contacts as $contact) {
-			$return[$contact['email']] = $contact['lastname'] . ' ' . $contact['firstname'] . ' (' . $contact['email'] . ')';
+		$return = array();
+		$client = $this->getChildObject('client');
+
+		$origin_email = $this->getData('origin_email');
+		if ($origin_email) {
+			$return[$origin_email] = 'E-mail d\'origine (' . $origin_email . ')';
 		}
-//		echo '<pre>';print_r($contacts);
+
+		if (BimpObject::objectLoaded($client) && $client->field_exists('email')) {
+			$email = $client->getData('email');
+			if ($email) { // Si l'e-mail est le même que celui d'origine, on écrase le libellé (pour avoir le nom du client)
+				$return[$email] = BimpTools::ucfirst($client->getLabel()) . ' "' . $client->getName() . '" : ' . $email;
+			}
+		}
+
+		// Liste contacts ticket :
+		$contacts_tiket = $this->dol_object->liste_contact(-1, 'external');
+		foreach ($contacts_tiket as $contact) {
+			if (!empty($contact['email']) && !isset($return[$contact['email']])) {
+				$return[$contact['email']] = $contact['libelle'] . ' : ' . $contact['firstname'] . ' ' . strtoupper($contact['lastname']) . ' (' . $contact['email'] . ')';
+			}
+		}
+
+		// Autres contacts client :
+		if (is_a($client, 'Bimp_Societe')) {
+			$contacts = BimpCache::getSocieteContactsArray($client->id, false, '', true);
+
+			if (!empty($contacts)) {
+				foreach ($contacts as $id_contact => $contact_label) {
+					$contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+					if (BimpObject::objectLoaded($contact)) {
+						$email = $contact->getData('email');
+						if ($email && !isset($return[$email])) {
+							$return[$email] = 'Contact "' . $contact_label . '" : ' . $email;
+						}
+					}
+				}
+			}
+		}
+
 		return $return;
 	}
 
@@ -831,6 +937,11 @@ class Bimp_Ticket extends BimpDolObject
 			$from = static::MAIL_TICKET_GENERAL;
 		}
 		return $from;
+	}
+
+	public function getEMailToCc()
+	{
+		return $this->getData('emails_cc');
 	}
 
 	public function getObjectMail()

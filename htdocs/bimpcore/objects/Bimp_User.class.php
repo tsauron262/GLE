@@ -1081,7 +1081,7 @@ class Bimp_User extends BimpObject
 				'content'       => $this->renderTicketsView(),
 			);
 		}
-		
+
 		$tabs[] = array(
 			'id'            => 'ldap',
 			'title'         => BimpRender::renderIcon('link', 'iconLeft') . 'LDAP',

@@ -125,7 +125,7 @@ fields:
         input: 
             type: select_mysoc_account
         default_value:
-            conf: id_default_bank_account
+            callback: getDefaultBankAccount
     centre: 
         label: Centre
         dol_extra_field: 1
@@ -699,6 +699,16 @@ forms:
               content: 
                   callback: renderCheckPaForm
 #              depends_on: type_check
+    check_ra: 
+        rows: 
+            - custom: 1
+              label: Recréer une nouvelle revalorisation en cas d'écart
+              input_name: recreate_revals
+              input: 
+                  type: toggle
+                  help: Les revalorisations actuelles seront supprimées quelque soient leurs statuts, les équipements et n° de série seront transférés vers la nouvelle revalorisation.  
+              value: 0
+              
     date_next_relance: 
         rows: 
             - field: date_next_relance

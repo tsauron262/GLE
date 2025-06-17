@@ -32,11 +32,12 @@ if (!$user->admin) {
 
 $pull_infos_file = DOL_DOCUMENT_ROOT . '/bimpressources/pull_infos.json';
 
-if (!file_exists(DOL_DOCUMENT_ROOT.'/bimpressoureces')) {
+if (!file_exists(DOL_DOCUMENT_ROOT.'/bimpressources')) {
 	echo 'BIMPRESSOURCES ABSENT<br/>';
 } else {
 	echo 'BIMPRESSOURCES PRESENT<br/>';
 }
+
 //if (file_exists($pull_infos_file)) {
 //	echo 'DEL PULL INFOS FILE<br/>';
 //	unlink($pull_infos_file);

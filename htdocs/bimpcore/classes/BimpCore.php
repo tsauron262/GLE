@@ -83,9 +83,9 @@ class BimpCore
 			global $user;
 			$use_css_v2 = ((int) self::getConf('use_css_v2'));
 
-			if ((int) self::getConf('use_public_files_external_dir') || self::getConf('use_erp_updates_v2')) {
+			if ((int) self::getConf('use_public_files_external_dir') || (int) self::getConf('use_erp_updates_v2')) {
 				if (!file_exists(DOL_DOCUMENT_ROOT . '/bimpressources')) {
-					BimpCore::addlog('Dossier "bimpressources absent', 4, 'bimpcore');
+					BimpCore::addlog('Dossier "bimpressources" absent', 4, 'bimpcore');
 					self::setConf('use_public_files_external_dir', '0', 'bimpcore', -1, true);
 					self::setConf('use_erp_updates_v2', '0', 'bimpcore', -1, true);
 				}

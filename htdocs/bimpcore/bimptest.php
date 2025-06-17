@@ -32,36 +32,41 @@ if (!$user->admin) {
 
 $pull_infos_file = DOL_DOCUMENT_ROOT . '/bimpressources/pull_infos.json';
 
+if (!file_exists(DOL_DOCUMENT_ROOT.'/bimpressoureces')) {
+	echo 'BIMPRESSOURCES ABSENT<br/>';
+} else {
+	echo 'BIMPRESSOURCES PRESENT<br/>';
+}
 //if (file_exists($pull_infos_file)) {
 //	echo 'DEL PULL INFOS FILE<br/>';
 //	unlink($pull_infos_file);
 //}
 
-echo '<br/>SIMULATION D\'UN PULL<br/><br/>';
-$pull_idx = 0;
-
-$pull_info = json_decode(file_get_contents($pull_infos_file), true);
-if (isset($pull_info['idx'])) {
-	$pull_idx = (int) $pull_info['idx'];
-} else {
-	echo 'PAS DE PULL INFOS<br/>';
-}
-
-$pull_idx++;
-echo '<br/>Pull idx : ' . $pull_idx . '<br/>';
-
-$pull_info = array(
-	'idx'   => $pull_idx,
-	'start' => date('Y-m-d H:i:s'),
-	'end'   => date('Y-m-d H:i:s')
-);
-
-echo 'NEW PULL INFOS<pre>' . print_r($pull_info, 1) . '</pre>';
-if (file_put_contents($pull_infos_file, json_encode($pull_info))) {
-	echo 'OK';
-} else {
-	echo 'FAIL';
-}
+//echo '<br/>SIMULATION D\'UN PULL<br/><br/>';
+//$pull_idx = 0;
+//
+//$pull_info = json_decode(file_get_contents($pull_infos_file), true);
+//if (isset($pull_info['idx'])) {
+//	$pull_idx = (int) $pull_info['idx'];
+//} else {
+//	echo 'PAS DE PULL INFOS<br/>';
+//}
+//
+//$pull_idx++;
+//echo '<br/>Pull idx : ' . $pull_idx . '<br/>';
+//
+//$pull_info = array(
+//	'idx'   => $pull_idx,
+//	'start' => date('Y-m-d H:i:s'),
+//	'end'   => date('Y-m-d H:i:s')
+//);
+//
+//echo 'NEW PULL INFOS<pre>' . print_r($pull_info, 1) . '</pre>';
+//if (file_put_contents($pull_infos_file, json_encode($pull_info))) {
+//	echo 'OK';
+//} else {
+//	echo 'FAIL';
+//}
 
 echo '<br/>FIN';
 echo '</body></html>';

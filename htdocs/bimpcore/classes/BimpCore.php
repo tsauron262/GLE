@@ -445,6 +445,8 @@ class BimpCore
 			return;
 		}
 
+		return; // pour test à suppr.
+
 		if (BimpTools::isSubmit('ajax')) {
 			return;
 		}

@@ -128,6 +128,7 @@ class ActionsBimpticket
 						// trouver le type de ticket selon mail de reception
 						$type_code = '';
 						foreach ($to_emails as $to_email) {
+							$to_email = strtolower($to_email);
 							if (isset($Bimp_Ticket::$mail_typeTicket[$to_email])) {
 								$type_code = $Bimp_Ticket::$mail_typeTicket[$to_email];
 								break;

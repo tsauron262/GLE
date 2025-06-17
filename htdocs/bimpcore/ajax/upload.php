@@ -24,6 +24,7 @@ if (!is_dir($dir)) {
 
 $files = array();
 foreach ($_FILES as $file) {
+	$file['name'] = time().urlencode($file['name']);
     $file_name = $user->id . '_' . $file['name'];
     if(move_uploaded_file($file['tmp_name'], DOL_DATA_ROOT . '/' . $dir . '/' . $file_name)){
         $files[] = array('fileName' => $file_name, 'uploaded'=>1, 'error'=> array(), 'url' => $url.$file_name, 'max-height'=>'200px', 'width'=>'auto', 'height'=>'150px');

@@ -45,7 +45,7 @@ params:
     use_erp_updates_v2: 
         label: Utiliser la version 2 du système de mises à jour de l'ERP
         type: bool
-        def: 0        
+        def: 1        
     send_sms: 
         label: Activer l'envoi de SMS
         type: bool

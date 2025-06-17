@@ -11,7 +11,7 @@ set_time_limit(0);
 
 ignore_user_abort(0);
 
-top_htmlhead('', 'TESTS', 0, 0, array(), array());
+top_htmlhead('', 'DEBUG MAJ ERP', 0, 0, array(), array());
 
 echo '<body style="padding: 30px">';
 
@@ -33,7 +33,7 @@ if (!$user->admin) {
 $pull_infos_file = DOL_DOCUMENT_ROOT . '/bimpressources/pull_infos.json';
 $pull_info = json_decode(file_get_contents($pull_infos_file), true);
 
-echo 'INFOS PULL : <pre>' . print_r($pull_info, 1) . '</pre>';
+//echo 'INFOS PULL : <pre>' . print_r($pull_info, 1) . '</pre>';
 
 if (!empty($pull_info)) {
 	if (!$pull_info['end']) {

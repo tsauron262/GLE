@@ -111,8 +111,8 @@ if (!defined('BIMP_LIB')) {
         }
     }
 
-    if (BimpCore::getVersion()) {
-        $dir_version = DOL_DOCUMENT_ROOT . '/bimpcore/extends/versions/' . BimpCore::getVersion() . '/';
+    if (BimpCore::getExtendsVersion()) {
+        $dir_version = DOL_DOCUMENT_ROOT . '/bimpcore/extends/versions/' . BimpCore::getExtendsVersion() . '/';
         if (file_exists($dir_version . 'classes/BimpMail.php')) {
             require_once $dir_version . 'classes/BimpMail.php';
         }

@@ -178,7 +178,7 @@ class BimpConfig
 
 			$file = DOL_DOCUMENT_ROOT . '/' . $module . ($module_dir ? '/' . $module_dir : '') . '/' . $file_name . '.yml';
 
-			$ext_version = BimpCore::getVersion();
+			$ext_version = BimpCore::getExtendsVersion();
 			$version_module_dir = '';
 			$version_file = '';
 			if ($ext_version) {

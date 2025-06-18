@@ -42,6 +42,10 @@ params:
         label: Message de vérouillage des GIT PULL
         info: Si défini, les GIT PULL sont bloqués et le message est affiché lors d'une tentative de pull.<br/>Un bouton est également affiché pour dévérouillage immédiat.
         def: ''
+    use_erp_updates_v2: 
+        label: Activer les mises à jour auto de l'ERP
+        type: bool
+        def: 1        
     send_sms: 
         label: Activer l'envoi de SMS
         type: bool

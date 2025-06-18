@@ -44,7 +44,7 @@ class BimpController
 			}
 		}
 
-		$ext_version = BimpCore::getVersion();
+		$ext_version = BimpCore::getExtendsVersion();
 		$ext_entity = BimpCore::getExtendsEntity();
 
 		// Surcharge Version:

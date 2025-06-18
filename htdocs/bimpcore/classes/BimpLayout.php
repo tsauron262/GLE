@@ -19,7 +19,7 @@ class BimpLayout
     public $main_area_html = '';
     public $help_url = '';
 
-    // Gestion Instance: 
+    // Gestion Instance:
 
     public static function getInstance()
     {
@@ -37,7 +37,7 @@ class BimpLayout
             }
 
             if (!BimpCore::isContextPublic()) {
-                if ($layout_module === 'bimpcore' && $layout_name === 'BimpLayout') { // Si le controller n'a pas défini un layout différent. 
+                if ($layout_module === 'bimpcore' && $layout_name === 'BimpLayout') { // Si le controller n'a pas défini un layout différent.
                     if ($conf->theme == "BimpTheme") {
                         $layout_module = 'bimptheme';
                         $layout_name = 'BimpThemeLayout';
@@ -57,10 +57,10 @@ class BimpLayout
                 }
             }
 
-            // Véfication des extensions: 
-            if (BimpCore::getVersion()) {
-                if (file_exists(DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/versions/' . BimpCore::getVersion() . '/classes/' . $layout_name . '.php')) {
-                    require_once DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/versions/' . BimpCore::getVersion() . '/classes/' . $layout_name . '.php';
+            // Véfication des extensions:
+            if (BimpCore::getExtendsVersion()) {
+                if (file_exists(DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/versions/' . BimpCore::getExtendsVersion() . '/classes/' . $layout_name . '.php')) {
+                    require_once DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/versions/' . BimpCore::getExtendsVersion() . '/classes/' . $layout_name . '.php';
                     $layout_class = $layout_name . '_ExtVersion';
                 }
             }
@@ -88,7 +88,7 @@ class BimpLayout
         return is_a(self::$instance, 'BimpLayout');
     }
 
-    // Gestion du contenu: 
+    // Gestion du contenu:
 
     public function addJsFile($file)
     {
@@ -143,7 +143,7 @@ class BimpLayout
                 $bimp_layout_js_vars .= $var_value;
                 $bimp_layout_js_vars .= ';' . "\n";
             }
-            
+
             if (count($this->js_local_vars)) {
                 $bimp_layout_js_vars .= "\t $(document).ready(function() {";
 //                $bimp_layout_js_vars .= "\t var bimp_storage = new BimpStorage();"; // exite déjà dans bimpcore.js
@@ -160,7 +160,7 @@ class BimpLayout
 
             $bimp_layout_js_vars .= '</script>' . "\n";
         }
-        
+
 //        $this->extra_head .= '<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\'; style-src \'self\' \'unsafe-inline\' \'unsafe-eval\';">';
     }
 
@@ -182,13 +182,13 @@ class BimpLayout
 
         echo $this->renderModals();
 
-        // Ce script doit figurer en toute fin de page (on cherche à être sûr que tout le js bimpcore est chargé): 
+        // Ce script doit figurer en toute fin de page (on cherche à être sûr que tout le js bimpcore est chargé):
         echo '<script ' . BimpTools::getScriptAttribut() . '>';
         echo '$(document).ready(function() {$(\'body\').trigger($.Event(\'bimp_ready\'));});';
         echo '</script>' . "\n\n";
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayHead()
     {
@@ -224,15 +224,15 @@ class BimpLayout
 
     public function displayRight()
     {
-        
+
     }
 
     public function displayBottom()
     {
-        
+
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderModals()
     {

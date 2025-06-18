@@ -31,9 +31,11 @@ class AlertProduit extends BimpObject
     const ACTION_VALIDATE = 'VALIDATE';
     const ACTION_UNVALIDATE = 'UNVALIDATE';
     const ACTION_DELETE = 'DELETE';
+	const  ACTION_CREATEUPDATE = 'CREATEUPDATE';
 
     public static $type_action = Array(
         self::ACTION_CREATE     => Array('label' => 'Création', 'classes' => array('info'), 'icon' => 'fas_plus'),
+        self::ACTION_CREATEUPDATE     => Array('label' => 'Création / Mise à jour', 'classes' => array('info'), 'icon' => 'fas_pencil-alt'),
         self::ACTION_VALIDATE   => Array('label' => 'Validation', 'classes' => array('success'), 'icon' => 'fas_check'),
         self::ACTION_UNVALIDATE => Array('label' => 'Dévalidation', 'classes' => array('danger'), 'icon' => 'fas_undo'),
         self::ACTION_DELETE     => Array('label' => 'Suppression', 'classes' => array('danger'), 'icon' => 'fas_trash'),
@@ -56,7 +58,7 @@ class AlertProduit extends BimpObject
 
 
         if (isset($id_type)) {
-            $alerts = BimpCache::getBimpObjectObjects('bimpalert', 'AlertProduit', array('type_piece' => $id_type, 'type_action' => $name_trigger));
+            $alerts = BimpCache::getBimpObjectObjects('bimpalert', 'AlertProduit', array('type_piece' => $id_type, array('custom' => 'type_action LIKE \'%'.$name_trigger.'%\'') /**/));
 
             foreach ($alerts as $a) {
                 $a->traiteAlerte($object, $errors, $warnings);

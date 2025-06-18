@@ -773,6 +773,9 @@ class BimpCore
 
 			if ((int) self::getConf('use_public_files_external_dir')) {
 				if (isset($pull_info['post_process']) && !(int) $pull_info['post_process']) {
+					$pull_info['post_process'] = 1;
+					file_put_contents($pull_infos_file, json_encode($pull_info, 1));
+
 					if ($debug_mode) {
 						echo '<br/>GIT PULL POST PROCESS : ';
 					}
@@ -794,9 +797,6 @@ class BimpCore
 							'Infos' => $post_process_infos
 						));;
 					}
-
-					$pull_info['post_process'] = 1;
-					file_put_contents($pull_infos_file, json_encode($pull_info, 1));
 				}
 			}
 			$errors = array();

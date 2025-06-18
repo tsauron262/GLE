@@ -13,7 +13,7 @@ class InterfacePostProcess extends BimpCommTriggers
 
         $object_name = '';
         $action_name = '';
-//exit(var_dump($action, $object->object_name, $object->element, $object->id));
+
         $bimpObject = $this->getBimpCommObject($action, $object, $object_name, $action_name, $warnings);
 
         if (BimpObject::objectLoaded($bimpObject)) {
@@ -29,6 +29,12 @@ class InterfacePostProcess extends BimpCommTriggers
                     case 'CREATE':
                         if (method_exists($bimpObject, 'onCreate')) {
                             $errors = $bimpObject->onCreate($warnings);
+                        }
+                        break;
+
+                    case 'UPDATE':
+                        if (method_exists($bimpObject, 'onUpdate')) {
+                            $errors = $bimpObject->onUpdate($warnings);
                         }
                         break;
 

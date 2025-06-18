@@ -3117,6 +3117,12 @@ class ObjectLine extends BimpObject
 				}
 			}
 
+			if (!is_a($this, 'BS_SavPropalLine')) {
+				global $user;
+				$line = $this->getChildObject('line');
+				$result = $line->call_trigger($line->element . '_UPDATE', $user);
+			}
+
 			if ($force_update) {
 				if (is_null($initial_status)) {
 					unset($object->statut);

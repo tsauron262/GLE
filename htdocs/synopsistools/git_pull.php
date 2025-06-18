@@ -56,9 +56,10 @@ if ($lock_msg) {
 		}
 
 		$pull_infos = array(
-			'idx'   => $pull_idx,
-			'start' => time(),
-			'end'   => ''
+			'idx'          => $pull_idx,
+			'start'        => time(),
+			'end'          => '',
+			'post_process' => 0
 		);
 
 		if (is_dir($ressources_dir)) {

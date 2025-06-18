@@ -769,6 +769,34 @@ class BimpCore
 				$pull_info = json_decode(file_get_contents($pull_infos_file), 1);
 			}
 
+			if ((int) self::getConf('use_public_files_external_dir')) {
+				if (!(int) $pull_info['post_process']) {
+					if ($debug_mode) {
+						echo '<br/>GIT PULL POST PROCESS : ';
+					}
+
+					$post_process_infos = '';
+					$post_process_errors = BimpCore::afterGitPullProcess(false, $post_process_infos);
+					if (count($post_process_errors)) {
+						$errors[] = BimpTools::getMsgFromArray('Erreurs GIT PULL POST PROCESS', $post_process_errors);
+
+						if ($debug_mode) {
+							echo 'Erreurs <pre>' . print_r($post_process_errors, 1) . '</pre>';
+						}
+					} elseif ($debug_mode) {
+						echo 'OK <br/>';
+						echo $post_process_infos;
+						echo '<br/><br/>';
+					} else {
+						BimpCore::addlog('GIT PULL POST PROCESS OK', 1, 'maj', null, array(
+							'Infos' => $post_process_infos
+						));;
+					}
+
+					$pull_info['post_process'] = 1;
+					file_put_contents($pull_infos_file, json_encode($pull_info, 1));
+				}
+			}
 			$errors = array();
 			$bdb = BimpCache::getBdb(true); // sans transactions
 			$ext_version = self::getExtendsVersion();

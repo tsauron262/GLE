@@ -2290,7 +2290,9 @@ class BCT_Contrat extends BimpDolObject
 							$infos .= 'Ligne #' . $id_line . ' : ';
 							$line_errors = array();
 							$lines_renouv = array();
-							$line->renouvAbonnement(array(), $lines_renouv, $line_errors);
+							$line->renouvAbonnement(array(
+								'renouv_auto' => 1
+							), $lines_renouv, $line_errors);
 
 							if (count($line_errors)) {
 								$infos .= '<span class="danger">' . BimpTools::getMsgFromArray($line_errors) . '</span>';
@@ -2488,10 +2490,10 @@ class BCT_Contrat extends BimpDolObject
 			return '';
 		}
 
-        $out = '';
-        $bdb = self::getBdb();
-        $date_lim = new DateTime();
-        $date_lim->sub(new DateInterval('P3M'));
+		$out = '';
+		$bdb = self::getBdb();
+		$date_lim = new DateTime();
+		$date_lim->sub(new DateInterval('P3M'));
 
 		$rows = $bdb->executeS(BimpTools::getSqlFullSelectQuery('facture', array('a.rowid as id_facture'), array(
 			'fk_statut'                    => 1,
@@ -2539,21 +2541,21 @@ class BCT_Contrat extends BimpDolObject
 						}
 						$msg .= '<br/><br/>Par conséquent, vous devez procéder à la désinstallation de ses licences et à la résiliation de son contrat.';
 
-                        $code = 'alerte_abonnement_unpaid';
+						$code = 'alerte_abonnement_unpaid';
 						if (!count(BimpUserMsg::envoiMsg($code, $subject, $msg))) {
-                            $out .= ' [OK]';
-                            $fac->updateField('alert_abonnement_unpaid_send', 1);
-                        } else {
-                            $out .= ' [ECHEC]';
-                        }
-                    } else {
-                        $out .= '<span class="danger">Fac #' . (int) $r['id_facture'] . ' non trouvée</span>';
-                    }
-                }
-            }
-        } else {
-            $out .= 'Erreur SQL - ' . $bdb->err();
-        }
+							$out .= ' [OK]';
+							$fac->updateField('alert_abonnement_unpaid_send', 1);
+						} else {
+							$out .= ' [ECHEC]';
+						}
+					} else {
+						$out .= '<span class="danger">Fac #' . (int) $r['id_facture'] . ' non trouvée</span>';
+					}
+				}
+			}
+		} else {
+			$out .= 'Erreur SQL - ' . $bdb->err();
+		}
 
 		return $out;
 	}

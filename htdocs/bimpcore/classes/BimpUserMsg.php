@@ -746,6 +746,12 @@ class BimpUserMsg
 			'dests'  => 'object::id_user',
 			'module' => 'bimpcore',
 			'metier' => 'metier'
+		),
+		'rechercheManquantMirakl'	=> array(
+			'label'  => 'Rapport de recherche de shops manquants dans Mirakl',
+			'dests'  => 'to::team-marketplace@rueducommerce.fr::s.conti@rueducommerce.fr::m.chapsal@rueducommerce.fr',
+			'module' => 'bimpcore',
+			'metier' => 'metier'
 		)
 
 		// todo tommy : separer mail client et mail interne :

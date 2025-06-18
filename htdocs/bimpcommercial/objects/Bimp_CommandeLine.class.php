@@ -8447,6 +8447,13 @@ class Bimp_CommandeLine extends ObjectLine
 				$commande->checkShipmentStatus();
 				$commande->checkInvoiceStatus();
 				$commande->checkLogistiqueStatus();
+
+				if (!is_a($this, 'BS_SavPropalLine')) {
+					global $user;
+					$line = $this->getChildObject('line');
+					$result = $line->call_trigger($line->element . '_UPDATE', $user);
+				}
+
 			}
 		}
 

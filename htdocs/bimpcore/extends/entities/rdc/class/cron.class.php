@@ -147,6 +147,69 @@ class cron extends BimpCron
 		}
 	}
 
+	public function rechercheManquantMirakl()
+	{
+		require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+		$api = BimpAPI::getApiInstance('mirakl');
+		if (!isset($api) || !is_object($api)) {
+			$this->output = 'Module API non actif';
+			return 1;
+		}
+
+		$step = $max = 100;
+		$shopManquants = array();
+		$errors = array();
+
+		for ($i = 0; $i < $max; $i += $step) {
+//			echo '<hr>Récupération des shops Mirakl de ' . $i . ' à ' . ($i + $step) . '<br>';
+			$ret = $api->getShopsPagination($i, $step, $errors);
+			$max = $ret['total_count'];
+			foreach ($ret['shops'] as $shop) {
+				$shopId = $shop['shop_id'];
+				// on verifie si le shop existe dans la base de données
+				$societe = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Client', array('shopid' => $shopId));
+				if (!BimpObject::objectLoaded($societe)) {
+//					echo 'Shop ID: ' . $shopId . ' - Shop Name: ' . $shopName . '<br>';
+					$shopManquants[] = array(
+						'id' => $shopId,
+						'shop_name' => $shop['shop_name'],
+						'corporate_name' => $shop['pro_details']['corporate_name'],
+						'assignees'	=> $shop['shop_assignees'] ?? array()
+					);
+				}
+			}
+		}
+
+		if (count($errors)) {
+			$this->output = 'Erreur lors de la récupération des shops Mirakl : ' . implode(', ', $errors);
+			return 1;
+		}
+
+		$code = 'rechercheManquantMirakl';
+		$sujet = 'Rapport de recherche de shops manquants dans Mirakl';
+		if (count($shopManquants) == 0) {
+			$this->output = 'Aucun shop manquant trouvé dans Mirakl';
+			$msg = 'Aucun shop manquant trouvé dans Mirakl';
+		}
+		else {
+			$this->output = 'Nombre de shops manquants trouvés dans Mirakl : ' . count($shopManquants);
+			$msg = '<p>Nombre de shops manquants trouvés dans Mirakl : <strong>' . count($shopManquants) . '</strong></p>';
+			$msg .= '<p>Liste des shops manquants :</p>';
+			$msg .= '<table style="width: 100%; border-collapse: collapse;">';
+			$msg .= '<tr><th>Shop ID</th><th>Nom de la boutique</th><th>Raison sociale</th></tr>';
+			foreach ($shopManquants as $shop) {
+				$msg .= '<tr>';
+				$msg .= '<td>' . $shop['id'] . '</td>';
+				$msg .= '<td style="padding-left: 1em;">' . $shop['shop_name'] . '</td>';
+				$msg .= '<td style="padding-left: 1em;">' . $shop['corporate_name'] . '</td>';
+				$msg .= '</tr>';
+			}
+			$msg .= '</table>';
+		}
+		BimpUserMsg::envoiMsg($code, $sujet, $msg);
+		return 0;
+	}
+
 	public function updateCaByPowerBi()
 	{
 		$warnings = array();

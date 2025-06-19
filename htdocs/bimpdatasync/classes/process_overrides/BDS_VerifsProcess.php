@@ -1811,7 +1811,7 @@ HAVING total_mvt != rl.qty;";
 					$this->incProcessed();
 					$data = json_decode($data, true);
 					/* @var Bimp_Product $prod */
-					$prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
+					$prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $data['id_prod']);
 
 					if (BimpObject::objectLoaded($prod)) {
 						$diff = $data['qty'] - $data['total_mvt'];

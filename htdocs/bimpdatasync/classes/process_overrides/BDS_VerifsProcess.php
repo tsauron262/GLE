@@ -1764,7 +1764,7 @@ class BDS_VerifsProcess extends BDSProcess
 
 	public function initCheckReceptionsStocksMvt(&$data, &$errors = array())
 	{
-		$sql = "SELECT cfdet.`fk_product` as id_prod, rl.qty, cfl.id_obj as id_cf, rl.id_reception as id_br, cfl.id as id_line,
+		$sql = "SELECT cfdet.`fk_product` as id_prod, rl.qty, cfl.id_obj as id_cf, rl.id_reception as id_br, cfl.id as id_line, br.id_entrepot,
 (SELECT SUM(mvt.value) FROM llx_stock_mouvement mvt WHERE mvt.fk_product = cfdet.`fk_product` AND (mvt.inventorycode = CONCAT('CMDF', cfl.id_obj, '_LN', cfl.id, '_RECEP', rl.`id_reception`) OR mvt.inventorycode = CONCAT('CMDF_', cfl.id_obj, '_LN', cfl.id, '_RECEP', rl.`id_reception`) OR mvt.inventorycode = CONCAT('ANNUL_CMDF', cfl.id_obj, '_LN', cfl.id, '_RECEP', rl.`id_reception`))) AS total_mvt
 FROM llx_bl_reception_line rl
 LEFT JOIN llx_bl_commande_fourn_reception br on br.id = rl.id_reception
@@ -1781,12 +1781,13 @@ HAVING total_mvt != rl.qty;";
 
 			foreach ($rows as $r) {
 				$elements[] = json_encode(array(
-					'id_prod'   => (int) $r['id_prod'],
-					'id_cf'     => (int) $r['id_cf'],
-					'id_br'     => (int) $r['id_br'],
-					'id_line'   => (int) $r['id_line'],
-					'qty'       => (float) $r['qty'],
-					'total_mvt' => (float) $r['total_mvt']
+					'id_prod'     => (int) $r['id_prod'],
+					'id_entrepot' => (int) $r['id_entrepot'],
+					'id_cf'       => (int) $r['id_cf'],
+					'id_br'       => (int) $r['id_br'],
+					'id_line'     => (int) $r['id_line'],
+					'qty'         => (float) $r['qty'],
+					'total_mvt'   => (float) $r['total_mvt']
 				));
 			}
 
@@ -1809,34 +1810,15 @@ HAVING total_mvt != rl.qty;";
 		if ($step_name == 'process') {
 //			$this->setCurrentObjectData('bimpcore', 'Bimp_Product');
 //			if (!empty($this->references)) {
-//				foreach ($this->references as $id_prod) {
+//				foreach ($this->references as $data) {
 //					$this->incProcessed();
+//					$data = json_decode($data, true);
+//					/* @var Bimp_Product $prod */
 //					$prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
 //
 //					if (BimpObject::objectLoaded($prod)) {
-//						$codes = array(
-//							'CMDF'
-//						);
-//						$where = '';
-//						$diff = $this->db->getSum('stock_mouvement', 'value', 'fk_product = ' . (int) $rl->getData('fk_product') . ' AND (inventorycode = CONCAT(\'CMDF\', ' . (int) $rl->getData('id_obj') . ', \'_LN\', ' . (int) $rl->getData('id_line') . ', \'_RECEP\', ' . (int) $rl->getData('id_reception') . ') OR inventorycode = CONCAT(\'CMDF_\', ' . (int) $rl->getData('id_obj') . ', \'_LN\', ' . (int) $rl->getData('id_line') . ', \'_RECEP\', ' . (int) $rl->getData('id_reception') . ') OR inventorycode = CONCAT(\'ANNUL_CMDF\', ' . (int) $rl->getData('id_obj') . ', \'_LN\', ' . (int) $rl->getData('id_line') . ', \'_RECEP\', ' . (int) $rl->getData('id_reception') . ') )');
-//						$lines = $fac->getLines('not_text');
-//
-//						foreach ($lines as $line) {
-//							$this->incProcessed();
-//
-//							$details = array();
-//							$errors = array();
-//							$line->checkRemisesArrieres($errors, $details);
-//
-//							if (count($details)) {
-//								$this->Info('<pre>' . print_r($details, 1) . '</pre>', $fac, 'Ligne n° ' . $line->getData('position'));
-//								$this->incUpdated();
-//							}
-//
-//							if (count($errors)) {
-//								$this->Error('<pre>' . print_r($errors, 1) . '</pre>', $fac, 'Ligne n° ' . $line->getData('position'));
-//							}
-//						}
+//						$diff = $data['qty'] - $data['total_mvt'];
+//						$prod->correctStocks($diff);
 //					} else {
 //						$this->Error('PROD #' . $id_prod . ' inexistant');
 //						$this->incIgnored();

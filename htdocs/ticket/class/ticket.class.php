@@ -422,7 +422,7 @@ class Ticket extends CommonObject
 		if (isset($this->message)) {
 			$this->message = trim($this->message);
 			/*moddrsi*/
-			if (dol_strlen($this->message) > 200000) {
+			if (dol_strlen($this->message) > 300000) {
 //			if (dol_strlen($this->message) > 65000) {
 				$this->errors[] = 'ErrorFieldTooLong' . ' ('.dol_strlen($this->message).' chars)';
 				/*fmoddrsi*/
@@ -1046,7 +1046,7 @@ class Ticket extends CommonObject
 		if (isset($this->message)) {
 			$this->message = trim($this->message);
 			/*moddrsi*/
-			if (dol_strlen($this->message) > 200000) {
+			if (dol_strlen($this->message) > 300000) {
 //			if (dol_strlen($this->message) > 65000) {
 				$this->errors[] = 'ErrorFieldTooLong' . ' ('.dol_strlen($this->message).' chars)';
 				/*fmoddrsi*/

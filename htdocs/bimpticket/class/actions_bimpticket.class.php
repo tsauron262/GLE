@@ -124,17 +124,23 @@ class ActionsBimpticket
 				if ($parameters['new']) {
 					if (!$traite && isset($parameters['objectemail']) && is_a($parameters['objectemail'], 'ticket')) {
 						$ticket = $parameters['objectemail'];
-						$Bimp_Ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
+						$bimp_ticket = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $ticket->id);
 						// trouver le type de ticket selon mail de reception
 						$type_code = '';
 						foreach ($to_emails as $to_email) {
 							$to_email = strtolower($to_email);
-							if (isset($Bimp_Ticket::$mail_typeTicket[$to_email])) {
-								$type_code = $Bimp_Ticket::$mail_typeTicket[$to_email];
+							if (isset($bimp_ticket::$mail_typeTicket[$to_email])) {
+								$type_code = $bimp_ticket::$mail_typeTicket[$to_email];
+								if (!$bimp_ticket->getData('dest_origin_email')) {
+									$bimp_ticket->set('dest_origin_email', $to_email);
+								}
 								break;
 							} elseif (preg_match('/^(.+)\.com$/', $to_email, $matches)) {
-								if (isset($Bimp_Ticket::$mail_typeTicket[$matches[1] . '.fr'])) {
-									$type_code = $Bimp_Ticket::$mail_typeTicket[$matches[1] . '.fr'];
+								if (isset($bimp_ticket::$mail_typeTicket[$matches[1] . '.fr'])) {
+									$type_code = $bimp_ticket::$mail_typeTicket[$matches[1] . '.fr'];
+									if (!$bimp_ticket->getData('dest_origin_email')) {
+										$bimp_ticket->set('dest_origin_email', $to_email);
+									}
 									break;
 								}
 							}
@@ -142,28 +148,28 @@ class ActionsBimpticket
 
 						// correction des object avec des accents
 						$up = false;
-						$s = str_replace("_", " ", mb_decode_mimeheader($Bimp_Ticket->getData('subject')));
-						$Bimp_Ticket->set('subject', $s);
+						$s = str_replace("_", " ", mb_decode_mimeheader($bimp_ticket->getData('subject')));
+						$bimp_ticket->set('subject', $s);
 						if ($type_code != '') {
-							$Bimp_Ticket->set('type_code', $type_code);
+							$bimp_ticket->set('type_code', $type_code);
 						}
-						$Bimp_Ticket->addObjectLog(BimpTools::cleanHtml($Bimp_Ticket->getData('message')));
-						$Bimp_Ticket->set("message", BimpTools::cleanHtml($msg));
-						if (!$Bimp_Ticket->getData('fk_user_assign')) {
-							$Bimp_Ticket->set('fk_user_assign', 0);
+						$bimp_ticket->addObjectLog(BimpTools::cleanHtml($bimp_ticket->getData('message')));
+						$bimp_ticket->set("message", BimpTools::cleanHtml($msg));
+						if (!$bimp_ticket->getData('fk_user_assign')) {
+							$bimp_ticket->set('fk_user_assign', 0);
 						}
 						if (!empty($cc)) {
-							$Bimp_Ticket->set('emails_cc', $cc);
+							$bimp_ticket->set('emails_cc', $cc);
 						}
 
-						$up_errors = $Bimp_Ticket->update($warnings, true);
+						$up_errors = $bimp_ticket->update($warnings, true);
 						if (count($up_errors)) {
-							$errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du ticket ' . $Bimp_Ticket->getRef());
+							$errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du ticket ' . $bimp_ticket->getRef());
 						}
 
 						$contact_static = new Contact($db);
-						$contact_static->fetch(0, null, '', $Bimp_Ticket->getData('origin_email'));
-						if ($contact_static->id > 0 and $contact_static->fk_soc == $Bimp_Ticket->getData('fk_soc')) {
+						$contact_static->fetch(0, null, '', $bimp_ticket->getData('origin_email'));
+						if ($contact_static->id > 0 and $contact_static->fk_soc == $bimp_ticket->getData('fk_soc')) {
 							$ticket->add_contact($contact_static->id, 'SUPPORTCLI', 'external');
 						}
 						$traite = 1;

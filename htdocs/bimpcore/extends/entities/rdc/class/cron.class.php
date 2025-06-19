@@ -158,7 +158,9 @@ class cron extends BimpCron
 
 		$step = $max = 100;
 		$shopManquants = array();
+		$shopEnDoublon = array();
 		$errors = array();
+		$bdd = new BimpDb($this->db);
 
 		for ($i = 0; $i < $max; $i += $step) {
 //			echo '<hr>Récupération des shops Mirakl de ' . $i . ' à ' . ($i + $step) . '<br>';
@@ -166,15 +168,23 @@ class cron extends BimpCron
 			$max = $ret['total_count'];
 			foreach ($ret['shops'] as $shop) {
 				$shopId = $shop['shop_id'];
-				// on verifie si le shop existe dans la base de données
-				$societe = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Client', array('shopid' => $shopId));
-				if (!BimpObject::objectLoaded($societe)) {
-//					echo 'Shop ID: ' . $shopId . ' - Shop Name: ' . $shopName . '<br>';
+				// on verifie si le shop existant en base de données
+				$nb = $bdd->getCount('societe', 'shopid = ' . $shopId, 'rowid');
+				if ($nb == 1) continue;
+
+				if ($nb == 0) {
 					$shopManquants[] = array(
 						'id' => $shopId,
 						'shop_name' => $shop['shop_name'],
 						'corporate_name' => $shop['pro_details']['corporate_name'],
-						'assignees'	=> $shop['shop_assignees'] ?? array()
+					);
+				}
+				else {
+					$shopEnDoublon[] = array(
+						'id' => $shopId,
+						'shop_name' => $shop['shop_name'],
+						'corporate_name' => $shop['pro_details']['corporate_name'],
+						'nb' => $nb,
 					);
 				}
 			}
@@ -185,16 +195,17 @@ class cron extends BimpCron
 			return 1;
 		}
 
-		$code = 'rechercheManquantMirakl';
-		$sujet = 'Rapport de recherche de shops manquants dans Mirakl';
+		$ret = array();
+		$titres = array();
+		$msg = '';
 		if (count($shopManquants) == 0) {
-			$this->output = 'Aucun shop manquant trouvé dans Mirakl';
-			$msg = 'Aucun shop manquant trouvé dans Mirakl';
+			$ret[] = 'Aucun shop manquant trouvé dans Mirakl';
+			$titres[] = '<p>Aucun shop manquant trouvé dans Mirakl</p>';
 		}
 		else {
-			$this->output = 'Nombre de shops manquants trouvés dans Mirakl : ' . count($shopManquants);
-			$msg = '<p>Nombre de shops manquants trouvés dans Mirakl : <strong>' . count($shopManquants) . '</strong></p>';
-			$msg .= '<p>Liste des shops manquants :</p>';
+			$ret[] = 'Nombre de shops manquants trouvés dans Mirakl : ' . count($shopManquants);
+			$titres[] = '<p>Nombre de shops manquants trouvés dans Mirakl : <strong>' . count($shopManquants) . '</strong></p>';
+			$msg .= '<h3>Liste des shops manquants :</h3>';
 			$msg .= '<table style="width: 100%; border-collapse: collapse;">';
 			$msg .= '<tr><th>Shop ID</th><th>Nom de la boutique</th><th>Raison sociale</th></tr>';
 			foreach ($shopManquants as $shop) {
@@ -206,7 +217,35 @@ class cron extends BimpCron
 			}
 			$msg .= '</table>';
 		}
-		BimpUserMsg::envoiMsg($code, $sujet, $msg);
+
+		if (count($shopEnDoublon) == 0) {
+			$ret[] = 'Aucun shop en doublon trouvé dans GLE';
+			$titres[] = 'Aucun shop en doublon trouvé dans GLE</p>';
+		}
+		else {
+			$ret[] = 'Nombre de shops en doublon trouvés dans GLE : ' . count($shopEnDoublon);
+			$titres[] = '<p>Nombre de shops en doublon trouvés dans Mirakl : <strong>' . count($shopEnDoublon) . '</strong></p>';
+			$msg .= '<h3>Liste des shops en doublon :</h3>';
+			$msg .= '<table style="width: 100%; border-collapse: collapse;">';
+			$msg .= '<tr><th>Shop ID</th><th>Nom de la boutique</th><th>Raison sociale</th><th>NB</th></tr>';
+			foreach ($shopEnDoublon as $shop) {
+				$msg .= '<tr>';
+				$msg .= '<td>' . $shop['id'] . '</td>';
+				$msg .= '<td style="padding-left: 1em;">' . $shop['shop_name'] . '</td>';
+				$msg .= '<td style="padding-left: 1em;">' . $shop['corporate_name'] . '</td>';
+				$msg .= '<td>' . $shop['nb'] . '</td>';
+				$msg .= '</tr>';
+			}
+			$msg .= '</table>';
+		}
+
+
+		$contenu = implode('', $titres) . $msg;
+		$code = 'rechercheManquantMirakl';
+		$sujet = 'Rapport de recherche des shops en annomalie dans Mirakl';
+		BimpUserMsg::envoiMsg($code, $sujet, $contenu);
+
+		$this->output = implode("<br>", $ret);
 		return 0;
 	}
 

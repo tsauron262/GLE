@@ -430,9 +430,18 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		if (substr($url, 0, 4) != 'http') {
 			$url = 'https://' . $url;
 		}
-//		$href = '<a href="' . $url . '" target="' . $target . '"><i class="fas fa-external-link-alt"></></a>';
 		$href = '<a href="' . $url . '" target="' . $target . '">' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
-		return $url . " " . $href;
+
+		if (strlen($url) > 80) {
+			$short = substr($url, 0, 80);
+			$ret = '<span class="bs-popover"';
+			$ret .= BimpRender::renderPopoverData($url);
+			$ret .= '>' . $short . '</span>';
+		}
+		else {
+			$ret = $url;
+		}
+		return $ret . " " . $href;
 	}
 
 	public function getIdSourcePresta()

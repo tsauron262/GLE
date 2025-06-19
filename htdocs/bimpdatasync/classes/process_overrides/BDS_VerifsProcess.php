@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-	public static $current_version = 14;
+	public static $current_version = 15;
 	public static $default_public_title = 'Vérifications et corrections diverses';
 
 	// Vérifs marges factures :
@@ -2214,7 +2214,6 @@ HAVING total_mvt != rl.qty;";
 			), true, $errors, $warnings);
 		}
 
-
 		if ($cur_version < 14) {
 			// Opération "Vérif des marges des propales":
 			$op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
@@ -2248,6 +2247,20 @@ HAVING total_mvt != rl.qty;";
 					$warnings = array_merge($warnings, $op->addAssociates('options', $op_options));
 				}
 			}
+		}
+
+		if ($cur_version < 15) {
+			// Opération "Vérif des statuts commande des propales":
+			$op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+				'id_process'    => (int) $id_process,
+				'title'         => 'Vérif Mouvements stocks réceptions',
+				'name'          => 'checkReceptionsStocksMvt',
+				'description'   => '',
+				'warning'       => 'Attention, les filtres sont en dur dans le code',
+				'active'        => 1,
+				'use_report'    => 1,
+				'reports_delay' => 30
+			), true, $errors, $warnings);
 		}
 
 		return $errors;

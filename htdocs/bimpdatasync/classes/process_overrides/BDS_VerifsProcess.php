@@ -1760,6 +1760,82 @@ class BDS_VerifsProcess extends BDSProcess
 		}
 	}
 
+	// Vérifs des mouvements de stocks des réceptions
+
+	public function initCheckReceptionsStocksMvt(&$data, &$errors = array())
+	{
+		$sql = "SELECT cfdet.`fk_product` as id_prod, rl.qty,
+(SELECT SUM(mvt.value) FROM llx_stock_mouvement mvt WHERE mvt.fk_product = cfdet.`fk_product` AND (mvt.inventorycode = CONCAT('CMDF', cfl.id_obj, '_LN', cfl.id, '_RECEP', rl.`id_reception`) OR mvt.inventorycode = CONCAT('CMDF_', cfl.id_obj, '_LN', cfl.id, '_RECEP', rl.`id_reception`) OR mvt.inventorycode = CONCAT('ANNUL_CMDF', cfl.id_obj, '_LN', cfl.id, '_RECEP', rl.`id_reception`))) AS total_mvt
+FROM llx_bl_reception_line rl
+LEFT JOIN llx_bl_commande_fourn_reception br on br.id = rl.id_reception
+LEFT JOIN llx_bimp_commande_fourn_line cfl ON cfl.id = rl.id_commande_fourn_line
+LEFT JOIN llx_commande_fournisseurdet cfdet ON cfdet.rowid = cfl.id_line
+WHERE rl.qty != ROUND(rl.qty, 0)
+AND br.status = 1
+HAVING total_mvt != rl.qty;";
+
+		$rows = $this->db->executeS($sql, 'array');
+
+		if (is_array($rows)) {
+			$elements = array();
+
+			foreach ($rows as $r) {
+				$elements[] = (int) $r['id_prod'] . ';' . $r['qty'] . ';' . $r['total_mvt'];
+			}
+
+			echo '<pre>' . print_r($elements, 1) . '</pre>';
+			exit;
+
+			$data['steps']['process'] = array(
+				'label'                  => 'Vérifs des remises arrières Factures',
+				'on_error'               => 'continue',
+				'elements'               => $elements,
+				'nbElementsPerIteration' => 50
+			);
+		} else {
+			$errors[] = $this->db->err();
+		}
+	}
+
+	public function executeCheckReceptionsStocksMvt($step_name, &$errors = array(), $extra_data = array())
+	{
+//		if ($step_name == 'process') {
+//			$this->setCurrentObjectData('bimplogistique', 'BL_ReceptionLine');
+//			if (!empty($this->references)) {
+//				foreach ($this->references as $id_rl) {
+//					$this->incProcessed();
+//					$rl = BimpCache::getBimpObjectInstance('bimpcommercial', 'BL_ReceptionLine', $id_rl);
+//
+//					if (BimpObject::objectLoaded($rl)) {
+//						$codes = array(
+//							'CMDF'
+//						);
+//						$where = '';
+//						$diff = $this->db->getSum('stock_mouvement', 'value', 'fk_product = ' . (int) $rl->getData('fk_product') . ' AND (inventorycode = CONCAT(\'CMDF\', ' . (int) $rl->getData('id_obj') . ', \'_LN\', ' . (int) $rl->getData('id_line') . ', \'_RECEP\', ' . (int) $rl->getData('id_reception') . ') OR inventorycode = CONCAT(\'CMDF_\', ' . (int) $rl->getData('id_obj') . ', \'_LN\', ' . (int) $rl->getData('id_line') . ', \'_RECEP\', ' . (int) $rl->getData('id_reception') . ') OR inventorycode = CONCAT(\'ANNUL_CMDF\', ' . (int) $rl->getData('id_obj') . ', \'_LN\', ' . (int) $rl->getData('id_line') . ', \'_RECEP\', ' . (int) $rl->getData('id_reception') . ') )');
+//						$lines = $fac->getLines('not_text');
+//
+//						foreach ($lines as $line) {
+//							$this->incProcessed();
+//
+//							$details = array();
+//							$errors = array();
+//							$line->checkRemisesArrieres($errors, $details);
+//
+//							if (count($details)) {
+//								$this->Info('<pre>' . print_r($details, 1) . '</pre>', $fac, 'Ligne n° ' . $line->getData('position'));
+//								$this->incUpdated();
+//							}
+//
+//							if (count($errors)) {
+//								$this->Error('<pre>' . print_r($errors, 1) . '</pre>', $fac, 'Ligne n° ' . $line->getData('position'));
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+	}
+
 	// Install:
 
 	public static function install(&$errors = array(), &$warnings = array(), $title = '')

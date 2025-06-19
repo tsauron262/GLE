@@ -1823,9 +1823,8 @@ HAVING total_mvt != rl.qty;";
 							$this->Success('Ajout de ' . $diff . ' unité(s) pour correction de la réception #' . $data['id_br'] . ' - Qté attendue : ' . $data['qty'] . ' - Total mvt : ' . $data['total_mvt'], $prod);
 							$this->incUpdated();
 						}
-						break;
 					} else {
-						$this->Error('PROD #' . $id_prod . ' inexistant');
+						$this->Error('PROD #' . $data['id_prod'] . ' inexistant');
 						$this->incIgnored();
 					}
 				}

@@ -1780,7 +1780,14 @@ HAVING total_mvt != rl.qty;";
 			$elements = array();
 
 			foreach ($rows as $r) {
-				$elements[] = json_encode($r);
+				$elements[] = json_encode(array(
+					'id_prod'   => (int) $r['id_prod'],
+					'id_cf'     => (int) $r['id_cf'],
+					'id_br'     => (int) $r['id_br'],
+					'id_line'   => (int) $r['id_line'],
+					'qty'       => (float) $r['qty'],
+					'total_mvt' => (float) $r['total_mvt']
+				));
 			}
 
 			echo '<pre>' . print_r($elements, 1) . '</pre>';

@@ -1764,7 +1764,7 @@ class BDS_VerifsProcess extends BDSProcess
 
 	public function initCheckReceptionsStocksMvt(&$data, &$errors = array())
 	{
-		$sql = "SELECT cfdet.`fk_product` as id_prod, rl.qty,
+		$sql = "SELECT cfdet.`fk_product` as id_prod, rl.qty, cfl.id_obj as id_cf, rl.id_reception as id_br, cfl.id as id_line,
 (SELECT SUM(mvt.value) FROM llx_stock_mouvement mvt WHERE mvt.fk_product = cfdet.`fk_product` AND (mvt.inventorycode = CONCAT('CMDF', cfl.id_obj, '_LN', cfl.id, '_RECEP', rl.`id_reception`) OR mvt.inventorycode = CONCAT('CMDF_', cfl.id_obj, '_LN', cfl.id, '_RECEP', rl.`id_reception`) OR mvt.inventorycode = CONCAT('ANNUL_CMDF', cfl.id_obj, '_LN', cfl.id, '_RECEP', rl.`id_reception`))) AS total_mvt
 FROM llx_bl_reception_line rl
 LEFT JOIN llx_bl_commande_fourn_reception br on br.id = rl.id_reception
@@ -1780,7 +1780,7 @@ HAVING total_mvt != rl.qty;";
 			$elements = array();
 
 			foreach ($rows as $r) {
-				$elements[] = (int) $r['id_prod'] . ';' . $r['qty'] . ';' . $r['total_mvt'];
+				$elements[] = json_encode($r);
 			}
 
 			echo '<pre>' . print_r($elements, 1) . '</pre>';
@@ -1799,14 +1799,14 @@ HAVING total_mvt != rl.qty;";
 
 	public function executeCheckReceptionsStocksMvt($step_name, &$errors = array(), $extra_data = array())
 	{
-//		if ($step_name == 'process') {
-//			$this->setCurrentObjectData('bimplogistique', 'BL_ReceptionLine');
+		if ($step_name == 'process') {
+//			$this->setCurrentObjectData('bimpcore', 'Bimp_Product');
 //			if (!empty($this->references)) {
-//				foreach ($this->references as $id_rl) {
+//				foreach ($this->references as $id_prod) {
 //					$this->incProcessed();
-//					$rl = BimpCache::getBimpObjectInstance('bimpcommercial', 'BL_ReceptionLine', $id_rl);
+//					$prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
 //
-//					if (BimpObject::objectLoaded($rl)) {
+//					if (BimpObject::objectLoaded($prod)) {
 //						$codes = array(
 //							'CMDF'
 //						);
@@ -1830,10 +1830,13 @@ HAVING total_mvt != rl.qty;";
 //								$this->Error('<pre>' . print_r($errors, 1) . '</pre>', $fac, 'Ligne n° ' . $line->getData('position'));
 //							}
 //						}
+//					} else {
+//						$this->Error('PROD #' . $id_prod . ' inexistant');
+//						$this->incIgnored();
 //					}
 //				}
 //			}
-//		}
+		}
 	}
 
 	// Install:

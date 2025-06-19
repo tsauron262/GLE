@@ -749,7 +749,8 @@ class BimpUserMsg
 		),
 		'rechercheManquantMirakl'	=> array(
 			'label'  => 'Rapport de recherche de shops manquants dans Mirakl',
-			'dests'  => 'to::team-marketplace@rueducommerce.fr::s.conti@rueducommerce.fr::m.chapsal@rueducommerce.fr',
+			'dests'  => 'to::franck.lauby@ldlc.com',
+//			'dests'  => 'to::team-marketplace@rueducommerce.fr::s.conti@rueducommerce.fr::m.chapsal@rueducommerce.fr',
 			'module' => 'bimpcore',
 			'metier' => 'metier'
 		)

@@ -96,7 +96,7 @@ fields:
         label: Commentaire développeur
         type: text
         hashtags: 1
-#        no_strip_tags: 1
+        no_strip_tags: 1
         
     status:
         label: Statut

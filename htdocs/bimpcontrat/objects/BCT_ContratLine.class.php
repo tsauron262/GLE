@@ -6040,7 +6040,7 @@ class BCT_ContratLine extends BimpObject
 			'propal_label'      => '',
 			'fac_periodicity'   => (int) $this->getData('fac_periodicity'),
 			'achat_periodicity' => (int) $this->getData('achat_periodicity'),
-			'subprice'          => $this->getValueForProduct('subprice', $prod),
+			'subprice'          => (!empty($options['renouv_auto']) ? $this->getData('subprice') : $this->getValueForProduct('subprice', $prod)),
 			'duration'          => (int) $this->getData('duration'),
 			'fac_term'          => (int) $this->getData('fac_term'),
 			'lines'             => array()

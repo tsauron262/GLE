@@ -101,7 +101,10 @@ fields:
         default_value: ''
     
     origin_email:
-        label: E-mail orgine
+        label: E-mail émetteur d'origine
+    
+    dest_origin_email:
+        label: E-mail destinataire d'origine
     
     fk_soc:
         label: Marchand
@@ -357,6 +360,7 @@ fields_tables:
             -   field: type_code
             -   field: subject
             -   field: origin_email
+            -   field: dest_origin_email
             -   field: emails_cc
             -   field: comment
                 edit: 1

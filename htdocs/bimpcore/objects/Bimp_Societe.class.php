@@ -2250,7 +2250,7 @@ class Bimp_Societe extends BimpDolObject
 						} else {
 							$fl = false;
 						}
-						$html .= $contrat->getLink(array('object_icons' => 0));
+						$html .= $contrat->getLink(array('object_icons' => 0)) . '<span style="margin-right: 5px;"></span>' . $contrat->displayData('statut');
 					}
 					$html .= '</div>';
 				}
@@ -2274,7 +2274,7 @@ class Bimp_Societe extends BimpDolObject
 						} else {
 							$fl = false;
 						}
-						$html .= $contrat->getLink(array('object_icons' => 0, 'syntaxe' => '<ref> - <name>'));
+						$html .= $contrat->getLink(array('object_icons' => 0, 'syntaxe' => '<ref> - <name>')) . '<span style="margin-right: 5px;"></span>' . $contrat->displayData('statut');
 					}
 					$html .= '</div>';
 				}

@@ -30,38 +30,22 @@ if (!$user->admin) {
 	exit;
 }
 
-$pull_infos_file = DOL_DOCUMENT_ROOT . '/bimpressources/pull_infos.json';
-
-//if (file_exists($pull_infos_file)) {
-//	echo 'DEL PULL INFOS FILE<br/>';
-//	unlink($pull_infos_file);
+///** @var BCT_ContratLine $line */
+//$id_line = 19166;
+//$line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
+//if (BimpObject::objectLoaded($line)) {
+//	echo 'Ligne #' . $id_line . ' : ';
+//	$line_errors = array();
+//	$lines_renouv = array();
+//	$line->renouvAbonnement(array(
+//		'renouv_auto' => 1
+//	), $lines_renouv, $line_errors);
+//
+//	echo 'RENOUV<pre>' . print_r($lines_renouv, 1) . '</pre>';
+//	echo 'ERR<pre>' . print_r($line_errors, 1) . '</pre>';
+//} else {
+//	echo 'FAIL';
 //}
-
-echo '<br/>SIMULATION D\'UN PULL<br/><br/>';
-$pull_idx = 0;
-
-$pull_info = json_decode(file_get_contents($pull_infos_file), true);
-if (isset($pull_info['idx'])) {
-	$pull_idx = (int) $pull_info['idx'];
-} else {
-	echo 'PAS DE PULL INFOS<br/>';
-}
-
-$pull_idx++;
-echo '<br/>Pull idx : ' . $pull_idx . '<br/>';
-
-$pull_info = array(
-	'idx'   => $pull_idx,
-	'start' => date('Y-m-d H:i:s'),
-	'end'   => date('Y-m-d H:i:s')
-);
-
-echo 'NEW PULL INFOS<pre>' . print_r($pull_info, 1) . '</pre>';
-if (file_put_contents($pull_infos_file, json_encode($pull_info))) {
-	echo 'OK';
-} else {
-	echo 'FAIL';
-}
 
 echo '<br/>FIN';
 echo '</body></html>';

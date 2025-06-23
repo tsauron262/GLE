@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-	public static $current_version = 14;
+	public static $current_version = 15;
 	public static $default_public_title = 'Vérifications et corrections diverses';
 
 	// Vérifs marges factures :
@@ -1760,6 +1760,78 @@ class BDS_VerifsProcess extends BDSProcess
 		}
 	}
 
+	// Vérifs des mouvements de stocks des réceptions
+
+	public function initCheckReceptionsStocksMvt(&$data, &$errors = array())
+	{
+		$sql = "SELECT cfdet.`fk_product` as id_prod, rl.qty, cfl.id_obj as id_cf, rl.id_reception as id_br, cfl.id as id_line, br.id_entrepot,
+(SELECT SUM(mvt.value) FROM llx_stock_mouvement mvt WHERE mvt.fk_product = cfdet.`fk_product` AND (mvt.inventorycode = CONCAT('CORRECTION_RECEP', rl.`id_reception`, '_LN', cfl.id) OR mvt.inventorycode = CONCAT('CMDF', cfl.id_obj, '_LN', cfl.id, '_RECEP', rl.`id_reception`) OR mvt.inventorycode = CONCAT('CMDF_', cfl.id_obj, '_LN', cfl.id, '_RECEP', rl.`id_reception`) OR mvt.inventorycode = CONCAT('ANNUL_CMDF', cfl.id_obj, '_LN', cfl.id, '_RECEP', rl.`id_reception`))) AS total_mvt
+FROM llx_bl_reception_line rl
+LEFT JOIN llx_bl_commande_fourn_reception br on br.id = rl.id_reception
+LEFT JOIN llx_bimp_commande_fourn_line cfl ON cfl.id = rl.id_commande_fourn_line
+LEFT JOIN llx_commande_fournisseurdet cfdet ON cfdet.rowid = cfl.id_line
+WHERE rl.qty != ROUND(rl.qty, 0)
+AND br.status = 1
+HAVING total_mvt != rl.qty;";
+
+		$rows = $this->db->executeS($sql, 'array');
+
+		if (is_array($rows)) {
+			$elements = array();
+
+			foreach ($rows as $r) {
+				$elements[] = json_encode(array(
+					'id_prod'     => (int) $r['id_prod'],
+					'id_entrepot' => (int) $r['id_entrepot'],
+					'id_cf'       => (int) $r['id_cf'],
+					'id_br'       => (int) $r['id_br'],
+					'id_line'     => (int) $r['id_line'],
+					'qty'         => (float) $r['qty'],
+					'total_mvt'   => (float) $r['total_mvt']
+				));
+			}
+
+			$data['steps']['process'] = array(
+				'label'                  => 'Vérifs des remises arrières Factures',
+				'on_error'               => 'continue',
+				'elements'               => $elements,
+				'nbElementsPerIteration' => 50
+			);
+		} else {
+			$errors[] = $this->db->err();
+		}
+	}
+
+	public function executeCheckReceptionsStocksMvt($step_name, &$errors = array(), $extra_data = array())
+	{
+		if ($step_name == 'process') {
+			$this->setCurrentObjectData('bimpcore', 'Bimp_Product');
+			if (!empty($this->references)) {
+				foreach ($this->references as $data) {
+					$this->incProcessed();
+					$data = json_decode($data, true);
+					/* @var Bimp_Product $prod */
+					$prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $data['id_prod']);
+
+					if (BimpObject::objectLoaded($prod)) {
+						$diff = $data['qty'] - $data['total_mvt'];
+						$mvt_errors = $prod->correctStocks($data['id_entrepot'], $diff, 0, 'CORRECTION_RECEP' . $data['id_br'] . '_LN' . $data['id_line'], 'Correction du mouvement de stock pour la réception #' . $data['id_br']);
+						if (count($mvt_errors)) {
+							$this->Error(BimpTools::getMsgFromArray($mvt_errors, 'Echec ajout de ' . $diff . ' unité(s) pour correction de la réception #' . $data['id_br'], $prod));
+							$this->incIgnored();
+						} else {
+							$this->Success('Ajout de ' . $diff . ' unité(s) pour correction de la réception #' . $data['id_br'] . ' - Qté attendue : ' . $data['qty'] . ' - Total mvt : ' . $data['total_mvt'], $prod);
+							$this->incUpdated();
+						}
+					} else {
+						$this->Error('PROD #' . $data['id_prod'] . ' inexistant');
+						$this->incIgnored();
+					}
+				}
+			}
+		}
+	}
+
 	// Install:
 
 	public static function install(&$errors = array(), &$warnings = array(), $title = '')
@@ -2138,7 +2210,6 @@ class BDS_VerifsProcess extends BDSProcess
 			), true, $errors, $warnings);
 		}
 
-
 		if ($cur_version < 14) {
 			// Opération "Vérif des marges des propales":
 			$op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
@@ -2172,6 +2243,20 @@ class BDS_VerifsProcess extends BDSProcess
 					$warnings = array_merge($warnings, $op->addAssociates('options', $op_options));
 				}
 			}
+		}
+
+		if ($cur_version < 15) {
+			// Opération "Vérif des statuts commande des propales":
+			$op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+				'id_process'    => (int) $id_process,
+				'title'         => 'Vérif Mouvements stocks réceptions',
+				'name'          => 'checkReceptionsStocksMvt',
+				'description'   => '',
+				'warning'       => 'Attention, les filtres sont en dur dans le code',
+				'active'        => 1,
+				'use_report'    => 1,
+				'reports_delay' => 30
+			), true, $errors, $warnings);
 		}
 
 		return $errors;

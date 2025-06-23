@@ -83,11 +83,13 @@ class BimpCore
 			global $user;
 			$use_css_v2 = ((int) self::getConf('use_css_v2'));
 
-			if ((int) self::getConf('use_public_files_external_dir') || self::getConf('use_erp_updates_v2')) {
-				if (!file_exists(DOL_DOCUMENT_ROOT . '/bimpressources')) {
-					BimpCore::addlog('Dossier "bimpressources absent', 4, 'bimpcore');
-					self::setConf('use_public_files_external_dir', '0', 'bimpcore', -1, true);
-					self::setConf('use_erp_updates_v2', '0', 'bimpcore', -1, true);
+			if (!self::isModeDev()) {
+				if ((int) self::getConf('use_public_files_external_dir') || (int) self::getConf('use_erp_updates_v2')) {
+					if (defined('DOL_DOCUMENT_ROOT') && !file_exists(DOL_DOCUMENT_ROOT . '/bimpressources')) {
+						BimpCore::addlog('Dossier "bimpressources" absent', 4, 'bimpcore');
+						self::setConf('use_public_files_external_dir', '0', 'bimpcore', -1, true);
+						self::setConf('use_erp_updates_v2', '0', 'bimpcore', -1, true);
+					}
 				}
 			}
 
@@ -287,7 +289,7 @@ class BimpCore
 		if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file_path)) {
 			if ($use_tms && (int) BimpCore::getConf('use_files_tms')) {
 				$external_dir = '';
-				if ((int) BimpCore::getConf('use_public_files_external_dir')) {
+				if ((int) BimpCore::getConf('use_public_files_external_dir') && (!defined('NO_PUBLIC_FILES_EXTERNAL_DIR') || !NO_PUBLIC_FILES_EXTERNAL_DIR)) {
 					$external_dir = '/bimpressources';
 				}
 				$pathinfo = pathinfo($file_path);
@@ -317,7 +319,9 @@ class BimpCore
 								));
 							}
 
-							echo '<br/>Err : ' . $err;
+							if ($debug) {
+								echo '<br/>Err : ' . $err;
+							}
 						}
 
 						if (!$err && !file_exists($out_dir . '/' . $out_file)) {
@@ -329,7 +333,7 @@ class BimpCore
 
 								if (preg_match('/^' . preg_quote($pathinfo['filename']) . '_tms_\d+\.' . preg_quote($pathinfo['extension']) . '$/', $f)) {
 									if ($debug) {
-										echo '<br/>DEL' . out_dir . '/' . $f;
+										echo '<br/>DEL' . $out_dir . '/' . $f;
 									}
 									unlink($out_dir . '/' . $f);
 								}
@@ -767,6 +771,34 @@ class BimpCore
 				$pull_info = json_decode(file_get_contents($pull_infos_file), 1);
 			}
 
+			if ((int) self::getConf('use_public_files_external_dir')) {
+				if (isset($pull_info['post_process']) && !(int) $pull_info['post_process']) {
+					$pull_info['post_process'] = 1;
+					file_put_contents($pull_infos_file, json_encode($pull_info, 1));
+
+					if ($debug_mode) {
+						echo '<br/>GIT PULL POST PROCESS : ';
+					}
+
+					$post_process_infos = '';
+					$post_process_errors = BimpCore::afterGitPullProcess(false, $post_process_infos);
+					if (count($post_process_errors)) {
+						$errors[] = BimpTools::getMsgFromArray('Erreurs GIT PULL POST PROCESS', $post_process_errors);
+
+						if ($debug_mode) {
+							echo 'Erreurs <pre>' . print_r($post_process_errors, 1) . '</pre>';
+						}
+					} elseif ($debug_mode) {
+						echo 'OK <br/>';
+						echo $post_process_infos;
+						echo '<br/><br/>';
+					} else {
+						BimpCore::addlog('GIT PULL POST PROCESS OK', 1, 'maj', null, array(
+							'Infos' => $post_process_infos
+						));;
+					}
+				}
+			}
 			$errors = array();
 			$bdb = BimpCache::getBdb(true); // sans transactions
 			$ext_version = self::getExtendsVersion();

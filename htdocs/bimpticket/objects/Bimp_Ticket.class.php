@@ -926,15 +926,17 @@ class Bimp_Ticket extends BimpDolObject
 
 	public function getMailFrom()
 	{
-		$from = '';
-		$type = $this->getData('type_code');
-
-		if ($type) {
-			$from = array_search($type, static::$mail_typeTicket);
-		}
+		$from = $this->getData('dest_origin_email');
 
 		if (!$from) {
-			$from = static::MAIL_TICKET_GENERAL;
+			$type = $this->getData('type_code');
+			if ($type) {
+				$from = array_search($type, static::$mail_typeTicket);
+			}
+			if (!$from) {
+				$from = static::MAIL_TICKET_GENERAL;
+			}
+			$this->updateField('dest_origin_email', $from);
 		}
 		return $from;
 	}

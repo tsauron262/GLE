@@ -10439,6 +10439,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				$html .= ' class="bs-popover card-popover"';
 				$html .= BimpRender::renderPopoverData($card_html, 'bottom', 'true');
 			}
+			if (isset($params['target']) && $params['target'] == 'blank')
+				$html .= ' target="_blank"';
 			$html .= '>' . $icon . $label . '</a>';
 			$html .= $status;
 		} elseif ($card_html) {

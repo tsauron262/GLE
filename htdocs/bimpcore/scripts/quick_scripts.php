@@ -746,7 +746,6 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 						echo 'ERR <pre>' . print_r($remise_errors, 1) . '</pre>';
 					} else {
 						echo '<br/><span class="success">Créa remise ok (' . $r['remise_doli'] . ')</span><br/>';
-						break;
 					}
 				} else {
 					echo '<span class="danger">Une remise existe déjà côté Bimp</span>';

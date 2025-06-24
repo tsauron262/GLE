@@ -317,6 +317,29 @@ class BS_SAV extends BimpObject
 		return 0;
 	}
 
+	public function isDureeInfSixHeures()
+	{
+		// trouver la note la plus recente
+		$notes = $this->getNotes();
+		if (count($notes) > 0) {
+			$dernote = reset($notes);
+			$date = $dernote->getData('date_create');
+		}
+		else	{
+			$date = $this->getData('date_create');
+		}
+
+		$date = new DateTime($date);
+		$now = new DateTime();
+		$interval = $date->diff($now);
+
+		// Vérifie si la différence est inférieure à 6 heures
+		if ($interval->h < 6 && $interval->d == 0 && $interval->m == 0 && $interval->y == 0) {
+			return 0;
+		}
+		return 1;
+	}
+
 	public function isActionAllowed($action, &$errors = array())
 	{
 		$status = (int) $this->getData('status');

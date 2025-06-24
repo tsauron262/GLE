@@ -40,6 +40,7 @@ class Bimp_ActionComm extends BimpObject
 		global $user;
 		switch ($action) {
 			case 'done':
+			case 'clone':
 				if ($this->isLoaded() && $this->isUserAssigned()) {
 					return 1;
 				}
@@ -95,6 +96,8 @@ class Bimp_ActionComm extends BimpObject
 						return 0;
 					}
 				}
+				return 1;
+			case 'clone':
 				return 1;
 		}
 
@@ -285,6 +288,15 @@ class Bimp_ActionComm extends BimpObject
 				'icon'    => 'fas_check',
 				'onclick' => $this->getJsActionOnclick('done', array(), array(
 					'confirm_msg' => 'Veuillez confirmer'
+				))
+			);
+		}
+		if ($this->isActionAllowed('clone') && $this->canSetAction('clone')) {
+			$buttons[] = array(
+				'label'   => 'Cloner',
+				'icon'    => 'fas_copy',
+				'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
+					'form_name' => 'duplicate'
 				))
 			);
 		}
@@ -561,21 +573,32 @@ class Bimp_ActionComm extends BimpObject
 		return BimpInput::renderInput($input_type, $field_name, $date);
 	}
 
-	public function renderDeleteButton()
+	public function renderHeaderButtons()
 	{
 		$html = '';
-
+		$ret = '';
+		$div = '<div style="margin: 10px; text-align: center">';
 		if ($this->isLoaded() && $this->canDelete()) {
-			$html .= '<div style="margin: 10px; text-align: center">';
 			$html .= '<span class="btn btn-danger" onclick="' . $this->getJsDeleteOnClick(array(
 					'success_callback' => "function(){bimpModal.hide();$('#calendar').weekCalendar('refresh');}"
 				)) . '">';
 			$html .= BimpRender::renderIcon('fas_trash-alt', 'iconLeft') . 'Supprimer cet événement';
 			$html .= '</span>';
-			$html .= '</div>';
+		}
+		if ($this->isActionAllowed('clone') && $this->canSetAction('clone')) {
+			$html .= '<span class="btn btn-primary" onclick="' .
+				$this->getJsActionOnclick('duplicate', array(), array(
+						'form_name' => 'duplicate',
+						'success_callback' => "function(){bimpModal.hide();$('#calendar').weekCalendar('refresh');}"
+					)
+				) . '" >';
+			$html .= BimpRender::renderIcon('copy', 'iconLeft') . 'Dupliquer';
+			$html .= '</span>';
 		}
 
-		return $html;
+		if ($html != '')	$ret = $div . $html . '</div>';
+
+		return $ret;
 	}
 
 	public function renderDolTabs()
@@ -733,6 +756,43 @@ class Bimp_ActionComm extends BimpObject
 				}
 			}
 		}
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
+	public function actionDuplicate($data, &$success = '')	{
+		global $user;
+
+		$errors = array();
+		$warnings = array();
+
+		$ac = BimpObject::getDolObjectInstance($this->getData('id'), 'actioncomm');
+		$idClone = $ac->createFromClone($user, $this->getData('fk_soc'));
+
+		$clone = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm', (int) $idClone);
+		$clone->set('label', $data['label']);
+		$clone->set('datep', $data['datep']);
+		$clone->set('datep2', $data['datep2']);
+		$clone->set('percent', 0);
+		$clone->set('fk_user_action', $data['users_assigned'][0]);
+
+		$transparency = (int) $this->getData('transparency');
+
+		$clone->dol_object->userassigned = array();
+		foreach ($data['users_assigned'] as $id_user) {
+			if (!isset($clone->dol_object->userassigned[$id_user])) {
+				$clone->dol_object->userassigned[$id_user] = array(
+					'id'           => $id_user,
+					'transparency' => $transparency
+				);
+			}
+		}
+
+		$clone->update($warnings);
+		$success = 'Evenement cloné avec succes ' . $clone->getLink(array('target' => 'blank'));
 
 		return array(
 			'errors'   => $errors,

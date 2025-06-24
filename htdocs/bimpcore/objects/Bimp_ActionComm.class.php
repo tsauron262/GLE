@@ -776,7 +776,7 @@ class Bimp_ActionComm extends BimpObject
 		$clone->set('label', $data['label']);
 		$clone->set('datep', $data['datep']);
 		$clone->set('datep2', $data['datep2']);
-		$clone->set('percent', 0);
+		$clone->set('percent', -1);
 		$clone->set('fk_user_action', $data['users_assigned'][0]);
 
 		$transparency = (int) $this->getData('transparency');

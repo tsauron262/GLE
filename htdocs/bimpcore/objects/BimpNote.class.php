@@ -543,7 +543,7 @@ class BimpNote extends BimpObject
 	public function getMailFrom($withName = true)
 	{
 		$parent = $this->getParentInstance();
-		if (method_exists($parent, 'getMailFrom')) {
+		if (is_object($parent) && method_exists($parent, 'getMailFrom')) {
 			$infoMail = $parent->getMailFrom();
 			if (is_array($infoMail) && isset($infoMail[1]) && $withName) {
 				return $infoMail[1] . '<' . $infoMail[0] . '>';

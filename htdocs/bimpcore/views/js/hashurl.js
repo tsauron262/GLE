@@ -111,6 +111,7 @@ function ecrireHash2() {
 	}
 	oldHash = newHash;
 	window.location.hash = newHash;
+	updateBookMark();
 }
 
 function getFiltersId($list){
@@ -132,5 +133,28 @@ function traiteList($list, value){
 	}
 	if(value['pa']  != getPageCourante($list)) {
 		loadPage($list, value['pa']);
+	}
+}
+
+function updateBookMark() {
+	if (document.forms['actionbookmark'] && document.forms['actionbookmark'].elements['bookmark']) {
+		var selecteur = document.forms['actionbookmark'].elements['bookmark'];
+		var cible = '';
+		for (var i=0; i<selecteur.length; i++) {
+			if(selecteur[i].value === 'newbookmark')	{
+				cible = selecteur[i];
+			}
+		}
+
+		if(cible) {
+			var get = cible.getAttribute('rel').split('%23');
+			var newrel = get[0];
+			var newhastag = encodeURIComponent(window.location.hash);
+			newrel += newhastag;
+			cible.setAttribute('rel', newrel);
+		}
+		else {
+			console.log('newbookmark non trouve dans le formulaire actionbookmark.');
+		}
 	}
 }

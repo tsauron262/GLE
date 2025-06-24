@@ -5861,19 +5861,20 @@ class ObjectLine extends BimpObject
 				$remise_percent = 0;
 				if (BimpTools::isSubmit('default_remise')) {
 					$remise_percent = (float) BimpTools::getValue('default_remise', 0, 'float');
-				} else {
-					$remise_percent = $this->getData('remise');
-					if ($remise_percent && $this->remise && $this->remise != $remise_percent) {
-						BimpCore::addlog('ATTENTION - Conflit de remise à la création d\'une ligne ' . $parent->getLabel('of_a'), 4, 'bimpcomm', $parent, array(
-							'ID Ligne' => $this->id,
-							'Remise ligne doli' => $this->remise,
-							'Remise ligne bimp' => $remise_percent
-						));
-						$warnings[] = 'ATTENTION: il semble y avoir une incohérence concernant la remise. Veuillez en vérifier le montant';
-					} elseif ($this->remise) {
-						$remise_percent = $this->remise;
-					}
 				}
+//				else {
+//					$remise_percent = $this->getData('remise');
+//					if ($remise_percent && $this->remise && $this->remise != $remise_percent) {
+//						BimpCore::addlog('ATTENTION - Conflit de remise à la création d\'une ligne ' . $parent->getLabel('of_a'), 4, 'bimpcomm', $parent, array(
+//							'ID Ligne' => $this->id,
+//							'Remise ligne doli' => $this->remise,
+//							'Remise ligne bimp' => $remise_percent
+//						));
+//						$warnings[] = 'ATTENTION: il semble y avoir une incohérence concernant la remise. Veuillez en vérifier le montant';
+//					} elseif ($this->remise) {
+//						$remise_percent = $this->remise;
+//					}
+//				}
 
 				if ($remise_percent) {
 					if ($this->isRemisable()) {

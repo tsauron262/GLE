@@ -725,11 +725,13 @@ function setCommonEvents($container) {
     $container.find('a[data-toggle="tab"]').each(function () {
         if (!parseInt($(this).data('toggle_tab_event_init'))) {
             $(this).on('shown.bs.tab', function (e) {
-				ecrireHash(getTabsParams());
                 var target = '' + e.target;
                 var tab_id = target.replace(/^.*#(.*)$/, '$1');
 
                 var $li = $('a[href="#' + tab_id + '"]').parent('li');
+				$('body').trigger($.Event('navTabShow', {
+					$nav_tab: $li
+				}));
                 if ($li.length && $li.parent('ul').data('navtabs_id') === 'maintabs') {
                     var prev = '' + e.relatedTarget;
                     prev = prev.replace(/^.*#(.*)$/, '$1');
@@ -1260,9 +1262,6 @@ function bimp_reloadPage() {
     }
 
     var tab = '';
-    // if (window.location.hash) {
-    //     tab = window.location.hash.replace('#', '');
-    // }
 
     var params = getUrlParams();
 
@@ -1965,6 +1964,24 @@ simpleUpload.maxUploads = 10, simpleUpload.activeUploads = 0, simpleUpload.uploa
 });
 
 $(document).ready(function () {
+	$('body').on('bimp_ready', function () { 
+		$('ul.nav-tabs').each(function () {
+			$('body').trigger($.Event('navTabsLoaded', {
+				$nav_tabs: $(this)
+			}));
+		});
+	});
+
+	$('body').on('contentLoaded', function (e) {
+		if (e.$container.length) {
+			e.$container.find('ul.nav-tabs').each(function () {
+				$('body').trigger($.Event('navTabsLoaded', {
+					$nav_tabs: $(this)
+				}));
+			});
+		}
+	});
+		
     $('body').click(function (e) {
         $(this).find('.hideOnClickOut').removeClass('locked').hide();
         $(this).find('.destroyPopoverOnClickOut').popover('destroy');

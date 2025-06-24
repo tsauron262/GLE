@@ -1339,32 +1339,9 @@ function loadPage($list, page, modeAppend) {
 		return;
 	}
 
-	var pageactuel = $list.find('input[name=param_p]').val();
 	$list.find('input[name=param_p]').val(page);
 
 	reloadObjectList($list.attr('id'), undefined, undefined, undefined, modeAppend, 250);
-
-	if (pageactuel !== page) {
-		var hashExistant = window.location.hash;
-		var pos = hashExistant.indexOf('&ct=');
-		if (pos > 0) {
-			var hash = hashExistant.substring(pos + 4).replaceAll('%22', '"');
-			var cts = JSON.parse(hash);
-			// console.log(cts);
-
-			Object.entries(cts).forEach(([keyList, value]) => {
-				if (keyList === $list.attr('id') && value.pa !== page) {
-					cts[keyList].pa = page;
-				}
-			});
-			var navs = getTabsParams();
-			var newHash = '';
-			Object.values(navs).forEach(value => {
-				newHash += '&' + value;
-			});
-			window.location.hash = newHash + '&ct=' + JSON.stringify(cts)
-		}
-	}
 }
 
 function deactivateSorting($list) {
@@ -1747,37 +1724,12 @@ function onListLoaded($list) {
 			$list.data('object_change_event_init', 1);
 		}
 
-		$('body').trigger($.Event('listLoaded', {
+		$list.trigger($.Event('listLoaded', {
 			$list: $list
-		}));
+		}), $list);
 	}
 
 	checkListWidth($list);
-	// chargerFiltreSelonHash();
-
-	/*var hash = window.location.hash.replaceAll('#', '');
-	var elements = hash.split('&');
-	const values = Object.values(elements);
-	values.forEach(value => {
-		var parts = value.split('=');
-		if (parts[0] === 'ct') {
-			var ct = JSON.parse(decodeURIComponent(parts[1]).replaceAll('%22', '"'));
-			// console.log(parts, ct);
-			for (const [divId, params] of Object.entries(ct)) {
-				if(divId === $list.attr('id')) {
-					console.log('Liste chargée:', $list.attr('id'));
-					for (const [param, id] of Object.entries(params)) {
-						if (param === 'pa') {
-							// var $list = $('#' + divId);
-							console.log($list);
-							// loadPage($list, id);
-						}
-						console.log('Paramètre:', param, 'ID:', id, 'Div ID:', divId);
-					}
-				}
-			}
-		}
-	});*/
 }
 
 function onListRefeshed($list) {
@@ -1858,7 +1810,9 @@ function onListRefeshed($list) {
 		});
 	}
 
-	$list.trigger('listRefresh');
+	$list.trigger($.Event('listRefresh', {
+		$list: $list
+	}), $list);
 
 	checkListWidth($list);
 }
@@ -2062,9 +2016,6 @@ function setPaginationEvents($list) {
 				});
 			}
 		}
-		// console.log('$list', $list);
-		// console.log('setPaginationEvents: ' + window.location.hash + $list.attr('id') + ', p=' + p);
-		
 
 		var $next = $((this)).find('.nextButtonAppend');
 		if ($next.length) {

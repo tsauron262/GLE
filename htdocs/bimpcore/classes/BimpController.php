@@ -3397,7 +3397,7 @@ class BimpController
 		$id_filters_config = (int) BimpTools::getValue('id_filters_config', 0, 'int');
 		$full_panel_html = (int) BimpTools::getValue('full_panel_html', 1, 'int');
 
-		if ($module && $object_name && $list_type && $list_identifier && $id_list_filters) {
+		if ($module && $object_name && $list_type && $list_identifier/* && $id_list_filters*/) {
 			$object = BimpObject::getInstance($module, $object_name);
 			$bc_filters = new BC_FiltersPanel($object, $list_type, $list_name, $list_identifier, $panel_name, $id_filters_config);
 

@@ -592,7 +592,7 @@ class Bimp_ActionComm extends BimpObject
 						'success_callback' => "function(){bimpModal.hide();$('#calendar').weekCalendar('refresh');}"
 					)
 				) . '" >';
-			$html .= BimpRender::renderIcon('copy', 'iconLeft') . 'Dupliquer';
+			$html .= BimpRender::renderIcon('copy', 'iconLeft') . 'Dupliquer cet événement';
 			$html .= '</span>';
 		}
 

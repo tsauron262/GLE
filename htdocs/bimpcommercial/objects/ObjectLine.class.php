@@ -5891,7 +5891,7 @@ class ObjectLine extends BimpObject
 							$warnings[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise');
 						}
 					} else {
-						$warnings[] = 'ATTENTION: ce produit n\'étant pas remisable, la remise de ' . $remise_value . '% n\'a pas été prise en compte';
+						$warnings[] = 'ATTENTION: ce produit n\'étant pas remisable, la remise de ' . $remise_percent . '% n\'a pas été prise en compte';
 					}
 				}
 

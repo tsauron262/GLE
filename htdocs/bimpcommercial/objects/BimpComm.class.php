@@ -2662,6 +2662,25 @@ class BimpComm extends BimpDolObject
 		return $html;
 	}
 
+	public function getEventElement()
+	{
+		$type_element = static::$dol_module;
+		switch ($type_element) {
+			case 'facture':
+				$type_element = 'invoice';
+				break;
+
+			case 'commande':
+				$type_element = 'order';
+				break;
+
+			case 'commande_fournisseur':
+				$type_element = 'order_supplier';
+				break;
+		}
+		return $type_element;
+	}
+
 	public function renderEventsTable()
 	{
 		$html = '';
@@ -2673,22 +2692,9 @@ class BimpComm extends BimpDolObject
 
 			BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
 
-			$type_element = static::$dol_module;
+			$type_element = $this->getEventElement();
 			$fk_soc = (int) $this->getData('fk_soc');
-			switch ($type_element) {
-				case 'facture':
-					$type_element = 'invoice';
-					break;
 
-				case 'commande':
-					$type_element = 'order';
-					break;
-
-				case 'commande_fournisseur':
-					$type_element = 'order_supplier';
-					$fk_soc = 0;
-					break;
-			}
 			$ActionComm = new ActionComm($this->db->db);
 			$list = $ActionComm->getActions($fk_soc, $this->id, $type_element);
 
@@ -2791,6 +2797,9 @@ class BimpComm extends BimpDolObject
 				$html .= '</tbody>';
 				$html .= '</table>';
 
+				$actioncom = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm');
+
+
 				$html = BimpRender::renderPanel('Evénements', $html, '', array(
 					'foldable'       => true,
 					'type'           => 'secondary-forced',
@@ -2801,7 +2810,11 @@ class BimpComm extends BimpDolObject
 							'icon_before' => 'plus-circle',
 							'classes'     => array('btn', 'btn-default'),
 							'attr'        => array(
-								'onclick' => 'window.location = \'' . $href . '\''
+								'onclick' => $actioncom->getJsLoadModalForm('add', 'Nouvelle événement', array('fields' => array(
+								    'fk_element' => $this->id,
+									'elementtype' => $this->getEventElement(),
+									'fk_soc'	 => (int) $this->getData('fk_soc'),
+								)))//'window.location = \'' . $href . '\''
 							)
 						)
 					)

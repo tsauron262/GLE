@@ -1059,6 +1059,43 @@ class Bimp_Facture extends BimpComm
 		return $show;
 	}
 
+	public function quickPaiement(&$errors = array(), &$warnings = array()){
+		global $user;
+
+		require_once(DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php');
+		$paiement = new Paiement($this->db->db);
+		$paiement->amounts = array($this->id => $this->getData('total_ttc'));
+		$paiement->fk_account = $this->getData('fk_account');
+		$paiement->paiementid = $this->getData('fk_mode_reglement');
+		$paiement->datepaye = $this->getData('datef');
+		$paiement->create($user);
+		if(isset($paiement->error) && $paiement->error != '')
+			$errors[] = $paiement->error;
+		else{
+			$result = $paiement->addPaymentToBank($user, 'payment_supplier', 'Paiement facture client', $this->getData('fk_account'), '', '');
+			$this->checkIsPaid();
+		}
+	}
+
+	// Getters params:
+	public function getActionsButtonsList()
+	{
+		$buttons = array();
+
+		if ($this->can("create")) {
+			$buttons[] = array(
+				'label'   => 'Cloner',
+				'icon'    => 'fas_copy',
+				'onclick' => $this->getJsActionOnclick('duplicate', array(
+					'datef' => date('Y-m-d')
+				), array(
+					'form_name' => 'duplicate'
+				))
+			);
+		}
+		return $buttons;
+	}
+
 	// Getters params:
 
 	public function getActionsButtons()

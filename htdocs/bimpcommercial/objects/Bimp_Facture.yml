@@ -1193,6 +1193,8 @@ lists:
         sort_field: datec
         sort_way: desc
         add_btn_label: Créer une nouvelle facture
+        extra_btn:
+            callback: getActionsButtonsList
         bulk_actions:
             delete: 
                 label: supprimer les factures sélectionnées

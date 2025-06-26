@@ -2275,6 +2275,15 @@ class BimpComm extends BimpDolObject
 
 	// Rendus HTML:
 
+
+	public function renderTotals(){
+		$html = '';
+		$bcFieldsTable = new BC_FieldsTable($this, 'totals');
+		$html .= $bcFieldsTable->renderHtml();
+		return $html;
+	}
+
+
 	public function renderHeaderExtraLeft()
 	{
 		$html = '';
@@ -3252,6 +3261,22 @@ class BimpComm extends BimpDolObject
 			$this->fetch($new_object->id);
 		}
 
+		if(isset($new_data['validate']) && $new_data['validate']){
+			$inut = array();
+			$inut2 = '';
+			$return = $this->actionValidate($inut, $inut2);
+			$warnings = BimpTools::merge_array($warnings, $return['warnings']);
+			$errors = BimpTools::merge_array($errors, $return['errors']);
+			if(!count($errors)){
+				if(isset($new_data['addPaiement']) && $new_data['addPaiement']){
+					if(method_exists($this, 'quickPaiement'))
+						$this->quickPaiement($errors, $warnings);
+					else
+						$errors[] = 'Pas de gestion rapide des paiements';
+				}
+			}
+		}
+
 		return $errors;
 	}
 
@@ -4222,11 +4247,11 @@ class BimpComm extends BimpDolObject
 					$tabComm = $client->dol_object->getSalesRepresentatives($user);
 
 					// Il y a un commercial pour ce client
-					if (count($tabComm) > 0) {
+					if (count($tabComm) > 0 && isset($tabComm[0]['id'])) {
 						$this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
 						$ok = true;
 						// Il y a un commercial définit par défaut (bimpcore)
-					} elseif ((int) BimpCore::getConf('user_as_default_commercial', null, 'bimpcommercial')) {
+					} elseif ((int) BimpCore::getConf('user_as_default_commercial', null, 'bimpcommercial') && $user->id) {
 						$this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
 						$ok = true;
 						// L'objet est une facture et elle a une facture d'origine
@@ -4248,7 +4273,7 @@ class BimpComm extends BimpDolObject
 
 				// Vérif contact signataire:
 				$tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
-				if (count($tabConatact) < 1) {
+				if (count($tabConatact) < 1 && $user->id) {
 					$this->dol_object->add_contact($user->id, 'SALESREPSIGN', 'internal');
 				}
 			}
@@ -4921,7 +4946,7 @@ class BimpComm extends BimpDolObject
 		$url = '';
 
 		if (!count($errors)) {
-			$url = $_SERVER['php_self'] . '?fc=' . $this->getController() . '&id=' . $this->id;
+			$url = $this->getUrl();
 		}
 
 		if (!count($warnings)) {

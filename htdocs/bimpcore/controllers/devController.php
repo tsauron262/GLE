@@ -34,7 +34,7 @@ class devController extends BimpController
 		$html = '';
 
 		$date = new DateTime();
-		$html .= 'Date serveur : ' . $date->format('d / m / Y H:i:s');
+		$html .= 'Test Pull Date serveur : ' . $date->format('d / m / Y H:i:s');
 
 		$html .= '<div class="container-fluid">';
 

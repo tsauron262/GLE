@@ -143,6 +143,10 @@ class BimpCore
 
 			BimpConfig::initCacheServeur();
 			self::checkSqlUpdates();
+
+			if ((int) self::getConf('use_public_files_external_dir') && !file_exists(DOL_DOCUMENT_ROOT . '/bimpressources/bimpcore/views/fonts/fa5.15.4/fa-brands-400.eot')) {
+				self::afterGitPullProcess(true);
+			}
 		}
 	}
 
@@ -772,7 +776,7 @@ class BimpCore
 			}
 
 			if ((int) self::getConf('use_public_files_external_dir')) {
-				if (isset($pull_info['post_process']) && !(int) $pull_info['post_process']) {
+				if (isset($pull_info['post_process']) && !(int) $pull_info['post_process'] || !file_exists()) {
 					$pull_info['post_process'] = 1;
 					file_put_contents($pull_infos_file, json_encode($pull_info, 1));
 

@@ -84,7 +84,7 @@ sections:
                   type: notes
                   notes:
                       object: client
-                      visibility: 4
+                      filter_by_user: 0
 
           - id: divers
             title: Divers (admin)

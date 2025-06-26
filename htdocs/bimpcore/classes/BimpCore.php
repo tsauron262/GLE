@@ -144,9 +144,9 @@ class BimpCore
 			BimpConfig::initCacheServeur();
 			self::checkSqlUpdates();
 
-			if ((int) self::getConf('use_public_files_external_dir') && !file_exists(DOL_DOCUMENT_ROOT . '/bimpressources/bimpcore/views/fonts/fa5.15.4/fa-brands-400.eot')) {
-				self::afterGitPullProcess(true);
-			}
+//			if ((int) self::getConf('use_public_files_external_dir') && !file_exists(DOL_DOCUMENT_ROOT . '/bimpressources/bimpcore/views/fonts/fa5.15.4/fa-brands-400.eot')) {
+//				self::afterGitPullProcess(true);
+//			}
 		}
 	}
 

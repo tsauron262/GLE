@@ -211,15 +211,15 @@ class BimpYml
                 'entity'  => array()
             );
 
-            // Base: 
+            // Base:
             $file = DOL_DOCUMENT_ROOT . '/' . $cur_module . '/objects/' . $cur_name . '.yml';
             if (file_exists($file)) {
                 $params[$idx]['base'] = spyc_load_file($file);
             }
 
-            // Version: 
-            if (BimpCore::getVersion()) {
-                $file = DOL_DOCUMENT_ROOT . '/' . $cur_module . '/extends/versions/' . BimpCore::getVersion() . '/objects/' . $cur_name . '.yml';
+            // Version:
+            if (BimpCore::getExtendsVersion()) {
+                $file = DOL_DOCUMENT_ROOT . '/' . $cur_module . '/extends/versions/' . BimpCore::getExtendsVersion() . '/objects/' . $cur_name . '.yml';
                 if (file_exists($file)) {
                     $params[$idx]['version'] = spyc_load_file($file);
                 }
@@ -363,15 +363,15 @@ class BimpYml
                 'entity'  => array()
             );
 
-            // Base: 
+            // Base:
             $file = DOL_DOCUMENT_ROOT . '/' . $cur_module . '/controllers/' . $cur_name . '.yml';
             if (file_exists($file)) {
                 $params[$idx]['base'] = spyc_load_file($file);
             }
 
-            // Version: 
-            if (BimpCore::getVersion()) {
-                $file = DOL_DOCUMENT_ROOT . '/' . $cur_module . '/extends/versions/' . BimpCore::getVersion() . '/controllers/' . $cur_name . '.yml';
+            // Version:
+            if (BimpCore::getExtendsVersion()) {
+                $file = DOL_DOCUMENT_ROOT . '/' . $cur_module . '/extends/versions/' . BimpCore::getExtendsVersion() . '/controllers/' . $cur_name . '.yml';
                 if (file_exists($file)) {
                     $params[$idx]['version'] = spyc_load_file($file);
                 }
@@ -485,15 +485,15 @@ class BimpYml
             'entity'  => array()
         );
 
-        // Base: 
+        // Base:
         $file = DOL_DOCUMENT_ROOT . '/' . $module . '/' . $module . '.yml';
         if (file_exists($file)) {
             $params[$idx]['base'] = spyc_load_file($file);
         }
 
-        // Version: 
-        if (BimpCore::getVersion()) {
-            $file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getVersion() . '/' . $module . '.yml';
+        // Version:
+        if (BimpCore::getExtendsVersion()) {
+            $file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getExtendsVersion() . '/' . $module . '.yml';
             if (file_exists($file)) {
                 $params[$idx]['version'] = spyc_load_file($file);
             }
@@ -558,7 +558,7 @@ class BimpYml
             $html .= self::renderYmlAnalyserColorsStyles($params_files);
             $html .= '<div class="yml_analyser_content">';
 
-            // Arborescence des fichiers: 
+            // Arborescence des fichiers:
             $html .= '<div class="yml_analyser_files_tree">';
             $html .= '<table>';
             $html .= '<thead>';
@@ -684,7 +684,7 @@ class BimpYml
             $html .= '</table>';
             $html .= '</div>';
 
-            // Trie des paramètres: 
+            // Trie des paramètres:
             $params = array('root' => array());
 
             foreach ($params_files as $idx => $file_data) {

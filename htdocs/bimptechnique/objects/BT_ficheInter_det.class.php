@@ -1045,7 +1045,9 @@ class BT_ficheInter_det extends BimpDolObject
 					$client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
 					$sujet = 'Dépassement d\'heure contrat de délégation ' . $contrat->getRef() . ' - ' . $client->getName();
 
-					$message = 'Bonjour ' . $commercial->getName() . ',<br />';
+					$commercial = $contrat->getCommercialClient(true);
+
+					$message = 'Bonjour' . (BimpObject::objectLoaded($commercial) ? $commercial->getName() . ' ' : '') . ',<br />';
 					$message .= $user->firstname . ' ' . $user->lastname . ' a renseigné une ligne dans sa fiche d\'intervention qui crée un dépassement des heures prévues dans le contrat.';
 					$message .= '<br />Contrat: ' . $contrat->getNomUrl() . '<br />Client: ' . $client->getNomUrl() . ' ' . $client->getName() . '<br />Fiche: ' . $fi->getNomUrl();
 					$message .= '<br /><br />Détails:<br />';

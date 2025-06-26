@@ -691,7 +691,6 @@ function vignette($file, $maxWidth = 160, $maxHeight = 120, $extName = '_small',
 
 	$whFact = $maxWidth / $maxHeight; // Width/height factor for maximum label dimensions
 	$imgWhFact = $imgWidth / $imgHeight; // Original width/height factor
-
 	// Set label dimensions
 	if ($whFact < $imgWhFact) {
 		// If determining width
@@ -704,7 +703,10 @@ function vignette($file, $maxWidth = 160, $maxHeight = 120, $extName = '_small',
 	}
 	$thumbHeight = (int) round($thumbHeight);
 	$thumbWidth = (int) round($thumbWidth);
-
+	// debut drsi
+	$thumbWidth = ($thumbWidth ?: 10);
+	$thumbHeight = ($thumbHeight ?: 10);
+//	fin drsi
 	// Define target format
 	if (empty($targetformat)) {
 		$targetformat = $infoImg[2];
@@ -715,6 +717,7 @@ function vignette($file, $maxWidth = 160, $maxHeight = 120, $extName = '_small',
 		// Compatibilite image GIF
 		$imgThumb = imagecreate($thumbWidth, $thumbHeight);
 	} else {
+//		var_dump($thumbWidth, $thumbHeight);
 		$imgThumb = imagecreatetruecolor($thumbWidth, $thumbHeight);
 	}
 

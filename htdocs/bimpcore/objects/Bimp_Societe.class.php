@@ -1862,7 +1862,7 @@ class Bimp_Societe extends BimpDolObject
 		return static::concatAdresse($this->getData('address'), $this->getData('zip'), $this->getData('town'), $this->getData('fk_departement'), $this->getData('fk_pays'), $icon, $single_line);
 	}
 
-	public function displayFullContactInfos($icon = true, $single_line = false)
+	public function displayFullContactInfos($icon = true, $single_line = false, $allowFields = array())
 	{
 		$html = '';
 
@@ -1887,6 +1887,11 @@ class Bimp_Societe extends BimpDolObject
 						 'skype' => 'fab_skype',
 						 'url'   => 'fas_globe',
 					 ) as $field => $icon_class) {
+//				if($allowFields) {
+//					var_dump($field, isset($allowFields[$field]), $allowFields[$field], isset($allowFields[$field]) && !$allowFields[$field]);
+//					echo '<br>';
+//				}
+				if (isset($allowFields[$field]) && !$allowFields[$field]) continue;
 				if ($this->getData($field)) {
 					$value = $this->getData($field);
 					if ($field === 'email') {
@@ -2245,7 +2250,7 @@ class Bimp_Societe extends BimpDolObject
 						} else {
 							$fl = false;
 						}
-						$html .= $contrat->getLink(array('object_icons' => 0));
+						$html .= $contrat->getLink(array('object_icons' => 0)) . '<span style="margin-right: 5px;"></span>' . $contrat->displayData('statut');
 					}
 					$html .= '</div>';
 				}
@@ -2269,7 +2274,7 @@ class Bimp_Societe extends BimpDolObject
 						} else {
 							$fl = false;
 						}
-						$html .= $contrat->getLink(array('object_icons' => 0, 'syntaxe' => '<ref> - <name>'));
+						$html .= $contrat->getLink(array('object_icons' => 0, 'syntaxe' => '<ref> - <name>')) . '<span style="margin-right: 5px;"></span>' . $contrat->displayData('statut');
 					}
 					$html .= '</div>';
 				}

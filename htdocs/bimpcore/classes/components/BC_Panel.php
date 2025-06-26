@@ -20,6 +20,8 @@ class BC_Panel extends BimpComponent
 
     public function __construct(BimpObject $object, $name, $path, $content_only = false, $level = 1, $title = null, $icon = null, $id_config = null)
     {
+		global $bc_panels_super_id;
+
         $this->params_def['title'] = array();
         $this->params_def['icon'] = array();
         $this->params_def['panel'] = array('data_type' => 'bool', 'default' => 1);
@@ -47,7 +49,8 @@ class BC_Panel extends BimpComponent
 
         $this->content_only = (int) $content_only;
         $this->level = $level;
-        $this->identifier = $object->object_name . '_' . ($name ? $name . '_' : '') . static::$type . BimpTools::randomPassword(10, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', false);
+//        $this->identifier = $object->object_name . '_' . ($name ? $name . '_' : '') . static::$type . '_' . BimpTools::randomPassword(10, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', false);
+        $this->identifier = $bc_panels_super_id . $object->object_name . '_' . ($name ? $name . '_' : '') . static::$type;
 
         if (BimpObject::objectLoaded($object)) {
             $this->identifier .= '_' . $object->id;
@@ -76,7 +79,7 @@ class BC_Panel extends BimpComponent
             $this->params['objects_change_reload'] = array($this->params['objects_change_reload']);
         }
 
-        $this->data['identifier'] = $this->identifier;
+//        $this->data['identifier'] = $this->identifier;
         $this->data['type'] = static::$type;
         $this->data['name'] = $this->name;
         $this->data['module'] = $this->object->module;
@@ -89,6 +92,19 @@ class BC_Panel extends BimpComponent
 
     public function renderHtml()
     {
+		if (isset($this->initial_filters) && is_array($this->initial_filters)) {
+			$json = json_encode($this->initial_filters);
+
+			if ($json) {
+				$this->identifier .= '_' . $json;
+			}
+		}
+
+		$md5 = md5($this->identifier);
+		if ($md5) {
+			$this->identifier = $md5;
+			$this->data['identifier'] = $md5;
+		}
         if (!(int) $this->params['show']) {
             return '';
         }
@@ -103,9 +119,10 @@ class BC_Panel extends BimpComponent
         $html = '';
         $this->setConfPath();
 
-        if (is_null($this->identifier)) {
-            $this->identifier = '';
-        }
+//        if (is_null($this->identifier)) {
+//            $this->identifier = '';
+//        }
+
 
         $labels = $this->object->getLabels();
         $html = '<script '.BimpTools::getScriptAttribut().'>';

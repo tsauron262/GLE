@@ -15,16 +15,16 @@ class BiAPI extends BimpAPI
 	public static $default_accept = 'text/xml';
 	public static $urls_bases = array(
 		'default' => array(
-			'prod' => 'https://erp.bimp.fr/bimp/bimpapi/public/',
-//			'prod' => 'http://172.24.2.31/OLAP/',
+//			'prod' => 'https://erp.bimp.fr/bimp/bimpapi/public/',
+			'prod' => 'http://172.24.2.31/OLAP/',
 			'test' => ''
 		)
 	);
 	public static $requests = array(
 		'req' => array(
 			'label'         => 'Requête',
-//			'url'           => 'msmdpump.dll',
-			'url'           => 'rebond.php',
+			'url'           => 'msmdpump.dll',
+//			'url'           => 'rebond.php',
 			'content_type' 	=> 'text/xml',
 		),
 	);
@@ -136,13 +136,15 @@ class BiAPI extends BimpAPI
 
 	public function testRequest(&$errors = array(), &$warnings = array())
 	{
-		$this->majCaWithNbDay(10, $warnings, $errors);
+//		$this->majCaWithNbDay(10, $warnings, $errors);
 
 
-//		$mois = array("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12");
-//		$annee = array("2024", "2025");
-//		$categorie = 0;
-//		$this->majCa($annee, $mois, 0, $warnings, $errors);
+		$mois = array("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12");
+		$annee = array("2020", "2021", "2022", "2023");
+		$annee = array("2024");
+		$annee = array("2025");
+		$categorie = 1;
+		$this->majCa($annee, $mois, $categorie, $warnings, $errors);
 	}
 
 	public function majCaWithNbDay($nbDay, &$warnings = array(), &$errors = array()){
@@ -183,6 +185,7 @@ class BiAPI extends BimpAPI
     FamillesProduitsSite[Level_4_Name],
     FamillesProduitsSite[Level_5_Name],';
 		}
+		$req .= 'KEEPFILTERS( TREATAS( {"Expédiée", "Préparée", "Réceptionnée", "Validée", "Validée par le vendeur", "En préparation"}, StatutCommandes[StatutCommande] )),';
 		$req .= 'KEEPFILTERS( TREATAS( {'.$annee.'}, Calendrier[Année] )),';
 		if($mois > 0){
 			$req .= 'KEEPFILTERS( TREATAS( {'.(int) $mois.'}, Calendrier[Mois Numéro] )),';
@@ -208,12 +211,15 @@ ORDER BY
 
 		foreach ($return as $key => $tabT) {
 			foreach ($tabT as $cat => $val) {
-				$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('shopId' => $key));
+				$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Client', array('shopid' => $key), true);
 //				if (!$soc || !$soc->isLoaded()) {
 //					$soc = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array('name_alias' => $key));
 //				}
 				if (!$soc || !$soc->isLoaded()) {
-					$warnings[] = 'Societe introuvable : ' . $key;
+					$soc = BimpObject::createBimpObject('bimpcore', 'Bimp_Client', array('nom' => 'Marchand inconnue importé de BI', 'zip' => '69000', 'town' => 'Lyon', 'shopid' => $key), true, $warnings, $warnings);
+				}
+				if (!$soc || !$soc->isLoaded()) {
+					$warnings[] = 'Societe introuvable et non céable : ' . $key;
 					$bad++;
 				} else {
 					$ok++;
@@ -224,7 +230,7 @@ ORDER BY
 					}
 					$dataFiltre = array(
 						'id_obj'       => $soc->id,
-						'type_obj'     => 0,
+						'type_obj'     => 'Bimp_Societe',
 						'fk_period'    => ($mois == 0) ? 0 : 3,
 						'debut_period' => $date,
 					);

@@ -15,6 +15,14 @@ list_page_url:
 
 header_list_name: default
 
+
+extrafields:
+    revue:
+        table: usergroup_revue
+        id_prop: id_group
+        filter_by_entity: 1
+        delete_db_row: 1
+
 dol_object: 
     instance: 
         dol_object: 
@@ -96,13 +104,15 @@ fields:
         label: Responsable
         type: id_object
         object: resp_user
-        dol_extra_field: 1
+        extra: 1
+        extrafields: revue
         input: 
             type: search_user
     data_revue: 
         label: Données de revue d'acces
         type: json
-        dol_extra_field: 1
+        extra: 1
+        extrafields: revue
 forms: 
     add_user: 
         rows: 
@@ -125,6 +135,7 @@ fields_tables:
             - field: secteur
             - field: note
             - field: fk_user
+            - field: data_revue
 
 views:
     default: 

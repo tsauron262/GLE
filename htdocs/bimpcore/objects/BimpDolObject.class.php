@@ -37,6 +37,7 @@ class BimpDolObject extends BimpObject
 		14  => "Bureautique",
 		15  => "Formation",
 		16  => "Sécurité",
+		75  => "Gestion",
 		100 => "Autre (ne pas utiliser)"
 	];
 
@@ -160,6 +161,13 @@ class BimpDolObject extends BimpObject
 							}
 						}
 					}
+				}
+			}
+
+			if (is_a($this, 'Bimp_CommandeFourn') || is_a($this, 'Bimp_FactureFourn')) {
+				$email_achat = BimpCore::getConf('mail_achat');
+				if ($email_achat) {
+					self::$cache[$cache_key][$email_achat] = $email_achat;
 				}
 			}
 
@@ -901,6 +909,8 @@ class BimpDolObject extends BimpObject
 
 		$html = '';
 
+		$html .= '<div class="">';
+
 		$html .= BimpInput::renderInput('select', $input_name . '_add_value', '', array(
 			'options'     => $emails,
 			'extra_class' => 'emails_select principal'
@@ -913,6 +923,7 @@ class BimpDolObject extends BimpObject
 		$html .= '<div class="mail_custom_value" style="display: none; margin-top: 10px">';
 		$html .= BimpInput::renderInput('text', $input_name . '_add_value_custom', '');
 		$html .= '<p class="inputHelp">Entrez une adresse e-mail valide puis cliquez sur "Ajouter"</p>';
+		$html .= '</div>';
 		$html .= '</div>';
 
 		return $html;

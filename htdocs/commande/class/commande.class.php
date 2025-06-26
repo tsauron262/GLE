@@ -531,6 +531,9 @@ class Commande extends CommonOrder
 
 		if (!$error && !$notrigger) {
 			// Call trigger
+			/*mod drsi v20*/
+			$this->idwarehouse = $idwarehouse;
+			/*fmoddrsi*/
 			$result = $this->call_trigger('ORDER_VALIDATE', $user);
 			if ($result < 0) {
 				$error++;
@@ -594,6 +597,7 @@ class Commande extends CommonOrder
 			$this->db->commit();
 			return 1;
 		} else {
+			BimpCore::addlog($error);
 			$this->db->rollback();
 			return -1;
 		}

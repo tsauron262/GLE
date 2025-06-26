@@ -178,7 +178,7 @@ class BimpCache
 	public static function getCacheServeur($key)
 	{
 		global $conf;
-		$key = $conf->entity . $key;
+		$key = $conf->entity . '_' . $key;
 
 		if (isset(self::$cache[$key]) && !is_null(self::$cache[$key])) {
 			return self::$cache[$key];
@@ -208,7 +208,7 @@ class BimpCache
 	public static function setCacheServeur($key, $value, $ttl = null)
 	{
 		global $conf;
-		$key = $conf->entity . $key;
+		$key = $conf->entity . '_' . $key;
 		if (is_null(self::$cache_server)) {
 			self::initCacheServeur();
 		}
@@ -220,10 +220,25 @@ class BimpCache
 		return false;
 	}
 
+	public static function unsetCacheServeur($key)
+	{
+		global $conf;
+		$key = $conf->entity . '_' . $key;
+		if (is_null(self::$cache_server)) {
+			self::initCacheServeur();
+		}
+
+		if (is_a(self::$cache_server, 'BimpCacheServer')) {
+			return self::$cache_server->delete($key);
+		}
+
+		return false;
+	}
+
 	public static function cacheServerExists($key)
 	{
 		global $conf;
-		$key = $conf->entity . $key;
+		$key = $conf->entity . '_' . $key;
 		if (is_null(self::$cache_server)) {
 			self::initCacheServeur();
 		}
@@ -643,7 +658,8 @@ class BimpCache
 		return $result;
 	}
 
-	public static function getObjectFieldsArray(BimpObject $object, $include_empty = false) {
+	public static function getObjectFieldsArray(BimpObject $object, $include_empty = false)
+	{
 		if (!is_null($object) && is_a($object, 'BimpObject')) {
 			$cache_key = $object->module . '_' . $object->object_name . '_fields_array';
 			if (!isset(self::$cache[$cache_key])) {
@@ -1583,6 +1599,7 @@ class BimpCache
 		if ($moduleName == 'bimpcore') {
 			return 1;
 		}
+
 		return (float) BimpCore::getConf('module_version_' . $moduleName, 0);
 	}
 
@@ -2341,7 +2358,7 @@ class BimpCache
 		if (!isset(self::$cache[$cache_key])) {
 			self::$cache[$cache_key] = array();
 
-			$rows = self::getBdb()->getRows('usergroup_user', '`fk_usergroup` = ' . (int) $id_group, null, 'array', array('fk_user'));
+			$rows = self::getBdb()->getRows('usergroup_user', '`fk_usergroup` = ' . (int) $id_group . ' AND entity IN (' . getEntity('usergroup') . ')', null, 'array', array('fk_user'));
 			if (is_array($rows)) {
 				foreach ($rows as $r) {
 					self::$cache[$cache_key][] = (int) $r['fk_user'];
@@ -2932,7 +2949,8 @@ class BimpCache
 						'id_centre_rattachement' => $centre->getData('id_centre_rattachement'),        // 10
 						'token'                  => $centre->getData('token'),        // 11
 						'id_group'               => $centre->getData('id_group'),
-						'infos'                  => ""
+						'infos'                  => "",
+						'rdv_allowed'            => (int) $centre->getData('rdv_allowed')
 					);
 				}
 			} else {
@@ -2957,6 +2975,7 @@ class BimpCache
 						'token'                  => $centre[11],
 						'id_group'               => $centre['idGroup'],
 						'infos'                  => (isset($centre[12]) ? $centre[12] : 1),
+						'rdv_allowed'            => 1
 					);
 				}
 			}
@@ -2965,7 +2984,7 @@ class BimpCache
 		return self::$cache[$cache_key];
 	}
 
-	public static function getCentresArray($activ_only = false, $label_key = 'label', $include_empty = true)
+	public static function getCentresArray($activ_only = false, $label_key = 'label', $include_empty = true, $rdv_allowed_only = false)
 	{
 		$cache_key = 'centres_sav_array';
 
@@ -2973,11 +2992,19 @@ class BimpCache
 			$cache_key .= '_active_only';
 		}
 
+		if ($rdv_allowed_only) {
+			$cache_key .= '_rdv_only';
+		}
+
 		if (!isset(self::$cache[$cache_key])) {
 			self::$cache[$cache_key] = array();
 
 			foreach (self::getCentresData() as $code => $centre) {
 				if ($activ_only && !(int) $centre['active']) {
+					continue;
+				}
+
+				if ($rdv_allowed_only && !(int) $centre['rdv_allowed']) {
 					continue;
 				}
 
@@ -3402,8 +3429,10 @@ class BimpCache
 			if (is_array($rows)) {
 				foreach ($rows as $r) {
 					self::$cache[$cache_key][$r->clef] = array(
-						'valeur'     => $r->valeur,
-						'email_from' => $r->email_from
+						'valeur'              => $r->valeur,
+						'email_from'          => $r->email_from,
+						'public_entity'       => $r->public_entity,
+						'fk_bank_account_def' => $r->fk_bank_account_def
 					);
 				}
 			}

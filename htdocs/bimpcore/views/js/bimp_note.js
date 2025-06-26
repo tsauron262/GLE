@@ -177,6 +177,7 @@ class bimp_note extends AbstractNotification {
     }
 
     getInitiales(nom) {
+		nom = nom.replace('(', '').replace(')', '').replace('@', ' @ ');
         var full_name = nom.split(' ');
         var initials = '';
         for (var i = 0; i < full_name.length; i++) {

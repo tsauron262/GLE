@@ -8,11 +8,11 @@ class FixeTabs_bimpmsg extends FixeTabs_module {
         $content = "";
         $alert = false;
         $maxTaskView = 30;
-        
-        
+
+
         $notes = BimpObject::getInstance("bimpcore", "BimpNote");
         $tabFils = $notes->getMyConversations(true, $maxTaskView);
-        
+
         $i = 0;
         $content = "";
         $nonLu = 0;
@@ -52,7 +52,7 @@ class FixeTabs_bimpmsg extends FixeTabs_module {
                             $content .= " - ".$soc->getNomUrl(1);
                 }
                 $content .= "<div onclick='loadModalObjectNotes($(this), \"".$fil['obj']->module."\", \"".$fil['obj']->object_name."\", \"".$fil['obj']->id."\", \"chat\", true);'>";
-                $content .= $notes->displayChatmsg("petit", false);
+                $content .= $notes->displayChatMsg("petit", false);
                 $content .= "</div></div>";
 
 
@@ -60,10 +60,10 @@ class FixeTabs_bimpmsg extends FixeTabs_module {
             }
         }
 
-        
+
 
             $this->bimp_fixe_tabs->addTab("Messages", "<span class='' >Messages" . ($nonLu > 0 ? " <span class='red'>" . $nonLu . " message" . ($nonLu > 1 ? 's' : '') . " non lu" . ($nonLu > 1 ? 's' : '') . ".</span>" : "") . "</span>", $content);
-            
+
             }
 
     function can($right){
@@ -79,11 +79,11 @@ class FixeTabs_bimpmsg extends FixeTabs_module {
 //        }
 //        return $retour;
     }
-    
+
     function displayHead() {
         $html = '';
         $html .= '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimpmsg/views/css/notesMsg.css"/>';
-        $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpmsg/views/js/notesMsg.js"></script>';
+//        $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpmsg/views/js/notesMsg.js"></script>'; // fichier vide
         return $html;
     }
 }

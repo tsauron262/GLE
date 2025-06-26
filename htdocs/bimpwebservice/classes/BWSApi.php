@@ -109,12 +109,12 @@ class BWSApi
 	{
 		$class_name = 'BWSApi';
 
-		if (BimpCore::getVersion()) {
-			if (file_exists(DOL_DOCUMENT_ROOT . '/bimpwebservice/extends/version/' . BimpCore::getVersion() . '/classes/BWSApi.php')) {
+		if (BimpCore::getExtendsVersion()) {
+			if (file_exists(DOL_DOCUMENT_ROOT . '/bimpwebservice/extends/version/' . BimpCore::getExtendsVersion() . '/classes/BWSApi.php')) {
 				$class_name = 'BWSApi_ExtVersion';
 
 				if (!class_exists($class_name)) {
-					require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/extends/version/' . BimpCore::getVersion() . '/classes/BWSApi.php';
+					require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/extends/version/' . BimpCore::getExtendsVersion() . '/classes/BWSApi.php';
 				}
 			}
 		}

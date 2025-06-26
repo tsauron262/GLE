@@ -14,7 +14,27 @@ parent_object:
     field_value: obj_name
 parent_id_property: id_obj
 
+nom_url:
+    card: default
+
 objects:
+    user_dest: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_dest
+                
+                
+    bimp_user_group:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_UserGroup 
+            id_object:
+                field_value: fk_group_dest
+                
     user_group:
         relation: hasOne
         delete: 0
@@ -25,6 +45,17 @@ objects:
                 class: UserGroup
             id_object:
                 field_value: fk_group_dest
+    
+    bimp_author_group:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_UserGroup
+            id_object:
+                field_value: fk_group_author
+                
     author_group:
         relation: hasOne
         delete: 0
@@ -67,8 +98,6 @@ fields:
         label: Société
         type: id_object
         object: societe
-        input:
-            type: search_societe
         display_if:
             field_name: type_author
             show_values: 2
@@ -112,9 +141,9 @@ fields:
             array: types_dest
         default_value: 0
     fk_user_dest:
-        label: Destinataire user
+        label: Utilisateur destinataire
         type: id_object
-        object: user
+        object: user_dest
         input:
             type: search_user
             include_empty: 1
@@ -122,9 +151,9 @@ fields:
             field_name: type_dest
             show_values: 1
     fk_group_dest:
-        label: Destinataire groupe
+        label: Groupe destinataire
         type: id_object
-        object: user_group
+        object: bimp_user_group
         input:
             type: search_group
             include_empty: 1
@@ -147,50 +176,96 @@ fields:
     fk_group_author:
         label: Group
         type: id_object
-        object: author_group
+        object: bimp_author_group
         display_if:
             field_name: type_author
             show_values: 4
         values:
             array: userUserGroups
+            
+    email_cc: 
+        label: Emails en copie
+        type: text
 
 forms:
     default:
         rows:
-            -   field: obj_type
-            -   field: obj_module
-            -   field: obj_name
-            -   field: id_obj
-            -   field: type_author
-            -   field: fk_group_author
-            -   field: id_societe
-            -   field: email
-            -   field: visibility
-            -   field: type_dest
-            -   field: fk_user_dest
-            -   field: fk_group_dest
-            -   custom: 1
+            obj_type:
+                field: obj_type
+            obj_module:
+                field: obj_module
+            obj_name:
+                field: obj_name
+            id_obj:
+                field: id_obj
+            type_author:
+                field: type_author
+            fk_group_author:
+                field: fk_group_author
+            id_societe:
+                field: id_societe
+            email:
+                field: email
+            visibility:
+                field: visibility
+            type_dest:
+                field: type_dest
+            fk_user_dest:
+                field: fk_user_dest
+            fk_group_dest:
+                field: fk_group_dest
+            email_dest:
+                custom: 1
                 label: Destinataire
-                input_name: mail_dest
-                input:
-                    type: text
-                value:
-                    callback: getMailTo
-                edit: 0
-                display_if:
-                    field_name: type_dest
-                    show_values: 2
-            -   custom: 1
-                label: Destinataire
-                input_name: mail_dest_contact
+                input_name: email_dest
                 input:
                     type: select
                     options:
-                        callback: getMailToContacts
+                        callback: getEmailDestsArray
                 display_if:
                     field_name: type_dest
-                    show_values: 5
-            -   custom: 1
+                    show_values: 2
+            email_dest_custom:
+                custom: 1
+                label: E-mail destinataire
+                input_name: email_dest_custom
+                input:
+                    type: text
+                display_if:
+                    fields_names: type_dest,email_dest
+                    type_dest:
+                        show_values: 2
+                    email_dest:
+                        show_values: custom
+            email_to_copy:
+                custom: 1
+                label: Copies e-mail
+                input_name: email_to_copy
+                input:
+                    type: text
+#                    type: select
+#                    options:
+#                        callback: getEmailToCcArray
+                    multiple: 1
+                display_if:
+                    field_name: type_dest
+                    show_values: 2
+                value: 
+                    callback: getEmailToCc
+#                    callback: getEmailCcToAddArray
+            email_from:
+                custom: 1
+                label: Emetteur
+                input_name: email_from
+                input:
+                    type: text
+                value:
+                    callback: getMailFrom
+                display_if:
+                    field_name: type_dest
+                    show_values: 2
+            note_modele:
+                custom: 1
                 label: Modèle
                 show:
                     conf: use_notes_models
@@ -198,7 +273,8 @@ forms:
                 data_type: int
                 content:
                     callback: renderModelInput
-            -   field: content
+            content:
+                field: content
     
     edit:
         rows:
@@ -206,25 +282,14 @@ forms:
             -   field: content
     
     msg:
+        extends: default
         rows:
-            -   field: obj_type
-            -   field: obj_module
-            -   field: obj_name
-            -   field: id_obj
-            -   field: type_author
+            fk_group_author: unset
+            id_societe: unset
+            email: unset
+            visibility: unset
+            type_author:
                 hidden: 1
-            -   field: type_dest
-            -   field: fk_user_dest
-            -   field: fk_group_dest
-            -   custom: 1
-                label: Modèle
-                show:
-                    conf: use_notes_models
-                input_name: note_modele
-                data_type: int
-                content:
-                    callback: renderModelInput
-            -   field: content
     
     rep:
         rows:
@@ -232,7 +297,6 @@ forms:
             -   field: obj_module
             -   field: obj_name
             -   field: id_obj
-            #            - field: type_dest
             -   custom: 1
                 label: Type auteur
                 input_name: type_author
@@ -253,23 +317,48 @@ forms:
                         params:
                             - fk_group_dest
             -   field: type_dest
-            #              hidden: 1
             -   field: fk_group_dest
-            #              edit: 0
             -   field: fk_user_dest
                 edit: 0
             -   custom: 1
                 label: Destinataire
-                input_name: mail_dest
+                input_name: email_dest
+                input: 
+                    type: select
+                    options: 
+                        callback: getEmailDestsArray
+            -   custom: 1
+                label: E-mail destinataire
+                input_name: email_dest_custom
                 input:
                     type: text
                 value:
                     callback: getMailTo
-                edit: 0
+                display_if:
+                    fields_names: type_dest,email_dest
+                    type_dest:
+                        show_values: 2
+                    email_dest:
+                        show_values: custom
+            -   custom: 1
+                label: Copies e-mail
+                input_name: email_to_copy
+                input:
+                    type: text
+                    multiple: 1
                 display_if:
                     field_name: type_dest
                     show_values: 2
-            #            - field: content
+            -   custom: 1
+                label: Emetteur
+                input_name: email_from
+                input:
+                    type: text
+                value:
+                    callback: getMailFrom
+                display_if:
+                    field_name: type_dest
+                    show_values: 2
             -   custom: 1
                 label: Modèle
                 show:
@@ -281,19 +370,12 @@ forms:
             -   custom: 1
                 label: Texte
                 input_name: content
-                input:
-                    auto_expand: 1
-                    hashtags: 1
-                    type: textarea
-                    rows: 3
+                content:
+                    callback: renderCustomContentInput
+                depends_on: note_modele
+        
         after_content:
             callback: getHisto
-            
-            #            - custom: 1
-            #              label: Historique
-            #              value: 
-            #                  callback: getHisto
-
 
 lists_cols:
     date_create:
@@ -307,9 +389,9 @@ lists_cols:
         value:
             callback: displayDestinataire
     chatmsg:
-        label: Destinataire(s)
+        label: ''
         value:
-            callback: displayChatmsg
+            callback: displayChatMsg
     parent:
         label: Objet lié
         value:
@@ -390,17 +472,19 @@ lists:
     
     chat:
         title: Messages
+        icon: fas_comments
+        enable_search: 0
+        no_rows_borders: 1
         n: 100
         add_form_name: msg
+        add_btn_label: Nouveau message
+        add_form_title: Nouveau message
         add_form_values:
             fields:
                 type_author: 1
                 type_dest: 1
         cols:
             chatmsg:
-                label: Destinataire(s)
-                value:
-                    callback: displayChatmsg
     
     bal:
         extends: default
@@ -425,3 +509,16 @@ filters_panels:
     default:
         filters:
             user_create:
+
+cards:
+    default:
+        status: viewed
+        fields:
+            -   label: Objet
+                value:
+                    callback: getParentLink
+            -   field: date_create
+            -   label: Auteur
+                value:
+                    callback: displayAuthor
+            -   field: content

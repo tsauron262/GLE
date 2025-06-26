@@ -206,7 +206,7 @@ if (!(int) $bdb->getValue('bimpcore_dictionnary', 'id', 'code = \'societe_rdc_ca
 		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
 			'id_dict' => $dict->id,
 			'code'    => 'ORDI',
-			'label'   => 'Oridinateur'
+			'label'   => 'Ordinateur'
 		), true, $errors);
 
 		BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(

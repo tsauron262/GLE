@@ -10,8 +10,20 @@ objects:
 sections:
     -   type: tabs
         tabs:
+            mytickets:
+                label: Mes tickets
+                icon: fas_user-check
+                sections:
+                    -   type: custom
+                        custom:
+                            callback:
+                                method: renderTicketList
+                                params:
+                                    - mytickets
+            
             default:
                 label: Tous les tickets
+                icon: fas_bars
                 sections:
                     -   type: list
                         list:
@@ -19,8 +31,20 @@ sections:
                             object: ticket
                             name: default
                             
+            not_assigned:
+                label: Non Assignés
+                icon: fas_user-alt-slash
+                sections:
+                    -   type: custom
+                        custom:
+                            callback: 
+                                method: renderTicketList
+                                params:
+                                    - not_assigned
+                                    
             stats:
                 label: Statistiques
+                icon: fas_chart-bar
                 sections:
                     -   type: stats_list
                         stats_list:

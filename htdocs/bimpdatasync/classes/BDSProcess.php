@@ -150,7 +150,7 @@ abstract class BDSProcess
 
     public function initOperation($id_operation, &$errors)
     {
-        $this->gestionPersistance($id_operation);
+        $this->gestionPersistance($id_operation, false, true);
         $data = array(
             'id_process'      => $this->process->id,
             'id_operation'    => $id_operation,

@@ -454,6 +454,7 @@ searches:
             - a.firstname
             - a.lastname
             - s.nom
+            - a.email
         fields_return: 
             - a.firstname
             - a.lastname

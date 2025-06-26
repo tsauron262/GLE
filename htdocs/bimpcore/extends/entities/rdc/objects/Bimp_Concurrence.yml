@@ -13,7 +13,7 @@ parent_id_property: fk_soc
 
 objects:
     chiffre_affaire:
-        relation: hasOne
+        relation: hasMany
         delete: 1
         instance:
             bimp_object: Bimp_ChiffreAffaire
@@ -65,26 +65,10 @@ views:
                               params:
                                   - chiffre_affaire
                                   - default
-                  - type: custom
-                    col_lg: 6
-                    col_md: 12
-                    col_sm: 12
-                    custom:
-                        callback:
-                            method: renderChildrenGraph
-                            params:
-                                - chiffre_affaire
-                                - rep
-                  - type: custom
-                    col_lg: 6
-                    col_md: 12
-                    col_sm: 12
-                    custom:
-                        callback:
-                            method: renderChildrenGraph
-                            params:
-                                - chiffre_affaire
-                                - rep2
+    ca_graph:
+        title: Chiffre d'affaire
+        rows:
+            - cols:
                   - type: custom
                     col_lg: 6
                     col_md: 12
@@ -105,6 +89,26 @@ views:
                             params:
                                 - chiffre_affaire
                                 - evol2
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - rep
+                  - type: custom
+                    col_lg: 6
+                    col_md: 12
+                    col_sm: 12
+                    custom:
+                        callback:
+                            method: renderChildrenGraph
+                            params:
+                                - chiffre_affaire
+                                - rep2
 
 lists:
     default:
@@ -114,8 +118,8 @@ lists:
             callback: canAddConcurrence
         add_form_name: default
         add_btn_label: Ajouter un concurrent
-#        extra_btn:
-#            callback: getListExtraButtons
+        extra_btn:
+            callback: getListExtraButtons
         edit_btn: 
             callback: canAddConcurrence
         edit_form: default
@@ -124,3 +128,8 @@ lists:
         cols:
             nom:
             site:
+            ca:
+                custom: 1
+                label: CA
+                value:
+                    callback: displayCa

@@ -60,7 +60,26 @@ class Bimp_FactureFourn extends BimpCommAchat
         return parent::isFieldEditable($field, $force_edit);
     }
 
-    public function isActionAllowed($action, &$errors = array())
+
+	public function quickPaiement(&$errors = array(), &$warnings = array()){
+		global $user;
+		require_once(DOL_DOCUMENT_ROOT.'/fourn/class/paiementfourn.class.php');
+		$paiement = new PaiementFourn($this->db->db);
+		$paiement->amounts = array($this->id => $this->getData('total_ttc'));
+		$paiement->fk_account = $this->getData('fk_account');
+		$paiement->paiementid = $this->getData('fk_mode_reglement');
+		$paiement->datepaye = $this->getData('datef');
+		$paiement->create($user);
+		if(isset($paiement->error) && $paiement->error != '')
+			$errors[] = $paiement->error;
+		else{
+			$result = $paiement->addPaymentToBank($user, 'payment_supplier', 'Paiement facture fournisseur', $this->getData('fk_account'), '', '');
+			$this->checkIsPaid();
+		}
+	}
+
+
+	public function isActionAllowed($action, &$errors = array())
     {
         $errors = array();
         $status = $this->getData('fk_statut');
@@ -277,6 +296,23 @@ class Bimp_FactureFourn extends BimpCommAchat
     }
 
     // Getters - overrides BimpComm
+
+
+	public function getActionsButtonsList()
+	{
+		$buttons = array();
+
+		if ($this->isActionAllowed('duplicate') && $this->canSetAction('duplicate')) {
+			$buttons[] = array(
+				'label'   => 'Cloner',
+				'icon'    => 'fas_copy',
+				'onclick' => $this->getJsActionOnclick('duplicate', array('datef' => date('Y-m-d'), 'exported' => 0, 'fk_user_author' => $user->id), array(
+					'form_name'   => 'duplicate_factfourn'
+				))
+			);
+		}
+		return $buttons;
+	}
 
     public function getActionsButtons()
     {
@@ -1212,48 +1248,44 @@ class Bimp_FactureFourn extends BimpCommAchat
 
     public function actionValidate($data, &$success)
     {
-        $errors = array();
         $warnings = array();
         $infos = array();
 
         $success = 'Facture fournisseur validée avec succès';
-
         $errors = $this->checkDate();
 
-        if (count($errors)) {
-            return $errors;
-        }
+        if (!count($errors)) {
+			if ((int) BimpCore::getConf('USE_ENTREPOT', null, 'bimpcore') && !(int) $this->getData('entrepot')) {
+				$errors[] = 'Entrepôt absent. Veuillez sélectionner un entrepôt avant de valider';
+			} else {
+				BimpTools::resetDolObjectErrors($this->dol_object);
+				global $user, $conf, $langs;
 
-        if ((int) BimpCore::getConf('USE_ENTREPOT', null, 'bimpcore') && !(int) $this->getData('entrepot')) {
-            $errors[] = 'Entrepôt absent. Veuillez sélectionner un entrepôt avant de valider';
-        } else {
-            BimpTools::resetDolObjectErrors($this->dol_object);
-            global $user, $conf, $langs;
+				if ($this->dol_object->validate($user, '', (int) $this->getData('entrepot')) < 0) {
+					$obj_errors = BimpTools::getDolEventsMsgs(array('errors'));
 
-            if ($this->dol_object->validate($user, '', (int) $this->getData('entrepot')) < 0) {
-                $obj_errors = BimpTools::getDolEventsMsgs(array('errors'));
+					if (!count($obj_errors)) {
+						$obj_errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' ne peut pas être validé' . $this->e();
+					}
+					$errors[] = BimpTools::getMsgFromArray($obj_errors);
+				} else {
+					if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
+						$this->fetch($this->id);
+						$this->dol_object->generateDocument($this->getModelPdf(), $langs);
+					}
+				}
 
-                if (!count($obj_errors)) {
-                    $obj_errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' ne peut pas être validé' . $this->e();
-                }
-                $errors[] = BimpTools::getMsgFromArray($obj_errors);
-            } else {
-                if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
-                    $this->fetch($this->id);
-                    $this->dol_object->generateDocument($this->getModelPdf(), $langs);
-                }
-            }
+				$obj_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
 
-            $obj_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
+				if (!empty($obj_warnings)) {
+					$warnings[] = BimpTools::getMsgFromArray($obj_warnings);
+				}
 
-            if (!empty($obj_warnings)) {
-                $warnings[] = BimpTools::getMsgFromArray($obj_warnings);
-            }
-
-            $obj_infos = BimpTools::getDolEventsMsgs(array('mesgs'));
-            if (!empty($obj_infos)) {
-                $infos[] = BimpTools::getMsgFromArray($obj_infos);
-            }
+				$obj_infos = BimpTools::getDolEventsMsgs(array('mesgs'));
+				if (!empty($obj_infos)) {
+					$infos[] = BimpTools::getMsgFromArray($obj_infos);
+				}
+			}
         }
 
         return array(

@@ -44,7 +44,7 @@ class BimpController
 			}
 		}
 
-		$ext_version = BimpCore::getVersion();
+		$ext_version = BimpCore::getExtendsVersion();
 		$ext_entity = BimpCore::getExtendsEntity();
 
 		// Surcharge Version:
@@ -458,7 +458,8 @@ class BimpController
 
 	public function display()
 	{
-		global $user;
+		global $user, $bc_panels_super_id;
+		$bc_panels_super_id = 'fc_' . $this->module . '_' . $this->controller . '_';
 
 		if (BimpTools::isSubmit('ajax')) {
 			$this->ajaxProcess();
@@ -874,6 +875,12 @@ class BimpController
 
 	protected function ajaxProcess()
 	{
+		global $bc_panels_super_id;
+
+		if (BimpTools::isSubmit('modal_idx')) {
+			$bc_panels_super_id .= 'modal_' . BimpTools::getValue('modal_idx', 0, 'int') . '_';
+		}
+
 		header('Content-Type: application/json');
 		BimpDebug::addDebugTime('Début affichage page');
 		if (BimpDebug::isActive()) {
@@ -939,10 +946,18 @@ class BimpController
 					$json_err_code = json_last_error();
 
 					if ($json_err_code == JSON_ERROR_UTF8) {
-						// On tente un encodage utf-8.
-						$result = BimpTools::utf8_encode($result);
-						$result['warnings'] = static::getAndResetAjaxWarnings();
-						$json = json_encode($result);
+						if (isset($result['no_utf8'])) {
+							// on tente d'ignorer les utf8 invalides :
+							$result['JSON_INVALID_UTF8_IGNORE'] = 1;
+							$json = json_encode($result, JSON_INVALID_UTF8_IGNORE);
+						}
+
+						if ($json === false) {
+							// On tente un encodage utf-8.
+							$result = BimpTools::utf8_encode($result);
+							$result['warnings'] = static::getAndResetAjaxWarnings();
+							$json = json_encode($result);
+						}
 
 						if ($json !== false) {
 							die($json);
@@ -1854,13 +1869,14 @@ class BimpController
 				}
 				if (!is_null($form_id)) {
 					$form->identifier = $form_id;
-				} else {
+				} /*else {
 					$form_id = $form->identifier;
-				}
+				}*/
 				if (count($form->errors)) {
 					$errors = $form->errors;
 				} else {
 					$html = $form->renderHtml();
+					$form_id = $form->identifier;
 				}
 			}
 		}
@@ -1974,17 +1990,19 @@ class BimpController
 						$form = new BC_Form($object, $id_parent, $form_name, 1, true);
 						$form->fields_prefix = $field_prefix;
 						$form->identifier = $form_id;
+						$row_params = array();
 						if (!is_null($form->config_path)) {
 							foreach ($form->params['rows'] as $row) {
 								if ($object->config->isDefined($form->config_path . '/rows/' . $row . '/field')) {
 									$form_field = $object->getConf($form->config_path . '/rows/' . $row . '/field', '');
 									if ($form_field && $form_field === $field_name) {
 										$row_params = BimpComponent::fetchParamsStatic($object->config, $form->config_path . '/rows/' . $row, BC_Form::$row_params);
-										$html = $form->renderFieldRow($field_name, $row_params, 3, true);
+										break;
 									}
 								}
 							}
 						}
+						$html = $form->renderFieldRow($field_name, $row_params, 3, true);
 
 						// Ancienne méthode :
 //                        $field = new BC_Field($object, $field_name, true, 'fields', $force_edit);
@@ -2048,7 +2066,7 @@ class BimpController
 				} else {
 					$params['child_name'] = $child_name;
 					$params['object_label'] = BimpTools::getValue('object_label', '', 'alphanohtml');
-					$params['fields_prefixe'] = BimpTools::getValue('fields_prefixe', '', 'aZ09');
+					$params['fields_prefixe'] = BimpTools::getValue('fields_prefixe', '', 'alphanohtml');
 
 					$html .= $child->renderFiltersSelect($params);
 				}
@@ -3379,7 +3397,7 @@ class BimpController
 		$id_filters_config = (int) BimpTools::getValue('id_filters_config', 0, 'int');
 		$full_panel_html = (int) BimpTools::getValue('full_panel_html', 1, 'int');
 
-		if ($module && $object_name && $list_type && $list_identifier && $id_list_filters) {
+		if ($module && $object_name && $list_type && $list_identifier/* && $id_list_filters*/) {
 			$object = BimpObject::getInstance($module, $object_name);
 			$bc_filters = new BC_FiltersPanel($object, $list_type, $list_name, $list_identifier, $panel_name, $id_filters_config);
 
@@ -3481,7 +3499,8 @@ class BimpController
 		return array(
 			'errors'        => $errors,
 			'notifications' => $notifs_for_user,
-			'request_id'    => BimpTools::getValue('request_id', 0, 'int')
+			'request_id'    => BimpTools::getValue('request_id', 0, 'int'),
+			'no_utf8'       => 1
 		);
 	}
 

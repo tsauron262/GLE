@@ -15,7 +15,7 @@ class Bimp_PaiementFourn extends BimpObject
         BimpObject::__construct($module, $object_name);
     }
 
-    // Getters: 
+    // Getters:
 
     public function getFourn()
     {
@@ -82,7 +82,7 @@ class Bimp_PaiementFourn extends BimpObject
         return 0;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function DisplayAccount()
     {
@@ -99,7 +99,7 @@ class Bimp_PaiementFourn extends BimpObject
         return '';
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderCaisseInput()
     {
@@ -108,6 +108,7 @@ class Bimp_PaiementFourn extends BimpObject
 
     public function renderFacturesAmountsInputs()
     {
+		$html = '';
         $id_fourn = (int) $this->getFourn();
 
         if (!$id_fourn) {
@@ -269,7 +270,7 @@ class Bimp_PaiementFourn extends BimpObject
         return $html;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayType()
     {
@@ -277,8 +278,8 @@ class Bimp_PaiementFourn extends BimpObject
             return $this->displayData('fk_paiement');
         }
     }
-    
-    
+
+
     public function validatePost()
     {
         $errors = parent::validatePost();
@@ -310,7 +311,7 @@ class Bimp_PaiementFourn extends BimpObject
         return $errors;
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function create(&$warnings = array(), $force_create = false)
     {
@@ -318,8 +319,12 @@ class Bimp_PaiementFourn extends BimpObject
 
         global $db, $user, $conf;
 
-        $id_account = (int) BimpTools::getPostFieldValue('id_account', BimpCore::getConf('id_default_bank_account', 0), 'int');
-        $account = null;
+		if(!$this->getData('fk_bank')) {
+			$id_account = (int) BimpTools::getPostFieldValue('id_account', BimpCore::getConf('id_default_bank_account', 0), 'int');
+		}
+		else
+			$id_account = $this->getData('fk_bank');
+		$account = null;
 
         if ($id_account) {
             BimpTools::loadDolClass('compta/bank', 'account');
@@ -335,7 +340,7 @@ class Bimp_PaiementFourn extends BimpObject
 
         $total_to_pay = (float) BimpTools::getValue('total_to_pay', 0, 'float');
         $total_avoirs = (float) BimpTools::getValue('total_avoirs', 0, 'float');
-        $total_paid = (float) BimpTools::getValue('total_paid_amount', 0, 'float');
+        $total_paid = (float) BimpTools::getValue('total_paid_amount', $this->getData('amount'), 'float');
 
         $avoirs = json_decode(BimpTools::getValue('avoirs_amounts', '', 'json_nohtml'), true);
         $total_factures_versements = 0;
@@ -347,7 +352,7 @@ class Bimp_PaiementFourn extends BimpObject
         $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $this->dol_object->paiementid);
         if (is_null($type_paiement) || !(string) $type_paiement) {
             $errors[] = 'Mode de paiement invalide';
-        } elseif (($total_paid + $total_avoirs) > $total_to_pay && $type_paiement !== 'LIQ') {
+        } elseif (($total_paid + $total_avoirs) > $total_to_pay && $type_paiement !== 'LIQ' && $total_to_pay > 0) {
             $errors[] = 'Le versement d\'une somme supérieure au total des factures n\'est possible que pour un paiement en espèces';
         }
 
@@ -374,7 +379,7 @@ class Bimp_PaiementFourn extends BimpObject
         BimpTools::loadDolClass('compta/facture', 'facture');
         $factures = array();
 
-        // Calcul du total payé par facture. 
+        // Calcul du total payé par facture.
         while (BimpTools::isSubmit('amount_' . $i)) {
             $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0, 'int');
             $amount = (float) BimpTools::getValue('amount_' . $i, 0, 'float');
@@ -425,7 +430,7 @@ class Bimp_PaiementFourn extends BimpObject
         }
 
         if (!count($errors)) {
-            // Insertion des avoirs éventuels: 
+            // Insertion des avoirs éventuels:
             $i = 1;
             while (BimpTools::isSubmit('amount_' . $i)) {
                 $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0, 'int');

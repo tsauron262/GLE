@@ -206,6 +206,8 @@ class EmailCollector extends CommonObject
 	public $target_directory;
 	public $maxemailpercollect;
 
+	public $isNew = 0;
+
 	/**
 	 * @var int|string $datelastresult
 	 */
@@ -2007,7 +2009,7 @@ class EmailCollector extends CommonObject
 							$dateemail += (60 * (int) $reg[3]);
 						}
 					}
-					$subject = $overview['subject'];
+					$subject = dol_escape_htmltag($overview['subject']);
 				} else {
 					$fromstring = $overview[0]->from;
 					$replytostring = (!empty($overview['in_reply-to']) ? $overview['in_reply-to'] : (!empty($headers['Reply-To']) ? $headers['Reply-To'] : "")) ;
@@ -2373,6 +2375,7 @@ class EmailCollector extends CommonObject
 
 				// Do operations (extract variables and creating data)
 				if ($mode < 2) {	// 0=Mode production, 1=Mode test (read IMAP and try SQL update then rollback), 2=Mode test with no SQL updates
+					$this->isNew = 0;
 					foreach ($this->actions as $operation) {
 						$errorforthisaction = 0;
 						$ticketalreadyexists = 0;
@@ -3349,6 +3352,7 @@ class EmailCollector extends CommonObject
 											 * mod drsi v20.0
 											 */
 											$objectemail = $tickettocreate;
+											$this->isNew = true;
 											/*
 											 * fmoddrsi
 											 */
@@ -3501,6 +3505,10 @@ class EmailCollector extends CommonObject
 								'subject' => $subject,
 								'header' => $header,
 								'attachments' => $attachments,
+								'new'		=> $this->isNew,
+								/*moddrsi (20.0)*/
+								'cc' => $sendtocc
+								/*fmoddrsi*/
 							);
 							$reshook = $hookmanager->executeHooks('doCollectImapOneCollector', $parameters, $this, $operation['type']);
 

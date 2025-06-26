@@ -39,8 +39,6 @@ class BimpDictionnaryValue extends BimpObject
 
 	// Rendus HTML:
 
-	// Traitements:
-
 	// Actions:
 
 	// Overrides:

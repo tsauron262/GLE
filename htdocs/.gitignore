@@ -17,6 +17,7 @@
 /ecommerce/
 /webmail*
 /conf/conf.php
+/conf/config-srv.inc.php
 /subtotal*
 /abricot*
 /nomenclature*

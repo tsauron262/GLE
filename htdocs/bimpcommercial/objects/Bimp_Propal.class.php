@@ -2,9 +2,9 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 
-if (BimpCore::getVersion() && BimpCore::getVersion()) {
-	if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getVersion() . '/objects/BimpComm.class.php')) {
-		require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getVersion() . '/objects/BimpComm.class.php';
+if (BimpCore::getExtendsVersion() && BimpCore::getExtendsVersion()) {
+	if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getExtendsVersion() . '/objects/BimpComm.class.php')) {
+		require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getExtendsVersion() . '/objects/BimpComm.class.php';
 	}
 }
 
@@ -879,6 +879,27 @@ class Bimp_Propal extends Bimp_PropalTemp
 		}
 
 		return $actions;
+	}
+
+	public function getDefaultListExtraButtons()
+	{
+		$buttons = parent::getDefaultListExtraButtons();
+		if ($this->isActionAllowed('close')) {
+			if ($this->canSetAction('close')) {
+				$buttons[] = array(
+					'label'   => 'Devis Refusé',
+					'icon'    => 'times',
+					'onclick' => $this->getJsActionOnclick('close', array(
+						'new_status' => 3
+					), array(
+						'form_name' => 'close'
+					))
+				);
+			}
+		}
+
+
+		return $buttons;
 	}
 
 	public function getActionsButtons()
@@ -3774,5 +3795,45 @@ class Bimp_Propal extends Bimp_PropalTemp
 		}
 
 		return $html;
+	}
+
+
+
+	public static function checkMargesAll()
+	{
+		$where = '';
+
+		$last_check_tms = BimpCore::getConf('propals_marges_last_check_tms', '');
+		if ($last_check_tms) {
+			$where = 'tms > \'' . $last_check_tms . '\'';
+		} else {
+			$where = 'tms > \'2024-05-22 00:00:00\''; // Jour de mise en place du cron sur Bimp
+		}
+
+		$rows = self::getBdb()->getRows('propal', $where, null, 'array', array('rowid'), 'tms', 'asc');
+
+		$nchecked = 0;
+
+		if (is_array($rows)) {
+			if (count($rows) > 1000) {
+				$msg = 'Cron vérfis marges propal : trop de commande à vérifier (' . count($rows) . ') - exécution via BDS nécessaire';
+				bimpcore::addlog($msg, Bimp_Log::BIMP_LOG_URGENT, 'bimpcommercial');
+				return $msg;
+			} else {
+				foreach ($rows as $r) {
+					$propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Propal', (int) $r['rowid']);
+					if (BimpObject::objectLoaded($propal)) {
+						$nchecked++;
+						$propal->checkMarge();
+					}
+				}
+
+				BimpCore::setConf('propals_marges_last_check_tms', date('Y-m-d H:i:s'));
+			}
+		}
+
+
+
+		return $nchecked . ' propal(s) vérifée(s)';
 	}
 }

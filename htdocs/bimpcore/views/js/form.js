@@ -2079,59 +2079,110 @@ function selectChecklistItem($container, value, value_type) {
 function onChecklistSearchInputChange($input) {
 	if ($.isOk($input)) {
 		var val = $input.val();
+
 		var $container = $input.findParentByClass('check_list_search_input');
 		var choices = [];
 		if (typeof (val) === 'string' && val !== '') {
-			if ($.isOk($container)) {
-				var regex1 = new RegExp('^(.*)(' + val + ')(.*)$', 'i');
-				var regex2 = '';
-				if (/^S.+$/i.test(val)) {
-					regex2 = new RegExp('^(.*)(' + val.replace(/^S(.+)$/i, '$1') + ')(.*)$', 'i');
-				}
-				$container.findParentByClass('check_list_container').find('.check_list_item').each(function () {
-					if (!$(this).children('input[type=checkbox]').prop('checked')) {
-						var choice = {
-							'label': '',
-							'value': ''
-						};
-						var text = $(this).children('label').text();
-						if (text) {
-							if (regex1.test(text)) {
-								choice.label = text.replace(regex1, '$1<strong>$2</strong>$3');
-							} else if (regex2 && regex2.test(text)) {
-								choice.label = text.replace(regex2, '$1<strong>$2</strong>$3');
-							}
+			var mult_vals = val.split(";");
 
-							var $item_input = $(this).find('input.check_list_item_input');
-							if ($item_input.length) {
-								choice.value = $item_input.val();
+			if (mult_vals.length > 1) {				
+				var nOk= 0;
+				var unfound = [];
+				
+				for (var i in mult_vals) {
+					var selected_items = [];
+					var found = false;
+					$container.findParentByClass('check_list_container').find('.check_list_item').each(function () {
+						if (!found) {
+							var text = $(this).children('label').text();
+							if (text === mult_vals[i]) {
+								found = true;
+							} else {
+								if (/^.+ \(.+\)$/.test(text)) {
+									if (text.replace(/^(.+) \(.+\)$/, '$1') === mult_vals[i]) {
+										found = true;
+									} else if (text.replace(/^.+ \((.+)\)$/, '$1') === mult_vals[i]) {
+										found = true;
+									}
+								}								
 							}
-						}
-
-						if (choice.label || choice.value) {
-							choices.push(choice);
-						}
-					}
-				});
-				if (choices.length) {
-					displayInputChoices($input, choices, function ($btn) {
-						if ($.isOk($btn)) {
-							var value = $btn.data('item_value');
-							var value_type = 'value';
-							if (typeof (value) === 'undefined') {
-								value = $btn.html();
-								value = value.replace('<strong>', '');
-								value = value.replace('</strong>', '');
-								value_type = 'label';
+							
+							if (found) {
+								nOk++;
+								$(this).find('input.check_list_item_input').prop('checked', true);	
 							}
-
-							var $checkList = $btn.findParentByClass('check_list_container');
-							$input.addClass('noEnterCheck');
-							selectChecklistItem($checkList, value, value_type);
+							
+							
 						}
 					});
+					
+					if (!found) {
+						unfound.push(mult_vals[i]);	
+					}					
+				}
+				
+				if (nOk > 0) {
+					bimp_msg(nOk + ' élément(s) trouvé(s)', 'success');
+				}
+				
+				if (unfound.length > 0) {
+					bimp_msg(unfound.length + ' élément(s) non trouvé(s) : <br/><br/>' + unfound.join('<br/>'), 'warning');
+				}
+				
+				$input.val('');
+			} else {
+				if ($.isOk($container)) {
+					var regex1 = new RegExp('^(.*)(' + val + ')(.*)$', 'i');
+					var regex2 = '';
+					if (/^S.+$/i.test(val)) {
+						regex2 = new RegExp('^(.*)(' + val.replace(/^S(.+)$/i, '$1') + ')(.*)$', 'i');
+					}
+					$container.findParentByClass('check_list_container').find('.check_list_item').each(function () {
+						if (!$(this).children('input[type=checkbox]').prop('checked')) {
+							var choice = {
+								'label': '',
+								'value': ''
+							};
+							var text = $(this).children('label').text();
+							if (text) {
+								if (regex1.test(text)) {
+									choice.label = text.replace(regex1, '$1<strong>$2</strong>$3');
+								} else if (regex2 && regex2.test(text)) {
+									choice.label = text.replace(regex2, '$1<strong>$2</strong>$3');
+								}
+
+								var $item_input = $(this).find('input.check_list_item_input');
+								if ($item_input.length) {
+									choice.value = $item_input.val();
+								}
+							}
+
+							if (choice.label || choice.value) {
+								choices.push(choice);
+							}
+						}
+					});
+					if (choices.length) {
+						displayInputChoices($input, choices, function ($btn) {
+							if ($.isOk($btn)) {
+								var value = $btn.data('item_value');
+								var value_type = 'value';
+								if (typeof (value) === 'undefined') {
+									value = $btn.html();
+									value = value.replace('<strong>', '');
+									value = value.replace('</strong>', '');
+									value_type = 'label';
+								}
+
+								var $checkList = $btn.findParentByClass('check_list_container');
+								$input.addClass('noEnterCheck');
+								selectChecklistItem($checkList, value, value_type);
+							}
+						});
+					}
 				}
 			}
+
 		}
 
 		if (!choices.length) {
@@ -3336,7 +3387,7 @@ function setInputsEvents($container) {
 				});
 
 				$input.keyup(function (e) {
-					if (e.key === 'Alt' || e.key === 'Enter') {
+					if (/*e.key === 'Alt' || */e.key === 'Enter') { // pas de alt car pertube la saisie de certains caractères (@ par ex.)  
 						e.preventDefault();
 						e.stopPropagation();
 						$btn.click();

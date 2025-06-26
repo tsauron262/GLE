@@ -136,7 +136,7 @@ fields:
         type: int
         default_value: 0
     fk_account: 
-        label: Compte financier
+        label: Compte bancaire
         type: id_object
         object: account
         values: 
@@ -350,6 +350,8 @@ lists:
         bulk_actions:
             delete: 
                 label: supprimer les factures fournisseurs sélectionnées
+        extra_btn:
+            callback: getActionsButtonsList
         extra_bulk_actions: 
             callback: getListExtraBulkActions
         sort_field: datec

@@ -189,7 +189,6 @@ associations:
         object: propal
         label: Devis
 
-
 fields:
     ref:
         label: Référence
@@ -483,7 +482,7 @@ fields:
             no_autocorrect: 1
     pword_admin:
         label: Mot de passe admin
-        required: 1
+        required: 0
         user_edit: 1
         input:
             no_autocorrect: 1
@@ -806,7 +805,8 @@ forms:
                 data_type: bool
                 input:
                     type: toggle
-                value: 1
+                value: 
+                    callback: isDureeInfSixHeures
             -   custom: 1
                 label: Contact
                 input_name: id_contact

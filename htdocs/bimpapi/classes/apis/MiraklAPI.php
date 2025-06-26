@@ -51,7 +51,7 @@ class MiraklAPI extends BimpAPI
 					'IS_NULL'
 				)
 			)
-		));
+		), 'id', 'ASC', array(), 500);
 		foreach($socs as $soc){
 			$soc->appelMiraklS20($warnings);
 		}
@@ -71,6 +71,17 @@ class MiraklAPI extends BimpAPI
 		return $data;
 	}
 
+	public function getShopsPagination($offset = 0, $max = 100, &$errors = array())
+	{
+		$data = $this->execCurl('getShops', array(
+			'url_params' => array(
+				'offset' => $offset,
+				'max'    => $max
+			)
+		), $errors);
+
+		return $data;
+	}
 
 	public function getDefaultRequestsHeaders($request_name, &$errors = array())
 	{

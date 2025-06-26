@@ -2,13 +2,13 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 
-if (BimpCore::getVersion() && BimpCore::getVersion()) {
-    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getVersion() . '/objects/BimpComm.class.php')) {
-        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getVersion() . '/objects/BimpComm.class.php';
+if (BimpCore::getExtendsVersion()) {
+    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getExtendsVersion() . '/objects/BimpComm.class.php')) {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BimpCore::getExtendsVersion() . '/objects/BimpComm.class.php';
     }
 }
 
-if (BimpCore::getExtendsEntity() != '' && BimpCore::getExtendsEntity()) {
+if (BimpCore::getExtendsEntity()) {
     if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BimpCore::getExtendsEntity() . '/objects/BimpComm.class.php')) {
         require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BimpCore::getExtendsEntity() . '/objects/BimpComm.class.php';
     }
@@ -699,7 +699,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return '';
     }
 
-    public function getData($field, $withDefault = true)
+    public function getData($field, $withDefault = true, $forDisplay = false)
     {
         // Pour mettre à jour mode et cond réglement dans le formulaire en cas de sélection d'un nouveau client ou client facturation.
         if (in_array($field, array('fk_cond_reglement', 'fk_mode_reglement'))) {

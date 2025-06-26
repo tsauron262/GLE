@@ -38,7 +38,23 @@ fields:
         type: string
         values:
             array: type_notif
-
+    msgOnParent:
+        label: Message sur parent
+        type: bool
+        default_value: 0
+        display_if:
+            field_name: type_notif
+            show_values: 0
+    searchByCallback:
+        label: Recherche par callback
+        type: bool
+        default_value: 0
+    callbackFunction:
+        label: Recherche par callback
+        display_if:
+            field_name: searchByCallback
+            show_values: 1
+        
     filtre_piece:
         label: Filtre pièce
         type: object_filters
@@ -53,6 +69,9 @@ fields:
                 params:
                     - obj_name
         depends_on: type_piece
+        display_if:
+            field_name: searchByCallback
+            show_values: 0
         
     notified_user:
         label: Utilisateurs notifiés
@@ -81,12 +100,15 @@ fields:
     message_notif:
         label: Message
         type: text
-
+    checkIfNoteNonLue:
+        label: Ne pas refaire de message s'il en exite un non lu 
+        type: bool
+        default_value: 0
     active: 
         label: Activée
         type: bool
         default_value: 1
-            
+    
 
 lists:
     default:
@@ -104,3 +126,4 @@ lists:
             notified_group:
             active: 
                 edit: 1
+            msgOnParent:

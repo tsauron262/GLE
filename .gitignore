@@ -98,8 +98,5 @@ phpstan_custom.neon
 /htdocs/bimpcore/diff_to.html
 /htdocs/bimpressources/
 !/htdocs/synopsiscaldav/caldav/vendor/
-/htdocs/includes/
 /htdocs/bimpcore/site.html
 /htdocs/bimpflo/
-/htdocs/custom/
-/htdocs/conf/

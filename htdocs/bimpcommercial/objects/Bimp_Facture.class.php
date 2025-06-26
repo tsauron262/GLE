@@ -150,9 +150,7 @@ class Bimp_Facture extends BimpComm
 				return (int) $commission->can('create');
 
 			case 'checkPa':
-//                if (!$user->admin) {
-//                    return 0; // A suppr
-//                }
+			case 'checkRa':
 //                $line_instance = $this->getLineInstance();
 //                if (is_a($line_instance, 'ObjectLine')) {
 //                    return (int) $line_instance->canEditPrixAchat();
@@ -390,7 +388,7 @@ class Bimp_Facture extends BimpComm
 
 	public function isActionAllowed($action, &$errors = array())
 	{
-		if (in_array($action, array('validate', 'modify', 'reopen', 'cancel', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements', 'classifyPaid', 'setCommandeLinesNotBilled', 'linesToFacture', 'exportToChorus', 'confirmChorusExport', 'forceChorusExported', 'generatePdfAttestLithium'))) {
+		if (in_array($action, array('validate', 'modify', 'reopen', 'cancel', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements', 'classifyPaid', 'setCommandeLinesNotBilled', 'linesToFacture', 'exportToChorus', 'confirmChorusExport', 'forceChorusExported', 'generatePdfAttestLithium', 'checkRa'))) {
 			if (!$this->isLoaded()) {
 				$errors[] = 'ID de la facture absent';
 				return 0;
@@ -739,6 +737,17 @@ class Bimp_Facture extends BimpComm
 				}
 				return 1;
 
+			case 'checkRa':
+				if (!in_array($type, array(0, 1, 2))) {
+					$errors[] = 'Ce type de facture n\'est pas élligible pour le processus de vérification des prix d\'achat';
+					return 0;
+				}
+				if (!in_array($status, array(1, 2))) {
+					$errors[] = 'Cette facture n\'est pas validée';
+					return 0;
+				}
+				return 1;
+
 			case 'createAcompteRemiseRbt':
 				if ($type !== Facture::TYPE_DEPOSIT) {
 					$errors[] = 'Cette facture n\'est pas de type facture d\'acompte';
@@ -1048,6 +1057,43 @@ class Bimp_Facture extends BimpComm
 		}
 
 		return $show;
+	}
+
+	public function quickPaiement(&$errors = array(), &$warnings = array()){
+		global $user;
+
+		require_once(DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php');
+		$paiement = new Paiement($this->db->db);
+		$paiement->amounts = array($this->id => $this->getData('total_ttc'));
+		$paiement->fk_account = $this->getData('fk_account');
+		$paiement->paiementid = $this->getData('fk_mode_reglement');
+		$paiement->datepaye = $this->getData('datef');
+		$paiement->create($user);
+		if(isset($paiement->error) && $paiement->error != '')
+			$errors[] = $paiement->error;
+		else{
+			$result = $paiement->addPaymentToBank($user, 'payment_supplier', 'Paiement facture client', $this->getData('fk_account'), '', '');
+			$this->checkIsPaid();
+		}
+	}
+
+	// Getters params:
+	public function getActionsButtonsList()
+	{
+		$buttons = array();
+
+		if ($this->can("create")) {
+			$buttons[] = array(
+				'label'   => 'Cloner',
+				'icon'    => 'fas_copy',
+				'onclick' => $this->getJsActionOnclick('duplicate', array(
+					'datef' => date('Y-m-d')
+				), array(
+					'form_name' => 'duplicate'
+				))
+			);
+		}
+		return $buttons;
 	}
 
 	// Getters params:
@@ -1480,13 +1526,24 @@ class Bimp_Facture extends BimpComm
 		}
 
 		// Vérifier les prix d'achat:
-		if ($this->isActionAllowed('checkcPa') && $this->canSetAction('checkPa')) {
+		if ($this->isActionAllowed('checkPa') && $this->canSetAction('checkPa')) {
 			$buttons[] = array(
 				'label'   => 'Vérifier les prix d\'achat',
 				'icon'    => 'fas_search-dollar',
 				'onclick' => $this->getJsActionOnclick('checkPa', array(), array(
 					'form_name'      => 'check_pa',
 					'on_form_submit' => 'function($form, extra_data) { return onCheckPaFactureFormSubmit($form, extra_data); }'
+				))
+			);
+		}
+
+		// Vérifier les remises arrières:
+		if ($this->isActionAllowed('checkRa') && $this->canSetAction('checkRa')) {
+			$buttons[] = array(
+				'label'   => 'Vérifier remises arrières',
+				'icon'    => 'fas_search-dollar',
+				'onclick' => $this->getJsActionOnclick('checkRa', array(), array(
+					'form_name'      => 'check_ra',
 				))
 			);
 		}
@@ -4184,7 +4241,7 @@ class Bimp_Facture extends BimpComm
 					$html .= BimpTools::displayMoneyValue((float) $line->pa_ht);
 					if ((float) $line->pa_ht !== $line_pa_ht) {
 						$html .= '<br/>';
-						$html .= 'Corrections incluses: ' . BimpTools::displayMoneyValue($line_pa_ht);
+						$html .= 'PA revalorisations incluses: ' . BimpTools::displayMoneyValue($line_pa_ht);
 					}
 					$html .= '</td>';
 					$html .= '<td>';
@@ -4389,12 +4446,11 @@ class Bimp_Facture extends BimpComm
 					if (isset($this->dol_object->linkedObjects['commande'])) {
 						$conf->global->STOCK_CALCULATE_ON_BILL = false;
 					} else {
-						if($this->getData('entrepot') < 1){
+						if ($this->getData('entrepot') < 1) {
 							$errors[] = 'Entrepôt de la facture non renseigné';
-						}
-						else{
+						} else {
 							$product = $line->getChildObject('product');
-							if($product->isLoaded() && $product->isSerialisable()){
+							if ($product->isLoaded() && $product->isSerialisable()) {
 								$errors[] = "Produit serialisable commande requise";
 							}
 						}
@@ -4513,56 +4569,8 @@ class Bimp_Facture extends BimpComm
 						}
 					} elseif ($line->isArticleLine()) {
 						// Création des revalorisations sur Remise arrière:
-						$remises_arrieres = $line->getRemisesArrieres();
-						if (!empty($remises_arrieres)) {
-							foreach ($remises_arrieres as $remise_arriere) {
-								$remise_pa = $remise_arriere->getRemiseAmount();
-								if (!$remise_pa) {
-									continue;
-								}
-
-								$ra_type = $remise_arriere->getData('type');
-
-								// On vérifie qu'une reval n'existe pas déjà:
-								if ($ra_type != 'oth') {
-									$reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
-										'id_facture'      => (int) $this->id,
-										'id_facture_line' => (int) $line->id,
-										'type'            => $ra_type
-									));
-
-									if (BimpObject::objectLoaded($reval)) {
-										continue;
-									}
-								}
-
-								$reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
-
-								$dt = new DateTime($this->getData('datec'));
-
-								$reval_errors = $reval->validateArray(array(
-									'id_facture'      => (int) $this->id,
-									'id_facture_line' => (int) $line->id,
-									'type'            => $ra_type,
-									'date'            => $dt->format('Y-m-d'),
-									'amount'          => $remise_pa,
-									'qty'             => (float) $line->qty
-								));
-
-								if ($remise_arriere->getData('type') == 'oth') {
-									$reval->set('note', $remise_arriere->getData('label'));
-								}
-
-								if (!count($reval_errors)) {
-									$reval_warnings = array();
-									$reval_errors = $reval->create($reval_warnings, true);
-								}
-
-								if (count($reval_errors)) {
-									$warnings[] = BimpTools::getMsgFromArray($reval_errors, 'Echec création de la revalorisation pour la remise arrière "' . $remise_arriere->getData('label') . '"');
-								}
-							}
-						}
+						$infos = array();
+						$line->checkRemisesArrieres($warnings, $infos, true);
 
 						// Mouvements de stocks :
 						if ($line->getData('linked_object_name') == 'contrat_line' && (int) $line->getData('linked_id_object')) {
@@ -6167,6 +6175,26 @@ class Bimp_Facture extends BimpComm
 		);
 	}
 
+	public function actionCheckRa($data, &$success)
+	{
+		$errors = array();
+		$warnings = array();
+		$success = 'Vérification effectuée';
+
+		$lines = $this->getLines('not_text');
+		$recreate = (int) BimpTools::getPostFieldValue('recreate_revals', 0, 'int');
+
+		foreach ($lines as $line) {
+			$line->checkRemisesArrieres($errors, $warnings, false, $recreate);
+		}
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
+
 	public function actionCreateAcompteRemiseRbt($data, &$success)
 	{
 		$errors = array();
@@ -7371,16 +7399,17 @@ class Bimp_Facture extends BimpComm
 				$code = "rappel_facture_brouillon";
 				$sujet = "Facture brouillon à régulariser";
 
-                $return .= ' - ' . $facs_ids . /*' => Mail to ' . $mail . */ ' : ';
-                if (!count(BimpUserMsg::envoiMsg($code, $sujet, $msg, $id_user))) {
-                    $return .= ' [OK]';
-                    $i++;
-                } else {
-                    $return .= ' [ECHEC]';
-                }
-                $return .= '<br/>';
-            }
-        }
+				$return .= ' - ' . $facs_ids . /*' => Mail to ' . $mail . */
+					' : ';
+				if (!count(BimpUserMsg::envoiMsg($code, $sujet, $msg, $id_user))) {
+					$return .= ' [OK]';
+					$i++;
+				} else {
+					$return .= ' [ECHEC]';
+				}
+				$return .= '<br/>';
+			}
+		}
 
 		return "OK " . $i . ' mail(s)<br/><br/>' . $return;
 	}
@@ -7515,17 +7544,17 @@ class Bimp_Facture extends BimpComm
 								$msg .= 'La facture "' . $facture->getLink() . '" dont le mode de paiement est de type "financement" n\'a pas été payée alors que sa date limite de réglement est le ';
 								$msg .= date('d / m / Y', strtotime($fac_date_lim));
 
-                                $out .= ' - Fac ' . $facture->getLink() . ' : ';
+								$out .= ' - Fac ' . $facture->getLink() . ' : ';
 
 								$code = "rappel_facture_financement_impayee";
-								if (!count(BimpUserMsg::envoiMsg($code, $subject, $msg, $facture)))	{
-                                    $out .= '[OK]';
-                                } else {
-                                    $out .= '[ECHEC]';
-                                }
-                                $out .= '<br/>';
-                                break;
-                            }
+								if (!count(BimpUserMsg::envoiMsg($code, $subject, $msg, $facture))) {
+									$out .= '[OK]';
+								} else {
+									$out .= '[ECHEC]';
+								}
+								$out .= '<br/>';
+								break;
+							}
 
 							$date_check->add(new DateInterval('P15D'));
 						}
@@ -7962,13 +7991,14 @@ class Bimp_Facture extends BimpComm
 	/*
 	 * Attention dangereux vas refaire les mouvement de stock
 	 */
-	public function reDestock(){
+	public function reDestock()
+	{
 		global $user, $langs;
 		$errors = array();
 		$idwarehouse = $this->getData('entrepot');
 		$num = $this->getData('ref');
 		// If active (STOCK_CALCULATE_ON_BILL), we decrement the main product and its components at invoice validation
-		if ($this->dol_object->type != $this->dol_object::TYPE_DEPOSIT &&  isModEnabled('stock') && getDolGlobalString('STOCK_CALCULATE_ON_BILL') && $idwarehouse > 0) {
+		if ($this->dol_object->type != $this->dol_object::TYPE_DEPOSIT && isModEnabled('stock') && getDolGlobalString('STOCK_CALCULATE_ON_BILL') && $idwarehouse > 0) {
 			require_once DOL_DOCUMENT_ROOT . '/product/stock/class/mouvementstock.class.php';
 			$langs->load("agenda");
 
@@ -7984,14 +8014,14 @@ class Bimp_Facture extends BimpComm
 					if ($this->dol_object->type == $this->dol_object::TYPE_CREDIT_NOTE) {
 						// TODO If warehouseid has been set into invoice line, we should use this value in priority
 						// $newidwarehouse = $this->lines[$i]->fk_warehouse ? $this->lines[$i]->fk_warehouse : $idwarehouse;
-						if($this->dol_object->lines[$i]->qty < 0)
+						if ($this->dol_object->lines[$i]->qty < 0) {
 							$this->dol_object->lines[$i]->qty = -$this->dol_object->lines[$i]->qty;
+						}
 						$result = $mouvP->reception($user, $this->dol_object->lines[$i]->fk_product, $idwarehouse, $this->dol_object->lines[$i]->qty, 0, $langs->trans("InvoiceValidatedInDolibarr", $num), '', '', $this->dol_object->lines[$i]->batch);
 						if ($result < 0) {
 							$errors[] = $mouvP->error;
 						}
-					}
-					else {
+					} else {
 						// TODO If warehouseid has been set into invoice line, we should use this value in priority
 						// $newidwarehouse = $this->lines[$i]->fk_warehouse ? $this->lines[$i]->fk_warehouse : $idwarehouse;
 						$result = $mouvP->livraison($user, $this->dol_object->lines[$i]->fk_product, $idwarehouse, $this->dol_object->lines[$i]->qty, 0, $langs->trans("InvoiceValidatedInDolibarr", $num), '', '', $this->dol_object->lines[$i]->batch);

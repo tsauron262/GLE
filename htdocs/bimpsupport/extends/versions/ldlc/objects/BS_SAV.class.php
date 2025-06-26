@@ -9,7 +9,15 @@ require_once DOL_DOCUMENT_ROOT . '/bimpsupport/objects/BS_SAV.class.php';
 class BS_SAV_ExtVersion extends BS_SAV
 {
 
-    public static $status_ecologic_list = array(
+	public static $required_fields_ecologic = array(
+		'address' => 'l\'adresse',
+		'zip' => 'le code postal',
+		'town' => 'la ville',
+		'phone' => 'le télephone',
+		'email' =>  'l\'E-mail',
+	);
+
+	public static $status_ecologic_list = array(
         -2   => array('label' => 'Refusée', 'icon' => 'fas_not-equal', 'classes' => array('important')),
         -1   => array('label' => 'Non Applicable', 'icon' => 'fas_not-equal', 'classes' => array('important')),
         0    => array('label' => 'En attente', 'icon' => 'fas_times', 'classes' => array('danger')),
@@ -97,6 +105,12 @@ class BS_SAV_ExtVersion extends BS_SAV
         $api = BimpAPI::getApiInstance('ecologic');
 
         $result = $api->executereqWithCache('printproducttypewithlabellist');
+
+		global $user;
+		if ($user->login == 'f.martinez') {
+			echo $type . '<pre>' . print_r($result, 1) . '</pre>';
+			exit;
+		}
 
         $resultList = array();
         if (isset($result['ResponseData']) && !empty($result['ResponseData'])) {
@@ -230,7 +244,33 @@ class BS_SAV_ExtVersion extends BS_SAV
                 else
                     $this->isClosable = false;
             }
-        }
+
+			// .... SAV - Alerte champs Tiers manquants https://erp.bimp.fr/bimp8/bimptask/index.php?fc=task&id=106339
+			// faire une boucle sur les $requiredFieldElogic (a creer) pour spécifier quels sont les champs manquants
+			$dataMissing = array();
+			foreach (self::$required_fields_ecologic as $field => $label)	{
+				$data = $client->getData($field);
+				if ($data == "")	{
+					$dataMissing[] = $label;
+				}
+			}
+			if (!empty($dataMissing)) {
+				$text = 'Pour la prise en charge QualiRépar, il manque ' . implode(', ', $dataMissing);
+				$text .= '<br />' . BimpRender::renderButton(array(
+					'onclick' => $client->getJsLoadModalForm(
+						'default',
+						'Compléter ' . htmlentities(implode(', ', $dataMissing))
+//						, array(),
+//						'triggerObjectChange("bimpsupport", "BS_SAV", ' . $this->getData('id') . ')',
+//						'', '', 0, '$(this)',
+//						'triggerObjectChange(\'bimpsupport\', \'BS_SAV\', ' . $this->getData('id') . ')'
+					),
+					'label' => 'Compléter',
+					'icon_before' => 'edit'
+				));
+				$html .= BimpRender::renderAlerts($text);
+			}
+		}
         return $html;
     }
 

@@ -13,7 +13,6 @@ common_fields: 0
 nom_url:
     syntaxe: <ref>
 
-
 header_list_name: default
 header_edit_form: default
 header_btn:
@@ -51,6 +50,15 @@ objects:
         instance:
             id_object:
                 field_value: fk_user_assign
+    
+    last_note_client:
+        relation: hasOne
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpNote
+            id_object:
+                field_value: id_last_note_client
     
     files:
         instance:
@@ -93,10 +101,13 @@ fields:
         default_value: ''
     
     origin_email:
-        label: Adresse Email source
+        label: E-mail émetteur d'origine
+    
+    dest_origin_email:
+        label: E-mail destinataire d'origine
     
     fk_soc:
-        label: Client
+        label: Marchand
         type: id_object
         object: client
         create_form: client_light
@@ -129,13 +140,13 @@ fields:
     subject:
         label: Sujet ticket
         type: html
+        input:
+            type: text
         required: 1
-        hashtags: 1
     
     message:
         label: Description
         type: html
-        hashtags: 1
     
     timing:
         label: Timing
@@ -156,10 +167,34 @@ fields:
     date_close:
         label: Date de clôture
         type: datetime
-        
-        
+    
     email_msgid:
         label: ID message
+    
+    id_last_note_client:
+        label: Dernier message marchand
+        type: id_object
+        object: last_note_client
+        default_value: 0
+        displays:
+            nom_url:
+                type: callback
+                method: displayLastNoteClient
+    
+    comment:
+        label: Commentaire
+        type: text
+        input:
+            type: textarea
+            hashtags: 1
+            rows: 3
+            auto_expand: 1
+    
+    emails_cc:
+        label: E-mails en copie
+        type: items_list
+        items_data_type: string
+        items_delimiter: ', '
 
 forms:
     default:
@@ -168,6 +203,8 @@ forms:
             -   field: fk_soc
             -   field: subject
             -   field: message
+            -   field: comment
+            -   field: emails_cc
     
     create:
         rows:
@@ -177,7 +214,7 @@ forms:
                 reload_btn: 1
             -   field: fk_soc
             -   custom: 1
-                label: Contact client suivi
+                label: Contact marchand suivi
                 input_name: id_contact_suivi
                 data_type: id
                 input:
@@ -191,6 +228,22 @@ forms:
                 depends_on: fk_soc
             -   field: subject
             -   field: message
+            -   field: comment
+            -   custom: 1
+                label: Notifier le tiers
+                input_name: notify
+                input:
+                    type: toggle
+                value: 1
+            -   custom: 1
+                label: Envoyer la notification à
+                input_name: notify_email
+                content:
+                    callback: renderNotifyEmailInput
+                depends_on: fk_soc,id_contact_suivi
+                display_if:
+                    field_name: notify
+                    show_values: 1
     
     new_status:
         rows:
@@ -198,17 +251,17 @@ forms:
                 label: Nouveau Statut
                 input_name: new_status
                 data_type: int
-                input: 
+                input:
                     type: select
                     options:
                         callback: getNewStatusOptionsArray
             -   custom: 1
                 label: Motif
                 input_name: reason
-                input: 
+                input:
                     type: textarea
                     hashtags: 1
-                display_if: 
+                display_if:
                     field_name: new_status
                     show_values: 7,9,11
     
@@ -288,15 +341,16 @@ forms:
                 display_if:
                     field_name: type
                     show_values: 2
-                    
-    assign: 
+    
+    assign:
         rows:
             -   field: type_code
-                show: 
+                show:
                     callback: isLoaded
             -   field: fk_user_assign
                 required: 1
                 label: Assigner à
+            -   field: comment
 
 fields_tables:
     infos:
@@ -305,10 +359,14 @@ fields_tables:
         rows:
             -   field: type_code
             -   field: subject
-            -   field: message
+            -   field: origin_email
+            -   field: dest_origin_email
+            -   field: emails_cc
+            -   field: comment
+                edit: 1
     
     client_infos:
-        title: Infos client
+        title: Infos Marchand
         icon: info-circle
         rows:
             -   field: fk_soc
@@ -323,35 +381,37 @@ views:
                     -   type: view
                         view:
                             name: fiche
-#            -   cols:
-#                    -   type: custom
-#                        custom:
-#                            callback: renderNotesList
     
     fiche:
         rows:
             -   cols:
                     -   type: fields_table
+                        col_lg: 6
+                        col_md: 6
                         fields_table:
                             name: infos
-                        col_lg: 12
-                        col_md: 12
-                        
-            -   cols:
                     -   type: custom
-                        custom:
-                            callback: renderNotesList
-                            
-            -   cols:
-                    -   type: fields_table
-                        fields_table:
-                            name: client_infos
-                        col_lg: 12
-                        col_md: 12
-            -   cols:
-                    -   type: custom
+                        col_lg: 6
+                        col_md: 6
                         custom:
                             callback: renderContacts
+            -   cols:
+                    -   type: custom
+                        custom:
+                            callback: renderDescription
+                        col_lg: 12
+                        col_md: 12
+            -   cols:
+                    -   type: custom
+                        custom:
+                            callback:
+                                method: renderNotesList
+                                params:
+                                    - 1
+                                    - chat
+                                    - ''
+                                    - 0
+                                    - 0
             -   cols:
                     -   type: list
                         list:
@@ -367,6 +427,17 @@ filters_panels:
             fk_user_assign:
             datec:
 
+lists_cols:
+    id_last_note_client:
+        min_width: 200
+    
+    nb_notes_unread:
+        label: Nb messages non lus
+        align: center
+        min_width: 45
+        value:
+            callback: displayNbNotesUnread
+
 lists:
     default:
         title: Tickets
@@ -374,9 +445,12 @@ lists:
         checkboxes: 1
         filters_panel: default
         bulk_actions:
-            -   label: supprimer les tickets sélectionnés
+            -   label: Supprimer les tickets sélectionnés
                 icon: fas_trash-alt
                 onclick: deleteSelectedObjects('list_id', $(this))
+            -   label: Ignorer les tickets sélectionnés
+                icon: fas_times-circle
+                onclick: setSelectedObjectsAction($(this), 'list_id', 'ignore')
         sort_field: datec
         sort_way: desc
         n: 10
@@ -387,6 +461,8 @@ lists:
         delete_btn: 1
         page_btn: 1
         modal_view: default
+        extra_btn:
+            callback: getListsExtraButtons
         cols:
             ref:
             fk_statut:
@@ -395,8 +471,8 @@ lists:
             datec:
             fk_soc:
             fk_user_assign:
-                
-    client: 
+    
+    client:
         extends: default
         cols:
             fk_soc: unset
@@ -406,7 +482,7 @@ stats_lists_cols:
         label: Nb tickets
         type: count
         data_type: int
-        
+    
     avg_resolution:
         label: Délai de résolution (en jours / moyenne)
         type: avg
@@ -422,3 +498,17 @@ stats_lists:
             - fk_user_assign
         cols:
             nb_tickets:
+
+searches:
+    default:
+        fields_search:
+            - a.rowid
+            - a.ref
+            - s.nom
+        joins:
+            s:
+                table: societe
+                on: a.fk_soc = s.rowid
+                alias: s
+        fields_return:
+            0: a.ref

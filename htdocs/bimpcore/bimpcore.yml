@@ -42,6 +42,10 @@ params:
         label: Message de vérouillage des GIT PULL
         info: Si défini, les GIT PULL sont bloqués et le message est affiché lors d'une tentative de pull.<br/>Un bouton est également affiché pour dévérouillage immédiat.
         def: ''
+    use_erp_updates_v2: 
+        label: Activer les mises à jour auto de l'ERP
+        type: bool
+        def: 1        
     send_sms: 
         label: Activer l'envoi de SMS
         type: bool
@@ -197,6 +201,11 @@ params:
         label: Activer mode éco
         type: bool
         def: 0
+        cat: perfs
+    user_notifications_refresh_delay: 
+        label: Délai de rafraîchissement des notifications utilisateur
+        info: En secondes
+        def: 30
         cat: perfs
     use_bimp_object_instances_clones: 
         label: cloner les instances de base des BimpObject

@@ -3117,6 +3117,12 @@ class ObjectLine extends BimpObject
 				}
 			}
 
+			if (!is_a($this, 'BS_SavPropalLine')) {
+				global $user;
+				$line = $this->getChildObject('line');
+				$result = $line->call_trigger($line->element . '_UPDATE', $user);
+			}
+
 			if ($force_update) {
 				if (is_null($initial_status)) {
 					unset($object->statut);
@@ -5853,8 +5859,8 @@ class ObjectLine extends BimpObject
 
 				// Ajout remise:
 				if (BimpTools::isSubmit('default_remise')) {
-					$remise_value = (float) BimpTools::getValue('default_remise', 0, 'float');
-					if ($remise_value) {
+					$remise_percent = (float) BimpTools::getValue('default_remise', 0, 'float');
+					if ($remise_percent) {
 						if ($this->isRemisable()) {
 							$remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
 							$remise->validateArray(array(
@@ -5862,20 +5868,19 @@ class ObjectLine extends BimpObject
 								'object_type'    => $this->getParentCommType(),
 								'label'          => '',
 								'type'           => 1,
-								'percent'        => $remise_value
+								'percent'        => $remise_percent
 							));
-							$remise_errors = $remise->create();
+							$remise_warnings = array();
+							$remise_errors = $remise->create($remise_warnings, true);
 							if (count($remise_errors)) {
 								$warnings[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise');
 							}
 						} else {
-							$warnings[] = 'ATTENTION: ce produit n\'étant pas remisable, la remise de ' . $remise_value . '% n\'a pas été prise en compte';
+							$warnings[] = 'ATTENTION: ce produit n\'étant pas remisable, la remise de ' . $remise_percent . '% n\'a pas été prise en compte';
 						}
 					}
 				}
-//                if (BimpObject::objectLoaded($parent)) {
-//                    $parent->resetLines();
-//                }
+
 				// Ajout Remises arrières:
 				if (!isset($this->no_remises_arrieres_auto_create) || !$this->no_remises_arrieres_auto_create) {
 					$product = $this->getProduct();

@@ -1,5 +1,8 @@
 <?php
 
+global $no_erp_updates;
+$no_erp_updates = true;
+
 require_once("../main.inc.php");
 
 ini_set('display_errors', 1);
@@ -8,7 +11,7 @@ set_time_limit(0);
 
 ignore_user_abort(0);
 
-top_htmlhead('', 'TESTS', 0, 0, array(), array());
+top_htmlhead('', 'TESTS RAPIDES', 0, 0, array(), array());
 
 echo '<body style="padding: 30px">';
 
@@ -27,8 +30,22 @@ if (!$user->admin) {
 	exit;
 }
 
-mailSyn2('TEST àéè', 'f.martinez@bimp.fr', '', '');
-BimpCore::addlog('TEST àéè', 4, 'bimpcore', null);
+///** @var BCT_ContratLine $line */
+//$id_line = 19166;
+//$line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
+//if (BimpObject::objectLoaded($line)) {
+//	echo 'Ligne #' . $id_line . ' : ';
+//	$line_errors = array();
+//	$lines_renouv = array();
+//	$line->renouvAbonnement(array(
+//		'renouv_auto' => 1
+//	), $lines_renouv, $line_errors);
+//
+//	echo 'RENOUV<pre>' . print_r($lines_renouv, 1) . '</pre>';
+//	echo 'ERR<pre>' . print_r($line_errors, 1) . '</pre>';
+//} else {
+//	echo 'FAIL';
+//}
 
 echo '<br/>FIN';
 echo '</body></html>';

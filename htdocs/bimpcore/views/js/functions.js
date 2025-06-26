@@ -729,6 +729,9 @@ function setCommonEvents($container) {
                 var tab_id = target.replace(/^.*#(.*)$/, '$1');
 
                 var $li = $('a[href="#' + tab_id + '"]').parent('li');
+				$('body').trigger($.Event('navTabShow', {
+					$nav_tab: $li
+				}));
                 if ($li.length && $li.parent('ul').data('navtabs_id') === 'maintabs') {
                     var prev = '' + e.relatedTarget;
                     prev = prev.replace(/^.*#(.*)$/, '$1');
@@ -1259,9 +1262,6 @@ function bimp_reloadPage() {
     }
 
     var tab = '';
-    if (window.location.hash) {
-        tab = window.location.hash.replace('#', '');
-    }
 
     var params = getUrlParams();
 
@@ -1315,30 +1315,10 @@ function bimp_htmlDecode(html) {
     return bimp_decode_textarea.value;
 }
 
-function bimp_copyTabsUrl($button, url, server) {
-    if (typeof (url) !== 'string' || !url) {
-        url = window.location;
-    }
-
-    url = url.replace(/#.*$/, '');
-
-    var url_base = url.replace(/^([^\?]+)(\?.*)?$/, '$1');
-    var query = url.replace(/^([^\?]+)\??(.*)?$/, '$2');
-    var args = [];
-
-    if (query) {
-        args = query.split('&');
-    }
-
-    var params = [];
-
-    if (args.length) {
-        for (var i in args) {
-            if (!/^navtab(\-.*)?=.*$/.test(args[i])) {
-                params.push(args[i]);
-            }
-        }
-    }
+function getTabsParams($conteneur, params){
+	if(typeof(params) === 'undefined') {
+		params = [];
+	}
 
 //    var $tabs = $('.bimp_controller_content').find('.tabs');
 //    if ($tabs.length) {
@@ -1361,48 +1341,79 @@ function bimp_copyTabsUrl($button, url, server) {
 //        }
 //    }
 
-    var $container = false;
+	var $container = false;
 
-    if ($.isOk($button)) {
-        var $modal = $button.findParentByClass('modal_content');
-        if ($.isOk($modal)) {
-            $container = $modal;
-        }
-    }
+	if ($.isOk($conteneur)) {
+		if($conteneur.hasClass('modal_content')){
+			$container = $conteneur;
+		}
+		else {
+			var $modal = $conteneur.findParentByClass('modal_content');
+			if ($.isOk($modal)) {
+				$container = $modal;
+			}
+		}
+	}
 
-    if (!$container) {
-        $container = $('.bimp_controller_content');
+	if (!$container) {
+		$container = $('.bimp_controller_content');
 
-        if (!$container.length) {
-            $container = $('body');
-        }
-    }
+		if (!$container.length) {
+			$container = $('body');
+		}
+	}
 
-    var $navtabs = $container.find('ul.nav-tabs');
+	var $navtabs = $container.find('ul.nav-tabs');
 
-    if ($navtabs.length) {
-        $navtabs.each(function () {
-            var $parent_navtab = $(this).findParentByClass('tab-pane');
+	if ($navtabs.length) {
+		$navtabs.each(function () {
+			var $parent_navtab = $(this).findParentByClass('tab-pane');
 
-            if (!$.isOk($parent_navtab) || $parent_navtab.hasClass('active')) {
-                var navtabs_id = $(this).data('navtabs_id');
-                var $navtab = $(this).find('li.active');
+			if (!$.isOk($parent_navtab) || $parent_navtab.hasClass('active')) {
+				var navtabs_id = $(this).data('navtabs_id');
+				var $navtab = $(this).find('li.active');
 
-                if ($navtab.length) {
-                    var navtab_id = $navtab.data('navtab_id');
+				if ($navtab.length) {
+					var navtab_id = $navtab.data('navtab_id');
 
-                    if (navtab_id) {
-                        var param = 'navtab';
-                        if (navtabs_id) {
-                            param += '-' + navtabs_id;
-                        }
-                        param += '=' + navtab_id;
-                        params.push(param);
-                    }
-                }
-            }
-        });
-    }
+					if (navtab_id) {
+						var param = 'navtab';
+						if (navtabs_id) {
+							param += '-' + navtabs_id;
+						}
+						param += '=' + navtab_id;
+						params.push(param);
+					}
+				}
+			}
+		});
+	}
+	return params;
+}
+function bimp_copyTabsUrl($button, url, server) {
+	if (typeof (url) !== 'string' || !url) {
+		url = window.location.toString(); 
+	}
+
+	url = url.replace(/#.*$/, '');
+
+	var url_base = url.replace(/^([^\?]+)(\?.*)?$/, '$1');
+	var query = url.replace(/^([^\?]+)\??(.*)?$/, '$2');
+	var args = [];
+
+	if (query) {
+		args = query.split('&');
+	}
+
+	var params = [];
+	if (args.length) {
+		for (var i in args) {
+			if (!/^navtab(\-.*)?=.*$/.test(args[i])) {
+				params.push(args[i]);
+			}
+		}
+	}
+    params = getTabsParams($button, params);
 
     url = '';
 
@@ -1953,6 +1964,24 @@ simpleUpload.maxUploads = 10, simpleUpload.activeUploads = 0, simpleUpload.uploa
 });
 
 $(document).ready(function () {
+	$('body').on('bimp_ready', function () { 
+		$('ul.nav-tabs').each(function () {
+			$('body').trigger($.Event('navTabsLoaded', {
+				$nav_tabs: $(this)
+			}));
+		});
+	});
+
+	$('body').on('contentLoaded', function (e) {
+		if (e.$container.length) {
+			e.$container.find('ul.nav-tabs').each(function () {
+				$('body').trigger($.Event('navTabsLoaded', {
+					$nav_tabs: $(this)
+				}));
+			});
+		}
+	});
+		
     $('body').click(function (e) {
         $(this).find('.hideOnClickOut').removeClass('locked').hide();
         $(this).find('.destroyPopoverOnClickOut').popover('destroy');

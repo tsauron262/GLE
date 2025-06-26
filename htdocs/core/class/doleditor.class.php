@@ -55,7 +55,7 @@ class DolEditor
         /*moddrsi (20.2)*/
         var $extra_class = '';
         /*fmoddrsi*/
-        
+
 	/**
 	 *  Create an object to build an HTML area to edit a large string content
 	 *
@@ -133,7 +133,7 @@ class DolEditor
                         $this->inputName = $htmlname;
 			$this->htmlname = random_int(111111, 999999) .'_' . $htmlname;
                         /*fmoddrsi 20.2*/
-                        
+
 			$this->toolbarname = $shorttoolbarname;
 			$this->toolbarstartexpanded = $toolbarstartexpanded;
 			$this->rows					= max(ROWS_3, $rows);
@@ -275,8 +275,8 @@ class DolEditor
 					$out .= '    filebrowserBrowseUrl : ckeditorFilebrowserBrowseUrl,';
 					$out .= '    filebrowserImageBrowseUrl : ckeditorFilebrowserImageBrowseUrl,';
                                         /*moddrsi (20.2)*/
-					$out.= '    filebrowserUploadUrl : \''.DOL_URL_ROOT.'/bimpcore/ajax/upload.php?type=media\',';
-					$out.= '    filebrowserImageUploadUrl : \''.DOL_URL_ROOT.'/bimpcore/ajax/upload.php?type=mediaImg\',';
+					$out.= '    filebrowserUploadUrl : \''.DOL_URL_ROOT.'/bimpcore/ajax/upload.php?type=media&token='.newToken().'\',';
+					$out.= '    filebrowserImageUploadUrl : \''.DOL_URL_ROOT.'/bimpcore/ajax/upload.php?type=mediaImg&token='.newToken().'\',';
                                         /*fmoddrsi*/
 					$out .= "\n";
 					// To use filemanager with ckfinder (Non free) and ckfinder directory is inside htdocs/includes

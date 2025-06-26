@@ -7,12 +7,13 @@ require_once('../../main.inc.php');
 ini_set("display_errors", 1);
 
 $error = array();
-if(defined('CLOSE_FOR_PROXY'))
-    $error[] = 'Fermé par le fichier de conf';
+if (defined('CLOSE_FOR_PROXY')) {
+	$error[] = 'Fermé par le fichier de conf';
+}
 
-if(!count($error)){
-    define('NO_SESSION_NETTOYAGE', true);
-    $files = array(DOL_DATA_ROOT."/test_serveur.txt");
+if (!count($error)) {
+	define('NO_SESSION_NETTOYAGE', true);
+	$files = array(DOL_DATA_ROOT . "/test_serveur.txt");
 
 //    foreach($files as $file){
 //        if(!file_get_contents($file)){
@@ -35,18 +36,27 @@ if(!count($error)){
 //            $error[] = 'Pas d\'ecriture '.$file;
 //
 //    }
-    $sqls = array("SELECT count(*) FROM ".MAIN_DB_PREFIX.'user'/*, 'CREATE TABLE IF NOT EXISTS `'.MAIN_DB_PREFIX.'test_serveur` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,`test` int(11) unsigned NOT NULL)', 'INSERT INTO '.MAIN_DB_PREFIX.'test_serveur (test) VALUES (4)'*/);
-    foreach($sqls as $sql){
-        if(!$db->query($sql))
-            $error[] = 'Erreur SQL '.$sql;
-    }
+	$sqls = array("SELECT count(*) FROM " . MAIN_DB_PREFIX . 'user'/*, 'CREATE TABLE IF NOT EXISTS `'.MAIN_DB_PREFIX.'test_serveur` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,`test` int(11) unsigned NOT NULL)', 'INSERT INTO '.MAIN_DB_PREFIX.'test_serveur (test) VALUES (4)'*/);
+	foreach ($sqls as $sql) {
+		if (!$db->query($sql)) {
+			$error[] = 'Erreur SQL ' . $sql;
+		}
+	}
 }
 
-if(count($error)){
-    header($_SERVER["SERVER_PROTOCOL"]." 503 Service Temporarily Unavailable", true, 503);
-    dol_syslog('test serv err 503'.print_r($error,1),3);
-    print_r($error);
+//$pull_infos_file = DOL_DOCUMENT_ROOT . '/bimpressources/pull_infos.json';
+//if (file_exists($pull_infos_file)) {
+//	$pull_info = json_decode(file_get_contents($pull_infos_file), true);
+//	if (isset($pull_info['end']) && $pull_info['end'] === '') {
+//		$error[] = 'Pull non terminé (index ' . (isset($pull_info['idx']) ? $pull_info['idx'] : 'inconnu') . ')';
+//	}
+//}
+
+if (count($error)) {
+	header($_SERVER["SERVER_PROTOCOL"] . " 503 Service Temporarily Unavailable", true, 503);
+	dol_syslog('test serv err 503' . print_r($error, 1), 3);
+	print_r($error);
+} else {
+	echo 'ok tout vas très très bien......';
 }
-else
-    echo 'ok tout vas très très bien......';
 

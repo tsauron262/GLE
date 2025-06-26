@@ -9,7 +9,7 @@ class ListFilters extends BCUserConfig
     public static $config_table = 'buc_list_filters';
     protected $obj_instance = null;
 
-    // Getters: 
+    // Getters:
 
     public function getCreateJsCallback()
     {
@@ -48,7 +48,7 @@ class ListFilters extends BCUserConfig
 
         return (BimpObject::objectLoaded($user) ? $user->getFullName($langs) . ': l' : 'L') . 'iste des filtres enregistrés';
     }
-    
+
     // Overrides:
 
     public function validatePost()

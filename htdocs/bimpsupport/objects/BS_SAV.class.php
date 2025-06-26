@@ -317,6 +317,29 @@ class BS_SAV extends BimpObject
 		return 0;
 	}
 
+	public function isDureeInfSixHeures()
+	{
+		// trouver la note la plus recente
+		$notes = $this->getNotes();
+		if (count($notes) > 0) {
+			$dernote = reset($notes);
+			$date = $dernote->getData('date_create');
+		}
+		else	{
+			$date = $this->getData('date_create');
+		}
+
+		$date = new DateTime($date);
+		$now = new DateTime();
+		$interval = $date->diff($now);
+
+		// Vérifie si la différence est inférieure à 6 heures
+		if ($interval->h < 6 && $interval->d == 0 && $interval->m == 0 && $interval->y == 0) {
+			return 0;
+		}
+		return 1;
+	}
+
 	public function isActionAllowed($action, &$errors = array())
 	{
 		$status = (int) $this->getData('status');
@@ -3512,7 +3535,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 							if ($this->useCaisseForPayments) {
 								$id_account = (int) $caisse->getData('id_account');
 							} else {
-								$id_account = (int) BimpCore::getConf('id_default_bank_account');
+								$id_account = $this->getDefaultBankAccount();
 							}
 						}
 
@@ -3621,7 +3644,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 			$prop->date = dol_now();
 			$prop->cond_reglement_id = $id_cond_reglement;
 			$prop->mode_reglement_id = $id_mode_reglement;
-			$prop->fk_account = (int) BimpCore::getConf('id_default_bank_account');
+			$prop->fk_account = (int) $this->getDefaultBankAccount();
 			$prop->model_pdf = 'bimpdevissav';
 
 			if ($prop->create($user) <= 0) {
@@ -6553,7 +6576,7 @@ ORDER BY a.val_max DESC");
 									$facture->origin = $propal->dol_object->element;
 									$facture->origin_id = $propal->id;
 
-									$facture->fk_account = ((int) $propal->dol_object->fk_account ? $propal->dol_object->fk_account : (int) BimpCore::getConf('id_default_bank_account'));
+									$facture->fk_account = ((int) $propal->dol_object->fk_account ? $propal->dol_object->fk_account : $this->getDefaultBankAccount());
 
 									// get extrafields from original line
 									$propal->dol_object->fetch_optionals($propal->id);
@@ -6659,7 +6682,7 @@ ORDER BY a.val_max DESC");
 															if ($this->useCaisseForPayments) {
 																$id_account = (int) $caisse->getData('id_account');
 															} else {
-																$id_account = (int) BimpCore::getConf('id_default_bank_account');
+																$id_account = $this->getDefaultBankAccount();
 															}
 															if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
 																$warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
@@ -6686,7 +6709,7 @@ ORDER BY a.val_max DESC");
 															if ($this->useCaisseForPayments) {
 																$id_account = (int) $caisse->getData('id_account');
 															} else {
-																$id_account = (int) BimpCore::getConf('id_default_bank_account');
+																$id_account = $this->getDefaultBankAccount();
 															}
 															if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
 																$warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
@@ -6961,7 +6984,7 @@ ORDER BY a.val_max DESC");
 
 					$id_client_fac = (int) $this->getData('id_client');
 					$id_contact_fac = (int) $this->getData('id_contact');
-					$id_bank_account = (int) BimpCore::getConf('id_default_bank_account');
+					$id_bank_account = $this->getDefaultBankAccount();
 					$ref_client = '';
 
 					if (BimpObject::objectLoaded($propal)) {
@@ -7469,7 +7492,7 @@ ORDER BY a.val_max DESC");
 			} else {
 				$data['amount'] = $amount;
 				$data['id_mode_paiement'] = $id_mode_paiement;
-				$data['bank_account'] = (isset($data['bank_account']) ? (int) $data['bank_account'] : (int) BimpCore::getConf('id_default_bank_account'));
+				$data['bank_account'] = (isset($data['bank_account']) ? (int) $data['bank_account'] : $this->getDefaultBankAccount());
 
 				$propal = $this->getChildObject('propal');
 				$client = $this->getChildObject('client');
@@ -7528,7 +7551,7 @@ ORDER BY a.val_max DESC");
 			if ($this->useCaisseForPayments && BimpObject::objectLoaded($caisse)) {
 				$id_account = (int) $caisse->getData('id_account');
 			} else {
-				$id_account = (int) BimpCore::getConf('id_default_bank_account');
+				$id_account = $this->getDefaultBankAccount();
 			}
 
 			if (!$id_account) {
@@ -8020,6 +8043,20 @@ ORDER BY a.val_max DESC");
 
 	// Overrides:
 
+	public function onSave(&$errors = array(), &$warnings = array())
+	{
+		if ($this->isLoaded() && (int) $this->getData('status') == self::BS_SAV_FERME) {
+			if ($this->getData('login_admin') || $this->getData('pword_admin')) {
+				$this->db->update('bs_sav', array(
+					'login_admin' => '*****',
+					'pword_admin' => '*****'
+				), 'id = ' . $this->id);
+			}
+		}
+
+		parent::onSave($errors, $warnings);
+	}
+
 	public function validate()
 	{
 		$errors = parent::validate();
@@ -8284,6 +8321,22 @@ ORDER BY a.val_max DESC");
 					$errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $new_client->getData('solvabilite_status')]['label'] . ')';
 				}
 			}
+
+			$id_cond_reglement = $new_client->getData('cond_reglement');
+			if (!$id_cond_reglement) {
+				$id_cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', $new_client->getData('cond_reglement'), 'bimpsupport');
+			}
+			$id_mode_reglement = $new_client->getData('mode_reglement');
+			if (!$id_mode_reglement) {
+				$id_mode_reglement = (int) BimpCore::getConf('sav_mode_reglement', $new_client->getData('mode_reglement'), 'bimpsupport');
+			}
+			if ($id_cond_reglement == 20 && $id_mode_reglement != 2) {
+				$id_cond_reglement = 1;
+			}
+			$prop = $this->getChildObject('propal');
+			$prop->set('fk_cond_reglement', $id_cond_reglement);
+			$prop->set('fk_mode_reglement',  $id_mode_reglement);
+			$prop->update($warnings);
 		}
 
 //        if (!count($errors)) {

@@ -3,7 +3,7 @@
 class ObjectLineRemiseArriere extends BimpObject
 {
 
-    // Getters array: 
+    // Getters array:
 
     public function getTypesArray()
     {
@@ -12,7 +12,7 @@ class ObjectLineRemiseArriere extends BimpObject
         return $className::$types;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getParentModule()
     {
@@ -81,7 +81,7 @@ class ObjectLineRemiseArriere extends BimpObject
         return $buttons;
     }
 
-    // Getters data : 
+    // Getters data :
 
     public function getRemiseAmount(&$errors = array())
     {
@@ -120,4 +120,27 @@ class ObjectLineRemiseArriere extends BimpObject
 
         return $amount;
     }
+
+	public function onSave(&$errors = array(), &$warnings = array())
+	{
+		parent::onSave($errors, $warnings);
+
+		$line = $this->getParentInstance();
+		if (BimpObject::objectLoaded($line) && is_a($line, 'Bimp_FactureLine')) {
+			$line->checkRemisesArrieres($warnings);
+		}
+	}
+
+	public function delete(&$warnings = array(), $force_delete = false)
+	{
+		$line = $this->getParentInstance();
+
+		$errors = parent::delete($warnings, $force_delete);
+
+		if (!count($errors) && BimpObject::objectLoaded($line) && is_a($line, 'Bimp_FactureLine')) {
+			$line->checkRemisesArrieres($warnings);
+		}
+
+		return $errors;
+	}
 }

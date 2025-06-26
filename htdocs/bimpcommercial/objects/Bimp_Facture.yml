@@ -125,7 +125,7 @@ fields:
         input: 
             type: select_mysoc_account
         default_value:
-            conf: id_default_bank_account
+            callback: getDefaultBankAccount
     centre: 
         label: Centre
         dol_extra_field: 1
@@ -554,8 +554,6 @@ forms:
             id_facture_to_correct: unset
 #            avoir_same_lines: unset
 #            avoir_remain_to_pay: unset
-            typedeposit: unset
-            typedeposit: unset
             
     paid_partially:
         msgs: 
@@ -726,6 +724,16 @@ forms:
               content: 
                   callback: renderCheckPaForm
 #              depends_on: type_check
+    check_ra: 
+        rows: 
+            - custom: 1
+              label: Recréer une nouvelle revalorisation en cas d'écart
+              input_name: recreate_revals
+              input: 
+                  type: toggle
+                  help: Les revalorisations actuelles seront supprimées quelque soient leurs statuts, les équipements et n° de série seront transférés vers la nouvelle revalorisation.  
+              value: 0
+              
     date_next_relance: 
         rows: 
             - field: date_next_relance
@@ -1091,9 +1099,7 @@ filters:
 filters_panels: 
     default: 
         filters: 
-            ref: unset
-            fk_availability: unset
-            
+            fk_availability: unset            
             ref: 
             paiement_status: 
             date_lim_reglement:
@@ -1102,7 +1108,6 @@ filters_panels:
 lists_cols:
     ref: 
         object_link: 1
-    ref: unset
     pdf: 
         label: Fichier PDF
         value: 
@@ -1210,10 +1215,11 @@ lists:
         total_row: 1
         title: Factures
         icon: fas_file-invoice-dollar
-        bulk_actions: unset
         sort_field: datec
         sort_way: desc
         add_btn_label: Créer une nouvelle facture
+        extra_btn:
+            callback: getActionsButtonsList
         bulk_actions:
             delete: 
                 label: supprimer les factures sélectionnées

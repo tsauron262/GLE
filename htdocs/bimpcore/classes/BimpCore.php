@@ -39,7 +39,8 @@ class BimpCore
 			'bimp_api'          => '/bimpapi/views/js/bimp_api.js',
 			'bimpDocumentation' => '/bimpcore/views/js/BimpDocumentation.js',
 			'bds_operations'    => '/bimpdatasync/views/js/operations.js',
-			'touch_punch'       => '/bimpcore/views/js/jquery.ui.touch-punch.min.js'
+			'touch_punch'       => '/bimpcore/views/js/jquery.ui.touch-punch.min.js',
+			'hashurl'           => '/bimpcore/views/js/hashurl.js',
 		),
 		'css' => array(
 			'fonts'          => '/bimpcore/views/css/fonts.css',
@@ -58,7 +59,7 @@ class BimpCore
 		'florian' => 'f.martinez@bimp.fr',
 		'alexis'  => 'al.bernard@bimp.fr',
 		'romain'  => 'r.PELEGRIN@bimp.fr',
-        'peter'   => 'p.tkatchenko@bimp.fr',
+		'peter'   => 'p.tkatchenko@bimp.fr',
 		'franck'  => 'f.lauby@ldlc.com'
 	);
 	public static $html_purifier = null;
@@ -80,7 +81,17 @@ class BimpCore
 			$extends_entity = BimpCore::getExtendsEntity();
 
 			global $user;
-			$use_css_v2 = ((int) self::getConf('use_css_v2') && ($user->login == 'f.martinez' || $user->login == 'e.sirodot' || $user->login == 'admin'));
+			$use_css_v2 = ((int) self::getConf('use_css_v2'));
+
+			if (!self::isModeDev()) {
+				if ((int) self::getConf('use_public_files_external_dir') || (int) self::getConf('use_erp_updates_v2')) {
+					if (defined('DOL_DOCUMENT_ROOT') && !file_exists(DOL_DOCUMENT_ROOT . '/bimpressources')) {
+						BimpCore::addlog('Dossier "bimpressources" absent', 4, 'bimpcore');
+						self::setConf('use_public_files_external_dir', '0', 'bimpcore', -1, true);
+						self::setConf('use_erp_updates_v2', '0', 'bimpcore', -1, true);
+					}
+				}
+			}
 
 			$is_context_private = self::isContextPrivate();
 
@@ -132,6 +143,10 @@ class BimpCore
 
 			BimpConfig::initCacheServeur();
 			self::checkSqlUpdates();
+
+			if ((int) self::getConf('use_public_files_external_dir') && !file_exists(DOL_DOCUMENT_ROOT . '/bimpressources/bimpcore/views/fonts/fa5.15.4/fa-brands-400.eot')) {
+				self::afterGitPullProcess(true);
+			}
 		}
 	}
 
@@ -172,17 +187,18 @@ class BimpCore
 	{
 		global $user, $conf, $dolibarr_main_url_root;
 		$vars = array(
-			'dol_url_root'               => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : '\'' . $dolibarr_main_url_root . '\'',
-			'entity'                     => $conf->entity,
-			'id_user'                    => (BimpObject::objectLoaded($user) ? $user->id : 0),
-			'bimp_context'               => '\'' . self::getContext() . '\'',
-			'theme'                      => '\'' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '\'',
-			'sessionHideMenu'            => (BimpController::getSessionConf('hideMenu') == "true" ? 1 : 0),
-			'bimp_use_local_storage'     => (int) BimpCore::getConf('use_browser_local_storage'),
-			'bimp_local_storage_prefixe' => '\'' . BimpCore::getConf('bimp_local_storage_prefixe') . '\'',
-			'bimp_debug_local_storage'   => (int) BimpCore::getConf('js_debug_local_storage'),
-			'bimp_debug_notifs'          => (int) BimpCore::getConf('js_debug_notifs'),
-			'dol_token'          => '\'' .newToken(). '\''
+			'dol_url_root'                     => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : '\'' . $dolibarr_main_url_root . '\'',
+			'entity'                           => $conf->entity,
+			'id_user'                          => (BimpObject::objectLoaded($user) ? $user->id : 0),
+			'bimp_context'                     => '\'' . self::getContext() . '\'',
+			'theme'                            => '\'' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '\'',
+			'sessionHideMenu'                  => (BimpController::getSessionConf('hideMenu') == "true" ? 1 : 0),
+			'bimp_use_local_storage'           => (int) BimpCore::getConf('use_browser_local_storage'),
+			'bimp_local_storage_prefixe'       => '\'' . BimpCore::getConf('bimp_local_storage_prefixe') . '\'',
+			'bimp_debug_local_storage'         => (int) BimpCore::getConf('js_debug_local_storage'),
+			'bimp_debug_notifs'                => (int) BimpCore::getConf('js_debug_notifs'),
+			'bimp_notifications_refresh_delay' => (int) BimpCore::getConf('user_notifications_refresh_delay'),
+			'dol_token'                        => '\'' . newToken() . '\''
 		);
 
 		$notifs = '{';
@@ -193,9 +209,8 @@ class BimpCore
 //			if ($user->login == 'f.martinez') {
 //				$config_notification = $notification->getList(array());
 //			} else {
-				$config_notification = $notification->getList(array('active' => 1));
+			$config_notification = $notification->getList(array('active' => 1));
 //			}
-
 
 			foreach ($config_notification as $cn) {
 				if (BimpCore::isModuleActive($cn['module'])) {
@@ -278,7 +293,7 @@ class BimpCore
 		if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file_path)) {
 			if ($use_tms && (int) BimpCore::getConf('use_files_tms')) {
 				$external_dir = '';
-				if ((int) BimpCore::getConf('use_public_files_external_dir')) {
+				if ((int) BimpCore::getConf('use_public_files_external_dir') && (!defined('NO_PUBLIC_FILES_EXTERNAL_DIR') || !NO_PUBLIC_FILES_EXTERNAL_DIR)) {
 					$external_dir = '/bimpressources';
 				}
 				$pathinfo = pathinfo($file_path);
@@ -308,7 +323,9 @@ class BimpCore
 								));
 							}
 
-							echo '<br/>Err : ' . $err;
+							if ($debug) {
+								echo '<br/>Err : ' . $err;
+							}
 						}
 
 						if (!$err && !file_exists($out_dir . '/' . $out_file)) {
@@ -320,7 +337,7 @@ class BimpCore
 
 								if (preg_match('/^' . preg_quote($pathinfo['filename']) . '_tms_\d+\.' . preg_quote($pathinfo['extension']) . '$/', $f)) {
 									if ($debug) {
-										echo '<br/>DEL' . out_dir . '/' . $f;
+										echo '<br/>DEL' . $out_dir . '/' . $f;
 									}
 									unlink($out_dir . '/' . $f);
 								}
@@ -425,6 +442,16 @@ class BimpCore
 
 	public static function checkSqlUpdates($execute = false)
 	{
+		global $no_erp_updates;
+		if ($no_erp_updates) {
+			return;
+		}
+
+		if ((int) self::getConf('use_erp_updates_v2')) {
+			self::checkErpUpdates();
+			return;
+		}
+
 		if (BimpTools::isSubmit('ajax')) {
 			return;
 		}
@@ -439,37 +466,11 @@ class BimpCore
 			return;
 		}
 
-		$dir = DOL_DOCUMENT_ROOT . '/bimpcore/updates';
-		$updates = array();
-		foreach (scandir($dir) as $subDir) {
-			if (in_array($subDir, array('.', '..'))) {
-				continue;
-			}
-
-			if (preg_match('/^[a-z]+$/', $subDir) && is_dir($dir . '/' . $subDir)) {
-				$current_version = (float) BimpCore::getBimpCoreSqlVersion($subDir);
-				foreach (scandir($dir . '/' . $subDir) as $f) {
-					if (in_array($f, array('.', '..'))) {
-						continue;
-					}
-					if (preg_match('/^(\d+(\.\d{1})*)\.sql$/', $f, $matches)) {
-						if ((float) $matches[1] > (float) $current_version) {
-							if (!isset($updates[$subDir])) {
-								$updates[$subDir] = array();
-							}
-							$updates[$subDir][] = (float) $matches[1];
-						}
-					}
-				}
-				if (isset($updates[$subDir])) {
-					sort($updates[$subDir]);
-				}
-			}
-		}
-
+		$updates = self::getBimpcoreUpdates();
 		$modules_updates = BimpCore::getModulesUpdates();
-
 		$modules_extends_updates = BimpCore::getModulesExtendsUpdates();
+
+		$menu_update = 0;
 		if (self::isModuleActive('bimptheme')) {
 			BimpObject::loadClass('bimptheme', 'Bimp_Menu');
 			$menu_update = (int) Bimp_Menu::getFullMenuUpdateVersion();
@@ -514,7 +515,7 @@ class BimpCore
 				}
 
 				if ($menu_update) {
-					echo 'Mise àjour du menu BimpThème complet: ';
+					echo 'Mise à jour du menu BimpThème complet: ';
 					$menu_errors = Bimp_Menu::updateFullMenu();
 					if (count($menu_errors)) {
 						echo '[ECHEC]<pre>';
@@ -599,8 +600,8 @@ class BimpCore
 
 				if (!empty($modules_extends_updates)) {
 					foreach ($modules_extends_updates as $module => $extends_updates) {
-						if (BimpCore::getVersion() && isset($extends_updates['version'])) {
-							$dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getVersion() . '/sql/';
+						if (BimpCore::getExtendsVersion() && isset($extends_updates['version'])) {
+							$dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getExtendsVersion() . '/sql/';
 							if (!file_exists($dir) || !is_dir($dir)) {
 								continue;
 							}
@@ -621,7 +622,7 @@ class BimpCore
 									echo 'FICHIER ABSENT: ' . $dir . $extend_version . '.sql <br/>';
 									continue;
 								}
-								echo 'Mise a jour du module "' . $module . '" à la version: ' . $extend_version . ' (extension de la version "' . BimpCore::getVersion() . '"';
+								echo 'Mise a jour du module "' . $module . '" à la version: ' . $extend_version . ' (extension de la version "' . BimpCore::getExtendsVersion() . '"';
 								if ($bdb->executeFile($dir . $extend_version . '.sql', $file_errors)) {
 									echo ' [OK]<br/>';
 								} else {
@@ -631,7 +632,7 @@ class BimpCore
 							echo '<br/>';
 
 							if ($new_version) {
-								BimpCore::setConf('module_sql_version_' . $module . '_version_' . BimpCore::getVersion(), $new_version);
+								BimpCore::setConf('module_sql_version_' . $module . '_version_' . BimpCore::getExtendsVersion(), $new_version);
 							}
 						}
 
@@ -682,6 +683,669 @@ class BimpCore
 		}
 	}
 
+	public static function checkErpUpdates($debug_mode = false)
+	{
+		if ($debug_mode) {
+			echo '<br/>----- START CHECK ERP UPDATES -----<br/>';
+		}
+
+		global $user, $no_erp_updates;
+		if ($no_erp_updates) {
+			if ($debug_mode) {
+				echo '***** NO ERP UPDATES *****<br/>';
+			}
+			return;
+		}
+
+		function loadUpdatesInfos($bdb, $type = 'global', $name = '')
+		{
+			$infos = json_decode((string) $bdb->getValue('bimpcore_conf', 'value', 'name = \'erp_' . $type . ($name ? '_' . $name : '') . '_updates_infos\' AND module = \'bimpcore\' AND entity = 0'), 1);
+			return (empty($infos) ? array() : $infos);
+		}
+
+		function addUpdatesInfos($bdb, &$errors, $type = 'global', $name = '')
+		{
+			if ($bdb->insert('bimpcore_conf', array(
+					'name'   => 'erp_' . $type . ($name ? '_' . $name : '') . '_updates_infos',
+					'module' => 'bimpcore',
+					'value'  => ''
+				)) <= 0) {
+				$errors[] = 'Echec insertion des infos de mise à jour Type : ' . $type . ($name ? ' (' . $name . ')' : '') . ' - ' . $bdb->err();
+				return false;
+			}
+
+			return true;
+		}
+
+		function upUpdatesInfos($bdb, &$errors, $infos, $type = 'global', $name = '')
+		{
+			if ($bdb->update('bimpcore_conf', array(
+					'value' => json_encode($infos)
+				), 'name = \'erp_' . $type . ($name ? '_' . $name : '') . '_updates_infos\' AND module = \'bimpcore\' AND entity = 0') <= 0) {
+				$errors[] = 'Echec enregistrement des infos de mise à jour Type : ' . $type . ($name ? ' (' . $name . ')' : '') . ' - ' . $bdb->err();
+				return false;
+			}
+
+			return true;
+		}
+
+		$erase_cache_server = false;
+		$pull_info = array();
+
+		$pull_infos_file = DOL_DOCUMENT_ROOT . '/bimpressources/pull_infos.json';
+		if (file_exists($pull_infos_file)) {
+			$pull_info = json_decode(file_get_contents($pull_infos_file), 1);
+		} elseif ($debug_mode) {
+			if (is_dir(DOL_DOCUMENT_ROOT . '/bimpressources')) {
+				echo 'FICHIER pull_infos.json absent, création du fichier avec l\'index 1 : ';
+
+				$pull_info = array(
+					'idx'   => 1,
+					'start' => date('Y-m-d H:i:s'),
+					'end'   => date('Y-m-d H:i:s')
+				);
+				if (file_put_contents($pull_infos_file, json_encode($pull_info))) {
+					echo 'Fichier créé avec succès<br/>';
+				} else {
+					die('ECHEC CREATION DU FICHIER pull_infos.json');
+				}
+			} else {
+				die('PAS DE DOSSIER "bimpressources"');
+			}
+		}
+
+		if (isset($pull_info['idx'])) {
+			if ($debug_mode) {
+				echo 'PULL INFOS<pre>' . print_r($pull_info, 1) . '</pre><br/>';
+			}
+
+			// on sleep tant qu'il y a un pull en cours non terminé
+			$n = 0;
+			while (empty($pull_info['end'])) {
+				$n++;
+				if ($n > 10) {
+					if ($debug_mode) {
+						die('Pull non terminé');
+					}
+					die('ERP EN COURS DE MISE A JOUR. MERCI DE PATIENTER QUELQUES INSTANTS AVANT D\'ACTUALISER CETTE PAGE.');
+				}
+
+				sleep(3);
+				$pull_info = json_decode(file_get_contents($pull_infos_file), 1);
+			}
+
+			if ((int) self::getConf('use_public_files_external_dir')) {
+				if (isset($pull_info['post_process']) && !(int) $pull_info['post_process']) {
+					$pull_info['post_process'] = 1;
+					file_put_contents($pull_infos_file, json_encode($pull_info, 1));
+
+					if ($debug_mode) {
+						echo '<br/>GIT PULL POST PROCESS : ';
+					}
+
+					$post_process_infos = '';
+					$post_process_errors = BimpCore::afterGitPullProcess(false, $post_process_infos);
+					if (count($post_process_errors)) {
+						$errors[] = BimpTools::getMsgFromArray('Erreurs GIT PULL POST PROCESS', $post_process_errors);
+
+						if ($debug_mode) {
+							echo 'Erreurs <pre>' . print_r($post_process_errors, 1) . '</pre>';
+						}
+					} elseif ($debug_mode) {
+						echo 'OK <br/>';
+						echo $post_process_infos;
+						echo '<br/><br/>';
+					} else {
+						BimpCore::addlog('GIT PULL POST PROCESS OK', 1, 'maj', null, array(
+							'Infos' => $post_process_infos
+						));;
+					}
+				}
+			}
+			$errors = array();
+			$bdb = BimpCache::getBdb(true); // sans transactions
+			$ext_version = self::getExtendsVersion();
+			$ext_entity = self::getExtendsEntity();
+
+			$bimpcore_updates = $modules_updates = array();
+			$modules_version_updates = $modules_entity_updates = array();
+			$menu_update = 0;
+			$global_updates = $version_updates = $entity_updates = false;
+			$token = BimpTools::randomPassword(12, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', false);
+
+			// On vérifies que les mises à jour correspondent bien au dernier pull
+			$global_infos = loadUpdatesInfos($bdb);
+			if ($debug_mode) {
+				echo '<br/>INFOS MAJ GLOBALE : <pre>' . print_r($global_infos, 1) . '</pre><br/>';
+			}
+			if (empty($global_infos)) {
+				if ($debug_mode) {
+					echo '<br/>INFOS MAJ GLOBALES ABSENTES, ajout en base : ';
+				}
+
+				if (!addUpdatesInfos($bdb, $errors)) {
+					if ($debug_mode) {
+						echo 'ECHEC<br/>';
+					}
+				} else {
+					if ($debug_mode) {
+						echo 'OK<br/>';
+					}
+				}
+			}
+			if (!isset($global_infos['idx'])) {
+				$global_infos['idx'] = 0;
+			}
+			if ((int) $global_infos['idx'] > (int) $pull_info['idx']) {
+				if ($debug_mode) {
+					echo 'Index de Màj (' . $global_infos['idx'] . ') supérieur à l\'index du pull (' . $pull_info['idx'] . '), correction de l\'index du fichier : ';
+				}
+				$pull_info['idx'] = $global_infos['idx'];
+				if (file_put_contents($pull_infos_file, json_encode($pull_info))) {
+					if ($debug_mode) {
+						echo 'OK<br/>';
+					}
+				} else {
+					if ($debug_mode) {
+						echo 'ECHEC<br/>';
+					}
+				}
+			}
+
+			if ($debug_mode || (isset($global_infos['idx']) && (int) $global_infos['idx'] < (int) $pull_info['idx'])) {
+				$bimpcore_updates = self::getBimpcoreUpdates();
+				$modules_updates = BimpCore::getModulesUpdates();
+				if (self::isModuleActive('bimptheme')) {
+					BimpObject::loadClass('bimptheme', 'Bimp_Menu');
+					$menu_update = Bimp_Menu::getFullMenuUpdateVersion();
+				}
+
+				if (!empty($bimpcore_updates) || !empty($modules_updates) || $menu_update) {
+					$global_updates = true;
+				}
+
+				if ($debug_mode) {
+					if (!$global_updates) {
+						echo '*** AUCUNE MISE A JOUR GLOBALE A EFFECTUER ***<br/><br/>';
+					} else {
+						if (!empty($bimpcore_updates)) {
+							echo 'MAJ Bimpcore<pre>' . print_r($bimpcore_updates, 1) . '</pre>';
+						}
+						if (!empty($modules_updates)) {
+							echo 'MAJ Modules<pre>' . print_r($modules_updates, 1) . '</pre>';
+						}
+						if ($menu_update) {
+							echo 'MAJ Menu : ' . $menu_update . '<br/><br/>';
+						}
+					}
+				}
+
+				upUpdatesInfos($bdb, $errors, array(
+					'idx'     => (int) $pull_info['idx'],
+					'id_user' => $user->id,
+					'start'   => date('Y-m-d H:i:s'),
+					'end'     => ($global_updates ? '' : date('Y-m-d H:i:s')),
+					'token'   => $token
+				));
+			}
+
+			$version_infos = array();
+			if ($ext_version) {
+				$version_infos = loadUpdatesInfos($bdb, 'version', $ext_version);
+				if ($debug_mode) {
+					echo '<br/>INFOS MAJ VERSION : <pre>' . print_r($version_infos, 1) . '</pre><br/>';
+				}
+				if (empty($version_infos)) {
+					if ($debug_mode) {
+						echo '<br/>INFOS MAJ VERSION ABSENTES, ajout en base : ';
+					}
+
+					if (!addUpdatesInfos($bdb, $errors, 'version', $ext_version)) {
+						if ($debug_mode) {
+							echo 'ECHEC<br/>';
+						}
+					} else {
+						if ($debug_mode) {
+							echo 'OK<br/>';
+						}
+					}
+				}
+				if (!isset($version_infos['idx'])) {
+					$version_infos['idx'] = 0;
+				}
+				if ($debug_mode || ((int) $version_infos['idx'] < (int) $pull_info['idx'])) {
+					$modules_version_updates = BimpCore::getModulesExtendsUpdates('version');
+
+					if (!empty($modules_version_updates)) {
+						$version_updates = true;
+					}
+
+					if ($debug_mode) {
+						if (!$version_updates) {
+							echo '*** AUCUNE MISE A JOUR DE VERSION A EFFECTUER ***<br/><br/>';
+						} else {
+							echo 'MAJ MODULES VERSION<pre>' . print_r($modules_version_updates, 1) . '</pre>';
+						}
+					}
+
+					upUpdatesInfos($bdb, $errors, array(
+						'idx'     => (int) $pull_info['idx'],
+						'id_user' => $user->id,
+						'start'   => date('Y-m-d H:i:s'),
+						'end'     => ($version_updates ? '' : date('Y-m-d H:i:s')),
+						'token'   => $token
+					), 'version', $ext_version);
+				}
+			}
+
+			$entity_infos = array();
+			if ($ext_entity) {
+				$entity_infos = loadUpdatesInfos($bdb, 'entity', $ext_entity);
+				if ($debug_mode) {
+					echo '<br/>INFOS MAJ ENTITÉ : <pre>' . print_r($entity_infos, 1) . '</pre><br/>';
+				}
+				if (empty($entity_infos)) {
+					if ($debug_mode) {
+						echo '<br/>INFOS MAJ ENTITÉ ABSENTES, ajout en base : ';
+					}
+
+					if (!addUpdatesInfos($bdb, $errors, 'entity', $ext_entity)) {
+						if ($debug_mode) {
+							echo 'ECHEC<br/>';
+						}
+					} else {
+						if ($debug_mode) {
+							echo 'OK<br/>';
+						}
+					}
+				}
+
+				if (!isset($entity_infos['idx'])) {
+					$entity_infos['idx'] = 0;
+				}
+
+				if ($debug_mode || ((int) $entity_infos['idx'] < (int) $pull_info['idx'])) {
+					$modules_entity_updates = BimpCore::getModulesExtendsUpdates('entity');
+
+					if (!empty($modules_entity_updates)) {
+						$entity_updates = true;
+					}
+
+					if ($debug_mode) {
+						if (!$entity_updates) {
+							echo '*** AUCUNE MISE A JOUR ENTITÉ A EFFECTUER ***<br/><br/>';
+						} else {
+							echo 'MAJ MODULES ENTITÉ<pre>' . print_r($modules_entity_updates, 1) . '</pre>';
+						}
+					}
+
+					upUpdatesInfos($bdb, $errors, array(
+						'idx'     => (int) $pull_info['idx'],
+						'id_user' => $user->id,
+						'start'   => date('Y-m-d H:i:s'),
+						'end'     => ($entity_updates ? '' : date('Y-m-d H:i:s')),
+						'token'   => $token
+					), 'entity', $ext_entity);
+				}
+			}
+
+			if (!count($errors)) {
+				$tbdb = BimpCache::getBdb(); // Avec transactions
+
+				// Pour chaque type de mise à jour, on actualise les infos en base pour vérifier qu'un autre utilisateur n'a pas pris le lead (via token)
+				// On éxécute les màj si le token est toujours valide
+
+				if ($global_updates) {
+					sleep(1);
+					$global_infos = loadUpdatesInfos($bdb);
+					if (isset($global_infos['token']) && $global_infos['token'] === $token) {
+						if ($debug_mode) {
+							echo '<br/>***** EXEC MAJ GLOBALES *****<br/>';
+						}
+
+						$global_updates_errors = array();
+						$tbdb->db->commitAll();
+
+						// Exécution des màj globales :
+						if ($menu_update) {
+							$erase_cache_server = true;
+							if ($debug_mode) {
+								echo 'Maj full menu ' . $menu_update . ' : ';
+							}
+							$menu_errors = Bimp_Menu::updateFullMenu();
+							if (count($menu_errors)) {
+								if ($debug_mode) {
+									echo 'ECHEC<pre>' . print_r($menu_errors, 1) . '</pre>';
+								}
+								$global_updates_errors[] = BimpTools::getMsgFromArray($menu_errors, 'Echec de la mise à jour complète du menu');
+							} elseif ($debug_mode) {
+								echo 'OK<br/>';
+							}
+						}
+
+						if (!empty($bimpcore_updates)) {
+							$erase_cache_server = true;
+							foreach ($bimpcore_updates as $dev => $dev_updates) {
+								sort($dev_updates);
+								$new_version = 0;
+								$dev_dir = DOL_DOCUMENT_ROOT . '/bimpcore/updates/' . $dev . '/';
+								foreach ($dev_updates as $version) {
+									$version = (string) $version;
+									if (!file_exists($dev_dir . $version . '.sql') && preg_match('/^[0-9]+$/', $version)) {
+										if (file_exists($dev_dir . $version . '.0.sql')) {
+											$version .= '.0';
+										}
+									}
+									if (file_exists($dev_dir . $version . '.sql')) {
+										if ($debug_mode) {
+											echo 'Mise à jour du module bimpcore à la version ' . $dev . '/' . $version . ' : ';
+										}
+										$tbdb->db->begin();
+										$file_errors = array();
+										if (!$bdb->executeFile($dev_dir . $version . '.sql', $file_errors)) {
+											if ($debug_mode) {
+												echo 'ECHEC<pre>' . print_r($file_errors, 1) . '</pre>';
+											}
+											$global_updates_errors[] = BimpTools::getMsgFromArray($file_errors, 'Echec de l\'exécution du fichier "' . $dev_dir . $version . '.sql' . '"');
+											$tbdb->db->rollback();
+											break;
+										} elseif ($debug_mode) {
+											echo 'OK<br/>';
+										}
+
+										$new_version = (float) $version;
+										$tbdb->db->commitAll();
+									}
+								}
+
+								if ($new_version) {
+									BimpCore::setVersion($dev, $new_version, true);
+								}
+							}
+						}
+
+						if (!empty($modules_updates)) {
+							$erase_cache_server = true;
+							foreach ($modules_updates as $module => $module_updates) {
+								$dir = DOL_DOCUMENT_ROOT . '/' . $module . '/sql/';
+
+								if (!file_exists($dir) || !is_dir($dir)) {
+									continue;
+								}
+
+								sort($module_updates);
+								$new_version = 0;
+
+								foreach ($module_updates as $version) {
+									$version = (string) $version;
+
+									if (!file_exists($dir . $version . '.sql') && preg_match('/^[0-9]+$/', $version)) {
+										if (file_exists($dir . $version . '.0.sql')) {
+											$version .= '.0';
+										}
+									}
+									if (!file_exists($dir . $version . '.sql')) {
+										continue;
+									}
+
+									if ($debug_mode) {
+										echo 'Mise à jour du module ' . $module . ' à la version ' . $version . ' : ';
+									}
+
+									$tbdb->db->begin();
+									$file_errors = array();
+									if (!$bdb->executeFile($dir . $version . '.sql', $file_errors)) {
+										if ($debug_mode) {
+											echo 'ECHEC<pre>' . print_r($file_errors, 1) . '</pre>';
+										}
+										$global_updates_errors[] = BimpTools::getMsgFromArray($file_errors, 'Echec de l\'exécution du fichier "' . $dir . $version . '.sql' . '"');
+										$tbdb->db->rollback();
+										break;
+									} elseif ($debug_mode) {
+										echo 'OK<br/>';
+									}
+
+									$new_version = (float) $version;
+									$tbdb->db->commitAll();
+								}
+
+								if ($new_version) {
+									BimpCore::setConf('module_version_' . $module, $new_version, 'bimpcore', 0, true);
+								}
+							}
+						}
+
+						if (count($global_updates_errors)) {
+							$errors[] = BimpTools::getMsgFromArray($global_updates_errors, 'Erreurs lors de la mise à jour globale');
+						} else {
+							$global_infos['end'] = date('Y-m-d H:i:s');
+							upUpdatesInfos($bdb, $errors, $global_infos);
+
+							BimpCore::addLog('Maj globale effectuée avec succès', 1, 'maj', null, array(
+								'infos' => $global_infos
+							), true);
+						}
+					} elseif ($debug_mode) {
+						echo 'Màj globale : token invalide.<br/>';
+					}
+				}
+
+				if ($version_updates) {
+					sleep(1);
+					$version_infos = loadUpdatesInfos($bdb, 'version', $ext_version);
+					if (isset($version_infos['token']) && $version_infos['token'] === $token) {
+						if ($debug_mode) {
+							echo '<br/>***** EXEC MAJ VERSION *****<br/>';
+						}
+						$version_updates_errors = array();
+						$tbdb->db->commitAll();
+
+						// Exécution des màj version :
+						if (!empty($modules_version_updates)) {
+							$erase_cache_server = true;
+							foreach ($modules_version_updates as $module => $extend_updates) {
+								$dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . $ext_version . '/sql/';
+								if (!file_exists($dir) || !is_dir($dir)) {
+									continue;
+								}
+
+								sort($extend_updates);
+								$new_version = 0;
+
+								foreach ($extend_updates as $extend_version) {
+									$extend_version = (string) $extend_version;
+
+									if (!file_exists($dir . $extend_version . '.sql') && preg_match('/^[0-9]+$/', $extend_version)) {
+										if (file_exists($dir . $extend_version . '.0.sql')) {
+											$extend_version .= '.0';
+										}
+									}
+									if (file_exists($dir . $extend_version . '.sql')) {
+										if ($debug_mode) {
+											echo 'Mise à jour du module ' . $module . ' à la version ' . $extend_version . ' (version "' . $ext_version . '") : ';
+										}
+
+										$tbdb->db->begin();
+										$file_errors = array();
+										if (!$bdb->executeFile($dir . $extend_version . '.sql', $file_errors)) {
+											if ($debug_mode) {
+												echo 'ECHEC<pre>' . print_r($file_errors, 1) . '</pre>';
+											}
+											$version_updates_errors[] = BimpTools::getMsgFromArray($file_errors, 'Echec de l\'exécution du fichier "' . $dir . $extend_version . '.sql' . '"');
+											$tbdb->db->rollback();
+											break;
+										} elseif ($debug_mode) {
+											echo 'OK<br/>';
+										}
+
+										$tbdb->db->commitAll();
+										$new_version = (float) $extend_version;
+									}
+								}
+
+								if ($new_version) {
+									BimpCore::setConf('module_sql_version_' . $module . '_version_' . $ext_version, $new_version, 'bimpcore', 0, true);
+								}
+							}
+						}
+
+						if (count($version_updates_errors)) {
+							$errors[] = BimpTools::getMsgFromArray($version_updates_errors, 'Erreurs lors de la mise à jour de la version "' . $ext_version . '"');
+						} else {
+							$version_infos['end'] = date('Y-m-d H:i:s');
+							upUpdatesInfos($bdb, $errors, $version_infos, 'version', $ext_version);
+
+							BimpCore::addLog('Maj version effectuée avec succès', 1, 'maj', null, array(
+								'infos' => $version_infos
+							), true);
+						}
+					} elseif ($debug_mode) {
+						echo 'Màj version : token invalide.<br/>';
+					}
+				}
+
+				if ($entity_updates) {
+					sleep(1);
+					$entity_infos = loadUpdatesInfos($bdb, 'entity', $ext_entity);
+					if (isset($entity_infos['token']) && $entity_infos['token'] === $token) {
+						if ($debug_mode) {
+							echo '<br/>***** EXEC MAJ ENTITÉ *****<br/>';
+						}
+						$entity_updates_errors = array();
+						$tbdb->db->commitAll();
+
+						// Exécution des màj entité :
+						if (!empty($modules_entity_updates)) {
+							$erase_cache_server = true;
+							foreach ($modules_entity_updates as $module => $extend_updates) {
+								$dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . $ext_entity . '/sql/';
+								if (!file_exists($dir) || !is_dir($dir)) {
+									continue;
+								}
+
+								sort($extend_updates);
+								$new_version = 0;
+
+								foreach ($extend_updates as $extend_version) {
+									$new_version = $extend_version;
+									$extend_version = (string) $extend_version;
+
+									if (!file_exists($dir . $extend_version . '.sql') && preg_match('/^[0-9]+$/', $extend_version)) {
+										if (file_exists($dir . $extend_version . '.0.sql')) {
+											$extend_version .= '.0';
+										}
+									}
+
+									if (file_exists($dir . $extend_version . '.sql')) {
+										if ($debug_mode) {
+											echo 'Mise à jour du module ' . $module . ' à la version ' . $extend_version . ' (entité "' . $ext_entity . '") : ';
+										}
+										$tbdb->db->begin();
+										$file_errors = array();
+										if (!$bdb->executeFile($dir . $extend_version . '.sql', $file_errors)) {
+											if ($debug_mode) {
+												echo 'ECHEC<pre>' . print_r($file_errors, 1) . '</pre>';
+											}
+											$entity_updates_errors[] = BimpTools::getMsgFromArray($file_errors, 'Echec de l\'exécution du fichier "' . $dir . $extend_version . '.sql' . '"');
+											$tbdb->db->rollback();
+											break;
+										} elseif ($debug_mode) {
+											echo 'OK<br/>';
+										}
+
+										$tbdb->db->commitAll();
+										$new_version = (float) $extend_version;
+									}
+								}
+
+								if ($new_version) {
+									BimpCore::setConf('module_sql_version_' . $module . '_entity_' . BimpCore::getExtendsEntity(), $new_version);
+								}
+							}
+						}
+
+						if (count($entity_updates_errors)) {
+							$errors[] = BimpTools::getMsgFromArray($entity_updates_errors, 'Erreurs lors de la mise à jour de l\'entité "' . $ext_entity . '"');
+						} else {
+							$entity_infos['end'] = date('Y-m-d H:i:s');
+							upUpdatesInfos($bdb, $errors, $entity_infos, 'entity', $ext_entity);
+
+							BimpCore::addLog('Maj entité effectuée avec succès', 1, 'maj', null, array(
+								'infos' => $entity_infos
+							), true);
+						}
+					}
+				}
+			}
+
+			if ($erase_cache_server) {
+				BimpCache::eraseCacheServer();
+			}
+
+			if ($debug_mode) {
+				echo '<br/><br/>FIN<br/><br/>';
+				if (count($errors)) {
+					echo 'ERREURS : <pre>' . print_r($errors, 1) . '</pre>';
+				} else {
+					echo 'AUCUNE ERREUR<br/>';
+				}
+			} else {
+				if (count($errors)) {
+					self::addlog('Erreurs mise à jour ERP', 4, 'maj', null, array(
+						'Infos pull' => $pull_info,
+						'Erreurs'    => $errors
+					), true);
+				}
+				// on sleep tant qu'il y a des maj sql en cours non terminées
+				$n = 0;
+				while ((isset($global_infos['end']) && empty($global_infos['end'])) ||
+					($ext_version && isset($version_infos['end']) && empty($version_infos['end'])) ||
+					($ext_entity && isset($entity_infos['end']) && empty($entity_infos['end']))) {
+					$n++;
+					sleep(3);
+					$updates_infos = json_decode((string) $bdb->getValue('bimpcore_conf', 'value', 'name = \'erp_updates_infos\' AND module = \'bimpcore\' AND entity = 0'), 1);
+
+					if ($n > 20) {
+						die('ERP EN COURS DE MISE A JOUR. MERCI DE PATIENTER QUELQUES INSTANTS AVANT D\'ACTUALISER CETTE PAGE.');
+					}
+				}
+			}
+		}
+	}
+
+	public static function getBimpcoreUpdates()
+	{
+		$dir = DOL_DOCUMENT_ROOT . '/bimpcore/updates';
+		$updates = array();
+		foreach (scandir($dir) as $subDir) {
+			if (in_array($subDir, array('.', '..'))) {
+				continue;
+			}
+
+			if (preg_match('/^[a-z]+$/', $subDir) && is_dir($dir . '/' . $subDir)) {
+				$current_version = (float) BimpCore::getBimpCoreSqlVersion($subDir);
+				foreach (scandir($dir . '/' . $subDir) as $f) {
+					if (in_array($f, array('.', '..'))) {
+						continue;
+					}
+					if (preg_match('/^(\d+(\.\d{1})*)\.sql$/', $f, $matches)) {
+						if ((float) $matches[1] > (float) $current_version) {
+							if (!isset($updates[$subDir])) {
+								$updates[$subDir] = array();
+							}
+							$updates[$subDir][] = (float) $matches[1];
+						}
+					}
+				}
+				if (isset($updates[$subDir])) {
+					sort($updates[$subDir]);
+				}
+			}
+		}
+
+		return $updates;
+	}
+
 	public static function getModulesUpdates()
 	{
 		$updates = array();
@@ -721,9 +1385,12 @@ class BimpCore
 		return $updates;
 	}
 
-	public static function getModulesExtendsUpdates()
+	public static function getModulesExtendsUpdates($type_filter = '')
 	{
-		if (!BimpCore::getVersion() && BimpCore::getExtendsEntity() == '') {
+		$version = BimpCore::getExtendsVersion();
+		$ext_entity = BimpCore::getExtendsEntity();
+
+		if (!$version && !$ext_entity) {
 			return array();
 		}
 
@@ -743,10 +1410,10 @@ class BimpCore
 			}
 
 			foreach ($modules as $module) {
-				if (BimpCore::getVersion()) {
-					$dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BimpCore::getVersion() . '/sql';
+				if ($version && (!$type_filter || $type_filter == 'version')) {
+					$dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . $version . '/sql';
 					if (file_exists($dir) && is_dir($dir)) {
-						$current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_version_' . BimpCore::getVersion(), 0);
+						$current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_version_' . $version, 0);
 						$files = scandir($dir);
 
 						foreach ($files as $f) {
@@ -759,22 +1426,27 @@ class BimpCore
 									if (!isset($updates[$module])) {
 										$updates[$module] = array();
 									}
-									if (!isset($updates[$module]['version'])) {
-										$updates[$module]['version'] = array();
-									}
 
-									$updates[$module]['version'][] = (float) $matches2[1];
+									if ($type_filter) {
+										$updates[$module][] = (float) $matches2[1];
+									} else {
+										if (!isset($updates[$module]['version'])) {
+											$updates[$module]['version'] = array();
+										}
+
+										$updates[$module]['version'][] = (float) $matches2[1];
+									}
 								}
 							}
 						}
 					}
 				}
 
-				if (BimpCore::getExtendsEntity() != '') {
-					$dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BimpCore::getExtendsEntity() . '/sql';
+				if ($ext_entity && (!$type_filter || $type_filter == 'entity')) {
+					$dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . $ext_entity . '/sql';
 					if (file_exists($dir) && is_dir($dir)) {
 
-						$current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . BimpCore::getExtendsEntity(), 0);
+						$current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . $ext_entity, 0);
 
 						$files = scandir($dir);
 
@@ -788,11 +1460,16 @@ class BimpCore
 									if (!isset($updates[$module])) {
 										$updates[$module] = array();
 									}
-									if (!isset($updates[$module]['entity'])) {
-										$updates[$module]['entity'] = array();
-									}
 
-									$updates[$module]['entity'][] = (float) $matches2[1];
+									if ($type_filter) {
+										$updates[$module][] = (float) $matches2[1];
+									} else {
+										if (!isset($updates[$module]['entity'])) {
+											$updates[$module]['entity'] = array();
+										}
+
+										$updates[$module]['entity'][] = (float) $matches2[1];
+									}
 								}
 							}
 						}
@@ -808,7 +1485,7 @@ class BimpCore
 	{
 		$versions = self::getConf('bimpcore_version');
 
-		$bdb = BimpCache::getBdb();
+		$bdb = BimpCache::getBdb(true);
 		if (!is_array($versions) || empty($versions)) {
 			if ((string) $versions) {
 				$versions = json_decode($versions, 1);
@@ -865,7 +1542,7 @@ class BimpCore
 		return $versions;
 	}
 
-	public static function setVersion($dev, $version)
+	public static function setVersion($dev, $version, $no_transactions = false)
 	{
 		$versions = self::getBimpCoreSqlVersion();
 
@@ -875,7 +1552,7 @@ class BimpCore
 
 		$versions[$dev] = $version;
 
-		self::setConf('bimpcore_version', $versions);
+		self::setConf('bimpcore_version', $versions, 'bimpcore', 0, $no_transactions);
 	}
 
 	public static function afterGitPullProcess($force_process = false, &$success = '')
@@ -983,7 +1660,7 @@ class BimpCore
 		return self::$conf_cache_def_values[$module][$name];
 	}
 
-	public static function setConf($name, $value, $module = 'bimpcore', $entity = -1)
+	public static function setConf($name, $value, $module = 'bimpcore', $entity = -1, $no_transactions = false)
 	{
 		if (!$module) {
 			$module = 'bimpcore';
@@ -1006,7 +1683,7 @@ class BimpCore
 
 		$current_val = (isset(self::$conf_cache[$entity][$module][$name]) ? self::$conf_cache[$entity][$module][$name] : null);
 
-		$bdb = BimpCache::getBdb();
+		$bdb = BimpCache::getBdb($no_transactions);
 
 		if (is_null($current_val)) {
 			if ($bdb->insert('bimpcore_conf', array(
@@ -1181,7 +1858,7 @@ class BimpCore
 		return $entity;
 	}
 
-	public static function getVersion()
+	public static function getExtendsVersion()
 	{
 		$version = BimpCore::getConf('extends_version', '');
 
@@ -1211,13 +1888,13 @@ class BimpCore
 
 	public static function isVersion($version)
 	{
-		if (BimpCore::getVersion()) {
+		if (BimpCore::getExtendsVersion()) {
 			if (is_array($version)) {
-				if (in_array(BimpCore::getVersion(), $version)) {
+				if (in_array(BimpCore::getExtendsVersion(), $version)) {
 					return 1;
 				}
 			} else {
-				if (BimpCore::getVersion() == $version) {
+				if (BimpCore::getExtendsVersion() == $version) {
 					return 1;
 				}
 			}
@@ -1237,7 +1914,7 @@ class BimpCore
 		$dir = DOL_DOCUMENT_ROOT . ($module ? '/' . $module : '') . '/';
 		$final_file_path = '';
 		$entity = self::getExtendsEntity();
-		$version = self::getVersion();
+		$version = self::getExtendsVersion();
 
 		if ($entity && file_exists($dir . 'extends/entities/' . $entity . '/' . $file_name)) {
 			$final_file_path = $dir . 'extends/entities/' . $entity . '/' . $file_name;
@@ -1260,7 +1937,7 @@ class BimpCore
 		return false;
 	}
 
-// Gestion du contexte:
+	// Gestion du contexte:
 
 	public static function getContext()
 	{
@@ -1703,7 +2380,7 @@ class BimpCore
 		// Vérif limite atteinte :
 		if ($data['count'] >= $limit) {
 			if ($data['count'] == $limit) {
-				BimpCore::addlog('Limite de requêtes atteinte en ' . ($current_time - $data['start_time']) . ' sec (type : ' . $type . ') debut : ' . $data['start_time'] . ' maintenant : ' . $current_time, 4, 'secu', null, array(
+				BimpCore::addlog('Limite de requêtes atteinte en ' . ($current_time - $data['start_time']) . ' sec (type : ' . $type . ') debut : ' . $data['start_time'] . ' maintenant : ' . $current_time, 2, 'secu', null, array(
 					'Utilisateur' => $user->id,
 					'Limit'       => $limit,
 					'Count'       => $data['count'],
@@ -1877,11 +2554,13 @@ class BimpCore
 		$content .= '</div>';
 
 		// Toutes mes tâches:
-		$content .= '<div style="margin-bottom: 12px">';
-		$content .= '<a href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=user&id=' . $user->id . '&navtab-maintabs=tasks&navtab-tasks=my_tasks">';
-		$content .= BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Toutes mes tâches';
-		$content .= '</a>';
-		$content .= '</div>';
+		if (BimpCore::isModuleActive('bimptask')) {
+			$content .= '<div style="margin-bottom: 12px">';
+			$content .= '<a href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=user&id=' . $user->id . '&navtab-maintabs=tasks&navtab-tasks=my_tasks">';
+			$content .= BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Toutes mes tâches';
+			$content .= '</a>';
+			$content .= '</div>';
+		}
 
 		// Logout:
 		$content .= '<div style="margin-top: 10px; text-align: center">';

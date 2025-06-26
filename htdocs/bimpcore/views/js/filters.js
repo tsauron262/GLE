@@ -777,6 +777,7 @@ function removeAllListFilters(filters_id) {
     } else {
         bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
     }
+	$filters.find('#id_filters_to_load').val(0);
 }
 
 function saveListFilters($button, filters_id, id_list_filters) {
@@ -901,7 +902,7 @@ function loadSavedFilters(filters_id, id_list_filters, full_panel_html) {
     var $filters = $('#' + filters_id);
 
     if ($.isOk($filters)) {
-        if (typeof (id_list_filters) === 'undefined' || !id_list_filters) {
+        if (typeof (id_list_filters) === 'undefined') {
             var $input = $filters.find('select[name="id_filters_to_load"]');
             if ($input.length) {
                 id_list_filters = parseInt($input.val());
@@ -911,15 +912,16 @@ function loadSavedFilters(filters_id, id_list_filters, full_panel_html) {
             full_panel_html = 1;
         }
 
-        if (!id_list_filters || isNaN(id_list_filters)) {
-            removeAllListFilters(filters_id);
+		if (full_panel_html) {
+			var $container = $filters.findParentByClass('listFiltersPanelContainer');
+		} else {
+			var $container = $filters.find('.load_saved_filters_container');
+		}
+		
+		if (!id_list_filters || isNaN(id_list_filters) || id_list_filters == 0) {
+			var list_identifier = $filters.data('list_identifier');
+			removeAllListFilters(filters_id);
             return;
-        }
-
-        if (full_panel_html) {
-            var $container = $filters.findParentByClass('listFiltersPanelContainer');
-        } else {
-            var $container = $filters.find('.load_saved_filters_container');
         }
 
         var id_filters_config = 0;

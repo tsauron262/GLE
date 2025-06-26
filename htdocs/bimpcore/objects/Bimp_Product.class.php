@@ -203,7 +203,7 @@ class Bimp_Product extends BimpObject
                 return $this->canValidate();
 
             case 'mouvement':
-                return (($this->canValidate() || $user->rights->bimpcommercial->correct_stocks) && $this->isTypeProduct());
+                return ($this->canValidate() || $user->rights->bimpcommercial->correct_stocks);
 
             case 'updatePrice':
                 return ($this->canValidate() && $this->canEditPrices());
@@ -299,6 +299,12 @@ class Bimp_Product extends BimpObject
                     $errors[] = 'Ce produit n\'est pas validé';
                     return 0;
                 }
+
+				if (!$this->isTypeProduct()) {
+					$errors[] = 'N\'est pas de type produit';
+					return 0;
+				}
+
                 if ((int) $this->getData('serialisable')) {
                     $errors[] = 'Ce produit est sériliasable créer un équipment';
                     return 0;

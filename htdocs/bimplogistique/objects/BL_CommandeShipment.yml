@@ -375,7 +375,7 @@ forms:
                 input: 
                     type: select_mysoc_account
                 value: 
-                    conf: id_default_bank_account
+                    callback: getDefaultBankAccount
                 display_if: 
                     field_name: id_facture
                     show_values: 0,

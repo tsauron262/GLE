@@ -1,0 +1,111 @@
+.bimp_chat_msg_container {
+  display: -ms-flexbox !important;
+  display: flex !important;
+
+  &.right {
+    -ms-flex-pack: end !important;
+    justify-content: flex-end !important;
+
+    .bimp_chat_msg_content {
+      background-color: #CEF2D6;
+      border-top-right-radius: 0;
+    }
+  }
+
+  &.left {
+    .bimp_chat_msg_content {
+      background-color: #DEF4F9;
+      border-top-left-radius: 0;
+    }
+  }
+}
+
+.bimp_chat_msg {
+  display: inline-block;
+  margin-bottom: 25px;
+  min-width: 600px;
+
+  .bimp_chat_msg_header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    padding: 0 38px;
+  }
+
+  .bimp_chat_msg_body {
+    display: flex;
+    margin: 3px 0;
+  }
+
+  .bimp_chat_dest_badge,
+  .bimp_chat_author_badge {
+    width: 38px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+
+    span.userBadge {
+      display: inline-block;
+      color: #fff;
+      font-size: 11px;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      vertical-align: middle;
+      border-radius: 50%;
+      background-color: #E6B85C;
+      margin: auto;
+
+      &.user {
+        background-color: #4D87BF;
+      }
+    }
+  }
+
+  .bimp_chat_author_badge span {
+    margin-top: 0 !important;
+  }
+
+  .bimp_chat_dest_badge span {
+    margin-bottom: 0 !important;
+  }
+
+  .bimp_chat_msg_content {
+    text-align: left;
+    font-size: 12px;
+    line-height: 14px;
+    margin-top: 0;
+    padding: 10px 20px;
+    border-radius: 16px;
+    flex: 1
+  }
+
+  .bimp_chat_author,
+  .bimp_chat_dest {
+    font-size: 11px;
+    color: $gray-darker;
+    font-style: italic;
+  }
+  
+  .bimp_chat_dest, 
+  .bimp_chat_buttons {
+    display: inline-block;
+    vertical-align: top;
+  } 
+
+  .bimp_chat_date {
+    display: inline-block;
+    margin-left: 12px;
+    color: $gray-dark;
+  }
+  
+  .bimp_chat_msg_footer {
+    text-align: right;
+    padding-right: 38px;
+  }
+  
+  .bimp_chat_buttons {
+    display: inline-block;
+    margin-left: 20px;
+  }
+}

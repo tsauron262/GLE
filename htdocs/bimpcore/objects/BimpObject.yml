@@ -343,6 +343,7 @@ objects:
                 obj_name: 
                     prop: object_name
                 
+                
 associations: 
     files: 
         label: Fichiers associés

@@ -20,9 +20,9 @@ objects:
             bimp_object:  
                 module: en
                 name: en_histo
-    histo2: 
+    histo2:
         instance:
-            bimp_object:  
+            bimp_object:
                 module: en
                 name: en_histo2
             

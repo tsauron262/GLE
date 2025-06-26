@@ -136,27 +136,69 @@ lists:
         
             
 graph:
+    treso:
+        title: Evolution Tréso
+        xDateConfig:
+            field: date
+            date1: 1
+            date2: 2
+            def: 1year
+        y: €
+        use_k: 1
+        x: date
+        data_callback: getDataGraphTreso
+    dette:
+        title: Evolution Dette
+        xDateConfig:
+            field: date
+            date1: 1
+            date2: 2
+            def: 1year
+        y: €
+        use_k: 1
+        round: 2
+        x: date
+        data_callback: getDataGraphDette
+    detteNet:
+        title: Evolution Dette - treso
+        xDateConfig:
+            field: date
+            date1: 1
+            date2: 2
+            def: 1year
+        y: €
+        use_k: 0
+        round: 2
+        x: date
+        data_callback: getDataGraphDetteTreso
     rep:
         mode: doughnut
         title: Repartition Capital
-#        xDateConfig:
-#            field: date
-#            date1: 1
-#            date2: 2
-#            def: 1year
         y: €
         use_k: 1
         yConfig:
             fields:
                 callback: getFieldsGraphRep
+    evol:
+        title: Evolution Capital
+        cumul: 1
+        xDateConfig:
+            field: date
+            params:
+                - day
+                - month
+                - week
+            date1: 1
+            date2: 2
+            def: 5year
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                callback: getFieldsGraphEvol
     rep2:
         mode: doughnut
         title: Repartition CCA
-#        xDateConfig:
-#            field: date
-#            date1: 1
-#            date2: 2
-#            def: 1year
         y: €
         use_k: 1
         yConfig:
@@ -165,14 +207,29 @@ graph:
                     method: getFieldsGraphRep
                     params: 
                         - 2
+    evol2:
+        title: Evolution CCA
+        cumul: 1
+        xDateConfig:
+            field: date
+            params:
+                - day
+                - month
+                - week
+            date1: 1
+            date2: 2
+            def: 5year
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                callback:
+                    method: getFieldsGraphEvol
+                    params:
+                        - 2
     rep3:
         mode: doughnut
         title: Repartition CCA Urgence
-#        xDateConfig:
-#            field: date
-#            date1: 1
-#            date2: 2
-#            def: 1year
         y: €
         use_k: 1
         yConfig:

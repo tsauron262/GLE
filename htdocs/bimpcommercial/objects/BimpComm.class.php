@@ -310,7 +310,7 @@ class BimpComm extends BimpDolObject
 					if ($this->object_name !== 'Bimp_Facture') {
 						$cond_reglement = $this->getData('fk_cond_reglement');
 						if (in_array((int) $cond_reglement, array(0, 39)) || $cond_reglement == "VIDE") {
-							$errors[] = 'Conditions de réglement absentes';
+//							$errors[] = 'Conditions de réglement absentes';
 						}
 					}
 				}
@@ -4229,7 +4229,7 @@ class BimpComm extends BimpDolObject
 					}
 
 					if (!$ok) {
-						$errors[] = 'Pas de Commercial Suivi';
+//						$errors[] = 'Pas de Commercial Suivi';
 					}
 				}
 

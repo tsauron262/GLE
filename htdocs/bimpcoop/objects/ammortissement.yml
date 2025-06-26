@@ -1,0 +1,135 @@
+table: ammortissement
+common_fields: 0
+
+labels:
+    name: Amortissement
+    name_plur: Amortissements
+    is_female: 1
+    
+parent_object: emprunt
+parent_id_property: id_emprunt
+
+fields:
+    id:
+        label: ID
+        type: int
+    id_emprunt:
+        label: ID Emprunt
+        type: id_object
+    id_prelev:
+        label: ID Prélèvement
+        type: int
+    id_fact:
+        label: ID Facture fourn
+        type: id_object
+        object: facture_fourn
+    Date_ECHEANCE:
+        label: Date Échéance
+        type: date
+    date_paiement_reel:
+        label: Date paiement réel
+        type: date
+    MONTANT_INTERETS:
+        label: Montant Intérêts
+        type: money
+    MONTANT_ASSURANCE:
+        label: Montant Assurance
+        type: money
+    MONTANT_ACCESSOIRES:
+        label: Montant Accessoires
+        type: money
+    CAPITAL_AMORTI:
+        label: Capital Amorti
+        type: money
+    MONTANT_ECHEANCE:
+        label: Montant Échéance
+        type: money
+    CAPITAL_RESTANT_DU:
+        label: Capital Restant Dû
+        type: money
+    ELEMENTS_CAPITALISES:
+        label: Éléments Capitalisés
+        type: money
+    SOMMES_TOTALES_RESTANT_DUES:
+        label: Sommes Totales Restant Dues
+        type: money
+        
+lists:
+    default:
+        title: Amortissement
+        icon: fas_percent
+        configurable: 0
+        enable_search: 1
+        pagination: 0
+        checkboxes: 1
+        add_btn: 1
+        has_total: 1
+        add_form_name: default
+        edit_btn: 1
+        delete_btn: 1
+        total_row: 1
+        sort_field: Date_ECHEANCE
+        extra_btn:
+            callback: getActionsButtons
+        sort_way: asc
+        n: 0
+        cols:
+            id_emprunt:
+            id_prelev:
+            Date_ECHEANCE:
+            MONTANT_ECHEANCE:
+            CAPITAL_RESTANT_DU:
+            id_fact:
+            date_paiement_reel:
+                
+forms:
+    createFact:
+        rows:
+            origin:
+                custom: 1
+                label: Date paiement
+                lable: Date
+                input_name: date
+                input:
+                    type: date
+            
+                
+graph:
+    restant:
+        title: Capital restant
+        xDateConfig:
+            field: Date_ECHEANCE
+            date1: 1
+            date2: 2
+            def: 1year
+        y: €
+        use_k: 1
+        yConfig:
+            fields:
+                callback: getEmpruntGraphData
+#                pop:
+#                    type: line
+#                    title: Pop
+#                    field: CAPITAL_RESTANT_DU
+#                    filters:
+#                        Banque: 1
+#                nef:
+#                    type: line
+#                    title: Nef
+#                    field: CAPITAL_RESTANT_DU
+#                    filters:
+#                        Banque: 2
+#                pop2:
+#                    type: line
+#                    title: Pop2
+#                    field: MONTANT_ECHEANCE
+#                    filters:
+#                        id_emprunt: 1
+#                nef2:
+#                    type: line
+#                    title: Nef2
+#                    field: MONTANT_ECHEANCE
+#                    filters:
+#                        id_emprunt: 2
+#            fields:
+#                filed: CAPITAL_RESTANT_DU

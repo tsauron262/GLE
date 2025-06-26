@@ -134,7 +134,7 @@ class DoliDBMysqli extends DoliDB
 
 				if (empty($disableforcecharset) && $this->db->character_set_name() != $clientmustbe) {
 					try {
-						dol_syslog(get_class($this)."::DoliDBMysqli You should set the \$dolibarr_main_db_character_set and \$dolibarr_main_db_collation for the PHP to the same as the database default, so to ".$this->db->character_set_name(). " or upgrade database default to ".$clientmustbe.".", LOG_WARNING);
+//						dol_syslog(get_class($this)."::DoliDBMysqli You should set the \$dolibarr_main_db_character_set and \$dolibarr_main_db_collation for the PHP to the same as the database default, so to ".$this->db->character_set_name(). " or upgrade database default to ".$clientmustbe.".", LOG_WARNING);
 						// To get current charset:   USE databasename; SHOW VARIABLES LIKE 'character_set_database'
 						//                     or:   USE databasename; SELECT schema_name, default_character_set_name FROM information_schema.SCHEMATA;
 						// To get current collation: USE databasename; SHOW VARIABLES LIKE 'collation_database'
@@ -639,6 +639,7 @@ class DoliDBMysqli extends DoliDB
 	 */
 	public function escape($stringtoencode)
 	{
+		$stringtoencode = str_replace('​​​​​​​', '', (string) $stringtoencode); // Remove zero-width space
 		return $this->db->real_escape_string((string) $stringtoencode);
 	}
 

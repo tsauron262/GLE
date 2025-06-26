@@ -223,6 +223,36 @@ forms:
               input: 
                   type: toggle
               value: 0
+            - custom: 1
+              label: Recap
+              input_name: lines
+              content:
+                 callback: renderTotals
+            - custom: 1
+              label: Valider
+              input_name: validate
+              data_type: bool
+              input:
+                  type: toggle
+              value: 0
+            - custom: 1
+              label: Créer paiement
+              input_name: addPaiement
+              data_type: bool
+              display_if:
+                  field_name: validate
+                  show_values: 1
+              input:
+                  type: toggle
+              value: 0
+            - field: fk_mode_reglement
+              display_if:
+                  field_name: addPaiement
+                  show_values: 1
+            - field: fk_account
+              display_if:
+                  field_name: addPaiement
+                  show_values: 1
             
 fields_tables: 
     infos: 

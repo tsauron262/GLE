@@ -269,14 +269,14 @@ WHERE date IS NULL '.
                 $label = $bank[$ln->fk_account];
                 if($label == '')
                     $label = 'Banque '.$ln->fk_account;
-                $tabInfoSolde['Solde '.$label] = $ln->solde;
+                $tabInfoSolde['Solde '.$label] = array('amount'=> $ln->solde, 'link'=> DOL_URL_ROOT.'/compta/bank/bankentries_list.php?id='.$ln->fk_account);
                 $tot += $ln->solde;
             }
         }
         if(BimpTools::getPostFieldValue('ajPret', 0) == 1){
-            $tabInfoSolde['Solde Banque POP'] -= 1446.38;
+            $tabInfoSolde['Solde Banque POP']['amount'] -= 1446.38;
             $tot -= 1446.38;
-            $tabInfoSolde['Solde NEF'] -= 1430.73;
+            $tabInfoSolde['Solde NEF']['amount'] -= 1430.73;
             $tot -= 1430.73;
 			$tabInfoD['Banque'] += (1446.38 + 1430.73);
         }
@@ -287,7 +287,7 @@ WHERE date IS NULL '.
                 (BimpTools::getPostFieldValue('dateF', null)? ' AND date < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
                  '');
         while($ln = $db->fetch_object($sql)){
-            $tabInfoSolde['Solde Bl'] =$ln->solde;
+            $tabInfoSolde['Solde Bl'] = array('amount'=> $ln->solde, 'link'=> DOL_URL_ROOT.'/bimpcoop/index.php?fc=index&tab=non_rep');
             $tot += $ln->solde;
         }
 
@@ -300,6 +300,8 @@ WHERE date IS NULL '.
             $tabInfoSolde['  '] = '';
             $tabInfoSolde['Dif Prévi'] = $tot - 10000 + $tabInfoD['Travaux'] - 9000 - BimpCore::getConf('b_previ', 0, 'bimpcoop');
         }
+		$tabInfoSolde['Dette'] = $this->getDetes(BimpTools::getPostFieldValue('dateF', ''));
+		$tabInfoSolde['Dette - Treso'] = $tabInfoSolde['Dette'] - $tabInfoSolde['TOTAL'];
 
 
 
@@ -307,7 +309,20 @@ WHERE date IS NULL '.
         $contentSolde = '<a class="btn btn-default" href="'.DOL_URL_ROOT.'/compta/bank/list.php">Comptes</a>';
         $contentSolde .= '<table class="bimp_list_table">';
         foreach($tabInfoSolde as $nom => $val){
-            $contentSolde .= '<tr><th>'.$nom.'</th><td>'.BimpTools::displayMoneyValue($val).'</td></tr>';
+			$link = '';
+			if(is_array($val)){
+				$link = $val['link'];
+				$val = $val['amount'];
+			}
+            $contentSolde .= '<tr><th>'.$nom.'</th><td>';
+			if($link != ''){
+				$contentSolde .= '<a href="'.$link.'">';
+			}
+			$contentSolde .= BimpTools::displayMoneyValue($val);
+			if($link != ''){
+				$contentSolde .= '</a>';
+			}
+			$contentSolde .= '</td></tr>';
         }
         $contentSolde .= '</table>';
 
@@ -376,8 +391,288 @@ WHERE date IS NULL '.
         $panels['Repartition Capital CCA'] = array('content'=>$this->renderCapitalCCA(), 'xs'=>12,'sm'=>8,'md'=>8);
 
 
-        return $this->renderPanels($panels);
+        return '<div style="display: inline-block;">'.$this->renderPanels($panels).'</div>';
     }
+
+	public function getTabSoldes($dateMini, $dateMax, $onlyTotal = false){
+		$dataByDate = array();
+		$dataByDate[0][0] = 0;
+		$memoire = array();
+		if(isset($dateMini) && $dateMini != ''){
+			$and = ' AND datev >= "'.$dateMini.'"';
+			$and2 = ' AND date >= "'.$dateMini.'"';
+			$sql = $this->db->db->query("SELECT SUM(amount) as amount, fk_account FROM lou_bank WHERE datev < '".$dateMini."' GROUP BY fk_account;");
+			while($ln = $this->db->db->fetch_object($sql)){
+				$dataByDate[0][$ln->fk_account] = $ln->amount;
+				$memoire[$ln->fk_account] = $ln->amount;
+			}
+			$sql = $this->db->db->query("SELECT SUM(value) as amount FROM lou_bimp_coop_nonrep WHERE date > 0 AND date < '".$dateMini."'");
+			while($ln = $this->db->db->fetch_object($sql)){
+				$dataByDate[0][999] = $ln->amount;
+				$memoire[999] = $ln->amount;
+			}
+		}
+
+		if(isset($dateMax) && $dateMax != '') {
+			$and .= ' AND datev <= "' . $dateMax . '"';
+			$and2 .= ' AND date <= "' . $dateMax . '"';
+		}
+		$sql = $this->db->db->query("SELECT SUM(amount) as amount, datev, fk_account FROM lou_bank WHERE 1 ".$and."  GROUP BY datev, fk_account;");
+
+		while($ln = $this->db->db->fetch_object($sql)){
+			$memoire[$ln->fk_account] += $ln->amount;
+			$dataByDate[strtotime($ln->datev)][$ln->fk_account] = $memoire[$ln->fk_account];
+		}
+		$sql = $this->db->db->query("SELECT SUM(value) as amount, date as datev FROM lou_bimp_coop_nonrep WHERE date > 0 ".$and2."  GROUP BY date ORDER BY date;");
+		while($ln = $this->db->db->fetch_object($sql)){
+			$memoire[999] += $ln->amount;
+			$dataByDate[strtotime($ln->datev)][999] = $memoire[999];
+		}
+
+		ksort($dataByDate);
+		return $dataByDate;
+	}
+
+	public function getTabDettes($dateMini, $dateMax){
+		if($dateMax == '' || $dateMax == '1'){
+			$dateMax = date('Y-m-d');
+		}
+
+		$dataByDate= array(
+			0=>array(
+				1=>0, //bp
+				2=>0, //nef
+				101=>0,//capital
+				102=>0,// cca
+				11=>0, // frais de resiliation bp
+				12=>0, //frais de resiltiation nef
+			)
+		);
+
+		$memoire = array();
+		if(isset($dateMini) && $dateMini != ''){
+			$and = ' AND Date_ECHEANCE >= "'.$dateMini.'"';
+			$and2 = ' AND date >= "'.$dateMini.'"';
+
+			$sql = $this->db->db->query("SELECT SUM(value) as amount, type FROM lou_bimp_coop_mvt WHERE date > 0 AND date < '".$dateMini."' GROUP BY type");
+			while($ln = $this->db->db->fetch_object($sql)){
+				$memoire[100 + $ln->type] = $ln->amount;
+				$dataByDate[0][100 + $ln->type] = $ln->amount;
+			}
+		}
+
+		$sql = $this->db->db->query("SELECT CAPITAL_RESTANT_DU as amount, if(date_paiement_reel, date_paiement_reel, Date_ECHEANCE) as datev, ID_EMPRUNT FROM `lou_ammortissement` WHERE `Date_ECHEANCE` <= '".$dateMax."' ".$and."  ORDER BY datev;");
+		while($ln = $this->db->db->fetch_object($sql)){
+			$emprunt = BimpCache::getBimpObjectInstance('bimpcoop', 'emprunt', $ln->ID_EMPRUNT);
+			if($dataByDate[0][$ln->ID_EMPRUNT] == 0)
+				$dataByDate[0][$ln->ID_EMPRUNT] = $ln->amount;
+			$dataByDate[strtotime($ln->datev)][$ln->ID_EMPRUNT] = $ln->amount;
+
+			if($emprunt->getData('pourcentage_frais')){
+				if($dataByDate[0][$ln->ID_EMPRUNT+10] == 0)
+					$dataByDate[0][$ln->ID_EMPRUNT+10] = $ln->amount * $emprunt->getData('pourcentage_frais') / 100; // frais de resiliation
+				$dataByDate[strtotime($ln->datev)][$ln->ID_EMPRUNT+10] = $ln->amount * $emprunt->getData('pourcentage_frais') / 100; // frais de resiliation
+			}
+		}
+
+		$sql = $this->db->db->query("SELECT SUM(value) as amount, date as datev, type FROM `lou_bimp_coop_mvt` WHERE `date` <= '".$dateMax."' ".$and2." GROUP BY type, date ORDER BY date;");
+		while($ln = $this->db->db->fetch_object($sql)){
+			$memoire[100 + $ln->type] += $ln->amount;
+			$dataByDate[strtotime($ln->datev)][$ln->type + 100] = $memoire[100 + $ln->type];
+		}
+
+		ksort($dataByDate);
+		return $dataByDate;
+	}
+
+	public function compileDataSerie($array1, $array2, $reverseValueArray2 = false){
+		$newTab2 = array();
+		foreach($array2 as $dateTime => $datas){
+			foreach($datas as $key => $value) {
+				$newTab2[$dateTime][$key+1000] = ($reverseValueArray2? -$value : $value);
+			}
+		}
+		$result = array_replace_recursive($array1, $newTab2);
+		ksort($result);
+		return $result;
+	}
+
+	public function dataByDateToDataPoint($dataByDate, $onlyTotal = false){
+		$dataByAccount = array();
+//		echo '<pre>';print_r($dataByDate);echo '</pre>';die;
+		foreach($dataByDate as $timestamp => $data){
+			foreach($data as $fk_account => $inut) {
+				if(!isset($dataByAccount[$fk_account])){
+					$dataByAccount[$fk_account] = array(0=>$dataByDate[0][$fk_account]);
+				}
+			}
+
+
+			$dataByAccount[0][$timestamp] = 0;
+			foreach ($dataByAccount as $fk_account => $inut) {
+				if($fk_account > 0 && $timestamp > 0) {
+					if(isset($data[$fk_account])){
+						$dataByAccount[$fk_account][0] = $data[$fk_account];
+					}
+					if(!$onlyTotal)
+						$dataByAccount[$fk_account][$timestamp] = $dataByAccount[$fk_account][0];
+					$dataByAccount[0][$timestamp] += $dataByAccount[$fk_account][0];
+				}
+			}
+		}
+		return $dataByAccount;
+	}
+
+	public function getDetes($dateMax){
+		$dette = 0;
+		if($dateMax == '' || $dateMax == '1'){
+			$dateMax = date('Y-m-d');
+		}
+		$emprunts = BimpCache::getBimpObjectObjects('bimpcoop', 'emprunt');
+		foreach($emprunts as $emprunt){
+			$sql = $this->db->db->query("SELECT CAPITAL_RESTANT_DU as mt FROM `lou_ammortissement` WHERE `Date_ECHEANCE` <= '".$dateMax."' AND ID_EMPRUNT = ".$emprunt->id." ORDER BY Date_ECHEANCE DESC LIMIT 0,1;");
+			$ln = $this->db->db->fetch_object($sql);
+			$dette += $ln->mt;
+			if($emprunt->getData('pourcentage_frais')){
+				$dette += $ln->mt *$emprunt->getData('pourcentage_frais')  / 100;
+			}
+		}
+
+		$sql = $this->db->db->query("SELECT SUM(value) as mt FROM `lou_bimp_coop_mvt` WHERE date <= '".$dateMax."';");
+		$ln = $this->db->db->fetch_object($sql);
+		$dette += $ln->mt;
+
+		return $dette;
+	}
+
+	public function getDataGraphTreso($userOption){
+		$datas = array();
+		$tabBank = array(
+			'0' => 'Solde global',
+			'999' => 'Bl',
+		);
+		$sql = $this->db->db->query("SELECT * FROM lou_bank_account;");
+		while($ln = $this->db->db->fetch_object($sql)){
+			$tabBank[$ln->rowid] = $ln->label;
+		}
+		$dataByDate = $this->getTabSoldes($userOption['date1'], $userOption['date2']);
+		$dataByAccount = $this->dataByDateToDataPoint($dataByDate);
+		foreach($dataByAccount as $idBank => $datasT){
+			$dataPoint = array();
+			foreach($datasT as $timestamp => $amount){
+				if($timestamp > 0) {
+					if($amount != 0){
+						$dataPoint[] = array(
+							'x' => "new Date('" . date('Y-m-d', $timestamp) . "')", // JavaScript date expects milliseconds
+							'y' => $amount,
+//					'name' => $idOrName,
+						);
+					}
+				}
+			}
+			$data = array(
+				'name'      => $tabBank[$idBank],
+				'type' => ($idBank == 0)? 'line' : 'line',//'stackedArea',
+				'visible'   => 1,
+				'dataPoints'=> $dataPoint
+			);
+			$datas[] = $data;
+		}
+//		echo '<pre>';print_r($datas);
+		return $datas;
+	}
+
+	public function getDataGraphDette($userOption){
+		$datas = array();
+		$tabBank = array(
+			'0' => 'Solde global',
+			'101' => 'Capital',
+			'102' => 'CCA',
+		);
+		$sql = $this->db->db->query("SELECT * FROM lou_bank_account;");
+		while($ln = $this->db->db->fetch_object($sql)){
+			$tabBank[$ln->rowid] = $ln->label;
+			$tabBank[$ln->rowid+10] = 'Resil '.$ln->label;
+		}
+		$dataByDate = $this->getTabDettes($userOption['date1'], $userOption['date2']);
+		$dataByAccount = $this->dataByDateToDataPoint($dataByDate);
+		foreach($dataByAccount as $idBank => $datasT){
+			$dataPoint = array();
+			foreach($datasT as $timestamp => $amount){
+				if($timestamp > 0) {
+					if($amount != 0){
+						$dataPoint[] = array(
+							'x' => "new Date('" . date('Y-m-d', $timestamp) . "')", // JavaScript date expects milliseconds
+							'y' => $amount,
+						);
+					}
+				}
+			}
+			$data = array(
+				'name'      => $tabBank[$idBank],
+				'type' => ($idBank == 0)? 'line' : 'line',//'stackedArea',
+				'visible'   => 1,
+				'round' => 2,
+				'dataPoints'=> $dataPoint
+			);
+			$datas[] = $data;
+		}
+//		echo '<pre>';print_r($datas);
+		return $datas;
+	}
+
+	public function getDataGraphDetteTreso($userOption){
+		$datas = array();
+		$tabBank = array(
+			'0' => 'Doit - Solde global',
+			'101' => 'Capital',
+			'102' => 'CCA',
+			'11' => 'Resil BP',
+			'12' => 'Resil NEF',
+			'13' => 'CCA Nef',
+			'999' => 'Bl',
+		);
+		$sql = $this->db->db->query("SELECT * FROM lou_bank_account;");
+		while($ln = $this->db->db->fetch_object($sql)){
+			$tabBank[$ln->rowid] = 'Reste '.$ln->label;
+			$tabBank[$ln->rowid+1000] = $ln->label;
+		}
+
+		$dataByDate = $this->getTabSoldes($userOption['date1'], $userOption['date2']);
+//		$dataByAccount1 = $this->dataByDateToDataPoint($dataByDate);
+		$dataByDate2 = $this->getTabDettes($userOption['date1'], $userOption['date2']);
+		$dataByAccount = $this->dataByDateToDataPoint($this->compileDataSerie($dataByDate2, $dataByDate, true), true);
+//		echo '<pre>';print_r($dataByDate);echo '</pre>';
+//		echo '<pre>';print_r($dataByDate2);echo '</pre>';
+//		echo '<pre>';print_r(array_replace_recursive($dataByDate, $dataByDate2));echo '</pre>';
+//		$dataByAccount = array(
+//			1 => $dataByAccount1[0],
+//			2 => $dataByAccount2[0],
+//		);
+		foreach($dataByAccount as $idBank => $datasT){
+			$dataPoint = array();
+			foreach($datasT as $timestamp => $amount){
+				if($timestamp > 0) {
+					if($amount != 0){
+						$dataPoint[] = array(
+							'x' => "new Date('" . date('Y-m-d', $timestamp) . "')", // JavaScript date expects milliseconds
+							'y' => $amount,
+						);
+					}
+				}
+			}
+			$data = array(
+				'name'      => $tabBank[$idBank],
+				'type' => ($idBank == 0)? 'line' : 'line',//'stackedArea',
+				'visible'   => 1,
+				'round' => 2,
+				'dataPoints'=> $dataPoint
+			);
+			$datas[] = $data;
+		}
+//		echo '<pre>';print_r($datas);
+		return $datas;
+	}
 
     public function renderPanels($panels, $xsD=6, $smD=4, $mdD=4, $open = 1){
         $html = '';
@@ -534,31 +829,62 @@ WHERE date IS NULL '.
 
 
     //graph
-    public function getFieldsGraphRep($type = 1, $label = ''){
-        $fields = array();
-        $filter = array(
-            'type'      => $type
-        );
-        if($label != '')
-            $filter['info'] = 'URGENCE';
-        $cmds = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filter);
-        foreach($cmds as $cmdData){
-            $userM = $cmdData->getChildObject('userM');
-            if($userM->isLoaded())
-                $title = $userM->getFullName();
-            else
-                $title = 'n/c';
+	public function getFieldsGraphRep($type = 1, $label = ''){
+		$fields = array();
+		$filter = array(
+			'type'      => $type
+		);
+		if($label != '')
+			$filter['info'] = 'URGENCE';
+		$cmds = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filter);
+		foreach($cmds as $cmdData){
+			$userM = $cmdData->getChildObject('userM');
+			if($userM->isLoaded())
+				$title = $userM->getFullName();
+			else
+				$title = 'n/c';
 
-            $filter2 = array_merge($filter, array('fk_user' => $userM->id));
-            $fields[$userM->id] = array(
-               "title"      => $title,
-               'field'     => 'value',
-               'calc'      => 'SUM',
-               'filters'    => $filter2
-            );
-        }
-        return $fields;
-    }
+			$filter2 = array_merge($filter, array('fk_user' => $userM->id));
+			$fields[$userM->id] = array(
+				"title"      => $title,
+				'field'     => 'value',
+				'calc'      => 'SUM',
+				'filters'    => $filter2
+			);
+		}
+		return $fields;
+	}
+	public function getFieldsGraphEvol($type = 1, $label = ''){
+		$fields = array();
+		$filter = array(
+			'type'      => $type
+		);
+		if($label != '')
+			$filter['info'] = 'URGENCE';
+		$fields[0] = array(
+			"title"      => 'Total',
+			'field'     => 'value',
+			'type'       => 'line',
+			'filters'    => $filter
+		);
+		$cmds = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filter);
+		foreach($cmds as $cmdData){
+			$userM = $cmdData->getChildObject('userM');
+			if($userM->isLoaded())
+				$title = $userM->getFullName();
+			else
+				$title = 'n/c';
+
+			$filter2 = array_merge($filter, array('fk_user' => $userM->id));
+			$fields[$userM->id] = array(
+				"title"      => $title,
+				'field'     => 'value',
+				'type'       => 'line',
+				'filters'    => $filter2
+			);
+		}
+		return $fields;
+	}
 }
 
 

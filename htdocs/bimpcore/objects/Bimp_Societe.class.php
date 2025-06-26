@@ -286,7 +286,7 @@ class Bimp_Societe extends BimpDolObject
 			if ($this->getData('parent') < 1) {//sinon maison mère
 				if ($this->getData('fk_pays') == 1 || $this->getData('fk_pays') < 1) {
 					if (strlen($this->getData("siret")) != 14 || !$this->Luhn($this->getData("siret"), 14)) {
-						$errors[] = "Siret client invalide :" . $this->getData("siret");
+//						$errors[] = "Siret client invalide :" . $this->getData("siret");
 					}
 				}
 			}

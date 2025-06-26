@@ -8,7 +8,12 @@ objects:
     bimpcoopnonrep:
         instance:
             bimp_object: bimpcoopnonrep
-    
+    ammortissement:
+        instance:
+            bimp_object: ammortissement
+    emprunt:
+        instance:
+            bimp_object: emprunt
 sections:
     - type: tabs
       tabs: 
@@ -20,6 +25,18 @@ sections:
                       callback: 
                           method: renderStat
                           object: bimpcoopmvt
+                - type: graph
+                  graph:
+                      object: bimpcoopmvt
+                      name: treso
+                - type: graph
+                  graph:
+                      object: bimpcoopmvt
+                      name: dette
+                - type: graph
+                  graph:
+                      object: bimpcoopmvt
+                      name: detteNet
         capital:
             label: Capital
             sections:
@@ -29,9 +46,13 @@ sections:
                       object: bimpcoopmvt
                       name: capital
                 - type: graph
-                  graph: 
+                  graph:
                       object: bimpcoopmvt
                       name: rep
+                - type: graph
+                  graph:
+                      object: bimpcoopmvt
+                      name: evol
         cpt_courant:
             label: Compte courant
             sections:
@@ -48,10 +69,29 @@ sections:
                   graph: 
                       object: bimpcoopmvt
                       name: rep3
+                - type: graph
+                  graph:
+                      object: bimpcoopmvt
+                      name: evol2
         non_rep:
             label: Non repertoriées
             sections:
                 - type: list
-                  list: 
+                  list:
                       panel: 1
                       object: bimpcoopnonrep
+        emprunt:
+            label: Emprunt
+            sections:
+                - type: list
+                  list:
+                      panel: 1
+                      object: emprunt
+                - type: list
+                  list:
+                      panel: 1
+                      object: ammortissement
+                - type: graph
+                  graph:
+                      object: ammortissement
+                      name: restant

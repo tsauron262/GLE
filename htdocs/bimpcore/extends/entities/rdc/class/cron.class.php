@@ -6,24 +6,6 @@ class cron extends BimpCron
 {
 	const API_BI = 2;
 
-	public function weeklyProcess()
-	{
-		$retCron = array();
-		if ($this->relanceEnAttenteOnboarding() != 1) {
-			$retCron[] = 'Erreur lors de la relance des onboarding';
-		}
-		if ($this->relance6mois() != 1) {
-			$retCron[] = 'Erreur lors de la relance 6 mois';
-		}
-
-		if (count($retCron)) {
-			$this->output = implode("<br>", $retCron);
-			return 1;
-		}
-		$this->output = 'Tâches cron effectuées avec succès';
-		return 0;
-	}
-
 	public function relance6mois()
 	{
 		$err = array();
@@ -31,36 +13,35 @@ class cron extends BimpCron
 		$marchands = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client');
 		$list = $marchands->getList(array(
 			'date_der_contact' => array('custom' => 'date_der_contact <= DATE_SUB(NOW(), INTERVAL 6 MONTH)'),
-			'fk_user_attr_rdc' => '> 0',
 		));
-		$relance = array();
 		foreach ($list as $element) {
-			$relance[$element['fk_user_attr_rdc']][] = $element['rowid'];
-		}
-
-		foreach ($relance as $bdkam => $socIds) {
+			$text = 'Ce marchand n\'a pas été contacté depuis plus de 6 mois';
 			$err0 = array();
-			$x = count($socIds);
-			$s = $x > 1 ? 's' : '';
-			$message = "Bonjour,<p>Voici " . $x . " marchand" . $s . " non contacté depuis 6 mois :</p><ul>";
-			foreach ($socIds as $id) {
-				$socMarchand = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id);
-				$message .= '<li>Raison sociale&nbsp;: ' . $socMarchand->getLink() . '<br>Boutique&nbsp;: ' . $socMarchand->getData('name_alias')  . '</li>';
-			}
-			$message .= "</ul><p>Merci de prendre contact rapidement,</p><p>Cordialement,</p>";
+			$soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $element['rowid']);
 
-			$err0[] = BimpUserMsg::envoiMsg('relance_6mois_bdkam', 'Relance 6 mois', $message, $bdkam);
-//			echo '<pre>'; print_r($err0); echo '</pre>';
+			$dejaInfo = false;
+			$oldNotes = $soc->getNotes();
+			$dejaInfo = $this->dejaInfo($oldNotes, $text, 'P6M');
+			if ($dejaInfo) continue;
+
+			list($type_dest, $idGroup, $idUser, $msg)	= $this->getParamsNote($soc->getData('fk_user_attr_rdc'), $text);
+
+			$err0 = $soc->addNote($msg,
+				BimpNote::BN_AUTHOR, 0, 1, '',
+				BimpNote::BN_AUTHOR_USER, $type_dest,
+				$idGroup, $idUser
+			);
 			if ($err0[0]) {
 				$err[] = implode(",", $err0[0]);
 			}
 		}
 
 		if (count($err) > 0) {
-			BimpCore::addlog('Erreur lors de l\'envoi des messages relance6mois : ' . implode(', ', $err), 4);
-			return 0;
-		} else {
+			BimpCore::addlog('Erreur lors de la relance6mois : ' . implode(', ', $err), 4);
 			return 1;
+		} else {
+			$this->output = 'Relance 6mois OK pour ' . strval(count($list)) . ' marchands';
+			return 0;
 		}
 	}
 
@@ -70,35 +51,31 @@ class cron extends BimpCron
 		// faire la liste par DB/KAM des marchands à relancer (marchand en attente onboarding)
 		$marchands = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client');
 		$list = $marchands->getList(array(
-			'fk_statut_rdc'    => '8',
-			'fk_user_attr_rdc' => '> 0',
+			'fk_statut_rdc'    => $marchands::STATUS_RDC_ATTENTE_ONBORDING,
 		));
-		$relance = array();
 		foreach ($list as $element) {
-			$relance[$element['fk_user_attr_rdc']][] = $element['rowid'];
-		}
-
-		foreach ($relance as $bdkam => $socIds) {
+			$text = 'Ce marchand est en attente onboarding';
 			$err0 = array();
-			$x = count($socIds);
-			$s = $x > 1 ? 's' : '';
-			$message = "Bonjour,<p>Voici " . $x . " marchand" . $s . " en attente d'onboarding :</p><ul>";
-			foreach ($socIds as $id) {
-				$socMarchand = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id);
-				$message .= '<li>Raison sociale&nbsp;: ' . $socMarchand->getLink() . '<br>Boutique&nbsp;: ' . $socMarchand->getData('name_alias')  . '</li>';
-			}
-			$message .= "</ul><p>Cordialement,</p>";
+			$soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $element['rowid']);
 
-			$err0[] = BimpUserMsg::envoiMsg('relance_onboarding_bdkam', 'Relance onboarding', $message, $bdkam);
+			list($type_dest, $idGroup, $idUser, $msg)	= $this->getParamsNote($soc->getData('fk_user_attr_rdc'), $text);
+
+			$err0 = $soc->addNote($msg,
+				BimpNote::BN_AUTHOR, 0, 1, '',
+				BimpNote::BN_AUTHOR_USER, $type_dest,
+				$idGroup, $idUser
+			);
 			if ($err0[0]) {
 				$err[] = implode(",", $err0[0]);
 			}
 		}
+
 		if (count($err) > 0) {
-			BimpCore::addlog('Erreur lors de l\'envoi des messages relanceEnAttenteOnboarding : ' . implode(', ', $err), 4);
-			return 0;
-		} else {
+			BimpCore::addlog('Erreur lors de relanceEnAttenteOnboarding : ' . implode(', ', $err), 4);
 			return 1;
+		} else {
+			$this->output = 'relanceEnAttenteOnboarding OK pour ' . strval(count($list)) . ' marchands';
+			return 0;
 		}
 
 	}
@@ -260,5 +237,50 @@ class cron extends BimpCron
 
 		$this->output = 'Mise à jour du CA effectuée avec succès : ' . implode(', ', $warnings);
 		return 0;
+	}
+
+	public function getParamsNote($attr, $text)	{
+		if ($attr) {
+			$bdd = new BimpDb($this->db);
+			$sql = 'SELECT g.rowid FROM ' . MAIN_DB_PREFIX . 'usergroup AS g';
+			$sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'usergroup_user AS ugu ON ugu.fk_usergroup = g.rowid';
+			$sql .= ' WHERE g.nom IN ("BD", "KAM", "Qualité", "Manager")';
+			$sql .= ' AND ugu.fk_user = ' . $attr;
+
+			$ret = $bdd->executeS($sql, 'array');
+
+			if($ret[0])	{
+				$t = BimpNote::BN_DEST_GROUP;
+				$g = (int)$ret[0]['rowid'];
+				$u = 0;
+			}
+			else	{
+				$t = BimpNote::BN_DEST_USER;
+				$g = 0;
+				$u = $attr;
+			}
+		}
+		else  {
+			$t = BimpNote::BN_DEST_GROUP;
+			$g = 12; // managers
+			$u = 0;
+			$text .= '<br>(Pas de DB/KAM désigné)';
+		}
+		return array($t, $g, $u, $text);
+	}
+
+	public function dejaInfo($notes, $text, $interval)	{
+		$dejaInfo = false;
+		foreach ($notes as $note) {
+			$dateNote = new DateTime($note->getData('date_note'));
+			$dateNote->add(new DateInterval($interval));
+			$aujourdhui = new DateTime();
+			if ($dateNote > $aujourdhui) {
+				if (strstr($note->getData('content'), $text) !== false) {
+					$dejaInfo = true;
+				}
+			}
+		}
+		return $dejaInfo;
 	}
 }

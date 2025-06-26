@@ -60,7 +60,26 @@ class Bimp_FactureFourn extends BimpCommAchat
         return parent::isFieldEditable($field, $force_edit);
     }
 
-    public function isActionAllowed($action, &$errors = array())
+
+	public function quickPaiement(&$errors = array(), &$warnings = array()){
+		global $user;
+		require_once(DOL_DOCUMENT_ROOT.'/fourn/class/paiementfourn.class.php');
+		$paiement = new PaiementFourn($this->db->db);
+		$paiement->amounts = array($this->id => $this->getData('total_ttc'));
+		$paiement->fk_account = $this->getData('fk_account');
+		$paiement->paiementid = $this->getData('fk_mode_reglement');
+		$paiement->datepaye = $this->getData('datef');
+		$paiement->create($user);
+		if(isset($paiement->error) && $paiement->error != '')
+			$errors[] = $paiement->error;
+		else{
+			$result = $paiement->addPaymentToBank($user, 'payment_supplier', 'Paiement facture fournisseur', $this->getData('fk_account'), '', '');
+			$this->checkIsPaid();
+		}
+	}
+
+
+	public function isActionAllowed($action, &$errors = array())
     {
         $errors = array();
         $status = $this->getData('fk_statut');
@@ -277,6 +296,23 @@ class Bimp_FactureFourn extends BimpCommAchat
     }
 
     // Getters - overrides BimpComm
+
+
+	public function getActionsButtonsList()
+	{
+		$buttons = array();
+
+		if ($this->isActionAllowed('duplicate') && $this->canSetAction('duplicate')) {
+			$buttons[] = array(
+				'label'   => 'Cloner',
+				'icon'    => 'fas_copy',
+				'onclick' => $this->getJsActionOnclick('duplicate', array('datef' => date('Y-m-d'), 'exported' => 0, 'fk_user_author' => $user->id), array(
+					'form_name'   => 'duplicate_factfourn'
+				))
+			);
+		}
+		return $buttons;
+	}
 
     public function getActionsButtons()
     {

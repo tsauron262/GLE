@@ -507,6 +507,14 @@ fields:
         label: Date validation       
         dol_extra_field: 1
         
+    tms:
+        type: datetime
+        label: Date update
+    
+    import_key:
+        type: text
+        label: import_key
+        
     date_ask_valid:
         type: datetime
         label: Date demande validation

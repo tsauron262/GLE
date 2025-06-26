@@ -755,8 +755,7 @@ class BimpUserMsg
 		),
 		'alerte_pre_anonymisation'	=> array(
 			'label' => 'Les clients suivants seront anonymisés dans 30 jours en raison d\'une absence de mouvements depuis 5 ans.',
-			'dests' => 'to::f.lauby@ldlc.com',
-//			'dests' => 'object::id_user',
+			'dests' => 'object::id_user',
 			'module' => 'bimpdatasync',
 			'metier' => 'metier'
 		),

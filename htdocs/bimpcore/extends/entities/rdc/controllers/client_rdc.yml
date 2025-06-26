@@ -78,6 +78,14 @@ sections:
                     object: client
                     children: files
                     name: default
+          -   id: notes
+              title: Notes
+              struct:
+                  type: notes
+                  notes:
+                      object: client
+                      visibility: 4
+
           - id: divers
             title: Divers (admin)
             icon: fas_tools

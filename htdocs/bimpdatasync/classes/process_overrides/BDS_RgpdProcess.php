@@ -681,6 +681,7 @@ class BDS_RgpdProcess extends BDSProcess
         // Recherche clients pros sans activité depuis 10 ans:
         $dt = new DateTime();
         $dt->sub(new DateInterval('P5Y'));
+		$dt->add(new DateInterval('P1M')); // ajout d'un mois pour alert pré-anonymisation
         $dt_5y = $dt->format('Y-m-d');
 
         $where = 'is_anonymized = 0 AND client IN (1,2,3)';
@@ -941,6 +942,11 @@ class BDS_RgpdProcess extends BDSProcess
         $dt->sub(new DateInterval('P5Y'));
         $dt_5y = $dt->format('Y-m-d');
 
+		$date_alert = clone $dt;
+		$date_alert->add(new DateInterval('P1M'));
+		$da = $date_alert->format('Y-m-d');
+		$id_clients_for_alert = array();
+
         foreach ($clients as $id_client) {
             $this->incProcessed();
 
@@ -962,6 +968,14 @@ class BDS_RgpdProcess extends BDSProcess
 
                 // Vérif date dernière activité toujours ko:
                 $date_last_activity = $client->getSavedData('date_last_activity');
+				if ($date_last_activity < $da && $date_last_activity > $dt_5y)	{
+					$date_alert_anonym = new DateTime($client->getData('date_alert_anonym'));
+					$aujourdhui = new DateTime();
+					$interval = $date_alert_anonym->diff($aujourdhui);
+					if (is_null($client->getData('date_alert_anonym')) || $interval->format('%a') > 365) {
+						$id_clients_for_alert[] = $id_client;
+					}
+				}
                 if ($date_last_activity > $dt_5y) {
                     $this->incIgnored();
                     continue;
@@ -986,6 +1000,37 @@ class BDS_RgpdProcess extends BDSProcess
                 $this->incIgnored();
             }
         }
+
+		// faire une boucle sur $id_clients_for_alert, allez chercher les commerciaux et construire un tableau id_commerciaux => linksClient
+		$relances = array();
+		foreach ($id_clients_for_alert as $id_client) {
+			$soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+			$coms = $soc->getIdCommercials(true);
+			if($coms) $soc->updateField('date_alert_anonym', date('Y-m-d'));
+			foreach ($coms as $com) {
+				$relances[$com][] = $soc->getLink(array('target' => 'blank'));
+			}
+		}
+		foreach ($relances AS $idCom => $links)	{
+			$com = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idCom);
+			$msg = '<p>Bonjour ' . $com->getData('firstname') . ',<br>';
+			if (count($links) == 1) {
+				$msg .= 'Ce client sera anonymisé ';
+				$s = '';
+			}
+			else {
+				$msg .= 'Les clients suivants seront anonymisés ';
+				$s = 's';
+			}
+			$msg .= 'dans 30 jours en raison d\'une absence de mouvements depuis 5 ans.';
+			$msg .= '<br>Merci de le' . $s . ' recontacter rapidement afin de relancer la relation et éviter que ses données ne deviennent inaccessibles dans notre base.</p>';
+			foreach ($links AS $link) {
+				$msg .= '<p>'.$link.'</p>';
+			}
+			$code = 'alerte_pre_anonymisation';
+			$sujet = 'Client' . $s . ' prochainement anoymisé' . $s;
+			BimpUserMsg::envoiMsg($code, $sujet, $msg, $idCom);
+		}
     }
 
     public function saveFilesDates(&$errors = array())

@@ -2,29 +2,11 @@
 
 class Bimp_Client_ExtEntity extends Bimp_Client
 {
-	public static $statusRdc = array(
-		0  => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
-		1  => array('label' => 'Prospection: demande entrante', 'icon' => 'fas_suitcase', 'classes' => array('important')),
-		2  => array('label' => 'Prospection: lead identifié', 'icon' => 'fas_suitcase', 'classes' => array('important')),
-		3  => array('label' => 'Prospection: prise de contact', 'icon' => 'fas_suitcase', 'classes' => array('important')),
-		4  => array('label' => 'Prospection: contact et présentation ok', 'icon' => 'fas_suitcase', 'classes' => array('important')),
-		5  => array('label' => 'Prospect KO', 'icon' => 'fas_suitcase', 'classes' => array('danger')),
-//				6 => array('label' => 'KYC en cours'),
-//				7 => array('label' => 'MANGOPAY en cours'),
-		8  => array('label' => 'En attente onboarding catalogue', 'icon' => 'fas_handshake', 'classes' => array('important')),
-		9  => array('label' => 'Onboarding catalogue KO', 'icon' => 'fas_handshake', 'classes' => array('danger')),
-		10 => array('label' => 'Onboarding catalogue OK', 'icon' => 'fas_handshake', 'classes' => array('success')),
-		11 => array('label' => 'Live', 'icon' => 'fas_thumbs-up', 'classes' => array('success')),
-		12 => array('label' => 'Résilié', 'icon' => 'fas_thumbs-down', 'classes' => array('danger')),
-		13 => array('label' => 'Suspendu', 'icon' => 'fas_thumbs-down', 'classes' => array('danger')),
-		14 => array('label' => 'Fermé', 'icon' => 'fas_thumbs-down', 'classes' => array('danger'))
-	);
-
+	const ID_ONBOARDING_OK = 12;        // YANN
 	const PENDING_SUBMISSION = 1;
 	const PENDING_APPROVAL = 2;
 	const APPROVED = 3;
 	const REFUSED = 4;
-	const ID_ONBOARDING_OK = 12;        // YANN
 	public static $statut_kyc_list = array(
 		0                        => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
 		self::PENDING_SUBMISSION => array('label' => 'En attente de soumission KYC', 'icon' => 'fas_hourglass', 'classes' => array('important')),
@@ -32,69 +14,107 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		self::APPROVED           => array('label' => 'KYC validé', 'icon' => 'fas_check', 'classes' => array('success')),
 		self::REFUSED            => array('label' => 'KYC non valide', 'icon' => 'fas_times', 'classes' => array('danger')),
 	);
-	public static $statut_rdc_live = 11;
-	public static $statut_rdc_prospect_array = array(3, 4);
+	CONST STATUS_RDC_PROSPECT_DEM_ENTRANT = 1;
+	CONST STATUS_RDC_PROSPECT_LEAD_IDENTIF = 2;
+	CONST STATUS_RDC_PROSPECT_PRISE_CONTACT = 3;
+	CONST STATUS_RDC_PROSPECT_CONTACT_PRES_OK = 4;
+	CONST STATUS_RDC_PROSPECT_KO = 5;
+	CONST STATUS_RDC_ATTENTE_ONBORDING = 8;
+	CONST STATUS_RDC_ONBOARDING_KO = 9;
+	CONST STATUS_RDC_ONBOARDING_OK = 10;
+	CONST STATUS_RDC_LIVE = 11;
+	CONST STATUS_RDC_RESIL = 12;
+	CONST STATUS_RDC_SUSPENDED = 13;
+	CONST STATUS_RDC_CLOSED = 14;
+
+	public static $statusRdc = array(
+		0  => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
+		self::STATUS_RDC_PROSPECT_DEM_ENTRANT  => array('label' => 'Prospection: demande entrante', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		self::STATUS_RDC_PROSPECT_LEAD_IDENTIF  => array('label' => 'Prospection: lead identifié', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		self::STATUS_RDC_PROSPECT_PRISE_CONTACT  => array('label' => 'Prospection: prise de contact', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		self::STATUS_RDC_PROSPECT_CONTACT_PRES_OK  => array('label' => 'Prospection: contact et présentation ok', 'icon' => 'fas_suitcase', 'classes' => array('important')),
+		self::STATUS_RDC_PROSPECT_KO  => array('label' => 'Prospect KO', 'icon' => 'fas_suitcase', 'classes' => array('danger')),
+//				6 => array('label' => 'KYC en cours'),
+//				7 => array('label' => 'MANGOPAY en cours'),
+		self::STATUS_RDC_ATTENTE_ONBORDING  => array('label' => 'En attente onboarding catalogue', 'icon' => 'fas_handshake', 'classes' => array('important')),
+		self::STATUS_RDC_ONBOARDING_KO  => array('label' => 'Onboarding catalogue KO', 'icon' => 'fas_handshake', 'classes' => array('danger')),
+		self::STATUS_RDC_ONBOARDING_OK => array('label' => 'Onboarding catalogue OK', 'icon' => 'fas_handshake', 'classes' => array('success')),
+		self::STATUS_RDC_LIVE => array('label' => 'Live', 'icon' => 'fas_thumbs-up', 'classes' => array('success')),
+		self::STATUS_RDC_RESIL => array('label' => 'Résilié', 'icon' => 'fas_thumbs-down', 'classes' => array('danger')),
+		self::STATUS_RDC_SUSPENDED => array('label' => 'Suspendu', 'icon' => 'fas_thumbs-down', 'classes' => array('danger')),
+		self::STATUS_RDC_CLOSED => array('label' => 'Fermé', 'icon' => 'fas_thumbs-down', 'classes' => array('danger'))
+	);
+	public static $statut_rdc_prospect_array = array(self::STATUS_RDC_PROSPECT_PRISE_CONTACT, self::STATUS_RDC_PROSPECT_CONTACT_PRES_OK);
 
 	public static $actions_selon_statut_rdc = array(
 		0  => array( // N/C
-			1, 2, 3, 4
+			self::STATUS_RDC_PROSPECT_DEM_ENTRANT,
+			self::STATUS_RDC_PROSPECT_LEAD_IDENTIF,
+			self::STATUS_RDC_PROSPECT_PRISE_CONTACT,
+			self::STATUS_RDC_PROSPECT_CONTACT_PRES_OK
 		),
-		1  => array( // Prospection: demande entrante
-			2, 3, 4, 5, 8
+		self::STATUS_RDC_PROSPECT_DEM_ENTRANT  => array( // Prospection: demande entrante
+			self::STATUS_RDC_PROSPECT_LEAD_IDENTIF,
+			self::STATUS_RDC_PROSPECT_PRISE_CONTACT,
+			self::STATUS_RDC_PROSPECT_CONTACT_PRES_OK,
+			self::STATUS_RDC_PROSPECT_KO,
+			self::STATUS_RDC_ATTENTE_ONBORDING
 		),
-		2  => array( // Prospection: lead identifié
-			3, 4, 5, 8
+		self::STATUS_RDC_PROSPECT_LEAD_IDENTIF  => array( // Prospection: lead identifié
+			self::STATUS_RDC_PROSPECT_PRISE_CONTACT,
+			self::STATUS_RDC_PROSPECT_CONTACT_PRES_OK,
+			self::STATUS_RDC_PROSPECT_KO,
+			self::STATUS_RDC_ATTENTE_ONBORDING
 		),
-		3  => array( // prospection: prise de contact
-			4, 5, 8
+		self::STATUS_RDC_PROSPECT_PRISE_CONTACT  => array( // prospection: prise de contact
+			self::STATUS_RDC_PROSPECT_CONTACT_PRES_OK,
+			self::STATUS_RDC_PROSPECT_KO,
+			self::STATUS_RDC_ATTENTE_ONBORDING
 		),
-		4  => array( // Prospection: contact et présentation ok
-			5, 8
+		self::STATUS_RDC_PROSPECT_CONTACT_PRES_OK  => array( // Prospection: contact et présentation ok
+			self::STATUS_RDC_PROSPECT_KO,
+			self::STATUS_RDC_ATTENTE_ONBORDING
 		),
-		5  => array( // Prospect KO
-			8, 3
+		self::STATUS_RDC_PROSPECT_KO  => array( // Prospect KO
+			self::STATUS_RDC_ATTENTE_ONBORDING, self::STATUS_RDC_PROSPECT_PRISE_CONTACT
 		),
-		8  => array( // En attente onboarding catalogue
-			9, 10, 5
+		self::STATUS_RDC_ATTENTE_ONBORDING  => array( // En attente onboarding catalogue
+			self::STATUS_RDC_ONBOARDING_KO, self::STATUS_RDC_ONBOARDING_OK, self::STATUS_RDC_PROSPECT_KO
 		),
-		9  => array( // Onboarding catalogue KO
-			10, 5
+		self::STATUS_RDC_ONBOARDING_KO  => array( // Onboarding catalogue KO
+			self::STATUS_RDC_ONBOARDING_OK, self::STATUS_RDC_PROSPECT_KO
 		),
-		10 => array( // Onboarding catalogue OK
-			5
+		self::STATUS_RDC_ONBOARDING_OK => array( // Onboarding catalogue OK
+			self::STATUS_RDC_PROSPECT_KO
 		),
-//		11 => array( // Live
-//			13, 14, // suspendu, férmé
-//		),
-//		13 => array( // suspendu
-//
-//		),
-//		14 => array( // Fermé
-//			12
-//		),
+		self::STATUS_RDC_SUSPENDED  => array(
+			self::STATUS_RDC_PROSPECT_KO,
+		),
 	);
 
 	public static $group_allowed_actions = array(
-		1  => array('BD'),
-		2  => array('BD'),
-		3  => array('BD'),
-		4  => array('BD'),
-		5  => array('BD'),
-		6  => array('BD'),
-		7  => array('BD'),
-		8  => array('BD'),
-		9  => array('BD'),
-		10 => array('BD'),
-		11 => array(),
-		12 => array('BD'),
-		13 => array(),
-		14 => array(),
+		self::STATUS_RDC_PROSPECT_DEM_ENTRANT  => array('BD'),
+		self::STATUS_RDC_PROSPECT_LEAD_IDENTIF  => array('BD'),
+		self::STATUS_RDC_PROSPECT_PRISE_CONTACT  => array('BD'),
+		self::STATUS_RDC_PROSPECT_CONTACT_PRES_OK  => array('BD'),
+		self::STATUS_RDC_PROSPECT_KO  => array('BD'),
+//		6  => array('BD'),
+//		7  => array('BD'),
+		self::STATUS_RDC_ATTENTE_ONBORDING  => array('BD'),
+		self::STATUS_RDC_ONBOARDING_KO  => array('BD'),
+		self::STATUS_RDC_ONBOARDING_OK => array('BD'),
+		self::STATUS_RDC_LIVE => array(),
+		self::STATUS_RDC_RESIL => array('BD'),
+		self::STATUS_RDC_SUSPENDED => array(),
+		self::STATUS_RDC_CLOSED => array(),
 	);
 
 	public static $valuesContrefacon = array(
 		0 => array('label' => ' '),
 		1 => array('label' => 'OUI', 'icon' => 'fas_exclamation', 'classes' => array('danger')),
 	);
+
+	public static $show_comm_statut_ko = array(self::STATUS_RDC_PROSPECT_KO);
 
 	// Droits users
 
@@ -185,7 +205,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function isCommentaireStatutKoRequired()
 	{
 		$statut = $this->getData('fk_statut_rdc');
-		if ($statut == 5) { // KO
+		if (in_array($statut, self::$show_comm_statut_ko)) {
 			return true;
 		}
 		return false;
@@ -195,7 +215,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function getActionsButtons()
 	{
-//		echo '<pre>'; print_r($this->data); echo '</pre>';die;
 		$actioncomm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm');
 		$buttons[] = array(
 			'label'   => 'CR échange',
@@ -217,7 +236,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				'onclick' => $this->getJsActionOnclick('synchroMirakl', array(), array())
 			);
 		}
-
 
 		return $buttons;
 	}
@@ -242,7 +260,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 					$buttons[$statut] = array(
 						'label'   => 'Passer le statut à ' . self::$statusRdc[$statut]['label'],
 						'icon'    => 'fas_edit',
-//						'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut), array('form_name' => 'formActionRdc'))
 						'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut))
 					);
 				} else {
@@ -294,7 +311,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$grouparray = array(
 			BimpCore::getUserGroupId('BD'),
 			BimpCore::getUserGroupId('KAM'),
-//			BimpCore::getUserGroupId('TECH_RDC'),
 		);
 
 		$cache_key = 'users_groups';
@@ -482,6 +498,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		}
 		return '';
 	}
+
 	// Affichages
 	public function displayFullContactInfosNoWeb()
 	{
@@ -516,7 +533,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		}
 		$html .= $icon . $tab['label'];
 		$html .= '</span>';
-		if ($this->getData('fk_statut_rdc') == 5) {
+		if ($this->getData('fk_statut_rdc') == self::STATUS_RDC_PROSPECT_KO) {
 			$html .= '<br />Motif KO&nbsp;: ' . $this->getData('commentaire_statut_ko');
 		}
 		if ($this->getData('date_changement_statut_rdc')) {
@@ -693,10 +710,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		$attr = $this->getData('fk_user_attr_rdc');
 		if ($attr != $user->id) {
 			if ($attr && ($this->getInitData('fk_user_attr_rdc') != $attr)) { // si changement d'attribution
-				$code = 'Attribution_rdc';
-				$sujet = 'Attribution Compte';
-				$msg = 'Le compte ' . $this->getLink() . ' vient de vous être attribué par ' . $user->getNomUrl();
-//				BimpUserMsg::envoiMsg($code, $sujet, $msg, $attr);
+				$msg = 'Ce marchand vient de vous être attribué';
+				$this->addNote(
+					$msg, BimpNote::BN_AUTHOR, 0, 1, '',
+					BimpNote::BN_AUTHOR_USER,BimpNote::BN_DEST_USER, 0, $attr
+				);
 			}
 		}
 	}
@@ -725,65 +743,62 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	{
 		global $user, $langs;
 		if ($this->getData('contrefacon') && !$this->getInitData('contrefacon') && $this->getData('fk_user_attr_rdc') != $user->id) {
-			$code = 'alerte_qualite';
-			$sujet = 'Alerte qualité';
-			$msg = 'Le marchand ' . $this->getLink() . ' a été signalé pour un problème de qualité par ' . $user->getFullName($langs);
-			if ($this->getData('comment_quality')) {
-				$msg .= '<p>Commentaire :<br>' . $this->getData('comment_quality') . '</p>';
-			}
-//			BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+			$msg = 'Ce marchand a été signalé pour un problème de qualité';
+			$this->addNote($msg, BimpNote::BN_AUTHOR, 0, 1, '',
+				BimpNote::BN_AUTHOR_USER, BImpNote::BN_DEST_USER, 0, $this->getData('fk_user_attr_rdc')
+			);
 		}
 	}
 
 	public function alerteOnboarding_catalogue_OK()
 	{
-		global $user, $langs;
-		$code = 'alerte_onboarding_catalogue';
-		$sujet = 'Marchand en "Onboarding catalogue OK"';
-		$msg = 'Le marchand ' . $this->getLink() . ' a été mis en "Onboarding catalogue OK" par ' . $user->getFullName($langs);
-//		BimpUserMsg::envoiMsg($code, $sujet, $msg, self::ID_ONBOARDING_OK);
+		if ($this->getData('fk_status_rdc') == self::STATUS_RDC_ONBOARDING_OK && $this->getData('fk_statut_rdc') != $this->getInitData('fk_statut_rdc')) {
+			$msg = 'Ce marchand a été mis en "Onboarding catalogue OK"';
+			$this->addNote($msg, BimpNote::BN_AUTHOR, 0, 1, '',
+				BimpNote::BN_AUTHOR_USER, BImpNote::BN_DEST_USER, 0, self::ID_ONBOARDING_OK);
+		}
 	}
 
 	public function alertePassage_live()
 	{
-		global $user, $langs;
-		$code = 'alerte_passage_live';
-		$sujet = 'Marchand en "Live"';
-		$msg = 'Bonjour,<p> Pour info, <br> marchand ' . $this->getLink() . ' vient de passer en LIVE</p>';
-//		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+		if ($this->getData('fk_status_rdc') == self::STATUS_RDC_LIVE && $this->getData('fk_statut_rdc') != $this->getInitData('fk_statut_rdc')) {
+			$msg = 'Ce marchand vient de passer en LIVE';
+			$this->addNote($msg, BimpNote::BN_AUTHOR, 0, 1, '',
+				BimpNote::BN_AUTHOR_USER, BImpNote::BN_DEST_USER, 0, $this->getData('fk_user_attr_rdc'));
+		}
 	}
 
 	public function alertePassage_resil()
 	{
-		global $user, $langs;
-		$code = 'alerte_passage_resil';
-		$sujet = 'Marchand en "Résilié"';
-		$msg = 'Bonjour,<p> Pour info, <br> marchand ' . $this->getLink() . ' vient de passer en RESILIE</p>';
-//		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+		if ($this->getData('fk_status_rdc') == self::STATUS_RDC_RESIL && $this->getData('fk_statut_rdc') != $this->getInitData('fk_statut_rdc')) {
+			$msg = 'Ce marchand vient de passer en RESILIE';
+			$this->addNote($msg, BimpNote::BN_AUTHOR, 0, 1, '',
+				BimpNote::BN_AUTHOR_USER, BImpNote::BN_DEST_USER, 0, $this->getData('fk_user_attr_rdc'));
+		}
 	}
 
 	public function alertePassage_suspendu()
 	{
-		global $user, $langs;
-		$code = 'alerte_passage_suspendu';
-		$sujet = 'Marchand en "Suspendu"';
-		$msg = 'Bonjour,<p> Pour info, <br> marchand ' . $this->getLink() . ' vient de passer en SUSPENDU</p>';
-//		BimpUserMsg::envoiMsg($code, $sujet, $msg, $this->getData('fk_user_attr_rdc'));
+		if ($this->getData('fk_status_rdc') == self::STATUS_RDC_SUSPENDED && $this->getData('fk_statut_rdc') != $this->getInitData('fk_statut_rdc')) {
+			$msg = 'Ce marchand vient de passer en SUSPENDU';
+			$this->addNote($msg, BimpNote::BN_AUTHOR, 0, 1, '',
+				BimpNote::BN_AUTHOR_USER, BImpNote::BN_DEST_USER, 0, $this->getData('fk_user_attr_rdc'));
+		}
 	}
 
 	public function alertePassage_XX($s)
 	{
 		switch ($s) {
-			case 10:
+			case self::STATUS_RDC_ONBOARDING_OK:
 				$this->alerteOnboarding_catalogue_OK();
 				break;
-			case 11:
+			case self::STATUS_RDC_LIVE:
 				$this->alertePassage_live();
 				break;
-			case 12:
+			case self::STATUS_RDC_RESIL:
 				$this->alertePassage_resil();
 				break;
-			case 13:
+			case self::STATUS_RDC_SUSPENDED:
 				$this->alertePassage_suspendu();
 				break;
 		}
@@ -867,7 +882,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				foreach ($shop['shop_additional_fields'] as $value) {
 					$additional_fields[$value['code']] = array('value' => $value['value'], 'type' => $value['type']);
 				}
-//				echo '<pre>'; print_r($additional_fields); echo '</pre>';  exit;
 				if (!empty($additional_fields['lastname-cs']) || !empty($additional_fields['email-cs']) || !empty($additional_fields['address-cs']) || !empty($additional_fields['firstname-cs']) || !empty($additional_fields['phone-cs'])) {
 					$datas = array(
 						'lastname'  => $additional_fields['lastname-cs']['value'],
@@ -937,12 +951,12 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 					}
 				}
 				// surcharge statut
-				if ($shop['shop_state'] === 'SUSPENDED' && !in_array($this->getData('fk_statut_rdc'), array(12, 14))) {
-					$this->set('fk_statut_rdc', 13);
+				if ($shop['shop_state'] === 'SUSPENDED' && !in_array($this->getData('fk_statut_rdc'), array(self::STATUS_RDC_RESIL, self::STATUS_RDC_CLOSED, self::STATUS_RDC_PROSPECT_KO))) {
+					$this->set('fk_statut_rdc', self::STATUS_RDC_SUSPENDED);
 					$this->set('date_changement_statut_rdc', date('Y-m-d', strtotime($shop['last_updated_date'])));
 				}
-				if ($shop['shop_state'] === 'OPEN' && $this->getData('fk_statut_rdc') != self::$statut_rdc_live) {
-					$this->set('fk_statut_rdc', self::$statut_rdc_live);
+				if ($shop['shop_state'] === 'OPEN' && $this->getData('fk_statut_rdc') != self::STATUS_RDC_LIVE) {
+					$this->set('fk_statut_rdc', self::STATUS_RDC_LIVE);
 					$this->set('date_changement_statut_rdc', date('Y-m-d'));
 					if (!$this->getData('date_ouverture') && $shop['last_updated_date']) {
 						$this->set('date_ouverture', date('Y-m-d', strtotime($shop['last_updated_date'])));
@@ -975,19 +989,25 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 		if (!$data['status']) {
 			$errors[] = 'Aucun statut sélectionné';
-		} else {
+		}
+		elseif ($data['status'] == self::STATUS_RDC_PROSPECT_KO && !$data['commentaire_statut_ko']) {
+			$errors[] = 'Merci de remplir le commentaire';
+		}
+		else {
 			// update de la date_debut_prospect (si statut_rdc dans la liste des statuts de début de prospection)
 			if (in_array($data['status'], self::$statut_rdc_prospect_array)) {
 				if (empty($this->getData('date_debut_prospect'))) {
 					$this->set('date_debut_prospect', date('Y-m-d'));
 				}
 			}
+			$this->set('fk_statut_rdc', $data['status']);
+			$this->set('date_changement_statut_rdc', date('Y-m-d'));
+			if ($data['status'] == self::STATUS_RDC_PROSPECT_KO)
+				$this->set('commentaire_statut_ko', $data['commentaire_statut_ko']);
+
+			$this->update($warnings, true);
 		}
 
-		$this->set('fk_statut_rdc', $data['status']);
-		$this->set('date_changement_statut_rdc', date('Y-m-d'));
-
-		$this->update($warnings, true);
 		return array(
 			'errors'   => $errors,
 			'warnings' => $warnings

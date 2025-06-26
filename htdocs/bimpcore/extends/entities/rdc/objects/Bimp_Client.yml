@@ -406,6 +406,12 @@ forms:
                     type: select
                     options:
                         callback: getListButtons
+            -   field: commentaire_statut_ko
+                display_if:
+                    field_name: status
+                    show_values: 
+                        array: show_comm_statut_ko
+                
 
 filters_panels:
     default:

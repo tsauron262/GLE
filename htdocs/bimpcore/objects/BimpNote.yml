@@ -24,6 +24,17 @@ objects:
             id_object: 
                 field_value: fk_user_dest
                 
+                
+    bimp_user_group:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_UserGroup 
+            id_object:
+                field_value: fk_group_dest
+                
     user_group:
         relation: hasOne
         delete: 0
@@ -34,6 +45,17 @@ objects:
                 class: UserGroup
             id_object:
                 field_value: fk_group_dest
+    
+    bimp_author_group:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_UserGroup
+            id_object:
+                field_value: fk_group_author
+                
     author_group:
         relation: hasOne
         delete: 0
@@ -131,7 +153,7 @@ fields:
     fk_group_dest:
         label: Groupe destinataire
         type: id_object
-        object: user_group
+        object: bimp_user_group
         input:
             type: search_group
             include_empty: 1
@@ -154,7 +176,7 @@ fields:
     fk_group_author:
         label: Group
         type: id_object
-        object: author_group
+        object: bimp_author_group
         display_if:
             field_name: type_author
             show_values: 4

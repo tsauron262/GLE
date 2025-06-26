@@ -164,6 +164,13 @@ class BimpDolObject extends BimpObject
 				}
 			}
 
+			if (is_a($this, 'Bimp_CommandeFourn') || is_a($this, 'Bimp_FactureFourn')) {
+				$email_achat = BimpCore::getConf('mail_achat');
+				if ($email_achat) {
+					self::$cache[$cache_key][$email_achat] = $email_achat;
+				}
+			}
+
 			$extra_emails = explode(',', BimpCore::getConf('extra_emails_from', null, 'bimpcommercial'));
 			if (!empty($extra_emails)) {
 				foreach ($extra_emails as $email) {

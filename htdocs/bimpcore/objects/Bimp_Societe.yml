@@ -815,6 +815,10 @@ fields:
     import_key:
         label: Clé d'import
         type: text
+    
+    date_alert_anonym:
+        label: Date d'alerte avant anonymisation
+        type: date
         
 fields_tables: 
     identity:

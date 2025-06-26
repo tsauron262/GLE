@@ -64,10 +64,11 @@ if (!$action) {
 		'aj_menu_compta'                            => 'Aj menu compta',
 		'convert_centre_sav'                        => 'Convertion des centres sav',
 		'check_ac_revals_out_of_stock'              => 'vérif des revals AC en attente hors stock',
-		'correct_stock_facture_depuis_inventaire'	=> 'Correction des stocks des factures depuis inventaire',
-		'check_attribut_entity'						=> 'Vérifier les attributs par entité',
-		'test_divers'								=> 'Test divers',
-		'users_bdd'									=> 'List Users BDD',
+		'correct_stock_facture_depuis_inventaire'   => 'Correction des stocks des factures depuis inventaire',
+		'check_attribut_entity'                     => 'Vérifier les attributs par entité',
+		'test_divers'                               => 'Test divers',
+		'users_bdd'                                 => 'List Users BDD',
+		'correct_propal_remises'                    => 'Correction des remises des propales'
 	);
 
 	$path = pathinfo(__FILE__);
@@ -609,24 +610,22 @@ VALUES
 		$db->begin();
 		$errors = array();
 
-		$sql = $db->query("SELECT f.rowid FROM ".MAIN_DB_PREFIX."facture f LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafields fa ON fa.fk_object = f.rowid WHERE f.rowid NOT IN (SELECT id_facture FROM `".MAIN_DB_PREFIX."bc_vente`) AND f.rowid NOt IN (SELECT id_avoir FROM `".MAIN_DB_PREFIX."bc_vente`) AND entity = ".$conf->entity." AND fk_statut > 0 AND (f.date_valid > (SELECT MAX(date_closing) FROM `".MAIN_DB_PREFIX."bl_inventory_2` WHERE fk_warehouse = fa.entrepot) || fa.entrepot NOT IN (SELECT fk_warehouse FROM `".MAIN_DB_PREFIX."bl_inventory_2`));");
-		while($ln = $db->fetch_object($sql)){
+		$sql = $db->query("SELECT f.rowid FROM " . MAIN_DB_PREFIX . "facture f LEFT JOIN " . MAIN_DB_PREFIX . "facture_extrafields fa ON fa.fk_object = f.rowid WHERE f.rowid NOT IN (SELECT id_facture FROM `" . MAIN_DB_PREFIX . "bc_vente`) AND f.rowid NOt IN (SELECT id_avoir FROM `" . MAIN_DB_PREFIX . "bc_vente`) AND entity = " . $conf->entity . " AND fk_statut > 0 AND (f.date_valid > (SELECT MAX(date_closing) FROM `" . MAIN_DB_PREFIX . "bl_inventory_2` WHERE fk_warehouse = fa.entrepot) || fa.entrepot NOT IN (SELECT fk_warehouse FROM `" . MAIN_DB_PREFIX . "bl_inventory_2`));");
+		while ($ln = $db->fetch_object($sql)) {
 			$fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $ln->rowid);
 			$errorsF = $fact->reDestock();
-			if(count($errorsF)){
+			if (count($errorsF)) {
 				$errors = BimpTools::merge_array($errors, $errorsF);
-			}
-			else{
-				echo '<br/>'.'OK '.$fact->getLink().'<br/>';
+			} else {
+				echo '<br/>' . 'OK ' . $fact->getLink() . '<br/>';
 			}
 		}
-		if(count($errors)){
+		if (count($errors)) {
 			$db->rollback();
 			echo '<br/>ECHEC : <pre>';
 			print_r($errors);
 			echo '</pre>';
-		}
-		else{
+		} else {
 			$db->commit();
 			echo '<br/>OK';
 		}
@@ -635,11 +634,11 @@ VALUES
 
 	case 'check_attribut_entity':
 		global $sql, $conf;
-		$db->query("UPDATE ".MAIN_DB_PREFIX."product_attribute_value SET entity = ".$conf->entity." WHERE entity != ".$conf->entity." AND fk_product_attribute IN (SELECT rowid FROM `".MAIN_DB_PREFIX."product_attribute` WHERE `entity` = ".$conf->entity.");");
-		$sql = $db->query("SELECT aP.rowid as id_combi, pa.rowid as id_attribute, pav.rowid as id_attribute_value, pa.ref as attribute, pav.ref as attribute_value, a.fk_product_parent, a.fk_product_child, pav.ref, pav.value, pa.* FROM `".MAIN_DB_PREFIX."product_attribute_combination2val` aP, ".MAIN_DB_PREFIX."product_attribute_combination a, ".MAIN_DB_PREFIX."product_attribute_value pav, ".MAIN_DB_PREFIX."product_attribute pa WHERE `fk_prod_combination` = a.rowid AND a.entity = ".$conf->entity." AND `fk_prod_attr_val` = pav.rowid AND pav.entity != ".$conf->entity." AND pa.rowid = pav.fk_product_attribute;");
-		echo $db->num_rows($sql).' lignes a traiter<br/>';
-		while($ln = $db->fetch_object($sql)){
-			$sql2 = $db->query("SELECT pa.rowid as id_attribute, pav.rowid as id_attribute_value, pa.ref as attribute, pav.ref as attribute_value FROM ".MAIN_DB_PREFIX."product_attribute_value pav, ".MAIN_DB_PREFIX."product_attribute pa WHERE pav.ref = '".$ln->attribute_value."' AND pa.ref = '".$ln->attribute."' AND pav.entity = ".$conf->entity." AND pa.entity = ".$conf->entity.";");
+		$db->query("UPDATE " . MAIN_DB_PREFIX . "product_attribute_value SET entity = " . $conf->entity . " WHERE entity != " . $conf->entity . " AND fk_product_attribute IN (SELECT rowid FROM `" . MAIN_DB_PREFIX . "product_attribute` WHERE `entity` = " . $conf->entity . ");");
+		$sql = $db->query("SELECT aP.rowid as id_combi, pa.rowid as id_attribute, pav.rowid as id_attribute_value, pa.ref as attribute, pav.ref as attribute_value, a.fk_product_parent, a.fk_product_child, pav.ref, pav.value, pa.* FROM `" . MAIN_DB_PREFIX . "product_attribute_combination2val` aP, " . MAIN_DB_PREFIX . "product_attribute_combination a, " . MAIN_DB_PREFIX . "product_attribute_value pav, " . MAIN_DB_PREFIX . "product_attribute pa WHERE `fk_prod_combination` = a.rowid AND a.entity = " . $conf->entity . " AND `fk_prod_attr_val` = pav.rowid AND pav.entity != " . $conf->entity . " AND pa.rowid = pav.fk_product_attribute;");
+		echo $db->num_rows($sql) . ' lignes a traiter<br/>';
+		while ($ln = $db->fetch_object($sql)) {
+			$sql2 = $db->query("SELECT pa.rowid as id_attribute, pav.rowid as id_attribute_value, pa.ref as attribute, pav.ref as attribute_value FROM " . MAIN_DB_PREFIX . "product_attribute_value pav, " . MAIN_DB_PREFIX . "product_attribute pa WHERE pav.ref = '" . $ln->attribute_value . "' AND pa.ref = '" . $ln->attribute . "' AND pav.entity = " . $conf->entity . " AND pa.entity = " . $conf->entity . ";");
 //			if($db->num_rows($sql2) < 1){
 //				$tabSubsitute = array('SKI'=>'TAILLE');
 //				$tabSubsitute = array('TAILLE'=>'SKI');
@@ -653,13 +652,12 @@ VALUES
 //				$ln->attribute_value = 'SKI'.str_replace('CM', '', $ln->attribute_value);
 //				$sql2 = $db->query("SELECT pa.rowid as id_attribute, pav.rowid as id_attribute_value, pa.ref as attribute, pav.ref as attribute_value FROM ".MAIN_DB_PREFIX."product_attribute_value pav, ".MAIN_DB_PREFIX."product_attribute pa WHERE pav.ref = '".$ln->attribute_value."' AND pa.ref = '".$ln->attribute."' AND pav.entity = ".$conf->entity." AND pa.entity = ".$conf->entity.";");
 //			}
-			if($db->num_rows($sql2) > 0){
+			if ($db->num_rows($sql2) > 0) {
 				$ln2 = $db->fetch_object($sql2);
-				$sql3 = $db->query("UPDATE ".MAIN_DB_PREFIX."product_attribute_combination2val SET fk_prod_attr_val = ".$ln2->id_attribute_value.", fk_prod_attr = ".$ln2->id_attribute." WHERE rowid = ".$ln->id_combi.";");
-				echo 'OK '.$ln->attribute.' : '.$ln->attribute_value.' -> '.$ln2->attribute.' : '.$ln2->attribute_value.'<br/>';
-			}
-			else{
-				echo 'ECHEC '.$ln->attribute.' : '.$ln->attribute_value.'<br/>';
+				$sql3 = $db->query("UPDATE " . MAIN_DB_PREFIX . "product_attribute_combination2val SET fk_prod_attr_val = " . $ln2->id_attribute_value . ", fk_prod_attr = " . $ln2->id_attribute . " WHERE rowid = " . $ln->id_combi . ";");
+				echo 'OK ' . $ln->attribute . ' : ' . $ln->attribute_value . ' -> ' . $ln2->attribute . ' : ' . $ln2->attribute_value . '<br/>';
+			} else {
+				echo 'ECHEC ' . $ln->attribute . ' : ' . $ln->attribute_value . '<br/>';
 			}
 		}
 		break;
@@ -671,40 +669,89 @@ VALUES
 		$tabResult = array();
 		$req = 'select user,host from mysql.user;';
 		$sql = $db->query($req);
-		echo '<h1>'.$req.'</h1>';
-		while($ln = $db->fetch_object($sql)) {
+		echo '<h1>' . $req . '</h1>';
+		while ($ln = $db->fetch_object($sql)) {
 			$tabResult[$ln->User] = array();
 //			echo '<br/><h2>' . $ln->User . '@' . $ln->Host.'<h2>';
-			$req2 = 'show grants for "' . $ln->User . '"@"' . $ln->Host.'";';
+			$req2 = 'show grants for "' . $ln->User . '"@"' . $ln->Host . '";';
 			$sql2 = $db->query($req2);
 			$tabResult[$ln->User][$req2] = array();
 //			echo '<h3>'.$req2.'</h3>';
-			while($ln2 = $db->fetch_array($sql2)) {
-				if((stripos($ln2[0], $db->database_name) !== false || stripos($ln2[0], 'ERP_PROD') === false) && stripos($ln2[0], 'GRANT USAGE ON') === false){
+			while ($ln2 = $db->fetch_array($sql2)) {
+				if ((stripos($ln2[0], $db->database_name) !== false || stripos($ln2[0], 'ERP_PROD') === false) && stripos($ln2[0], 'GRANT USAGE ON') === false) {
 					$priv = $ln2[0];
 					$tab = explode('password', $priv);
-					if(isset($tab[1])){
-						$priv = $tab[0].'****';
+					if (isset($tab[1])) {
+						$priv = $tab[0] . '****';
 					}
 					$tab = explode('PASSWORD', $priv);
-					if(isset($tab[1])){
-						$priv = $tab[0].'****';
+					if (isset($tab[1])) {
+						$priv = $tab[0] . '****';
 					}
-					if(stripos($priv, 'ALL PRIVILEGES') !== false){
-						$priv = '<span class="error">'.$priv.'</span>';
-					}
-					else{
-						$priv = '<span class="success">'.$priv.'</span>';
+					if (stripos($priv, 'ALL PRIVILEGES') !== false) {
+						$priv = '<span class="error">' . $priv . '</span>';
+					} else {
+						$priv = '<span class="success">' . $priv . '</span>';
 					}
 					$tabResult[$ln->User][$req2][] = $priv;
 				}
 //					echo '<br/><h4>' . $ln2[0].'<h4>';
 			}
-			if(!count($tabResult[$ln->User][$req2]))
+			if (!count($tabResult[$ln->User][$req2])) {
 				$tabResult[$ln->User][$req2][] = '<span class="success">Aucun privilège</span>';
+			}
 		}
 //		echo '<pre>'.print_r($tabResult,1).'</pre>';
 		echo BimpRender::renderRecursiveArrayContent($tabResult);
+		break;
+
+	case 'correct_propal_remises':
+		$bdb = BimpCache::getBdb(true);
+
+		$sql = "SELECT pl.id as id_bimp_line, pdet.rowid as id_dol_line, pl.remise as remise_bimp, pdet.remise_percent as remise_doli, pl.id_obj as id_propal
+FROM llx_bimp_propal_line pl
+LEFT JOIN llx_propaldet pdet ON pdet.rowid = pl.id_line
+LEFT JOIN llx_propal p ON p.rowid = pl.id_obj
+WHERE
+p.fk_statut = 0
+AND p.datec > '2025-01-01'
+AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
+
+		$rows = $bdb->executeS($sql, 'array');
+		if (is_array($rows)) {
+			foreach ($rows as $r) {
+				echo '<br/>Ligne #' . $r['id_bimp_line'] . ' - Propal #' . $item['id_propal'] . ' : ';
+				echo '<pre>' . print_r($r, 1) . '</pre>';
+
+				/** @var Bimp_PropalLine $line */
+				$line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', (int) $r['id_bimp_line']);
+				if (!BimpObject::objectLoaded($line)) {
+					echo '<br/><span class="danger">Ligne #' . $r['id_bimp_line'] . ' non trouvée</span><br/> ';
+					continue;
+				}
+				if (!(float) $line->remise) {
+					echo '<span class="danger">Pas de remise côté doli</span>';
+				} elseif (!(float) $line->getData('remise')) {
+					$remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+					$remise->validateArray(array(
+						'id_object_line' => (int) $line->id,
+						'object_type'    => $line->getParentCommType(),
+						'label'          => '',
+						'type'           => 1,
+						'percent'        => $r['remise_doli']
+					));
+					$remise_warnings = array();
+					$remise_errors = $remise->create($remise_warnings, true);
+					if (count($remise_errors)) {
+						echo 'ERR <pre>' . print_r($remise_errors, 1) . '</pre>';
+					} else {
+						echo '<br/><span class="success">Créa remise ok (' . $r['remise_doli'] . ')</span><br/>';
+					}
+				} else {
+					echo '<span class="danger">Une remise existe déjà côté Bimp</span>';
+				}
+			}
+		}
 		break;
 
 	default:

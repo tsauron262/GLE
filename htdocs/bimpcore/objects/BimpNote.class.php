@@ -625,7 +625,7 @@ class BimpNote extends BimpObject
 				return $this->getData('email');
 
 			case self::BN_AUTHOR_GROUP:
-				$group = $this->getChildObject('author_group');
+				$group = $this->getChildObject('bimp_author_group');
 				if (BimpObject::objectLoaded($group)) {
 					return $group->getName();
 				}
@@ -648,7 +648,7 @@ class BimpNote extends BimpObject
 				return '';
 
 			case self::BN_DEST_GROUP:
-				$group = $this->getChildObject('user_group');
+				$group = $this->getChildObject('bimp_user_group');
 				if (BimpObject::objectLoaded($group)) {
 					return $group->getName();
 				}

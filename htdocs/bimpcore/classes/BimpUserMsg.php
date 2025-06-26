@@ -717,7 +717,7 @@ class BimpUserMsg
 			'module' => 'bimpcore',
 			'metier' => 'devs'
 		),
-		'Attribution_rdc'							=> array(
+		/*'Attribution_rdc'							=> array(
 			'label'  => 'Le compte XXX vient de vous être attribué',
 			'dests'  => 'object::id_user',
 			'module' => 'bimpcore',
@@ -746,40 +746,19 @@ class BimpUserMsg
 			'dests'  => 'object::id_user',
 			'module' => 'bimpcore',
 			'metier' => 'metier'
-		),
+		),*/
 		'rechercheManquantMirakl'	=> array(
 			'label'  => 'Rapport de recherche de shops manquants dans Mirakl',
 			'dests'  => 'to::team-marketplace@rueducommerce.fr::s.conti@rueducommerce.fr::m.chapsal@rueducommerce.fr',
 			'module' => 'bimpcore',
 			'metier' => 'metier'
-		)
-
-		// todo tommy : separer mail client et mail interne :
-		/*
-			'creation_ticket_support_view'	=> array( //	views\interfaces
-				'label' => 'Ticket Support N° XXX. Sujet du ticket : XXX. Demandeur : XXX. Contrat : XXX',
-				'dests' => '???????????',
-				'dest' => '????????',
-				'cc' => 'j.garnier@bimp.fr, l.gay@bimp.fr, tt.cao@bimp.fr',
-				'module' => 'bimpinterfaceclient',
-				'active' => (int) BimpCore::getConf('bimpsupport', null, 'use_tickets')
-			),
-			'creation_ticket_support_html'	=> array( //	html\interfaces
-				'label' => 'Ticket Support N° XXX. Sujet du ticket : XXX. Demandeur : XXX. Contrat : XXX',
-				'dests' => '???????????',
-				'dest' => '????????',
-				'cc' => 'j.garnier@bimp.fr, l.gay@bimp.fr, tt.cao@bimp.fr',
-				'module' => 'bimpinterfaceclient',
-				'active' => (int) BimpCore::getConf('bimpsupport', null, 'use_tickets')
-			),
-			'creation_ticket_support'	=> array( //	\BS_Ticket::create
-				'label' => 'Ticket Support N° XXX. Sujet du ticket : XXX. Demandeur : XXX. Contrat : XXX',
-				'dests' => '???????????',
-				'dest' => '????????',
-				'cc' => 'c.conort@bimp.fr, l.gay@bimp.fr, tt.cao@bimp.fr, d.debarnaud@bimp.fr, v.gaillard@bimp.fr',
-				'module' => 'bimpsupport',
-				'active' => (int) BimpCore::getConf('bimpsupport', null, 'use_tickets')
-			),*/
+		),
+		'alerte_pre_anonymisation'	=> array(
+			'label' => 'Les clients suivants seront anonymisés dans 30 jours en raison d\'une absence de mouvements depuis 5 ans.',
+			'dests' => 'object::id_user',
+			'module' => 'bimpdatasync',
+			'metier' => 'metier'
+		),
 	);
 
 	public static $canaux_diff_msg = array(

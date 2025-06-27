@@ -796,11 +796,12 @@ class BimpCore
 						echo 'OK <br/>';
 						echo $post_process_infos;
 						echo '<br/><br/>';
-					} else {
-						BimpCore::addlog('GIT PULL POST PROCESS OK', 1, 'maj', null, array(
-							'Infos' => $post_process_infos
-						));;
 					}
+//					else {
+//						BimpCore::addlog('GIT PULL POST PROCESS OK', 1, 'maj', null, array(
+//							'Infos' => $post_process_infos
+//						));
+//					}
 				}
 			}
 			$errors = array();

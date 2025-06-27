@@ -239,7 +239,7 @@ class BimpController
 							$logs[$hash]['last_tms'] = $cur_tms;
 							$send_email = false;
 
-							if ($logs[$hash]['n'] == 10 && !(int) $logs[$hash]['sms_sent']) {
+							if ($logs[$hash]['n'] == 10) {
 								$erp_name = BimpCore::getConf('erp_name', '');
 								BimpTools::sendSmsAdmin(($erp_name ? $erp_name . ' : ' : '') . '10 erreurs fatales en moins d\'1 heure');
 							}

@@ -30,22 +30,11 @@ if (!$user->admin) {
 	exit;
 }
 
-///** @var BCT_ContratLine $line */
-//$id_line = 19166;
-//$line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
-//if (BimpObject::objectLoaded($line)) {
-//	echo 'Ligne #' . $id_line . ' : ';
-//	$line_errors = array();
-//	$lines_renouv = array();
-//	$line->renouvAbonnement(array(
-//		'renouv_auto' => 1
-//	), $lines_renouv, $line_errors);
-//
-//	echo 'RENOUV<pre>' . print_r($lines_renouv, 1) . '</pre>';
-//	echo 'ERR<pre>' . print_r($line_errors, 1) . '</pre>';
-//} else {
-//	echo 'FAIL';
-//}
+if (file_exists(DOL_DATA_ROOT . '/bimpcore/fatal_errors_logs.json')) {
+	echo 'LOGS<pre>' . print_r(json_decode(file_get_contents(DOL_DATA_ROOT . '/bimpcore/fatal_errors_logs.json'), 1), 1) . '</pre>';
+} else {
+	echo 'FICHIER KO';
+}
 
 echo '<br/>FIN';
 echo '</body></html>';

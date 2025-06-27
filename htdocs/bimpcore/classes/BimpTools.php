@@ -2096,8 +2096,8 @@ class BimpTools
 	public static function isUserInGroup($userid, $groupName)
 	{
 		$bdd = BimpCache::getBdb();
-		$res = $bdd->getRows('usergroup_user ugu', 'ugu.fk_user = ' . $userid . ' AND ug.nom LIKE \'' . $groupName . '\'' , null, 'array', array('ugu.rowid'), null, null,
-		array(
+		$res = $bdd->getRows('usergroup_user ugu', 'ugu.fk_user = ' . $userid . ' AND ug.nom LIKE \'' . $groupName . '\'', null, 'array', array('ugu.rowid'), null, null,
+			array(
 				'ug' => array('table' => 'usergroup', 'on' => 'ug.rowid = ugu.fk_usergroup')
 			)
 		);
@@ -2274,6 +2274,45 @@ class BimpTools
 
 		return $html;
 	}
+
+	public static function getHash($data, $size = 'short')
+	{
+		$algo = 'sha256';
+		$algos = hash_algos();
+
+		switch ($size) {
+			case 'short': // 8
+			default:
+				foreach (array('adler32', 'crc32', 'crc32b') as $algo_to_test) {
+					if (in_array($algo_to_test, $algos)) {
+						$algo = $algo_to_test;
+						break;
+					}
+				}
+				break;
+
+			case 'medium': // 32
+				foreach (array('md2', 'md4', 'md5') as $algo_to_test) {
+					if (in_array($algo_to_test, $algos)) {
+						$algo = $algo_to_test;
+						break;
+					}
+				}
+				break;
+
+			case 'long': // 64
+				foreach (array('sha256', 'snefru', 'gost') as $algo_to_test) {
+					if (in_array($algo_to_test, $algos)) {
+						$algo = $algo_to_test;
+						break;
+					}
+				}
+				break;
+		}
+
+		return hash($algo, $data, false);
+	}
+
 
 	// Gestion des durées:
 
@@ -2765,7 +2804,8 @@ class BimpTools
 		return (float) $str_number;
 	}
 
-	public static function htmlToString($html, $max_chars = false, $no_multiple_new_lines = true) {
+	public static function htmlToString($html, $max_chars = false, $no_multiple_new_lines = true)
+	{
 		$html = self::replaceBr($html, '[[BR]]');
 		foreach (array('div', 'p') as $tag) {
 			$html = str_replace('</' . $tag . '>', '</' . $tag . '>[[BR]]', $html);
@@ -2781,7 +2821,7 @@ class BimpTools
 		}
 
 		if ($max_chars && strlen($html) > $max_chars) {
-			$html = substr($html, 0, $max_chars) .' [...]';
+			$html = substr($html, 0, $max_chars) . ' [...]';
 		}
 
 		return $html;
@@ -4464,8 +4504,8 @@ class BimpTools
 	public static function cleanHtml($html)
 	{
 //		if ((int) BimpCore::getConf('pdf_use_html_purifier')) {
-			$purifier = self::getHtmlPurifier();
-			$html = $purifier->purify($html);
+		$purifier = self::getHtmlPurifier();
+		$html = $purifier->purify($html);
 //		} else {
 //			// Envisager d'autres méthodes...
 //		}

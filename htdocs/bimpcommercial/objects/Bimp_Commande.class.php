@@ -505,10 +505,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
 
             if ($this->hasRemiseCRT()) {
-                if (!$client->getData('type_educ')) {
+				$clientF = $this->getClientFinal();
+                if (!$clientF->getData('type_educ')) {
                     $errors[] = 'Cette commande contient une remise CRT or le type éducation n\'est pas renseigné pour ce client, veuillez corriger la fiche client avant validation de cette commande';
-                } elseif ($client->getData('type_educ') == 'E4') {
-                    $date_fin_validite = $client->getData('type_educ_fin_validite');
+                } elseif ($clientF->getData('type_educ') == 'E4') {
+                    $date_fin_validite = $clientF->getData('type_educ_fin_validite');
 
                     if (!$date_fin_validite) {
                         $errors[] = 'Cette commande contient une remise CRT or la date de fin de validité du statut enseignant / étudiant n\'est pas renseigné. Veuillez corriger la fiche client avant validation de la commande';

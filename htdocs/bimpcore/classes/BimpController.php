@@ -194,6 +194,7 @@ class BimpController
 			case E_ERROR:
 			case E_CORE_ERROR:
 			case E_COMPILE_ERROR:
+				$hash = BimpTools::getHash($msg, 'medium');
 				if (stripos($msg, 'mysql')) {
 					global $db;
 					$msg = 'Derniére req : ' . $db->lastquery . '<br/><br/>' . $msg;
@@ -225,23 +226,48 @@ class BimpController
 						$txt .= '<pre>' . print_r($_POST, 1) . '</pre>';
 					}
 
-					if ((int) BimpCore::getConf('send_fatal_errors_emails')) {
-//                        $last_error_fatal_tms = BimpCore::getConf('last_fatal_error_tms', 0);
-//                        $cur_tms = date('U');
+					$send_email = (int) BimpCore::getConf('send_fatal_errors_emails');
+					if ($send_email) {
+						$logs = json_decode(file_get_contents(DOL_DATA_ROOT . '/bimpcore/fatal_errors_logs.json'), 1);
+						if (!is_array($logs)) {
+							$logs = array();
+						}
 
-//                        $nb = 0;
-//                        if ($cur_tms - $last_error_fatal_tms > 30) {
-//                            $nb = BimpCore::getConf('nb_fatal_errors', 0) + 1;
-//                        }
-//
-//                        if ($nb == 10) {
-//                            $erp_name = BimpCore::getConf('erp_name', '');
-//                            BimpTools::sendSmsAdmin('10 erreurs fatales en moins de 30 secondes');
-//                        } elseif ($nb < 10) {
-						$code = 'erreur_fatale';
-						$subject = 'ERREUR FATALE - ' . str_replace('/', '', DOL_URL_ROOT);
-						BimpUserMsg::envoiMsg($code, $subject, $txt);
-//                        }
+						$cur_tms = time();
+						if (isset($logs[$hash]) && $cur_tms < $logs[$hash]['start_tms'] + 3600) {
+							$logs[$hash]['n']++;
+							$logs[$hash]['last_tms'] = $cur_tms;
+							$send_email = false;
+
+							if ($logs[$hash]['n'] == 10) {
+								$erp_name = BimpCore::getConf('erp_name', '');
+								BimpTools::sendSmsAdmin(($erp_name ? $erp_name . ' : ' : '') . '10 erreurs fatales en moins d\'1 heure');
+							}
+						} else {
+							$logs[$hash] = array(
+								'start_tms' => $cur_tms,
+								'last_tms'  => $cur_tms,
+								'n'         => 1
+							);
+						}
+
+						foreach ($logs as $log_hash => $log) {
+							if ($log_hash == $hash) {
+								continue;
+							}
+
+							if ($cur_tms > $log['last_tms'] + 3600) {
+								unset($logs[$log_hash]);
+							}
+						}
+
+						file_put_contents(DOL_DATA_ROOT . '/bimpcore/fatal_errors_logs.json', json_encode($logs));
+
+						if ($send_email) {
+							$code = 'erreur_fatale';
+							$subject = 'ERREUR FATALE - ' . str_replace('/', '', DOL_URL_ROOT);
+							BimpUserMsg::envoiMsg($code, $subject, $txt);
+						}
 					}
 				}
 
@@ -249,8 +275,7 @@ class BimpController
 					$msg = 'Mémoire dépassée (Opération trop lourde). Les administrateurs ont été alertés par e-mail';
 				}
 
-				$html = '';
-				$html .= '<h2 class="danger">Erreur Fatale</h2>';
+				$html = '<h2 class="danger">Erreur Fatale</h2>';
 
 				global $dolibarr_main_prod;
 				if (!$dolibarr_main_prod) {

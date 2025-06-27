@@ -2283,6 +2283,22 @@ class BimpComm extends BimpDolObject
 		return $html;
 	}
 
+	public function getClientFinal(){
+		if (is_a($this, 'Bimp_Facture') && $this->field_exists('id_client_final') && (int) $this->getData('id_client_final')) {
+			$client = $this->getChildObject('client_final');
+			return $client;
+		}
+		$id_contact = $this->getIdContact('external', 'CLIFINAL');
+		if ($id_contact > 0) {
+			$id_client = (int) $this->db->getValue('socpeople', 'fk_soc', 'rowid = ' . $id_contact);
+			if ($id_client) {
+				$client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+				return $client;
+			}
+		}
+		$client = $this->getChildObject('client');
+		return $client;
+	}
 
 	public function renderHeaderExtraLeft()
 	{
@@ -2302,13 +2318,7 @@ class BimpComm extends BimpDolObject
 
 		if (BimpCore::isEntity('bimp')) {
 			if ($this->hasRemiseCRT()) {
-				$client = null;
-				if (is_a($this, 'Bimp_Facture') && $this->field_exists('id_client_final') && (int) $this->getData('id_client_final')) {
-					$client = $this->getChildObject('client_final');
-				}
-				if (!BimpObject::objectLoaded($client)) {
-					$client = $this->getChildObject('client');
-				}
+				$client = $this->getClientFinal();
 
 				if (BimpObject::objectLoaded($client)) {
 					if (!$client->getData('type_educ')) {

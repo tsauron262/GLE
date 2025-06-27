@@ -787,4 +787,16 @@ class Bimp_Log extends BimpObject
 
 		return parent::update($warnings, $force_update);
 	}
+
+	public function delete(&$warnings = array(), $force_delete = false)
+	{
+		$id = $this->id;
+		$errors =  parent::delete($warnings, $force_delete);
+
+		if (!count($errors) && $id) {
+			$this->db->delete('bimpcore_log_datetime', 'id_log = ' . $id);
+		}
+
+		return $errors;
+	}
 }

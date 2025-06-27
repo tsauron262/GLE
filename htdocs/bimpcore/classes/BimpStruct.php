@@ -238,7 +238,7 @@ class BimpStruct
         $config->setCurrentPath($prev_path);
         return $html;
     }
-    
+
     public static function renderGraph(BimpConfig $config, $path, &$parent_component = null)
     {
         $html = '';
@@ -260,7 +260,7 @@ class BimpStruct
             if($title == '')
                     $title = $object->getLabel('', true);
             $icon = $config->getFromCurrentPath('icon', null);
-            
+
             $html .= $object->renderGraph($name, $title);
         } else {
             $html = BimpRender::renderAlerts('Instance invalide - Chemin: ' . $path . '/object');
@@ -268,22 +268,22 @@ class BimpStruct
 
         $config->setCurrentPath($prev_path);
         return $html;
-        
-        
+
+
         $html = '';
         $prev_path = $config->current_path;
         $config->setCurrentPath($path);
         $name = $config->getFromCurrentPath('name', 'default');
         $title = $config->getFromCurrentPath('title', 'default');
-        
-        
+
+
         if ($config->isDefined($path . '/object')) {
             $object = $config->getObject($path . '/object');
         } else {
             $object = $config->instance;
         }
-        
-        
+
+
         return $object->renderGraph($name, $title);
     }
 
@@ -314,7 +314,8 @@ class BimpStruct
             } elseif (!is_null($association)) {
                 $html = $object->renderAssociatesList($association, $name, $title, $icon);
             } else {
-                $filters = $config->getFromCurrentPath('filters', array(), false, 'array');
+//                $filters = $config->getFromCurrentPath('filters', array(), false, 'array');
+				$filters = $config->getCompiledParams($config->current_path . '/filters');
                 $html = $object->renderList($name, $panel, $title, $icon, $filters);
             }
         } else {

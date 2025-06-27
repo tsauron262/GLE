@@ -22,6 +22,8 @@ class BimpCoreCronExec extends BimpCron
             Bimp_Client::checkRelancesDeactivatedToNotify();
         }
 
+		Bimp_Log::cleanLogs();
+
         $this->output = 'OK';
         return 0;
     }

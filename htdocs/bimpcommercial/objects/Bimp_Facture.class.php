@@ -358,12 +358,13 @@ class Bimp_Facture extends BimpComm
 			$errors[] = 'Attention la réf client ne peut pas être vide : <br/>' . nl2br($client->getData('consigne_ref_ext'));
 		}
 
-		if (is_a($this, 'Bimp_Facture') && $this->field_exists('id_client_final') && (int) $this->getData('id_client_final')) {
-			$client = $this->getChildObject('client_final');
-		}
-		if (!BimpObject::objectLoaded($client)) {
-			$client = $this->getChildObject('client');
-		}
+//		if (is_a($this, 'Bimp_Facture') && $this->field_exists('id_client_final') && (int) $this->getData('id_client_final')) {
+//			$client = $this->getChildObject('client_final');
+//		}
+//		if (!BimpObject::objectLoaded($client)) {
+//			$client = $this->getChildObject('client');
+//		}
+		$client = $this->getClientFinal();
 
 		if ($this->hasRemiseCRT()) {
 			if (!$client->getData('type_educ')) {
@@ -1072,7 +1073,7 @@ class Bimp_Facture extends BimpComm
 		if(isset($paiement->error) && $paiement->error != '')
 			$errors[] = $paiement->error;
 		else{
-			$result = $paiement->addPaymentToBank($user, 'payment_supplier', 'Paiement facture client', $this->getData('fk_account'), '', '');
+			$result = $paiement->addPaymentToBank($user, 'payment', 'Paiement facture client', $this->getData('fk_account'), '', '');
 			$this->checkIsPaid();
 		}
 	}

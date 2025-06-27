@@ -292,6 +292,12 @@ forms:
         before_content:
             callback: renderHeaderButtons
         rows:
+            elementtype:
+                field: elementtype
+                hidden: 1
+            fk_element:
+                field: fk_element
+                hidden: 1
             type:
                 field: fk_action
                 required: 1

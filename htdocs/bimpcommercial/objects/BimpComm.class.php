@@ -2292,7 +2292,7 @@ class BimpComm extends BimpDolObject
 		if ($id_contact > 0) {
 			$id_client = (int) $this->db->getValue('socpeople', 'fk_soc', 'rowid = ' . $id_contact);
 			if ($id_client) {
-				$client = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Client', $id_client);
+				$client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
 				return $client;
 			}
 		}

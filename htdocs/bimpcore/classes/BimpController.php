@@ -234,14 +234,14 @@ class BimpController
 						}
 
 						$cur_tms = time();
-						if (isset($logs[$hash]) && $cur_tms < $logs[$hash]['last_tms'] + 3600) {
+						if (isset($logs[$hash]) && $cur_tms < $logs[$hash]['start_tms'] + 3600) {
 							$logs[$hash]['n']++;
 							$logs[$hash]['last_tms'] = $cur_tms;
 							$send_email = false;
 
-							if ($logs[$hash]['n'] == 10) {
+							if ($logs[$hash]['n'] == 10 && !(int) $logs[$hash]['sms_sent']) {
 								$erp_name = BimpCore::getConf('erp_name', '');
-								BimpTools::sendSmsAdmin(($erp_name ? $erp_name . ' : ' : '') . '10 erreurs fatales en moins d\'1 heure'); // Message simplifié, en réalité c'est moins d'1 h depuis la dernière err fatale identique.
+								BimpTools::sendSmsAdmin(($erp_name ? $erp_name . ' : ' : '') . '10 erreurs fatales en moins d\'1 heure');
 							}
 						} else {
 							$logs[$hash] = array(

@@ -1073,7 +1073,7 @@ class Bimp_Facture extends BimpComm
 		if(isset($paiement->error) && $paiement->error != '')
 			$errors[] = $paiement->error;
 		else{
-			$result = $paiement->addPaymentToBank($user, 'payment_supplier', 'Paiement facture client', $this->getData('fk_account'), '', '');
+			$result = $paiement->addPaymentToBank($user, 'payment', 'Paiement facture client', $this->getData('fk_account'), '', '');
 			$this->checkIsPaid();
 		}
 	}

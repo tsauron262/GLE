@@ -775,7 +775,8 @@ class BimpObject extends BimpCache
 		return null;
 	}
 
-	public function getFilesDir(){
+	public function getFilesDir()
+	{
 		return $this->getFilesDirComplexe();
 	}
 
@@ -783,28 +784,26 @@ class BimpObject extends BimpCache
 	{
 		if ($this->isLoaded() || !$module) {
 			$more = '';
-			if($module) {
+			if ($module) {
 				if ($this->getEntity_name() && $this->getData('entity') > 1) {
 					$more .= '/' . $this->getData('entity');
 				}
-			}
-			else{
+			} else {
 				global $conf;
-				if($conf->entity > 0){
+				if ($conf->entity > 0) {
 					$more .= '/' . $conf->entity;
 				}
 			}
-			if($path_tmp){
+			if ($path_tmp) {
 				$path = PATH_TMP;
-			}
-			else{
+			} else {
 				$path = DOL_DATA_ROOT;
 			}
-			$path .= $more. '/bimpcore/';
-			if($module) {
+			$path .= $more . '/bimpcore/';
+			if ($module) {
 				$path .= $this->module . '/' . $this->object_name . '/' . $this->id . '/';
 			}
-			return  $path;
+			return $path;
 		}
 
 		return '';
@@ -2320,7 +2319,7 @@ class BimpObject extends BimpCache
 		global $conf;
 		$fk_account = BimpCore::getConf('id_default_bank_account', (!empty($conf->global->FACTURE_RIB_NUMBER) ? $conf->global->FACTURE_RIB_NUMBER : 0));
 		$dataSecteur = BimpCache::getSecteursData();
-		if(isset($dataSecteur[$this->getSecteur()]['id_default_bank_account']) && (int) $dataSecteur[$this->getSecteur()]['id_default_bank_account'] > 0) {
+		if (isset($dataSecteur[$this->getSecteur()]['id_default_bank_account']) && (int) $dataSecteur[$this->getSecteur()]['id_default_bank_account'] > 0) {
 			$fk_account = (int) $dataSecteur[$this->getSecteur()]['id_default_bank_account'];
 		}
 
@@ -2605,7 +2604,7 @@ class BimpObject extends BimpCache
 		global $dont_rollback;
 		if ($use_db_transactions) {
 			if (isset($result['errors']) && count($result['errors']) and !isset($dont_rollback)) {
-				$instance->db->db->rollback();
+				$instance->db->db->rollback('Objet ' . $this->getLabel() . ($this->id ? ' #' . $this->id : '') . ' - Action ' . $action);
 
 				if ((int) BimpCore::getConf('log_actions_rollbacks')) {
 					BimpCore::addlog('Rollback suite à action', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $instance, array(
@@ -10439,8 +10438,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				$html .= ' class="bs-popover card-popover"';
 				$html .= BimpRender::renderPopoverData($card_html, 'bottom', 'true');
 			}
-			if (isset($params['target']) && $params['target'] == 'blank')
+			if (isset($params['target']) && $params['target'] == 'blank') {
 				$html .= ' target="_blank"';
+			}
 			$html .= '>' . $icon . $label . '</a>';
 			$html .= $status;
 		} elseif ($card_html) {

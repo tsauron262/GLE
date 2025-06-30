@@ -5126,9 +5126,13 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
                 $id_user = (int) $comm->getIdCommercial();
 
-                if (!$id_user) {
-                    $id_user = $comm->getIdContact('internal', 'SALESREPSIGN');
-                }
+				if (!$id_user) {
+					$id_user = $comm->getIdContact('internal', 'SALESREPSIGN');
+				}
+
+				if (!$id_user) {
+					$id_user = BimpCore::getConf('default_id_commercial', 0);
+				}
 
                 if (!isset($commandes[$id_user])) {
                     $commandes[$id_user] = array();

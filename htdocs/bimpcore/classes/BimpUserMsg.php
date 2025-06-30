@@ -646,7 +646,7 @@ class BimpUserMsg
 		),
 		'tentativeARestitueAuto_non_RFPU_GSX'        => array( // \test_sav::tentativeARestitueAuto
 			'label'  => 'Le SAV xxx n\'arrive pas a être passé a RFPU dans GSX',
-			'dests'  => 'object::user',
+			'dests'  => 'object::array_id_users',
 			'params' => array('allow_user_default_sav_email' => 1),
 			'module' => 'bimpapple',
 		),

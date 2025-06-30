@@ -364,7 +364,9 @@ abstract class DoliDB implements Database
                     return $ret;
                 } elseif ($this->noTransaction) {
                     // Pas besoin de loguer, de nombreux cas où c'est normal d'arriver là (Quand on veut contourner un comportement par défaut).
-                    BimpCore::addlog('Tentative de ROLLBACK sur instance sans transactions', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
+                    BimpCore::addlog('Tentative de ROLLBACK sur instance sans transactions', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+						'Info' => $log
+					));
                     return 1;
                 } else {
                     $this->transaction_opened--;

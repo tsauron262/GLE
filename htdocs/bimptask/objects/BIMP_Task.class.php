@@ -869,9 +869,11 @@ class BIMP_Task extends BimpAbstractFollow
 		foreach ($this->getUsersFollow(true) as $userN) {
 			$mails[] = BimpTools::getUserEmailOrSuperiorEmail($userN->id);
 		}
-		$to = implode(',', $mails);
+		if (count($mails)) {
+			$to = implode(',', $mails);
 
-		$this->sendMail($to, 'Tache ERP<' . BimpCore::getConf('mailReponse', null, 'bimptask') . '>', $subject, $message, $rappel, $files);
+			$this->sendMail($to, 'Tache ERP<' . BimpCore::getConf('mailReponse', null, 'bimptask') . '>', $subject, $message, $rappel, $files);
+		}
 
 		foreach ($this->getEmailFollow() as $to) {//pour ne pas partager email et lien
 			$this->sendMail($to, 'Tache ERP<' . BimpCore::getConf('mailReponse', null, 'bimptask') . '>', $subject, $message, $rappel, $files, false);

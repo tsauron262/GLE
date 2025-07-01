@@ -681,11 +681,15 @@ class BDS_RgpdProcess extends BDSProcess
         // Recherche clients pros sans activité depuis 10 ans:
         $dt = new DateTime();
         $dt->sub(new DateInterval('P5Y'));
-		$dt->add(new DateInterval('P1M')); // ajout d'un mois pour alert pré-anonymisation
-        $dt_5y = $dt->format('Y-m-d');
+		$dt_5y = $dt->format('Y-m-d');
 
-        $where = 'is_anonymized = 0 AND client IN (1,2,3)';
-        $where .= ' AND date_last_activity IS NOT NULL AND date_last_activity > \'0000-00-00\' AND date_last_activity <= \'' . $dt_5y . '\'';
+		$dt->add(new DateInterval('P1M')); // ajout d'un mois pour alert pré-anonymisation
+		$da = $dt->format('Y-m-d');
+
+		$where = 'is_anonymized = 0 AND client IN (1,2,3)';
+        $where .= ' AND date_last_activity IS NOT NULL AND date_last_activity > \'0000-00-00\' AND (date_last_activity <= \'' . $dt_5y . '\'';
+		$where .= ' OR (date_last_activity <= \'' . $da . '\' AND (date_alert_anonym IS NULL OR date_alert_anonym < SUBDATE(CURRENT_DATE, INTERVAL 1 YEAR)))';
+		$where .= ')';
 
         if ($excluded_clients) {
             $where .= ' AND rowid NOT IN (' . $excluded_clients . ')';

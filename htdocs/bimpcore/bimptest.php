@@ -30,11 +30,9 @@ if (!$user->admin) {
 	exit;
 }
 
-if (file_exists(DOL_DATA_ROOT . '/bimpcore/fatal_errors_logs.json')) {
-	echo 'LOGS<pre>' . print_r(json_decode(file_get_contents(DOL_DATA_ROOT . '/bimpcore/fatal_errors_logs.json'), 1), 1) . '</pre>';
-} else {
-	echo 'FICHIER KO';
-}
+//$test = 'SAVLDLC<f.martinez@bimp.fr>';
+//echo 'test ' . $test .' : ';
+//echo BimpValidate::isEmail($test) ? 'OK' : 'KO';
 
 echo '<br/>FIN';
 echo '</body></html>';

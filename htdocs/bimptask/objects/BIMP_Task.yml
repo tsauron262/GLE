@@ -306,16 +306,6 @@ forms:
                 hashtags: 1
                 label: Commentaire
             -   custom: 1
-                input_name: comment_dev
-                input:
-                    type: textarea
-                    rows: 3
-                    auto_expand: 1
-                hashtags: 1
-                label: Commentaire développeur
-                view:
-                    callback: isDev
-            -   custom: 1
                 input_name: notif
                 data_type: bool
                 label: Notifier
@@ -385,16 +375,6 @@ forms:
                     rows: 3
                     auto_expand: 1
                 hashtags: 1
-            -   custom: 1
-                label: Commentaire developpeur
-                input_name: comment_dev
-                input:
-                    type: textarea
-                    rows: 3
-                    auto_expand: 1
-                hashtags: 1
-                view:
-                    callback: isDev
 
 lists_cols:
     typeTache:

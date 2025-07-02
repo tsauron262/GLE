@@ -1,0 +1,1 @@
+Abonnements : correctif bug concernant les remises sur abonnement lors d'un renouvellement ou d'un ajout d'unité. 

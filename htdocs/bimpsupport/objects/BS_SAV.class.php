@@ -5686,7 +5686,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 							'label'       => $part_label . '. Pour : ' . $ref_added_part
 						), true, $part_errors);
 
-						if (!BimpObject::objectLoaded($new_part) | -count($part_errors)) {
+						if (!BimpObject::objectLoaded($new_part) || count($part_errors)) {
 							$errors[] = BimpTools::getMsgFromArray($part_errors, 'Echec de l\'ajout du composant ' . $part_number . ' - ' . $part_label);
 						}
 					}

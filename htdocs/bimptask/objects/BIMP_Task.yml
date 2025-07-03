@@ -375,6 +375,26 @@ forms:
                     rows: 3
                     auto_expand: 1
                 hashtags: 1
+                
+    closeInac:
+        extends: close
+        rows:
+            -   custom: 1
+                label: Notifier
+                input_name: notify
+                input:
+                    type: toggle
+                value: 1
+            -   custom: 1
+                label: Commentaire
+                input_name: comment
+                input:
+                    type: textarea
+                    rows: 3
+                    auto_expand: 1
+                hashtags: 1
+                value: 'Bonjour,\n\nFermeture automatique de cette tache, en attente utilisateur, car elle n\'a pas obtenue de réponse.\nNhésitez pas à répondre à ce mail pour la réouvrir si besoin.\n\nCdt,'
+        
 
 lists_cols:
     typeTache:

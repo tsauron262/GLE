@@ -768,6 +768,8 @@ class BimpCore
 					if ($debug_mode) {
 						die('Pull non terminé');
 					}
+
+					http_response_code(503);
 					die('ERP EN COURS DE MISE A JOUR. MERCI DE PATIENTER QUELQUES INSTANTS AVANT D\'ACTUALISER CETTE PAGE.');
 				}
 
@@ -1308,6 +1310,7 @@ class BimpCore
 					$updates_infos = json_decode((string) $bdb->getValue('bimpcore_conf', 'value', 'name = \'erp_updates_infos\' AND module = \'bimpcore\' AND entity = 0'), 1);
 
 					if ($n > 20) {
+						http_response_code(503);
 						die('ERP EN COURS DE MISE A JOUR. MERCI DE PATIENTER QUELQUES INSTANTS AVANT D\'ACTUALISER CETTE PAGE.');
 					}
 				}

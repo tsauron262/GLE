@@ -3225,7 +3225,7 @@ class Bimp_User extends BimpObject
 				'lastname'	=> $userDatas['sn'],
 				'firstname' => $userDatas['givenName'],
 				'email' 	=> $userDatas['userprincipalname'],
-				'job'		=> $userDatas['description']
+				'job'		=> ($userDatas['title'] ? $userDatas['title'] . ' ' : '')  . ($userDatas['description'] ? $userDatas['description']: ''),
 			)) );
 		}
 		else	{

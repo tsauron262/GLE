@@ -1,0 +1,1 @@
+- Ajout process BDS de vérif des stocks pour les réceptions de produit avec des quantités comportant des décimales.

@@ -295,6 +295,59 @@ class Bimp_User extends BimpObject
 	}
 	// Getters données:
 
+	public function getUsersLdap($missing_only = false)
+	{
+		$liste = array();
+		if (isModEnabled('ldap')) {
+			require_once DOL_DOCUMENT_ROOT . '/core/class/ldap.class.php';
+			require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
+			$ldap = new Ldap();
+			$result = $ldap->connectBind();
+			if ($result >= 0) {
+				$bdd = BimpCache::getBdb();
+				$dolusers = array_column($bdd->getRows('user', '1', null, 'array', array('login')), 'login');
+				$required_fields = array(
+					getDolGlobalString('LDAP_KEY_USERS'),
+					getDolGlobalString('LDAP_FIELD_FULLNAME'),
+					getDolGlobalString('LDAP_FIELD_NAME'),
+					getDolGlobalString('LDAP_FIELD_FIRSTNAME'),
+					getDolGlobalString('LDAP_FIELD_LOGIN'),
+					getDolGlobalString('LDAP_FIELD_LOGIN_SAMBA'),
+					getDolGlobalString('LDAP_FIELD_PASSWORD'),
+					getDolGlobalString('LDAP_FIELD_PASSWORD_CRYPTED'),
+					getDolGlobalString('LDAP_FIELD_PHONE'),
+					getDolGlobalString('LDAP_FIELD_FAX'),
+					getDolGlobalString('LDAP_FIELD_MOBILE'),
+					getDolGlobalString('LDAP_FIELD_SKYPE'),
+					getDolGlobalString('LDAP_FIELD_MAIL'),
+					getDolGlobalString('LDAP_FIELD_TITLE'),
+					getDolGlobalString('LDAP_FIELD_DESCRIPTION'),
+					getDolGlobalString('LDAP_FIELD_SID')
+				);
+
+				// Remove from required_fields all entries not configured in LDAP (empty) and duplicated
+				$required_fields = array_unique(array_values(array_filter($required_fields, "dol_validElement")));
+				$ldapusers = $ldap->getRecords('*', getDolGlobalString('LDAP_USER_DN'), getDolGlobalString('LDAP_KEY_USERS'), $required_fields, 1);
+				if (is_array($ldapusers)) {
+					foreach ($ldapusers as $key => $ldapuser) {
+						if ($missing_only && in_array($ldapuser['sAMAccountName'], $dolusers)) continue;
+						// Define the label string for this user
+						$label = '';
+						foreach ($required_fields as $value) {
+							if ($value === getDolGlobalString('LDAP_FIELD_PASSWORD') || $value === getDolGlobalString('LDAP_FIELD_PASSWORD_CRYPTED')) {
+								$label .= $value."=******* ";
+							} elseif ($value) {
+								$label .= $value."=".$ldapuser[$value]." ";
+							}
+						}
+						$liste[$key] = $label;
+					}
+				}
+			}
+		}
+		return $liste;
+	}
+
 	public function getCardFields($card_name)
 	{
 		$fields = parent::getCardFields($card_name);
@@ -661,7 +714,8 @@ class Bimp_User extends BimpObject
 			'icon_before' => 'fas_plus-circle',
 			'attr'        => array(
 				'type'    => 'button',
-				'onclick' => "document.location.replace('" . DOL_URL_ROOT . "/user/card.php?leftmenu=users&action=create');"
+//				'onclick' => "document.location.replace('" . DOL_URL_ROOT . "/user/card.php?leftmenu=users&action=create');"
+				'onclick' => $this->getJsActionOnclick('selectUser', array(), array('form_name' => 'select_user'))
 			)
 		);
 
@@ -3120,6 +3174,68 @@ class Bimp_User extends BimpObject
 		return array(
 			'errors'   => $errors,
 			'warnings' => $warnings
+		);
+	}
+
+	public function actionSelectUser($data, &$success)
+	{
+		$errors = array();
+		$warnings = array();
+		$success = '';
+
+		require_once DOL_DOCUMENT_ROOT . '/core/class/ldap.class.php';
+		require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
+
+		$selecteduser = $data['selecteduser'];
+		$required_fields = array(
+			getDolGlobalString('LDAP_KEY_USERS'),
+			getDolGlobalString('LDAP_FIELD_NAME'),
+			getDolGlobalString('LDAP_FIELD_FIRSTNAME'),
+			getDolGlobalString('LDAP_FIELD_LOGIN'),
+			getDolGlobalString('LDAP_FIELD_LOGIN_SAMBA'),
+			getDolGlobalString('LDAP_FIELD_PASSWORD'),
+			getDolGlobalString('LDAP_FIELD_PASSWORD_CRYPTED'),
+			getDolGlobalString('LDAP_FIELD_PHONE'),
+			getDolGlobalString('LDAP_FIELD_FAX'),
+			getDolGlobalString('LDAP_FIELD_MOBILE'),
+			getDolGlobalString('LDAP_FIELD_MAIL'),
+			getDolGlobalString('LDAP_FIELD_TITLE'),
+			getDolGlobalString('LDAP_FIELD_DESCRIPTION'),
+			getDolGlobalString('LDAP_FIELD_SID')
+		);
+		if (isModEnabled('socialnetworks')) {
+			$arrayofsocialnetworks = array('skype', 'twitter', 'facebook', 'linkedin');
+			foreach ($arrayofsocialnetworks as $socialnetwork) {
+				$required_fields[] = getDolGlobalString('LDAP_FIELD_'.strtoupper($socialnetwork));
+			}
+		}
+
+		$ldap = new Ldap();
+		$result = $ldap->connectBind();
+		if ($result >= 0) {
+			// Remove from required_fields all entries not configured in LDAP (empty) and duplicated
+			$required_fields = array_unique(array_values(array_filter($required_fields, "dol_validElement")));
+
+			$ldapusers = $ldap->getRecords($selecteduser, getDolGlobalString('LDAP_USER_DN'), getDolGlobalString('LDAP_KEY_USERS'), $required_fields);
+			$userDatas = $ldapusers[$selecteduser];
+
+
+			$onSuccess = $this->getJsLoadModalForm('create_user', '', array('fields' => array(
+				'login' 	=> $userDatas['sAMAccountName'],
+				'lastname'	=> $userDatas['sn'],
+				'firstname' => $userDatas['givenName'],
+				'email' 	=> $userDatas['userprincipalname'],
+				'job'		=> ($userDatas['title'] ? $userDatas['title'] . ' ' : '')  . ($userDatas['description'] ? $userDatas['description']: ''),
+			)) );
+		}
+		else	{
+			$errors[] = 'Echec de la connexion LDAP';
+		}
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings,
+			'success_callback' => 'setTimeout(function(){'.html_entity_decode($onSuccess).'},500);'
 		);
 	}
 	// Overrides:

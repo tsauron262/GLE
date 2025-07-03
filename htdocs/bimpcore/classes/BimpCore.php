@@ -444,7 +444,7 @@ class BimpCore
 	public static function checkSqlUpdates($execute = false)
 	{
 		global $no_erp_updates;
-		if ($no_erp_updates) {
+		if ($no_erp_updates || defined('NO_ERP_UPDATES') && NO_ERP_UPDATES) {
 			return;
 		}
 

@@ -95,11 +95,11 @@ fields:
     address: 
         label: Adresse
         user_edit: 1
-        default_value:
-            callback:
-                method: getParentData
-                params:
-                    - address
+#        default_value:
+#            callback:
+#                method: getParentData
+#                params:
+#                    - address
     zip: 
         label: Code postal
         user_edit: 1

@@ -393,7 +393,7 @@ forms:
                     rows: 3
                     auto_expand: 1
                 hashtags: 1
-                value: 'Bonjour,\n\nFermeture automatique de cette tache, en attente utilisateur, car elle n\'a pas obtenue de réponse.\nNhésitez pas à répondre à ce mail pour la réouvrir si besoin.\n\nCdt,'
+                value: 'Bonjour,\n\nFermeture automatique de cette tache, en attente utilisateur, car elle n\'a pas obtenue de réponse.\nN'hésitez pas à répondre à ce mail pour la rouvrir si besoin.\n\nCdt,'
         
 
 lists_cols:

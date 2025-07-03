@@ -6,6 +6,8 @@ CREATE TABLE llx_usergroup_revue (
 	  entity INT default 1
 ) ENGINE=InnoDB;
 
+ALTER table llx_usergroup ADD IF NOT EXIST fk_user int DEFAULT 0;
+
 
 
 INSERT into llx_usergroup_revue (SELECT null, u.rowid,fk_user, data_revue,1 FROM llx_usergroup u, llx_usergroup_extrafields ue WHERE ue.fk_object = u.rowid);

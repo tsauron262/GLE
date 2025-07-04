@@ -34,7 +34,7 @@ class devController extends BimpController
 		$html = '';
 
 		$date = new DateTime();
-		$html .= 'Date serveur : ' . $date->format('d / m / Y H:i:s');
+		$html .= 'Test pas de pull au redemarrage Date serveur : ' . $date->format('d / m / Y H:i:s');
 
 		$html .= '<div class="container-fluid">';
 

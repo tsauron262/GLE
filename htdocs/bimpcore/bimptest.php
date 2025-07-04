@@ -30,9 +30,15 @@ if (!$user->admin) {
 	exit;
 }
 
-//$test = 'SAVLDLC<f.martinez@bimp.fr>';
-//echo 'test ' . $test .' : ';
-//echo BimpValidate::isEmail($test) ? 'OK' : 'KO';
+// Test log urgent :
+//echo 'LOG URGENT : ';
+//$err = BimpCore::addlog('TEST', 4);
+//
+//if (count($err)) {
+//	echo 'Err<pre>' . print_r($err, 1) . '</pre>';
+//} else {
+//	echo 'ok';
+//}
 
 echo '<br/>FIN';
 echo '</body></html>';

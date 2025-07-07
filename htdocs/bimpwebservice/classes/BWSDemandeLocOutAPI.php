@@ -77,6 +77,17 @@ BWSApi::$requests['getContractInfo'] = array(
     'prod'       => array('label' => 'Ref produit', 'required' => 0),
 );
 
+BWSApi::$requests['sendNotifFinContrat'] = array(
+	'desc'   => 'Envoi d\'une notification de fin de contrat',
+	'params' => array(
+		'demande_target'   => array('label' => 'Destinataire de la demande de location', 'required' => 1),
+		'id_demande'       => array('label' => 'ID demande de location', 'data_type' => 'id', 'required' => 1),
+		'type_origine'     => array('label' => 'Type de pièce d\'origine', 'required' => 1),
+		'id_origine'       => array('label' => 'ID pièce d\'origine', 'data_type' => 'id', 'required' => 1),
+		'id_commercial'		=> array('label' => 'ID commercial de la piece', 'data_type' => 'id', 'required' => 1),
+	)
+);
+
 class BWSDemandeLocOutAPI extends BWSApi
 {
 
@@ -447,7 +458,9 @@ class BWSDemandeLocOutAPI extends BWSApi
 //					$errors = BimpUserMsg::envoiMsg($code, '', $note, $bcdf);
 					$err = $bcdf->addNote(
 						'TEST DEV',
-						BimpNote::BN_MEMBERS, 0 ,1, '', BimpNote::BN_AUTHOR_GROUP, BimpNote::BN_DEST_USER, 0, 2048
+						BimpNote::BN_MEMBERS, 0 ,1, '',
+						BimpNote::BN_AUTHOR_GROUP, BimpNote::BN_DEST_USER, 0,
+						2048 // (int) $this->getParam('id_commercial', 0)
 					);
 				}
 			}

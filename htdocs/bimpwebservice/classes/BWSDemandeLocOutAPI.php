@@ -80,7 +80,7 @@ BWSApi::$requests['getContractInfo'] = array(
 class BWSDemandeLocOutAPI extends BWSApi
 {
 
-    // Requêtes: 
+    // Requêtes:
 
     protected function wsRequest_setDemandeFinancementStatus()
     {
@@ -178,17 +178,17 @@ class BWSDemandeLocOutAPI extends BWSApi
                     $signed = (int) $this->getParam('signed', 0);
                     $signature_params = array();
                     $signature_data = array();
-                    
+
                     if (!$signed) {
                         $signature_params = $this->getParam('signature_params', array());
                         if (empty($signature_params)) {
                             $this->addError('MISSING_PARAMETER', 'Paramètres de signature du document absents');
                             return array();
                         }
-                        
+
                         $signature_data = $this->getParam('signataires_data', array());
                     }
-                    
+
                     $errors = $bcdf->onDocFinReceived($this->getParam('doc_type', '') . '_fin', $this->getParam('docs_content', ''), $signature_params, $signature_data, $signed);
 
                     if (count($errors)) {
@@ -419,4 +419,38 @@ class BWSDemandeLocOutAPI extends BWSApi
             );
         }
     }
+
+	protected function wsRequest_sendNotifFinContrat()	{
+		$response = array();
+
+		if (!count($this->errors)) {
+			$bcdf_class = '';
+			BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin', $bcdf_class);
+			$origine = $bcdf_class::getOrigineFromType($this->getParam('type_origine', ''), (int) $this->getParam('id_origine', 0));
+			if (!BimpObject::objectLoaded($origine)) {
+				$this->addError('UNFOUND', 'Pièce d\'origine non trouvée (Type: "' . $this->getParam('type_origine', '') . '" - ID: ' . $this->getParam('id_origine', 0) . ')');
+			} else {
+				$bcdf = BimpCache::findBimpObjectInstance('bimpcommercial', 'BimpCommDemandeFin', array(
+					'obj_module' => $origine->module,
+					'obj_name'   => $origine->object_name,
+					'id_obj'     => $origine->id,
+					'target'     => $this->getParam('demande_target', ''),
+					'id_ext_df'  => (int) $this->getParam('id_demande', 0)
+				));
+
+
+				if (!BimpObject::objectLoaded($bcdf)) {
+					$this->addError('UNFOUND', 'Aucune demande de location trouvée pour l\'ID externe ' . $this->getParam('id_demande', 0));
+				} else {
+//					$code = 'fin_financement_apporteur_interne';
+//					$note = 'bla bla';
+//					$errors = BimpUserMsg::envoiMsg($code, '', $note, $bcdf);
+					$err = $bcdf->addNote(
+						'TEST DEV',
+						BimpNote::BN_MEMBERS, 0 ,1, '', BimpNote::BN_AUTHOR_GROUP, BimpNote::BN_DEST_USER, 0, 2048
+					);
+				}
+			}
+		}
+	}
 }

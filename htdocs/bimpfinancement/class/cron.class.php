@@ -77,6 +77,10 @@ class cron extends BimpCron
 					$warnings
 				);
 			}
+			echo '<pre>' . print_r($err, true) . '</pre>';
+			echo '<pre>' . print_r($warnings, true) . '</pre>';
+			  exit();
+			 // exit();
 		}
 
 		if (count($err) > 0) {

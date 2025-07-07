@@ -1581,8 +1581,8 @@ fields_tables:
               edit: 1
             - field: date_fin
               edit: 1
-            - field: nb_mois_avant_notif
-              edit: 1
+#            - field: nb_mois_avant_notif
+#              edit: 1
             - field: agreement_number
               edit: 1
             - field: id_client

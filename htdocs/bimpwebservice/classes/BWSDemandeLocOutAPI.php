@@ -457,7 +457,7 @@ class BWSDemandeLocOutAPI extends BWSApi
 //					$note = 'bla bla';
 //					$errors = BimpUserMsg::envoiMsg($code, '', $note, $bcdf);
 					$err = $bcdf->addNote(
-						'TEST DEV',
+						'TEST DEV ' . print_r($this->params, true),
 						BimpNote::BN_MEMBERS, 0 ,1, '',
 						BimpNote::BN_AUTHOR_GROUP, BimpNote::BN_DEST_USER, 0,
 						2048 // (int) $this->getParam('id_commercial', 0)

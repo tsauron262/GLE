@@ -435,34 +435,20 @@ class BWSDemandeLocOutAPI extends BWSApi
 		$response = array();
 
 		if (!count($this->errors)) {
-			$bcdf_class = '';
 			BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin', $bcdf_class);
 			$origine = $bcdf_class::getOrigineFromType($this->getParam('type_origine', ''), (int) $this->getParam('id_origine', 0));
 			if (!BimpObject::objectLoaded($origine)) {
 				$this->addError('UNFOUND', 'Pièce d\'origine non trouvée (Type: "' . $this->getParam('type_origine', '') . '" - ID: ' . $this->getParam('id_origine', 0) . ')');
 			} else {
-				$bcdf = BimpCache::findBimpObjectInstance('bimpcommercial', 'BimpCommDemandeFin', array(
-					'obj_module' => $origine->module,
-					'obj_name'   => $origine->object_name,
-					'id_obj'     => $origine->id,
-					'target'     => $this->getParam('demande_target', ''),
-					'id_ext_df'  => (int) $this->getParam('id_demande', 0)
-				));
-
-
-				if (!BimpObject::objectLoaded($bcdf)) {
-					$this->addError('UNFOUND', 'Aucune demande de location trouvée pour l\'ID externe ' . $this->getParam('id_demande', 0));
-				} else {
-//					$code = 'fin_financement_apporteur_interne';
-//					$note = 'bla bla';
-//					$errors = BimpUserMsg::envoiMsg($code, '', $note, $bcdf);
-					$err = $bcdf->addNote(
-						'TEST DEV',
-						BimpNote::BN_MEMBERS, 0 ,1, '',
-						BimpNote::BN_AUTHOR_GROUP, BimpNote::BN_DEST_USER, 0,
-						2048 // (int) $this->getParam('id_commercial', 0)
-					);
-				}
+//				$code = 'fin_financement_apporteur_interne';
+//				$note = 'bla bla';
+//				$errors = BimpUserMsg::envoiMsg($code, '', $note, $bcdf);
+				$err = $origine->addNote(
+					'TEST DEV ' . print_r($this->params, true),
+					BimpNote::BN_MEMBERS, 0 ,1, '',
+					BimpNote::BN_AUTHOR_GROUP, BimpNote::BN_DEST_USER, 0,
+					2048 // (int) $this->getParam('id_commercial', 0)
+				);
 			}
 		}
 	}

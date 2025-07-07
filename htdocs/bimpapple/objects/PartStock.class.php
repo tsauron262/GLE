@@ -97,7 +97,7 @@ class PartStock extends BimpObject
 	{
 		$buttons = array();
 
-		if ($this->isActionAllowed('correct') && $this->canSetAction('correct')) {
+		if ($this->canSetAction('correct')) {
 			$buttons[] = array(
 				'label'   => 'Corriger le stock',
 				'icon'    => 'fas_pen',

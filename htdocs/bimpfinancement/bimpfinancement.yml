@@ -67,6 +67,11 @@ params:
         cat: defaults
         def: 6        
     
+    def_mois_avant_notif:
+        label: Nb mois par défaut avant notification
+        cat: defaults
+        def: 3
+        
     # Signatures: 
     devis_loc_signature_allow_dist: 
         label: Autoriser les signatures électroniques à distance pour les devis de location

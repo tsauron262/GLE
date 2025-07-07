@@ -22,7 +22,8 @@ class cron extends BimpCron
 		$where .= ' AND (id_facture_cli_rev = 0 OR id_facture_fourn_rev = 0)';
 		$where .= ' AND d.date_fin BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 4 MONTH)';
 
-		$demandes = $bdd->getRows('bf_demande AS d', $where, null, 'object', array('id'));
+		$demandes = $bdd->getRows('bf_demande AS d', $where);
+//		$demandes = $bdd->getRows('bf_demande AS d', $where, null, 'object', array('id'));
 		foreach ($demandes as $d) {
 			$demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $d->id);
 			$date_fin = new DateTime($demande->getData('date_fin'));
@@ -49,18 +50,35 @@ class cron extends BimpCron
 			);
 */
 
-			// API pour notif apporteur
-			$soc_apport = $demande->getData('id_supplier');
-			$contact_apport = $demande->getData('id_supplier_contact');
-			if($contact_apport)	{
-				$socpeople = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $contact_apport);
-				echo '<pre>' . print_r($socpeople->getDataArray(), true) . '</pre>';
-//				  exit();
+			if ( 0 && $demande->getData('id_supplier_contact')) { // apporteur externe
+				$apporteur = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $demande->getData('id_supplier_contact'));
+				if (BimpObject::objectLoaded($apporteur)) {
+					$code = 'fin_financement_apporteur_externe';
+					$sujet = 'Fin de financement de location';
+					$msg = 'Bonjour ' . $apporteur->getData('firstname') . ', <br> <br>';
+					$msg .= 'Le contrat de location ' . $demande->getData('ref') . ' arrive à expiration le ' .date('d/m/Y',strtotime($demande->getData('date_fin')));
+
+					// todo : voir pour envoyer notes Via BimpUserMsg et priorisation comm tiers si com piece non dispo
+					BimpUserMsg::envoiMsg($code, $sujet, $msg, $apporteur->getData('mail'));
+//					echo '<pre>' . print_r($warnings, true) . '</pre>'; exit;
+				}
 			}
 
+			if ($demande->getData('id_main_source'))	{
+				$source = $demande->getChildObject('main_source');
+				$api = $source->getAPI($er, 1);
+				$api->sendNotifFinContrat(
+					$source->getData('id_demande'),
+					$source->getData('type_origine'),
+					$source->getData('id_origine'),
+					$source->getData('id_commercial'),
+					$source->getData('id_client'),
+					$err,
+					$warnings
+				);
+			}
 		}
-echo '<pre>' . print_r($demandes, true) . '</pre>';
-  exit();
+
 		if (count($err) > 0) {
 			$this->output = 'Erreur  : ' . implode(', ', $err);
 			BimpCore::addlog('Erreur lors des notification de fin de contrat : ' . implode(', ', $err), 4);

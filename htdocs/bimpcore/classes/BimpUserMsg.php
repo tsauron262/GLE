@@ -759,6 +759,20 @@ class BimpUserMsg
 			'module' => 'bimpdatasync',
 			'metier' => 'metier'
 		),
+		'fin_financement_apporteur_externe'	=> array(
+			'label' => 'Bonjour xxx, Le contrat de location XXX arrive à expiration le d/m/Y',
+			'dests'	=> 'to::obj',
+			'module'=> 'bimpfinancement',
+		),
+		'fin_financement_apporteur_interne'	=> array(
+			'label' => 'Bonjour xxx, Le contrat de location XXX arrive à expiration le d/m/Y',
+			'dests'	=> 'to::obj',
+			'module'=> 'bimpcommercial',
+			'params' => array(
+				'canal_diffusion' => 'msgerp',
+				'allow_parent' => true
+			),
+		)
 	);
 
 	public static $canaux_diff_msg = array(
@@ -1137,8 +1151,10 @@ class BimpUserMsg
 					}
 
 					// todo flo : gérer les transactions db.
-					if (!mailSyn2($sujet, $to, null, $contenu, $filename_list, $mimetype_list, $mimefilename_list)) {
-						$errors[] = 'Echec de l\'envoi du message par e-mail';
+					if(!$errors) {
+						if (!mailSyn2($sujet, $to, null, $contenu, $filename_list, $mimetype_list, $mimefilename_list)) {
+							$errors[] = 'Echec de l\'envoi du message par e-mail';
+						}
 					}
 				} else {
 					BimpCore::addlog('Message utilisateur "' . $code . '" non envoyé (aucun destinataire)', 2, 'email', (is_a($obj, 'BimpObject') ? $obj : ''));

@@ -193,6 +193,8 @@ lists:
                 method: canSetAction
                 params:
                     - correct
+        checkboxes:
+            callback: isUserAdmin
         bulk_actions:
             callback: getListsBulkActions
         edit_btn: 1

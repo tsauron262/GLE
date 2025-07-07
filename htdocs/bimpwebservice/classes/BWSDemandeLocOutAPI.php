@@ -77,10 +77,21 @@ BWSApi::$requests['getContractInfo'] = array(
     'prod'       => array('label' => 'Ref produit', 'required' => 0),
 );
 
+BWSApi::$requests['sendNotifFinContrat'] = array(
+	'desc'   => 'Envoi d\'une notification de fin de contrat',
+	'params' => array(
+		'demande_target'   => array('label' => 'Destinataire de la demande de location', 'required' => 1),
+		'id_demande'       => array('label' => 'ID demande de location', 'data_type' => 'id', 'required' => 1),
+		'type_origine'     => array('label' => 'Type de pièce d\'origine', 'required' => 1),
+		'id_origine'       => array('label' => 'ID pièce d\'origine', 'data_type' => 'id', 'required' => 1),
+		'id_commercial'		=> array('label' => 'ID commercial de la piece', 'data_type' => 'id', 'required' => 1),
+	)
+);
+
 class BWSDemandeLocOutAPI extends BWSApi
 {
 
-    // Requêtes: 
+    // Requêtes:
 
     protected function wsRequest_setDemandeFinancementStatus()
     {
@@ -178,17 +189,17 @@ class BWSDemandeLocOutAPI extends BWSApi
                     $signed = (int) $this->getParam('signed', 0);
                     $signature_params = array();
                     $signature_data = array();
-                    
+
                     if (!$signed) {
                         $signature_params = $this->getParam('signature_params', array());
                         if (empty($signature_params)) {
                             $this->addError('MISSING_PARAMETER', 'Paramètres de signature du document absents');
                             return array();
                         }
-                        
+
                         $signature_data = $this->getParam('signataires_data', array());
                     }
-                    
+
                     $errors = $bcdf->onDocFinReceived($this->getParam('doc_type', '') . '_fin', $this->getParam('docs_content', ''), $signature_params, $signature_data, $signed);
 
                     if (count($errors)) {
@@ -419,4 +430,26 @@ class BWSDemandeLocOutAPI extends BWSApi
             );
         }
     }
+
+	protected function wsRequest_sendNotifFinContrat()	{
+		$response = array();
+
+		if (!count($this->errors)) {
+			BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin', $bcdf_class);
+			$origine = $bcdf_class::getOrigineFromType($this->getParam('type_origine', ''), (int) $this->getParam('id_origine', 0));
+			if (!BimpObject::objectLoaded($origine)) {
+				$this->addError('UNFOUND', 'Pièce d\'origine non trouvée (Type: "' . $this->getParam('type_origine', '') . '" - ID: ' . $this->getParam('id_origine', 0) . ')');
+			} else {
+//				$code = 'fin_financement_apporteur_interne';
+//				$note = 'bla bla';
+//				$errors = BimpUserMsg::envoiMsg($code, '', $note, $bcdf);
+				$err = $origine->addNote(
+					'TEST DEV 2 ' . print_r($this->params, true),
+					BimpNote::BN_MEMBERS, 0 ,1, '',
+					BimpNote::BN_AUTHOR_GROUP, BimpNote::BN_DEST_USER, 0,
+					2048 // (int) $this->getParam('id_commercial', 0)
+				);
+			}
+		}
+	}
 }

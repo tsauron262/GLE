@@ -93,6 +93,23 @@ class PartStock extends BimpObject
 
     // Getters params:
 
+	public function getListsBulkActions()
+	{
+		$buttons = array();
+
+		if ($this->isActionAllowed('correct') && $this->canSetAction('correct')) {
+			$buttons[] = array(
+				'label'   => 'Corriger le stock',
+				'icon'    => 'fas_pen',
+				'onclick' => $this->getJsBulkActionOnclick('correct', array(), array('single_action' => false, 'form_name' => 'correct_bulk'))
+//				'onclick' => $this->getJsActionOnclick('correct', array(), array(
+//					'form_name' => $form_name
+//				))
+			);
+		}
+
+		return $buttons;
+	}
     public function getListExtraButtons()
     {
         $buttons = array();

@@ -64,7 +64,7 @@ class cron extends BimpCron
 				}
 			}
 
-			if ($demande->getData('id_main_source'))	{
+			if ($demande->getData('id_main_source')) {
 				$source = $demande->getChildObject('main_source');
 				$api = $source->getAPI($er, 1);
 				$api->sendNotifFinContrat(
@@ -76,11 +76,10 @@ class cron extends BimpCron
 					$err,
 					$warnings
 				);
+				echo '<pre>' . print_r($err, true) . '</pre>';
+				echo '<pre>' . print_r($warnings, true) . '</pre>';
+				exit();
 			}
-			echo '<pre>' . print_r($err, true) . '</pre>';
-			echo '<pre>' . print_r($warnings, true) . '</pre>';
-			  exit();
-			 // exit();
 		}
 
 		if (count($err) > 0) {

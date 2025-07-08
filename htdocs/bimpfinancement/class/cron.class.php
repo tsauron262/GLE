@@ -49,7 +49,7 @@ class cron extends BimpCron
 			$err0 = BimpUserMsg::envoiMsg($code, $sujet, $contenu, $demande);
 			if($err0) $err[] = implode(',', $err0);
 
-			if (0 && $demande->getData('id_supplier_contact')) { // apporteur externe (mail)
+			if ($demande->getData('id_supplier_contact')) { // apporteur externe (mail)
 				$apporteur = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $demande->getData('id_supplier_contact'));
 				if (BimpObject::objectLoaded($apporteur)) {
 					$code = 'fin_financement_apporteur_externe';

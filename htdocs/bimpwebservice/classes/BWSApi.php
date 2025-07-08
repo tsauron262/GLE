@@ -298,6 +298,14 @@ class BWSApi
 			return false;
 		}
 
+		if ((int) $this->ws_user->getData('check_ip')) {
+			$allowed_ips = $this->ws_user->getData('allowed_ip');
+			if (!in_array($_SERVER['REMOTE_ADDR'], $allowed_ips)) {
+				$this->addError('IP_UNAUTHORIZED', 'Adresse IP non autorisée : ' . $_SERVER['REMOTE_ADDR']);
+				$this->response_code = 401;
+			}
+		}
+
 		if ($this->request_name !== 'authenticate') {
 			$token = base64_decode($token);
 			$err = '';
@@ -324,7 +332,7 @@ class BWSApi
 			$object_name = BimpTools::getArrayValueFromPath($this->params, 'object_name', 'any');
 
 			if (!$this->ws_user->hasRight($this->request_name, $module, $object_name)) {
-				$this->addError('UNAUTHORIZED', 'Opération non permise');
+				$this->addError('FORBIDDEN', 'Opération non permise');
 				$this->response_code = 403;
 				return false;
 			}

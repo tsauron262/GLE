@@ -5,8 +5,7 @@ class BWS_User extends BimpObject
 
     protected $rights = null;
 
-    // Droits users: 
-
+    // Droits users:
     public function canView()
     {
         return BimpCore::isUserDev();
@@ -32,7 +31,7 @@ class BWS_User extends BimpObject
         return BimpCore::isUserDev();
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getActionsButtons()
     {
@@ -134,14 +133,14 @@ class BWS_User extends BimpObject
         );
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function hasRight($request_name, $module = 'any', $object_name = 'any')
     {
         return ($this->getRightId($request_name, $module, $object_name) ? 1 : 0);
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getMainProfile()
     {
@@ -369,7 +368,7 @@ class BWS_User extends BimpObject
         return (int) BimpCore::getConf('id_default_user', null, 'bimpwebservice');
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayUserErpUsed($display = 'nom_url', $with_origine = true)
     {
@@ -408,7 +407,7 @@ class BWS_User extends BimpObject
         return $html;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderRequestsRightsList()
     {
@@ -544,7 +543,7 @@ class BWS_User extends BimpObject
         ));
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function checkPWord($pword)
     {
@@ -632,7 +631,7 @@ class BWS_User extends BimpObject
         return array();
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionReinitPWord($data, &$success)
     {
@@ -653,7 +652,7 @@ class BWS_User extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function create(&$warnings = array(), $force_create = false)
     {

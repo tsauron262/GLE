@@ -12,7 +12,8 @@ header("Content-Type: application/json");
 //    $_POST = json_decode($_POST, 1);
 //}
 
-if (isset($_GET['debug']) && (int) $_GET['debug']) {
+$debug = false;
+if ((isset($_GET['debug']) && (int) $_GET['debug']) || $debug) {
     $response = array(
 //        'server' => $_SERVER,
         'post' => $_POST,

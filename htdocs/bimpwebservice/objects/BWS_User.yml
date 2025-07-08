@@ -70,6 +70,11 @@ fields:
         type: bool
         default_value: 1
         
+    allowed_ip: 
+        label: IP autorisée(s)
+        type: items_list
+        items_data_type: string
+        
 forms: 
     default: 
         rows: 
@@ -78,6 +83,7 @@ forms:
             - field: profiles
             - field: id_user
             - field: active
+            - field: allowed_ip
             
     testReq:
         rows_callback: getfields
@@ -150,6 +156,7 @@ fields_tables:
             - field: email
             - field: profiles
             - field: id_user
+            - field: allowed_ip
             
 views: 
     default: 

@@ -2310,6 +2310,11 @@ class BF_Demande extends BimpObject
 		return $return;
 	}
 
+	public function getIdCommercial($force_resp = true)
+	{
+		if($force_resp) return $this->getData('id_user_resp');
+		return 0;
+	}
 	// Affichages:
 
 	public function displaySourceName($id_source = 'main')

@@ -435,6 +435,7 @@ class BWSDemandeLocOutAPI extends BWSApi
 		$response = array();
 
 		if (!count($this->errors)) {
+			$bcdf_class = '';
 			BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin', $bcdf_class);
 			$origine = $bcdf_class::getOrigineFromType($this->getParam('type_origine', ''), (int) $this->getParam('id_origine', 0));
 			if (!BimpObject::objectLoaded($origine)) {
@@ -442,14 +443,8 @@ class BWSDemandeLocOutAPI extends BWSApi
 			} else {
 				$code = 'fin_financement_apporteur_interne';
 				$sujet = 'Fin de contrat';
-				$note = 'TEST DEV 2 ' . print_r($this->params, true);
+				$note = $this->params['contenuNote'];
 				$errors = BimpUserMsg::envoiMsg($code, $sujet, $note, $origine);
-//				$errors = $origine->addNote(
-//					$note,
-//					BimpNote::BN_MEMBERS, 0 ,1, '',
-//					BimpNote::BN_AUTHOR_GROUP, BimpNote::BN_DEST_USER, 0,
-//					(int) $this->getParam('id_commercial', 0)
-//				);
 			}
 			if (count($errors)) {
 				$this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));

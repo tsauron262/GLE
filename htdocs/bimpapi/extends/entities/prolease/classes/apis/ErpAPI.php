@@ -181,7 +181,7 @@ class ErpAPI_ExtEntity extends ErpAPI
         return null;
     }
 
-	public function sendNotifFinContrat($id_demande, $type_origine, $id_origine, $id_commercialPiece, &$errors = array(), &$warnings = array())
+	public function sendNotifFinContrat($id_demande, $type_origine, $id_origine, $id_commercialPiece, $contenuNote, &$errors = array(), &$warnings = array())
 	{
 		$response = $this->execCurl('sendNotifFinContrat', array(
 			'fields' => array(
@@ -190,6 +190,7 @@ class ErpAPI_ExtEntity extends ErpAPI
 				'type_origine'   => $type_origine,
 				'id_origine'     => $id_origine,
 				'id_commercial' => $id_commercialPiece,
+				'contenuNote'    => $contenuNote,
 			)
 		), $errors);
 

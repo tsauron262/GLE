@@ -763,6 +763,16 @@ class BimpUserMsg
 			'module' => 'bimpdatasync',
 			'metier' => 'metier'
 		),
+		'fin_financement_resp_prolease'	=> array(
+			'label' => 'Bonjour xxx, Le contrat de location XXX arrive à expiration le d/m/Y',
+			'dests'	=> 'object::commercial',
+			'module'=> 'bimpcommercial',
+			'params' => array(
+				'canal_diffusion' => 'msgerp',
+				'check_availability' => 1,
+				'prio_comm_client' => 1
+			),
+		),
 		'fin_financement_apporteur_externe'	=> array(
 			'label' => 'Bonjour xxx, Le contrat de location XXX arrive à expiration le d/m/Y',
 			'dests'	=> 'to::obj',
@@ -789,6 +799,8 @@ class BimpUserMsg
 		'active'             => 1,
 		'required'           => 1,
 		'canal_diffusion'    => 'email',
+		'msgerp_Visibility'	 => BimpNote::BN_MEMBERS,
+		'msgerp_TypeDest'	 => BimpNote::BN_DEST_USER,
 		'def_abo'            => 1,
 		'type_metier'        => 'metier',
 		'check_availability' => 0,
@@ -1047,7 +1059,9 @@ class BimpUserMsg
 						break;
 				}
 			}
-
+//			echo '<pre>' . print_r($datasMessage, true) . '</pre>';
+//			echo '<pre>' . print_r($id_users, true) . '</pre>';
+			// exit();
 			if (!empty($id_users)) {
 				foreach ($id_users as $id_user) {
 					if (!in_array($id_user, $idsDejaAjoutes)) {
@@ -1080,11 +1094,11 @@ class BimpUserMsg
 								}
 							}
 							if ($params['prio_comm_client'] && strstr($datasMessage['dests'], 'object::commercial') !== false && !$userDestinataires)	{
-								$client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int)$obj->getData('fk_soc'));
+								$client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int)($obj->getData('fk_soc')?$obj->getData('fk_soc'):$obj->getData('id_client')));
 								$user_commClient = $client->getCommercial();
 								if ($user_commClient->id != $user->id && $user_commClient->isMsgAllowed($code, 1, $unallowed_reason)) {
 									$userDestinataires[] = $user_commClient;
-									$redir_reasons[$user_commClient->id] = 'Message recu en tant que commercial du client ' . $client->getName();										// exit();
+									$redir_reasons[$user_commClient->id] = 'Message recu en tant que commercial du client';										// exit();
 								}
 							}
 							if ($params['allow_superior'] && !$userDestinataires) {
@@ -1105,7 +1119,7 @@ class BimpUserMsg
 				}
 			}
 
-			if ($datasMessage['params']['canal_diffusion'] == 'email') {
+			if ($params['canal_diffusion'] == 'email') {
 				if (!count($errors)) {
 					if (count($userDestinataires)) {
 						foreach ($userDestinataires as $u) {
@@ -1174,20 +1188,27 @@ class BimpUserMsg
 					}
 				}
 			}
-			elseif ($datasMessage['params']['canal_diffusion'] == 'msgerp')	{
+			elseif ($params['canal_diffusion'] == 'msgerp')	{
 				if (!count($errors)) {
 					if (count($userDestinataires)) {
 						foreach ($userDestinataires as $u) {
-							$err = $obj->addNote($contenu, BimpNote::BN_MEMBERS, 0 ,1, '', BimpNote::BN_AUTHOR_GROUP, BimpNote::BN_DEST_USER, 0, $u->id);
+							if (isset($redir_reasons[$u->id])) {
+								$contenu = $redir_reasons[$u->id] . "\n" . $contenu;
+							}
+							$err = $obj->addNote($contenu, $params['msgerp_Visibility'], 0 ,1, '', BimpNote::BN_AUTHOR_GROUP, $params['msgerp_TypeDest'],
+								$params['msgerp_TypeDest'] == BimpNote::BN_DEST_GROUP ? $u->id : 0,
+								$params['msgerp_TypeDest'] == BimpNote::BN_DEST_USER ? $u->id : 0);
 							if($err) $errors[] = implode(',', $err);
 						}
 					}
+				} else {
+					BimpCore::addlog('Message utilisateur "' . $code . '" non envoyé (aucun destinataire)', 2, 'note', (is_a($obj, 'BimpObject') ? $obj : ''));
 				}
 			}
 			else	{
 				$errors[] = 'canal de diffusion erroné';
 			}
-
+			 // exit();
 			if (count($errors)) {
 				BimpCore::addlog('Erreurs envoi message utilisateur "' . $code . '"', 3, 'email', (is_a($obj, 'BimpObject') ? $obj : ''), array(
 					'Erreurs' => $errors

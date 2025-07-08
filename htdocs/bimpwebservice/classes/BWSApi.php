@@ -110,7 +110,7 @@ class BWSApi
 			'params' => array(
 				'origine'       => array('label' => 'Origine', 'required' => 1),
 				'client'        => array(
-					'label' => 'Client', 'data_type' => 'json', 'required' => 1, 'sub_params' => array(
+					'label' => 'Client', 'data_type' => 'array', 'required' => 1, 'sub_params' => array(
 						'nom'                 => array('label' => 'Nom', 'required' => 1),
 						'prenom'              => array('label' => 'Prénom', 'required' => 1),
 						'email'               => array('label' => 'Adresse e-mail', 'required' => 1),
@@ -139,7 +139,7 @@ class BWSApi
 					),
 				),
 				'lines'         => array(
-					'label' => 'Lignes', 'data_type' => 'json', 'multiple' => 1, 'sub_params' => array(
+					'label' => 'Lignes', 'data_type' => 'array', 'multiple' => 1, 'sub_params' => array(
 						'ref_produit' => array('label' => 'Référence produit', 'required' => 1),
 						'pu_ht'       => array('label' => 'Prix unitaire HT', 'data_type' => 'float', 'required' => 1),
 						'tva_tx'      => array('label' => 'Taux de TVA', 'data_type' => 'float', 'required' => 1),

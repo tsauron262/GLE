@@ -12,10 +12,14 @@ header("Content-Type: application/json");
 //    $_POST = json_decode($_POST, 1);
 //}
 
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SERVER['CONTENT_TYPE'] == 'application/json') {
+	$_POST = json_decode(file_get_contents('php://input'), true);
+}
+
 $debug = false;
 if ((isset($_GET['debug']) && (int) $_GET['debug']) || $debug) {
     $response = array(
-//        'server' => $_SERVER,
+        'server' => $_SERVER,
         'post' => $_POST,
         'get'  => $_GET
     );

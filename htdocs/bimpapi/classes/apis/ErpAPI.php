@@ -229,10 +229,10 @@ class ErpAPI extends BimpAPI
 	public function testRequest(&$errors = array(), &$warnings = array())
 	{
 		$params = array(
-//			'post_mode' => 'json',
-			'fields' => array(
+			'post_mode' => 'json',
+			'fields'    => array(
 				'origine'       => 'site_educ',
-				'client'        => json_encode(array(
+				'client'        => array(
 					'nom'                 => 'New TEST',
 					'prenom'              => 'Client',
 					'email'               => 'client_educ_2@test.fr',
@@ -249,15 +249,15 @@ class ErpAPI extends BimpAPI
 						'code_postal' => '43000',
 						'ville'       => 'LE PUY EN VELAY'
 					)
-				)),
-				'lines'         => json_encode(array(
+				),
+				'lines'         => array(
 					array(
 						'ref_produit' => 'TES-PRODTEST',
 						'pu_ht'       => 100,
 						'tva_tx'      => 20,
 						'quantite'    => 3
 					)
-				)),
+				),
 				'total_ttc'     => 360,
 				'mode_paiement' => 'ALMA'
 			)

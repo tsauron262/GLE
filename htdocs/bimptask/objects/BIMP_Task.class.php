@@ -276,6 +276,22 @@ class BIMP_Task extends BimpAbstractFollow
 						'onclick'    => $this->getJsActionOnclick('close', array(), array('form_name' => 'close'))
 					);
 				}
+
+				if (!$this->hasFilleEnCours() && $this->canSetAction('attribute') && $this->getStatus() == 2 && $this->isDev()) {
+					$logs = $this->getObjectLogs();
+					$log = end($logs);
+					$dateLog = new DateTime($log->getData('date'));
+					$now = new DateTime();
+					$delai = $dateLog->diff($now);
+					if ($delai->format('%a') >= 10) {
+						$buttons[] = array(
+							'label'      => 'Classer terminée sans rép. utilisateur',
+							'labelShort' => 'Terminer',
+							'icon'       => 'fas_check',
+							'onclick'    => $this->getJsActionOnclick('close', array(), array('form_name' => 'closeInac'))
+						);
+					}
+				}
 			}
 			if ($this->can("edit") || $this->canSetAction('attribute')) {
 				if ($this->getData("id_user_owner") < 1) {
@@ -869,9 +885,11 @@ class BIMP_Task extends BimpAbstractFollow
 		foreach ($this->getUsersFollow(true) as $userN) {
 			$mails[] = BimpTools::getUserEmailOrSuperiorEmail($userN->id);
 		}
-		$to = implode(',', $mails);
+		if (count($mails)) {
+			$to = implode(',', $mails);
 
-		$this->sendMail($to, 'Tache ERP<' . BimpCore::getConf('mailReponse', null, 'bimptask') . '>', $subject, $message, $rappel, $files);
+			$this->sendMail($to, 'Tache ERP<' . BimpCore::getConf('mailReponse', null, 'bimptask') . '>', $subject, $message, $rappel, $files);
+		}
 
 		foreach ($this->getEmailFollow() as $to) {//pour ne pas partager email et lien
 			$this->sendMail($to, 'Tache ERP<' . BimpCore::getConf('mailReponse', null, 'bimptask') . '>', $subject, $message, $rappel, $files, false);

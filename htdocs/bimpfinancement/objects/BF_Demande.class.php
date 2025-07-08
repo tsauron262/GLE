@@ -78,6 +78,12 @@ class BF_Demande extends BimpObject
 		'evo_afs' => 'Formule évolutive (AFS)',
 		'dyn'     => 'Formule dynamique'
 	);
+	public static $array_mois_avant_notif = array(
+		1	=> '1 mois',
+		2	=> '2 mois',
+		3	=> '3 mois',
+		4	=> '4 mois',
+	);
 	protected $values = null;
 	protected $default_values = null;
 	protected $missing_serials = null;
@@ -2304,6 +2310,11 @@ class BF_Demande extends BimpObject
 		return $return;
 	}
 
+	public function getIdCommercial($force_resp = true)
+	{
+		if($force_resp) return $this->getData('id_user_resp');
+		return 0;
+	}
 	// Affichages:
 
 	public function displaySourceName($id_source = 'main')

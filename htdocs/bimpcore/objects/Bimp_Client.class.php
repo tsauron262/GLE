@@ -3086,17 +3086,17 @@ class Bimp_Client extends Bimp_Societe
 
                     $msg = '';
 
-                    if ($client_data['available_discounts'] > 0) {
+                    if ($client_data['available_discounts'] > 1) {
                         $msg .= 'd\'avoirs non consommés';
                         $msg .= ' (' . BimpTools::displayMoneyValue($client_data['available_discounts']) . ')';
                     }
 
-                    if ($client_data['convertible_amounts'] > 0) {
+                    if ($client_data['convertible_amounts'] > 1) {
                         $msg .= ($msg ? ', ' : '') . 'de trop perçus non convertis en remises';
                         $msg .= ' (' . BimpTools::displayMoneyValue($client_data['convertible_amounts']) . ')';
                     }
 
-                    if ((float) $client_data['paiements_inc']) {
+                    if ((float) $client_data['paiements_inc'] > 1) {
                         $msg .= ($msg ? ', ' : '') . 'de paiements non identifiés';
                         $msg .= ' (' . BimpTools::displayMoneyValue($client_data['paiements_inc']) . ')';
                     }

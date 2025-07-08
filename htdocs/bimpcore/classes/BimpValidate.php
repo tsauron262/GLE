@@ -13,6 +13,9 @@ class BimpValidate
             $string = BimpTools::cleanEmailsStr($string);
 
             foreach (explode(',', $string) as $email) {
+				if (preg_match('/^[^<>]*<(.+)>$/', $email, $matches)) {
+					$email = $matches[1];
+				}
                 if (!preg_match('/^[a-z\p{L}0-9!#$%&\'*+\/=?^`{}|~_-]+[.a-z\p{L}0-9!#$%&\'*+\/=?^`{}|~_-]*@[a-z\p{L}0-9]+(?:[.]?[_a-z\p{L}0-9-])*\.[a-z\p{L}0-9][a-z\p{L}0-9]+$/ui', str_replace(' ', '', $email))) {
                     return 0;
                 }

@@ -105,6 +105,14 @@ class Bimp_Contact extends BimpObject
     }
 
     // Getters params:
+	public function isAddressEmpty()
+	{
+		$ret = true;
+		if($this->getData('address') != '' || $this->getData('zip') != '' || $this->getData('town') != '') {
+			$ret = false;
+		}
+		return $ret;
+	}
 
     public function getSocContactsListTitle()
     {
@@ -286,31 +294,20 @@ class Bimp_Contact extends BimpObject
     public function displayFullAddress($singleLine = false, $icon = false)
     {
         $html = '';
-
-        if ($this->getData('address')) {
-            $html .= $this->getData('address') . ($singleLine ? ' ' : '<br/>');
-        }
-
-        if ($this->getData('zip')) {
-            $html .= $this->getData('zip');
-
-            if ($this->getData('town')) {
-                $html .= ' ' . $this->getData('town');
-            }
-            $html .= ($singleLine ? ' ' : '<br/>');
-        } elseif ($this->getData('town')) {
-            $html .= $this->getData('town') . ($singleLine ? ' ' : '<br/>');
-        }
-
-        if ($this->getData('fk_departement')) {
-            $html .= $this->displayDepartement();
-
-            if ($this->getData('fk_pays')) {
-                $html .= ' - ' . $this->displayCountry();
-            }
-        } elseif ($this->getData('fk_pays')) {
-            $html .= $this->displayCountry();
-        }
+		$parent  = $this->getParentInstance();
+		if (
+			($this->getData('address') != '' && $parent->getData('address') != $this->getData('address'))
+			|| ($this->getData('zip') != '' && $parent->getData('zip') != $this->getData('zip'))
+			|| ($this->getData('town') != '' && $parent->getData('town') != $this->getData('town'))
+			|| ($this->getData('fk_pays') != '' && $parent->getData('fk_pays') != $this->getData('fk_pays'))
+			|| ($this->getData('fk_departement') != '' && $parent->getData('fk_departement') != $this->getData('fk_departement'))
+		) {
+//			$html .= 'Adresse CONTACT<br>';
+			$html = $this->getHtmlFullAddress($this, $singleLine, $html);
+		} else {
+//			$html .= 'Adresse TIERS<br>';
+			$html = $this->getHtmlFullAddress($parent, $singleLine, $html);
+		}
 
 		if ($icon && $html) {
 			$html = BimpRender::renderIcon('fas_map-marker-alt', 'iconLeft') . $html;
@@ -509,4 +506,51 @@ class Bimp_Contact extends BimpObject
 
         return $errors;
     }
+
+	public function update(&$warnings = array(), $force_update = false)	{
+		$errors = array();
+		if (GETPOST('customAdddress', 'aZ09') == 1)	{
+			$this->set('address', '');
+			$this->set('zip', '');
+			$this->set('town', '');
+			$this->set('fk_pays', '0');
+			$this->set('fk_departement', '0');
+		}
+		return parent::update($warnings, $force_update);
+	}
+
+	/**
+	 * @param $obj
+	 * @param $singleLine
+	 * @param string $html
+	 * @return string
+	 */
+	public function getHtmlFullAddress($obj, $singleLine, string $html): string
+	{
+		if ($obj->getData('address')) {
+			$html .= $obj->getData('address') . ($singleLine ? ' ' : '<br/>');
+		}
+
+		if ($obj->getData('zip')) {
+			$html .= $obj->getData('zip');
+
+			if ($obj->getData('town')) {
+				$html .= ' ' . $obj->getData('town');
+			}
+			$html .= ($singleLine ? ' ' : '<br/>');
+		} elseif ($obj->getData('town')) {
+			$html .= $obj->getData('town') . ($singleLine ? ' ' : '<br/>');
+		}
+
+		if ($obj->getData('fk_departement')) {
+			$html .= $obj->displayDepartement();
+
+			if ($obj->getData('fk_pays')) {
+				$html .= ' - ' . $obj->displayCountry();
+			}
+		} elseif ($obj->getData('fk_pays')) {
+			$html .= $obj->displayCountry();
+		}
+		return $html;
+	}
 }

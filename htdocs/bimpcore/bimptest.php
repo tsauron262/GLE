@@ -30,11 +30,15 @@ if (!$user->admin) {
 	exit;
 }
 
-if (file_exists(DOL_DATA_ROOT . '/bimpcore/fatal_errors_logs.json')) {
-	echo 'LOGS<pre>' . print_r(json_decode(file_get_contents(DOL_DATA_ROOT . '/bimpcore/fatal_errors_logs.json'), 1), 1) . '</pre>';
-} else {
-	echo 'FICHIER KO';
-}
+// Test log urgent :
+//echo 'LOG URGENT : ';
+//$err = BimpCore::addlog('TEST', 4);
+//
+//if (count($err)) {
+//	echo 'Err<pre>' . print_r($err, 1) . '</pre>';
+//} else {
+//	echo 'ok';
+//}
 
 echo '<br/>FIN';
 echo '</body></html>';

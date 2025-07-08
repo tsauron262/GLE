@@ -2,6 +2,7 @@
 
 define("NOLOGIN", 1);  // This means this output page does not require to be logged.
 define("NOCSRFCHECK", 1); // We accept to go on this page from external web site.
+define('NO_ERP_UPDATES', 1);
 
 require_once('../../main.inc.php');
 ini_set("display_errors", 1);

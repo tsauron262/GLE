@@ -1,0 +1,2 @@
+- Mise en place de la limitation des envoi d'erreurs fatales par e-mail à 1 par heure pour une même erreur. 
+- Limitation des logs identiques

@@ -22,6 +22,9 @@ ErpApi::$requests['setDocFinancementStatus'] = array(
 ErpApi::$requests['reviewDocFinancement'] = array(
     'label' => 'Mise en révision d\'un document de location'
 );
+ErpApi::$requests['sendNotifFinContrat'] = array(
+	'label' => 'Nouvelle notification de fin de contrat de location'
+);
 
 class ErpAPI_ExtEntity extends ErpAPI
 {
@@ -177,4 +180,29 @@ class ErpAPI_ExtEntity extends ErpAPI
 
         return null;
     }
+
+	public function sendNotifFinContrat($id_demande, $type_origine, $id_origine, $id_commercialPiece, $contenuNote, &$errors = array(), &$warnings = array())
+	{
+		$response = $this->execCurl('sendNotifFinContrat', array(
+			'fields' => array(
+				'demande_target' => 'prolease',
+				'id_demande'     => $id_demande,
+				'type_origine'   => $type_origine,
+				'id_origine'     => $id_origine,
+				'id_commercial' => $id_commercialPiece,
+				'contenuNote'    => $contenuNote,
+			)
+		), $errors);
+
+		if (isset($response['warnings'])) {
+			$warnings = BimpTools::merge_array($warnings, $response['warnings']);
+			unset($response['warnings']);
+		}
+
+		if (!count($errors)) {
+			return $response;
+		}
+
+		return null;
+	}
 }

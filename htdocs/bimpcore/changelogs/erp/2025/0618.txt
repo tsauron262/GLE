@@ -1,0 +1,3 @@
+Contrats d'abonnement : 
+    - Possiblité de définir un prix d'achat exceptionnel pour chaque ligne
+    - Reprise du PU HT de la ligne d'origine lors d'un renouvellement auto au lieu du PU HT actuel du produit. 

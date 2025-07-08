@@ -13,6 +13,8 @@ class BWSApi
 	protected $ws_user = null;
 	protected $params = array();
 	protected $errors = array();
+	public $response_code = 200;
+
 	protected $check_erp_user_rights = true;
 	public static $requests = array(
 		'authenticate'   => array(
@@ -273,12 +275,14 @@ class BWSApi
 		// check requête:
 		if (!isset(self::$requests[$this->request_name])) {
 			$this->addError('REQUEST_INVALID', 'La requête "' . $this->request_name . '" n\'existe pas');
+			$this->response_code = 400;
 			return false;
 		}
 
 		if (!method_exists($this, 'wsRequest_' . $this->request_name)) {
 			BimpCore::addlog('Méthode absente pour la requête webservice "' . $this->request_name . '"', Bimp_Log::BIMP_LOG_URGENT, 'ws', null, array(), true);
 			$this->addError('INTERNAL_ERROR', 'Erreur interne - opération non disponible actuellement');
+			$this->response_code = 500;
 			return false;
 		}
 
@@ -290,6 +294,7 @@ class BWSApi
 
 		if (!BimpObject::objectLoaded($this->ws_user)) {
 			$this->addError('LOGIN_INVALIDE', 'Identifiant ou mot de passe du compte utilisateur invalide (L: ' . $login . ')');
+			$this->response_code = 401;
 			return false;
 		}
 
@@ -298,6 +303,7 @@ class BWSApi
 			$err = '';
 			if (!$this->ws_user->checkToken($token, $err)) {
 				$this->addError('TOKEN_INVALIDE', ($err ? $err : 'Token invalide ou arrivé à expiration'));
+				$this->response_code = 401;
 				return false;
 			}
 		}
@@ -306,6 +312,7 @@ class BWSApi
 		if (isset(self::$requests[$this->request_name]['params'])) {
 			$params_infos = array();
 			if (!$this->checkParams(self::$requests[$this->request_name]['params'], '', $params_infos)) {
+				$this->response_code = 400;
 				return false;
 			}
 //			die(json_encode(array('infos' => $params_infos, 'params' => $this->params), JSON_UNESCAPED_UNICODE));
@@ -318,6 +325,7 @@ class BWSApi
 
 			if (!$this->ws_user->hasRight($this->request_name, $module, $object_name)) {
 				$this->addError('UNAUTHORIZED', 'Opération non permise');
+				$this->response_code = 403;
 				return false;
 			}
 		}
@@ -327,6 +335,7 @@ class BWSApi
 		if (!$id_user) {
 			BimpCore::addlog('Utilisateur ERP associé non défini', Bimp_Log::BIMP_LOG_URGENT, 'ws', $this->ws_user, array(), true);
 			$this->addError('INTERNAL_ERROR', 'Erreur interne - opération non disponible actuellement');
+			$this->response_code = 500;
 			return false;
 		}
 
@@ -340,6 +349,7 @@ class BWSApi
 				'Erreur' => 'L\'utilisateur #' . $id_user . ' n\'existe pas'
 			), true);
 			$this->addError('INTERNAL_ERROR', 'Erreur interne - opération non disponible actuellement');
+			$this->response_code = 500;
 			return false;
 		}
 
@@ -590,6 +600,7 @@ class BWSApi
 			case E_ERROR:
 			case E_CORE_ERROR:
 			case E_COMPILE_ERROR:
+				$this->response_code = 500;
 				$txt = '';
 				$txt .= '<strong>ERP:</strong> ' . DOL_URL_ROOT . "\n";
 				$txt .= '<strong>Requête:</strong> ' . $this->request_name . "\n";
@@ -659,6 +670,7 @@ class BWSApi
 
 				if (!$this->ws_user->checkPWord($pword)) {
 					$this->addError('LOGIN_INVALIDE', 'Identifiant ou mot de passe du compte utilisateur invalide - (PW)');
+					$this->response_code = 401;
 					return array();
 				}
 			}
@@ -671,6 +683,7 @@ class BWSApi
 					'Erreurs' => $errors
 				));
 				$this->addError('INTERNAL_ERROR', 'Une erreur est survenue - échec de l\'authentification');
+				$this->response_code = 500;
 			}
 		}
 
@@ -1309,6 +1322,7 @@ class BWSApi
 			if (count($errors)) {
 				$db->rollback();
 				$this->addError('CREATION_FAIL', BimpTools::getMsgFromArray($errors, '', true));
+				$this->response_code = 400;
 
 				BimpCore::addlog('Echec de la création d\'une commande depuis le site e-commerce éducation', 4, 'bimpcomm', null, array(
 					'Erreurs'             => $errors,

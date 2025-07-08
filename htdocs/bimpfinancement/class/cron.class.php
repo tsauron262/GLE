@@ -37,13 +37,13 @@ class cron extends BimpCron
 
 			$notes = $demande->getNotes();
 			$OK_notif = true;
-			$baseContent = 'Fin de contrat prévu le ';
+			$baseContent = 'Fin de contrat ' . $demande->getData('ref') . ' prévu le ';
 			foreach ($notes as $note) {
 				if(strpos($note->getData('content'), $baseContent) !== false) $OK_notif = false;
 			}
 			if (!$OK_notif) continue;
 			$code = 'fin_financement_resp_prolease';
-			$sujet = 'Fin de financement de location';
+			$sujet = 'Fin contrat de financement';
 			$contenu = $baseContent . $df;
 			$messages[] = $contenu;
 			$err0 = BimpUserMsg::envoiMsg($code, $sujet, $contenu, $demande);

@@ -10,7 +10,7 @@ class cron extends BimpCron
 		global $db, $user;
 		$warnings = array();
 		$err = array();
-
+		$messages = array();
 		// selection les demandes Acceptée qui on une date de fin de mois de 4 mois
 		$bdd = new bimpDB($db);
 		$where = 'd.status = ' . BF_Demande::STATUS_ACCEPTED;
@@ -45,6 +45,7 @@ class cron extends BimpCron
 			$code = 'fin_financement_resp_prolease';
 			$sujet = 'Fin de financement de location';
 			$contenu = $baseContent . $df;
+			$messages[] = $contenu;
 			$err0 = BimpUserMsg::envoiMsg($code, $sujet, $contenu, $demande);
 			if($err0) $err[] = implode(',', $err0);
 
@@ -72,8 +73,6 @@ class cron extends BimpCron
 					$err,
 					$warnings
 				);
-				echo '<pre>' . print_r($demande->getDataArray(), true) . '</pre>';
-				  exit();
 			}
 		}
 
@@ -82,7 +81,7 @@ class cron extends BimpCron
 			BimpCore::addlog('Erreur lors des notification de fin de contrat : ' . implode(', ', $err), 4);
 			return 1;
 		} else {
-			$this->output = 'Ok pour la notification de fin de contrat';
+			$this->output = 'Ok pour la notification de fin de contrat : ' . implode('<br>', $messages);
 			return 0;
 		}
 	}

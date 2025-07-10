@@ -12,9 +12,14 @@ header("Content-Type: application/json");
 //    $_POST = json_decode($_POST, 1);
 //}
 
-if (isset($_GET['debug']) && (int) $_GET['debug']) {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SERVER['CONTENT_TYPE'] == 'application/json') {
+	$_POST = json_decode(file_get_contents('php://input'), true);
+}
+
+$debug = false;
+if ((isset($_GET['debug']) && (int) $_GET['debug']) || $debug) {
     $response = array(
-//        'server' => $_SERVER,
+        'server' => $_SERVER,
         'post' => $_POST,
         'get'  => $_GET
     );
@@ -25,6 +30,7 @@ $errors = array();
 $response = array();
 
 $request_name = (isset($_GET['req']) ? $_GET['req'] : '');
+$response_code = 200;
 
 if (!$request_name) {
     $errors[] = array(
@@ -48,12 +54,14 @@ if (!$request_name) {
                 'code'    => 'TOKEN_MISSING',
                 'message' => 'Token absent'
             );
+			$response_code = 401;
         }
     } else {
         $pw = isset($_POST['pword']) ? $_POST['pword'] : '';
 
         if (!$pw) {
             $errors[] = 'Mot de passe absent';
+			$response_code = 401;
         }
     }
 
@@ -63,6 +71,7 @@ if (!$request_name) {
             $response = $bws->exec();
         }
         $errors = $bws->getErrors();
+		$response_code = $bws->response_code;
     }
 }
 
@@ -70,5 +79,6 @@ if (count($errors)) {
     $response = array('errors' => $errors);
 }
 
+http_response_code($response_code);
 echo json_encode($response, JSON_UNESCAPED_UNICODE);
 

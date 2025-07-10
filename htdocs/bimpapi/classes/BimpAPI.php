@@ -581,11 +581,12 @@ abstract class BimpAPI
 					if (!count($errors)) {
 						// Exécution:
 						$response = curl_exec($ch);
-						curl_close($ch);
 
 						// Traitement de la réponse:
 						$response_code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 						$response_infos = curl_getinfo($ch);
+
+						curl_close($ch);
 
 						if (isset($response_infos['request_header']) && !empty($response_infos['request_header'])) {
 							$infos .= "<h4>Header REQUEST: </h4><br/>" . str_replace("\n", "<br/>", $response_infos['request_header']);

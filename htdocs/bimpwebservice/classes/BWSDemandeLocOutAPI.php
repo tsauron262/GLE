@@ -435,21 +435,23 @@ class BWSDemandeLocOutAPI extends BWSApi
 		$response = array();
 
 		if (!count($this->errors)) {
+			$bcdf_class = '';
 			BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin', $bcdf_class);
 			$origine = $bcdf_class::getOrigineFromType($this->getParam('type_origine', ''), (int) $this->getParam('id_origine', 0));
 			if (!BimpObject::objectLoaded($origine)) {
 				$this->addError('UNFOUND', 'Pièce d\'origine non trouvée (Type: "' . $this->getParam('type_origine', '') . '" - ID: ' . $this->getParam('id_origine', 0) . ')');
 			} else {
-//				$code = 'fin_financement_apporteur_interne';
-//				$note = 'bla bla';
-//				$errors = BimpUserMsg::envoiMsg($code, '', $note, $bcdf);
-				$err = $origine->addNote(
-					'TEST DEV 2 ' . print_r($this->params, true),
-					BimpNote::BN_MEMBERS, 0 ,1, '',
-					BimpNote::BN_AUTHOR_GROUP, BimpNote::BN_DEST_USER, 0,
-					2048 // (int) $this->getParam('id_commercial', 0)
-				);
+				$code = 'fin_financement_apporteur_interne';
+				$sujet = 'Fin de contrat';
+				$note = $this->params['contenuNote'];
+				$errors = BimpUserMsg::envoiMsg($code, $sujet, $note, $origine);
+			}
+			if (count($errors)) {
+				$this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
+			} else {
+				$response = array('success'	=> 1);
 			}
 		}
+		return $response;
 	}
 }

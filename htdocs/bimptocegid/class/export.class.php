@@ -209,7 +209,7 @@
 
             foreach($list as $pay) {
                 $reglement = $this->bdb->getRow('c_paiement', 'id = ' . $pay->fk_paiement);
-                    if($reglement->code != 'NO_COM') {
+                    if (!in_array($reglement->code, array('NO_COM', 'PAI_DC'))) {
                         $paiement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement', $pay->rowid);
                         $liste_transactions = $this->bdb->getRows('paiement_facture', 'fk_paiement = ' . $pay->rowid);
                         foreach($liste_transactions as $transaction) {

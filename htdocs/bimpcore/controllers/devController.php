@@ -34,11 +34,11 @@ class devController extends BimpController
 		$html = '';
 
 		$date = new DateTime();
-		$html .= 'pull redemarrageDate serveur : ' . $date->format('d / m / Y H:i:s');
+		$html .= 'test pull Date serveur : ' . $date->format('d / m / Y H:i:s');
 
 		$html .= '<div class="container-fluid">';
 
-		// ToolsBar:
+		// Tools  Bar:
 		$html .= '<div class="buttonsContainer align-left" style="padding-bottom: 15px; margin-bottom: 15px; border-bottom: 1px solid #000000">';
 //        if (BimpCore::isModuleActive('bimpapple')) {
 //            $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/synopsistools/phantomApple.php" target="_blank">';

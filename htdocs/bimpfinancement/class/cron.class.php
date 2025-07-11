@@ -53,8 +53,8 @@ class cron extends BimpCron
 				$apporteur = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $demande->getData('id_supplier_contact'));
 				if (BimpObject::objectLoaded($apporteur)) {
 					$code = 'fin_financement_apporteur_externe';
-					$msg = 'Bonjour ' . $apporteur->getData('firstname') . ', <br>';
-					$msg .= 'Le contrat de location ' . $demande->getData('ref') . ' arrive à expiration le ' .date('d/m/Y',strtotime($demande->getData('date_fin')));
+					$msg = 'Bonjour ' . $apporteur->getData('firstname') . ', <br><br>';
+					$msg .= 'Le contrat de location ' . $demande->getData('label') . ' (' . $demande->getData('ref') . ') arrive à expiration le ' .date('d/m/Y',strtotime($demande->getData('date_fin')));
 
 					$err0 = BimpUserMsg::envoiMsg($code, $sujet, $msg, $apporteur->getData('email'));
 					if($err0) $err[] = implode(',', $err0);

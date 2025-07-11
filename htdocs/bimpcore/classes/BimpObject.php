@@ -7419,6 +7419,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 			case 'bulkEditField': // Pour ce type d'action, il faut également que le user ait le droit d'éditer le field en question.
 				return ($user->admin ? 1 : 0);
+
+			case 'importFromCsv':
+				return $this->canCreate();
 		}
 
 		return 1;

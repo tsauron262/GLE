@@ -1098,7 +1098,7 @@ class BC_ListTable extends BC_List
 			$title = self::getColFullTitle($this->object, $col_name);
 
 			$rows[] = array(
-				'label'   => $label . '<br/><span class="small" style="color: #e6dccf">' . $title . '</span>',
+				'label'   => $label . '<br/><span class="small">' . $title . '</span>',
 				'content' => $content
 			);
 		}

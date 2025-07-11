@@ -1,1 +1,2 @@
 - Ajout d'un outil d'import de données générique
+- Tickets RDC : ajout du changement de statut depuis la liste globale

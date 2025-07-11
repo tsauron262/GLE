@@ -2155,6 +2155,30 @@ function onGenerateCsvFormSubmit($form, extra_data) {
 	return extra_data;
 }
 
+function onImportCsvFormSubmit($form, extra_data) {
+	if ($.isOk($form)) {
+		var $select = $form.find('[name="maj_check_mode"]');
+		if ($select.length) {
+			extra_data['maj_check_mode'] = $select.val();
+		}
+		extra_data['maj_check_keys'] = [];
+		$form.find('[name="maj_check_keys[]"]').each(function () {
+			if ($(this).prop('checked')) {
+				extra_data['maj_check_keys'].push($(this).val());
+			}
+		});
+
+		extra_data['matches'] = {};
+		$form.find('select.field_match_select').each(function () {
+			var key = $(this).data('key');
+			extra_data['matches'][key] = $(this).val();
+		});
+	}
+	
+	console.log(extra_data);
+	return extra_data;
+}
+
 function updateGraph(list_id, idGraph, list_name) {
 	var extra_data = {};
 	extra_data['list_name'] = list_name;

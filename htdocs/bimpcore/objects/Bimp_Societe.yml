@@ -1650,6 +1650,7 @@ lists:
     default: 
         configurable: 1
         checkboxes: 1
+        allow_csv_imports: 1
         title: Liste des tiers
         icon: fas_building
         filters_panel: default

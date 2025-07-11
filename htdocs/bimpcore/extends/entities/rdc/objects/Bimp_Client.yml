@@ -121,7 +121,7 @@ fields:
         type: qty
         unsigned: 0
     fk_categorie_maitre:
-        label: Catégorie Maitre
+        label: Catégorie maître
         type: items_list
         values:
             dict: societe_rdc_cat_maitre
@@ -444,6 +444,7 @@ lists:
     rdc:
         configurable: 1
         checkboxes: 1
+        allow_csv_imports: 1
         title: Liste des Marchands
         filters_panel: default
         bulk_actions:

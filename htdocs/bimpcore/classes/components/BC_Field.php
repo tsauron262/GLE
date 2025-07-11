@@ -724,9 +724,12 @@ class BC_Field extends BimpComponent
 					$script .= '  var data = {};' . "\n";
 					$script .= '  var $form = $(\'#' . $form_identifier . '\');';
 					foreach ($dependances as $dep) {
-						$script .= '  if ($form.find(\'[name=' . $name_prefix . $dep . ']\').length) {' . "\n";
-						$script .= '      data[\'' . $dep . '\'] = getFieldValue($form, \'' . $name_prefix . $dep . '\');' . "\n";
-						$script .= '  }' . "\n";
+						$script .= 'var dep_val = getFieldValue($form, \'' . $name_prefix . $dep . '\');';
+						$script .= 'if (typeof(dep_val) !== \'undefined\') {data[\'' . $dep . '\'] = dep_val;}';
+
+//						$script .= '  if ($form.find(\'[name=' . $name_prefix . $dep . ']\').length) {' . "\n";
+//						$script .= '      data[\'' . $dep . '\'] = getFieldValue($form, \'' . $name_prefix . $dep . '\');' . "\n";
+//						$script .= '  } else {bimp_msg(\'OOPS - ' .$dep .' - \' + $form.attr(\'id\'), \'info\');}' . "\n";
 					}
 					$script .= '  reloadObjectInput(\'' . $form_identifier . '\', \'' . $name_prefix . $field_name . '\', data, ' . $keep_new_value . ');' . "\n";
 					$script .= '});' . "\n";

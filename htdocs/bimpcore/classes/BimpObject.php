@@ -2387,6 +2387,21 @@ class BimpObject extends BimpCache
 		return array();
 	}
 
+	public function getCsvImportSeparator()
+	{
+		$id_model = BimpTools::getPostFieldValue('id_csv_model', 0, 'int');
+
+		if ($id_model) {
+			/** @var CsvModel $model */
+			$model = BimpCache::getBimpObjectInstance('bimpcore', 'CsvModel', $id_model);
+			if (BimpObject::objectLoaded($model)) {
+				return $model->getData('sep');
+			}
+		}
+
+		return ';';
+	}
+
 	// Gestion des données:
 
 	public function printData($return_html = false)
@@ -2463,6 +2478,77 @@ class BimpObject extends BimpCache
 				$this->hydrateDolObject($bimpObjectFields, false);
 			}
 		}
+	}
+
+	public function setImportData($data)
+	{
+		$errors = array();
+
+		foreach ($data as $field_name => $value) {
+			if (!$this->field_exists($field_name)) {
+				$errors[] = 'Le champ "' . $field_name . '" n\'existe pas pour les ' . $this->getLabel('name_plur');
+				continue;
+			}
+
+			// Check des values :
+
+			$field_label = $this->getConf('fields/' . $field_name . '/label', $field_name);
+			$values = $this->getConf('fields/' . $field_name . '/values', array(), false, 'array');
+			if (!empty($values)) {
+				if (!isset($values[$value])) {
+					$key_val = BimpTools::arraySearchInsensitive($value, $values);
+					if ($key_val === false) {
+						$errors[] = 'Champ "' . $field_label . '" Valeur invalide : ' . $value;
+						continue;
+					} else {
+						$value = $key_val;
+					}
+				}
+			} else {
+				$data_type = $this->getConf('fields/' . $field_name . '/type', 'string');
+				switch ($data_type) {
+					case 'id_parent':
+					case 'id_object':
+						if (!is_int($value) && !preg_match('/^[0-9]$/', (string) $value)) {
+							$id_obj = null;
+
+							$obj_name = ($data_type == 'id_parent' ? 'parent' : $this->getConf('fields/' . $field_name . '/object', ''));
+							if ($obj_name) {
+								$obj_instance = $this->getChildObject($obj_name);
+
+								if (is_a($obj_instance, 'BimpObject')) {
+									$results = $obj_instance->getSearchResults('all', $value);
+
+									if (!count($results)) {
+										$errors[] = 'Champ "' . $field_label . '" : aucun ' . $obj_instance->getLabel() . ' trouvé' . $obj_instance->e() . ' pour la valeur "' . $value . '"';
+										$value = 0;
+										continue 2;
+									} elseif (count($results) > 1) {
+										$msg = count($results) . ' ' . $obj_instance->getLabel('name_plur') . ' trouvé' . $obj_instance->e() . 's pour la valeur "' . $value . '"';
+										foreach ($results as $id_obj => $result) {
+											$obj = BimpCache::getBimpObjectInstance($obj_instance->module, $obj_instance->object_name, $id_obj);
+											$msg .= '<br/> - ' . (BimpObject::objectLoaded($obj) ? $obj->getLink() : BimpTools::ucfirst($obj_instance->getLabel()) . ' #' . $id_obj);
+										}
+										$errors[] = 'Champ "' . $field_label . '" : ' . $msg;
+										$value = 0;
+										continue 2;
+									} else {
+										foreach ($results as $id_obj => $result) {
+											$value = $id_obj;
+											break;
+										}
+									}
+								}
+							}
+						}
+						break;
+				}
+			}
+
+			$this->set($field_name, $value);
+		}
+
+		return $errors;
 	}
 
 	public function setIdParent($id_parent)
@@ -4126,11 +4212,6 @@ class BimpObject extends BimpCache
 		}
 	}
 
-//    public function onChildCreate($child_name)
-//    {
-//        $this->unsetChildrenListCache($child_name);
-//    }
-//
 	// Getters Listes
 
 	public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = array(), $extra_order_by = null, $extra_order_way = 'ASC', $groupBy = '')
@@ -8573,7 +8654,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		return BimpRender::renderAlerts($msg);
 	}
 
-
 	public function renderChildrenGraph($children_object, $list_name = 'default', $panel = false, $title = null, $icon = null, $level = 1)
 	{
 		$children_instance = $this->config->getObject('', $children_object);
@@ -9362,6 +9442,122 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				'type' => 'secondary'
 			));
 		}
+		return $html;
+	}
+
+	public function renderCsvImportMatchesInputs()
+	{
+		$html = '';
+
+		$files = BimpTools::getPostFieldValue('csv_file', array(), 'array');
+		$sep = BimpTools::getPostFieldValue('separator', ';');
+		$id_model = (int) BimpTools::getPostFieldValue('id_csv_model', 0, 'int');
+
+		if (empty($files[0])) {
+			$html .= BimpRender::renderAlerts('Aucun fichier sélectionné', 'warning');
+		} else {
+			$file = DOL_DATA_ROOT . '/' . BimpTools::getTmpFilesDir() . '/' . $files[0];
+
+			if (!file_exists($file)) {
+				$html .= BimpRender::renderAlerts('Le fichier "' . $files[0] . '" semble ne pas avoir été télécharger correctement', 'danger');
+			} else {
+				$lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+				if (empty($lines)) {
+					$html .= BimpRender::renderAlerts('Fichier vide', 'danger');
+				} else {
+					$model_matches = array();
+					$maj_check_mode = 'and';
+					$maj_check_keys = array();
+
+					if ($id_model) {
+						$model = BimpCache::getBimpObjectInstance('bimpcore', 'CsvModel', $id_model);
+						$model_params = $model->getData('params');
+						$model_matches = (isset($model_params['matches']) ? $model_params['matches'] : array());
+						$maj_check_mode = (isset($model_params['maj_check_mode']) ? $model_params['maj_check_mode'] : 'and');
+						$maj_check_keys = (isset($model_params['maj_check_keys']) ? $model_params['maj_check_keys'] : array());
+					}
+
+					$obj_fields = BimpCache::getObjectFieldsArray($this, true, false);
+					$headers = array();
+					$header_line = str_getcsv($lines[0], $sep);
+
+					foreach ($header_line as $header) {
+						if (isset($model_matches[$header]) && isset($obj_fields[$model_matches[$header]])) {
+							$headers[$header] = $model_matches[$header];
+						} elseif (isset($obj_fields[$header])) {
+							$headers[$header] = $header;
+						} else {
+							$field = BimpTools::arraySearchInsensitive($header, $obj_fields);
+							if ($field === false) {
+								$field = '';
+							}
+							$headers[$header] = (string) $field;
+						}
+					}
+
+					$maj_key_fields = array();
+
+					$html .= '<div>';
+					$html .= '<h3>Gestion des mises à jour :</h3>';
+					$html .= '<b>Mode d\'identifiation des élements existants : </b><br/>';
+					$html .= BimpInput::renderInput('select', 'maj_check_mode', $maj_check_mode, array(
+						'options' => array(
+							'and' => 'Tous les champs indiqués comme identifiants doivent correspondre',
+							'or'  => 'L\'un des champs indiqué comme identifiant doit correspondre'
+						)
+					));
+					$html .= '<br/><br/>';
+					$html .= '<b>Champs servant d\'identifiant pour détecter les éléments déjà existant à mettre à jour : </b><br/>';
+
+					$items = array();
+					foreach ($header_line as $header) {
+						$items[$header] = $header;
+					}
+					$html .= BimpInput::renderInput('check_list', 'maj_check_keys', $maj_check_keys, array(
+						'items'              => $items,
+						'search_input'       => 0,
+						'select_all_buttons' => 0
+					));
+					$html .= '<br/><span class="inputHelp">Si aucun champ n\'est indiqué comme identifiant, aucune recherche d\'éléments existants ne sera effectuée.</span>';
+					$html .= '</div>';
+
+					$html .= '<div style="margin-top: 20px; border-top: 1px solid #999">';
+					$html .= '<h3>Correspondances des champs : </h3>';
+					$html .= '<table class="bimp_list_table">';
+					$html .= '<thead>';
+					$html .= '<tr>';
+					$html .= '<th>En-tête de la colonne</th>';
+					$html .= '<th>Champ ' . $this->getLabel('of_the') . ' correspondant</th>';
+					$html .= '</tr>';
+					$html .= '</thead>';
+					$html .= '<tbody>';
+
+					$i = 0;
+					foreach ($headers as $header => $field_name) {
+						$i++;
+
+						$html .= '<tr>';
+						$html .= '<th>' . $header . '</th>';
+						$html .= '<td>';
+						$html .= BimpInput::renderInput('select', 'match_' . $i, $field_name, array(
+							'options'     => $obj_fields,
+							'data'        => array(
+								'key' => $header
+							),
+							'extra_class' => 'field_match_select'
+						));
+						$html .= '</td>';
+						$html .= '</tr>';
+					}
+
+					$html .= '</tbody>';
+					$html .= '</table>';
+					$html .= '</div>';
+				}
+			}
+		}
+
 		return $html;
 	}
 
@@ -10712,6 +10908,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		return self::getObjectFiltersArray($this, $include_empty);
 	}
 
+	public function getImportCsvModelsArray()
+	{
+		BimpObject::loadClass('bimpcore', 'CsvModel');
+		return CsvModel::getObjectCsvModelsArray($this, true, 'Nouveau modèle');
+	}
+
 	// Actions Communes:
 
 	public function actionDeleteFile($data, &$success)
@@ -11566,6 +11768,320 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				}
 				break;
 		}
+	}
+
+	public function initBdsActionImportFromCsv(BDSProcess $process, &$action_data = array(), &$errors = array(), $extra_data = array())
+	{
+		$use_db_transactions = (int) BimpCore::getConf('use_db_transactions');
+		if ($use_db_transactions) {
+			$this->db->db->begin();
+		}
+
+		$nbElementsPerIteration = 100;
+		$files = BimpTools::getArrayValueFromPath($extra_data, 'csv_file', array());
+		$pages = array();
+		$header_line = array();
+
+		if (empty($files[0])) {
+			$errors[] = 'Aucun fichier sélectionné';
+		} else {
+			$file = DOL_DATA_ROOT . '/' . BimpTools::getTmpFilesDir() . '/' . $files[0];
+
+			if (!file_exists($file)) {
+				$errors[] = 'Le fichier "' . $files[0] . '" semble ne pas avoir été télécharger correctement';
+			} else {
+				$lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+				if (empty($lines)) {
+					$errors[] = 'Fichier vide';
+				} else {
+					$sep = BimpTools::getArrayValueFromPath($extra_data, 'separator', ';');
+					if (!$sep) {
+						$errors[] = 'Séparateur CSV absent';
+					} else {
+						$id_model = (int) BimpTools::getArrayValueFromPath($extra_data, 'id_csv_model', 0);
+						$model_matches = BimpTools::getArrayValueFromPath($extra_data, 'matches', array());
+						$maj_check_keys = BimpTools::getArrayValueFromPath($extra_data, 'maj_check_keys', array());
+						$maj_check_mode = BimpTools::getArrayValueFromPath($extra_data, 'maj_check_mode', 'and');
+
+						$obj_fields = BimpCache::getObjectFieldsArray($this, true, false);
+						$header_line = str_getcsv($lines[0], $sep);
+
+						foreach ($header_line as $header) {
+							if (empty($model_matches[$header])) {
+								$errors[] = 'Correspondance de champ absente pour la colonne "' . $header . '"';
+							} elseif (!isset($obj_fields[$model_matches[$header]])) {
+								$errors[] = 'Correspondance de champ invalide pour la colonne "' . $header . '"';
+							}
+						}
+
+						if (!count($errors)) {
+							$model = null;
+							if ($id_model) {
+								$model = BimpCache::getBimpObjectInstance('bimpcore', 'CsvModel', $id_model);
+							} elseif ((int) BimpTools::getArrayValueFromPath($extra_data, 'save_new_model', 0)) {
+								$model_name = BimpTools::getArrayValueFromPath($extra_data, 'new_model_name', '');
+
+								if (!$model_name) {
+									$errors[] = 'Veuillez saisir le nom du nouveau modèle';
+								} else {
+									$model = BimpObject::getInstance('bimpcore', 'CsvModel');
+									$model->set('obj_module', $this->module);
+									$model->set('obj_name', $this->object_name);
+									$model->set('name', $model_name);
+								}
+							}
+
+							if (!is_null($model)) {
+								$model->set('sep', $sep);
+								$model->set('import_params', array(
+									'matches'        => $model_matches,
+									'maj_check_mode' => $maj_check_mode,
+									'maj_check_keys' => $maj_check_keys
+								));
+
+								$w = array();
+								if (BimpObject::objectLoaded($model)) {
+									$model_errors = $model->update($w, true);
+									if (count($model_errors)) {
+										$errors[] = BimpTools::getMsgFromArray($model_errors, 'Echec de la mise à jour du modèle');
+									}
+								} else {
+									$model_errors = $model->create($w, true);
+									if (count($model_errors)) {
+										$errors[] = BimpTools::getMsgFromArray($model_errors, 'Echec de la création du nouveau modèle');
+									}
+								}
+							}
+						}
+
+						if (!count($errors)) {
+							$nb_pages = ceil((count($lines) - 1) / $nbElementsPerIteration);
+							for ($i = 1; $i <= $nb_pages; $i++) {
+								$pages[] = $i;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (!count($errors)) {
+			$tmp_dir = BimpTools::getTmpFilesDir();
+			$fails_file_name = 'import_failed_lines_' . time() . '.csv';
+			$fails_file = DOL_DATA_ROOT . '/' . $tmp_dir . '/' . $fails_file_name;
+			file_put_contents($fails_file, implode($sep, $header_line) . "\n");
+
+			$entity = 1;
+			if (preg_match('/^\/?([^\/]+)\/?(.*)$/', $tmp_dir, $matches) && is_numeric($matches[1])) {
+				$entity = $matches[1];
+				$tmp_dir = str_replace('/' . $entity . '/', '', $tmp_dir);
+			}
+
+			$fails_file_url = '';
+			if (preg_match('/^\/?([^\/]+)\/?(.*)$/', $tmp_dir, $matches)) {
+				$module = $matches[1];
+				$fileName = urlencode(($matches[2] ? $matches[2] . '/' : '') . $fails_file_name);
+				$fails_file_url = DOL_URL_ROOT . '/document.php?' . ($entity ? 'entity=' . $entity . '&' : '') . 'modulepart=' . $module . '&file=' . $fileName;
+				$process->Info('<a href="' . $fails_file_url . '" target="_blank">Fichier des lignes en échec</a>');
+			}
+
+			$action_data['operation_title'] = 'Import CSV ' . $this->getLabel('of_plur');
+			$action_data['steps'] = array(
+				'import' => array(
+					'label'                  => 'Import des ' . $this->getLabel('name_plur'),
+					'on_error'               => 'continue',
+					'elements'               => $pages,
+					'nbElementsPerIteration' => 1
+				)
+			);
+
+			$action_data['data'] = array(
+				'file'           => $file,
+				'fails_file'     => $fails_file,
+				'fails_file_url' => $fails_file_url,
+				'sep'            => $sep,
+				'maj_check_mode' => $maj_check_mode,
+				'maj_check_keys' => $maj_check_keys,
+				'matches'        => $model_matches
+			);
+		}
+
+		if ($use_db_transactions) {
+			if (count($errors)) {
+				$this->db->db->rollback();
+			} else {
+				$this->db->db->commit();
+			}
+		}
+	}
+
+	public function executeBdsActionImportFromCsv(BDSProcess $process, $step_name, $elements = array(), &$errors = array(), $operation_extra_data = array(), $action_extra_data = array())
+	{
+		$use_db_transaction = (int) BimpCore::getConf('use_db_transactions');
+		if ($use_db_transaction) {
+			$this->db->db->commitAll();
+		}
+
+		switch ($step_name) {
+			case 'import':
+				$file = BimpTools::getArrayValueFromPath($operation_extra_data, 'operation/file', '');
+				if (!file_exists($file)) {
+					$errors[] = 'Le fichier "' . $file . '" n\'existe plus';
+					return;
+				}
+
+				$process->setCurrentObject($this);
+
+				$fails_file = BimpTools::getArrayValueFromPath($operation_extra_data, 'operation/fails_file', '');
+				$sep = BimpTools::getArrayValueFromPath($operation_extra_data, 'operation/sep', ';');
+				$maj_check_mode = BimpTools::getArrayValueFromPath($operation_extra_data, 'operation/maj_check_mode', 'and');
+				$maj_check_keys = BimpTools::getArrayValueFromPath($operation_extra_data, 'operation/maj_check_keys', array());
+				$matches = BimpTools::getArrayValueFromPath($operation_extra_data, 'operation/matches', array());
+
+				$lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+				$header_line = str_getcsv($lines[0], $sep);
+
+				// check des assos de champs :
+				foreach ($header_line as $header) {
+					$field = (isset($matches[$header]) ? $matches[$header] : '');
+					if (!$field) {
+						$errors[] = 'Champ correspondant absent pour la colonne "' . $header . '"';
+					} elseif (!$this->field_exists($field)) {
+						$errors[] = 'Le champ "' . $field . '" associé à la colonne "' . $header . '" n\'existe pas pour les ' . $this->getLabel('name_plur');
+					}
+				}
+
+				if (count($errors)) {
+					return;
+				}
+
+				$h_fails_file = null;
+				if (file_exists($fails_file)) {
+					$h_fails_file = fopen($fails_file, 'a');
+				}
+
+				foreach ($elements as $page) {
+					for ($i = (100 * ($page - 1)) + 1; $i <= (100 * $page); $i++) {
+						if (isset($lines[$i])) {
+							$process->incProcessed();
+
+							$line_errors = array();
+							$line_warnings = array();
+
+							$line_data = str_getcsv($lines[$i], $sep);
+							$obj_data = array();
+							$obj_filters = array();
+
+							foreach ($header_line as $idx => $header) {
+								$obj_data[$matches[$header]] = (isset($line_data[$idx]) ? $line_data[$idx] : '');
+
+								if (in_array($header, $maj_check_keys) && isset($line_data[$idx])) {
+									$obj_filters[$matches[$header]] = $line_data[$idx];
+								}
+							}
+
+							$obj = null;
+							if (!empty($obj_filters)) {
+								if ($maj_check_mode == 'or') {
+									$obj_filters['or_check'] = array(
+										'or' => $obj_filters
+									);
+								}
+
+								$obj = BimpCache::findBimpObjectInstance($this->module, $this->object_name, $obj_filters);
+							}
+
+							$new_obj = false;
+							if (!BimpObject::objectLoaded($obj)) {
+								$obj = self::getInstance($this->module, $this->object_name);
+								$new_obj = true;
+							}
+
+							$line_errors = $obj->setImportData($obj_data);
+
+							if (!count($line_errors)) {
+								if ($new_obj) {
+									$line_errors = $obj->create($line_warnings, true);
+								} else {
+									$line_errors = $obj->update($line_warnings, true);
+								}
+							}
+
+							if (count($line_errors)) {
+								if ($use_db_transaction) {
+									$this->db->db->rollback();
+								}
+								if ($new_obj) {
+									$process->Error(BimpTools::getMsgFromArray($line_errors, 'Echec de la création ' . $this->getLabel('of_the')), null, 'Ligne n° ' . ($i + 1));
+								} else {
+									$process->Error(BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour ' . $this->getLabel('of_the')) . ' ' . $obj->getRef(), $obj, 'Ligne n° ' . ($i + 1));
+								}
+
+								$process->incIgnored();
+
+								if ($h_fails_file) {
+									if (!fwrite($h_fails_file, $lines[$i] . "\n")) {
+										$process->Error('Echec de l\'ajout de la ligne au fichier des lignes en échec (données: ' . $lines[$i] . ')');
+									} else {
+										$process->Info('Ajout de la ligne au fichier des lignes en échec (données: ' . $lines[$i] . ')');
+									}
+								}
+							} else {
+								if ($use_db_transaction) {
+									$this->db->db->commit();
+								}
+								$process->Success(BimpTools::ucfirst($this->getLabel() . ($new_obj ? ' créé' . $this->e() : ' mis' . $this->e() . ' à jour') . ' avec succès'), $obj, 'Ligne n° ' . ($i + 1));
+
+								if ($new_obj) {
+									$process->incCreated();
+								} else {
+									$process->incUpdated();
+								}
+							}
+
+							if (count($line_warnings)) {
+								$process->Alert(BimpTools::getMsgFromArray($line_warnings), $obj, 'Ligne n° ' . ($i + 1));
+							}
+						}
+					}
+					$obj_data = array();
+
+				}
+
+				if ($h_fails_file) {
+					fclose($h_fails_file);
+				}
+				break;
+		}
+
+	}
+
+	public function finalizeBdsActionImportFromCsv(BDSprocess $process, &$errors = array(), $operation_extra_data = array(), $action_extra_data = array())
+	{
+//		echo '<pre>' . print_r($operation_extra_data, 1) . '</pre>';
+//		echo '<pre>' . print_r($action_extra_data, 1) . '</pre>';
+//		exit;
+		$process->Success('Fichier entièrement traité');
+		$result = array();
+
+		$fails_file = BimpTools::getArrayValueFromPath($operation_extra_data, 'fails_file', '');
+		$fails_file_url = BimpTools::getArrayValueFromPath($operation_extra_data, 'fails_file_url', '');
+
+		if (file_exists($fails_file)) {
+			$lines = file($fails_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+			if (count($lines) > 1) {
+				$process->Alert((count($lines) - 1) . ' ligne(s) en échec' . ($fails_file_url ? ' - <a href="' . $fails_file_url . '" target="_blank">Télécharger le fichier des lignes en échec</a>' : ''));
+
+				if ($fails_file_url) {
+					$result['success_callback'] = 'window.open(\'' . $fails_file_url . '\');';
+				}
+			} else {
+				unlink($fails_file);
+			}
+		}
+
+		return $result;
 	}
 
 	// Gestion statique des objets:

@@ -587,6 +587,15 @@ fields:
         default_value: 0
         
         
+    nb_mois_avant_notif:
+        label: Nb de mois avant notification de fin de contrat
+        type: int
+        values:
+             array: array_mois_avant_notif
+        default_value:
+            conf:
+                module: bimpfinancement
+                name: def_mois_avant_notif
 forms:
     default: 
         rows:
@@ -1571,6 +1580,8 @@ fields_tables:
             - field: date_loyer
               edit: 1
             - field: date_fin
+              edit: 1
+            - field: nb_mois_avant_notif
               edit: 1
             - field: agreement_number
               edit: 1

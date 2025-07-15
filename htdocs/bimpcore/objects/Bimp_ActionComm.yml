@@ -290,8 +290,14 @@ fields:
 forms:
     default:
         before_content:
-            callback: renderDeleteButton
+            callback: renderHeaderButtons
         rows:
+            elementtype:
+                field: elementtype
+                hidden: 1
+            fk_element:
+                field: fk_element
+                hidden: 1
             type:
                 field: fk_action
                 required: 1
@@ -377,6 +383,32 @@ forms:
     edit:
         extends: default
         before_content: unset
+    duplicate:
+        rows:
+            label:
+                field: label
+                required: 1
+            from:
+                label: Nouvelle date de début
+                field: datep
+                required: 1
+            to:
+                label: Nouvelle date de fin
+                field: datep2
+                required: 1
+            users_assigned:
+                custom: 1
+                label: Evénement assigné à
+                input_name: users_assigned
+                input:
+                    multiple: 1
+                    sortable: 1
+                    type: search_user
+                    help:
+                        callback: displayExternalUsers
+                value:
+                    callback: getUsersAssigned
+        
 
 fields_tables:
     infos:

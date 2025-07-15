@@ -78,6 +78,7 @@ class BC_ListTable extends BC_List
 		$this->params_def['search_open'] = array('data_type' => 'bool', 'default' => 0);
 		$this->params_def['graph'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
 		$this->params_def['no_rows_borders'] = array('data_type' => 'bool', 'default' => 0);
+		$this->params_def['allow_csv_imports'] = array('data_type' => 'bool', 'default' => 0);
 
 		global $current_bc;
 		if (!is_object($current_bc)) {
@@ -1097,7 +1098,7 @@ class BC_ListTable extends BC_List
 			$title = self::getColFullTitle($this->object, $col_name);
 
 			$rows[] = array(
-				'label'   => $label . '<br/><span class="small" style="color: #e6dccf">' . $title . '</span>',
+				'label'   => $label . '<br/><span class="small">' . $title . '</span>',
 				'content' => $content
 			);
 		}
@@ -2117,6 +2118,24 @@ class BC_ListTable extends BC_List
 						), array(
 							'form_name'      => 'list_csv',
 							'on_form_submit' => 'function($form, extra_data) {return onGenerateCsvFormSubmit($form, extra_data);}'
+						))
+					)
+				));
+				$tools_html .= '</div>';
+			}
+
+			if ($this->params['allow_csv_imports'] && $this->object->isActionAllowed('importFromCsv') && $this->object->canSetAction('importFromCsv')) {
+				$tools_html .= '<div style="text-align: center;">';
+				$tools_html .= BimpRender::renderButton(array(
+					'classes'     => array('btn', 'btn-default'),
+					'label'       => 'Importer depuis un csv',
+					'icon_before' => 'fas_file-export',
+					'attr'        => array(
+						'onclick' => $this->object->getJsActionOnclick('importFromCsv', array(), array(
+							'form_name'      => 'import_csv',
+							'on_form_submit' => 'function($form, extra_data) {return onImportCsvFormSubmit($form, extra_data);}',
+							'use_bimpdatasync' => true,
+							'use_report'       => true
 						))
 					)
 				));

@@ -87,61 +87,77 @@ forms:
                 field: serialized
     
     correct:
-        rows: 
-            centre: 
+        rows:
+            centre:
                 field: code_centre
                 edit: 0
-            part: 
+            part:
                 field: part_number
                 edit: 0
-            mode: 
+            mode:
                 custom: 1
                 label: Mode de saisie
                 input_name: mode
-                input: 
+                input:
                     type: select
-                    options: 
+                    options:
                         total: Quantité totale du stock
                         add: Quantité à ajouter au stock
                         remove: Quantité à retirer du stock
                 value: total
-            qty: 
+            qty:
                 field: qty
                 label: Nouvelles quantités totales
-                display_if: 
+                display_if:
                     field_name: mode
                     show_values: total
-            qty_to_add: 
+            qty_to_add:
                 custom: 1
                 label: Quantité à ajouter
                 input_name: qty_to_add
                 data_type: qty
-                input: 
+                input:
                     type: qty
                 decimals: 0
                 min: 0
                 value: 0
-                display_if: 
+                display_if:
                     field_name: mode
                     show_values: add
-            qty_to_remove: 
+            qty_to_remove:
                 custom: 1
                 label: Quantité à retirer
                 input_name: qty_to_remove
                 data_type: qty
-                input: 
+                input:
                     type: qty
                 decimals: 0
                 min: 0
                 value: 0
-                display_if: 
+                display_if:
                     field_name: mode
                     show_values: remove
-            infos: 
+            infos:
                 custom: 1
                 label: Informations
                 input_name: infos
-                input: 
+                input:
+                    type: textarea
+    correct_bulk:
+        rows:
+            
+            qty:
+                field: qty
+                label: Nouvelles quantités totales
+                display_if:
+                    field_name: mode
+                    show_values: total
+        
+            infos:
+                custom: 1
+                label: Informations
+                input_name: infos
+                input:
                     type: textarea
            
     correct_serialized: 
@@ -177,6 +193,10 @@ lists:
                 method: canSetAction
                 params:
                     - correct
+        checkboxes:
+            callback: isUserAdmin
+        bulk_actions:
+            callback: getListsBulkActions
         edit_btn: 1
         edit_form: edit
         extra_btn: 

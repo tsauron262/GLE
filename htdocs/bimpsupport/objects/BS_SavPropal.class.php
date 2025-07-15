@@ -17,6 +17,13 @@ class BS_SavPropal extends Bimp_Propal
         );
     }
 
+	public function getIdCommercial(){
+		$sav = $this->getSav();
+		if($sav && BimpObject::objectLoaded($sav)){
+			return $sav->getData('id_user_tech');
+		}
+	}
+
     public function getObjectForEmailsLogs()
     {
         $sav = $this->getSav();

@@ -270,11 +270,6 @@ params:
         type: bool
         cat: emails
         def: 1
-    send_logs_urgents_emails: 
-        label: Envoyer les logs urgents par e-mail
-        type: bool
-        cat: emails
-        def: 1
     devs_email: 
         label: Adresse e-mail tous les devs
         cat: emails
@@ -491,6 +486,10 @@ params:
                       label: Enregistrer les logs similaires en tant que notes
                       type: bool
                       def: 0
+                  save_similar_logs_datetimes:
+                      label: Enregistrer les timers des logs similaires
+                      type: bool
+                      def: 1
                   bimp_log_urgent_send_email: 
                       label: Envoyer un e-mail aux devs pour chaque nouveau log urgent
                       type: bool

@@ -1891,7 +1891,9 @@ class Bimp_Societe extends BimpDolObject
 //					var_dump($field, isset($allowFields[$field]), $allowFields[$field], isset($allowFields[$field]) && !$allowFields[$field]);
 //					echo '<br>';
 //				}
-				if (isset($allowFields[$field]) && !$allowFields[$field]) continue;
+				if (isset($allowFields[$field]) && !$allowFields[$field]) {
+					continue;
+				}
 				if ($this->getData($field)) {
 					$value = $this->getData($field);
 					if ($field === 'email') {
@@ -2250,7 +2252,7 @@ class Bimp_Societe extends BimpDolObject
 						} else {
 							$fl = false;
 						}
-						$html .= $contrat->getLink(array('object_icons' => 0));
+						$html .= $contrat->getLink(array('object_icons' => 0)) . '<span style="margin-right: 5px;"></span>' . $contrat->displayData('statut');
 					}
 					$html .= '</div>';
 				}
@@ -2274,7 +2276,7 @@ class Bimp_Societe extends BimpDolObject
 						} else {
 							$fl = false;
 						}
-						$html .= $contrat->getLink(array('object_icons' => 0, 'syntaxe' => '<ref> - <name>'));
+						$html .= $contrat->getLink(array('object_icons' => 0, 'syntaxe' => '<ref> - <name>')) . '<span style="margin-right: 5px;"></span>' . $contrat->displayData('statut');
 					}
 					$html .= '</div>';
 				}
@@ -2789,12 +2791,14 @@ class Bimp_Societe extends BimpDolObject
 			$api->getCompany(BimpTools::getPostFieldValue('search_name'), BimpTools::getPostFieldValue('search_siret'));
 			$result = $api->getSocSiren();
 		}
-		if(count($result) > 1)
+		if (count($result) > 1) {
 			$result[0] = '';
+		}
 		asort($result);
 		session_write_close();
 		return $result;
 	}
+
 	public function getApiResultSiret()
 	{
 		if (BimpTools::getPostFieldValue('result_siren') != '' && BimpTools::getPostFieldValue('result_siren') != 0) {
@@ -2806,18 +2810,19 @@ class Bimp_Societe extends BimpDolObject
 		return array();
 	}
 
-	public function actionCreat_auto($data, &$success = array()){
+	public function actionCreat_auto($data, &$success = array())
+	{
 		$success = array();
 		$errors = array();
 
 		require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 		$api = BimpAPI::getApiInstance('Inpi');
 		$result = $api->getSiret($data['result_siret']);
-$onSuccess = $this->getJsLoadModalForm('default', null, array('fields'=>$result));
+		$onSuccess = $this->getJsLoadModalForm('default', null, array('fields' => $result));
 //		$errors[] = $data.'<pre>'.print_r($dataR, true).'</pre>';
 
-		return array('errors' => $errors, 'success' => $success, 'success_callback' => 'setTimeout(function(){'.html_entity_decode($onSuccess).'},500);');
-				}
+		return array('errors' => $errors, 'success' => $success, 'success_callback' => 'setTimeout(function(){' . html_entity_decode($onSuccess) . '},500);');
+	}
 
 	public function checkSiren($field, $value, &$data = array(), &$warnings = array())
 	{
@@ -2826,14 +2831,14 @@ $onSuccess = $this->getJsLoadModalForm('default', null, array('fields'=>$result)
 		$api->getCompany('', $value);
 		$data = $api->getSiret($value);
 		return array();
-		}
+	}
 
 
 //		public function checkSirenOLDOLD($field, $value, &$data = array(), &$warnings = array())
 //	{
 //        if ($value == "356000000")
 //            return array('Siren de la Poste, trop de résultats');
-					//
+	//
 //        $errors = array();
 //
 //        $siret = '';
@@ -4098,7 +4103,7 @@ $onSuccess = $this->getJsLoadModalForm('default', null, array('fields'=>$result)
 			if ($this->isSirenRequired()) {
 				$siret = $this->getData('siret');
 				if (!$siret) {
-					$errors[] = 'Numéro SIRET absent pour le client d\'id ' . $this->id;
+					$errors[] = 'Numéro SIRET absent' . ($this->isLoaded() ? ' pour le client #' . $this->id : '');
 				} elseif (!$this->Luhn($siret, 14)) {
 					$errors[] = 'Numéro SIRET invalide';
 				} else {
@@ -4120,7 +4125,7 @@ $onSuccess = $this->getJsLoadModalForm('default', null, array('fields'=>$result)
 
 			$have_already_code_comptable = (BimpTools::getValue('has_already_code_comptable_client', 0, 'int') == 1) ? true : false;
 			if ($have_already_code_comptable && empty(BimpTools::getValue('code_compta', '', 'alphanohtml'))) {
-				$errors[] = "Vous devez rensseigner un code comptable client";
+				$errors[] = "Vous devez renseigner un code comptable client";
 			}
 
 			if (!count($errors) && $have_already_code_comptable) {

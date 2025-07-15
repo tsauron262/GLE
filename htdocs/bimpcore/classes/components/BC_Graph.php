@@ -22,6 +22,7 @@ class BC_Graph extends BC_Panel
         $this->params_def['use_k'] = array('data_type' => 'boolean', 'default' => 0);
         $this->params_def['relative'] = array('data_type' => 'boolean', 'default' => -1);
         $this->params_def['filters'] = array('data_type' => 'array', 'json' => true, 'default' => json_decode(BimpTools::getPostFieldValue('param_filters', '[]', 'json_nohtml'), true), 'request' => true);
+		$this->params_def['cumul'] = array('data_type' => 'boolean', 'default' => -1);
 //        echo '<pre>';
 //        print_r($_POST);
 //        echo '<br/><br/>';
@@ -121,6 +122,13 @@ class BC_Graph extends BC_Panel
                 'value'=> $this->params['relative']
             );
         }
+		if(isset($this->params['cumul']) && $this->params['cumul'] > -1){
+			$this->formData['cumul'] = array(
+				'name' => 'Cumul',
+				'type' => 'switch',
+				'value'=> $this->params['cumul']
+			);
+		}
 
         foreach($this->formData as $tmpName => $tmpData){
         }
@@ -332,6 +340,7 @@ class BC_Graph extends BC_Panel
 
         $joins = array();
         $i = 0;
+		$dateMax = 0;
         if(isset($params['fields'])){
             foreach($params['fields'] as $nameField => $tabField){
                 $field = $nameField;
@@ -397,6 +406,14 @@ class BC_Graph extends BC_Panel
                     if(isset($resultOldValue[0]))
                         $oldValue = $resultOldValue[0]['y'];
                 }
+				elseif($this->userOptions['cumul']){
+					$filtersOldValue = $filters;
+					if(isset($this->userOptions['date1']))
+						$filtersOldValue[$this->fieldX] = array('operator' => '<', 'value' => $this->userOptions['date1']);
+					$resultOldValue = $this->object->getList($filtersOldValue, 1, 1, $this->fieldX, 'DESC', 'array', $return_fields, $joins, null, 'ASC');
+					if(isset($resultOldValue[0]))
+						$oldValue = $resultOldValue[0]['y'];
+				}
 
                 $result = $this->object->getList($filters, 10000, 1, $this->fieldX, 'ASC', 'array', $return_fields, $joins, null, 'ASC', $groupBy);
 
@@ -404,17 +421,30 @@ class BC_Graph extends BC_Panel
                  * todo rajouter pour le relative la recup de la derniére oldValue avant la date de début.
                  */
 
+				$thisSerieAsDateMax = false;
                 foreach($result as $tmp){
                     $y = floatval($tmp['y']);
-                    if($this->userOptions['relative'] == 1 && !is_null($oldValue))
-                        $y = $y - $oldValue;
+					if($this->userOptions['relative'] == 1 && !is_null($oldValue))
+						$y = $y - $oldValue;
+					if($this->userOptions['cumul'] == 1 && !is_null($oldValue)) {
+						$y = $y + $oldValue;
+						$tmp['y'] = $y;
+					}
 
                     if(is_array($tabField) && isset($tabField['reverse']) && $tabField['reverse'])
                         $y = -$y;
                     if($this->userOptions['relative'] != 1 || !is_null($oldValue))
                         $data['dataPoints'][] = array('x' => "new Date('".$tmp['x']."')", 'y' => $y, 'name'=> $name);
                     $oldValue = floatval($tmp['y']);
+					if($tmp['x'] > $dateMax){
+						$thisSerieAsDateMax = true;
+						$dateMax = $tmp['x'];
+					}
                 }
+				if($this->userOptions['cumul'] == 1 && !is_null($oldValue) && !$thisSerieAsDateMax){
+					//si on est en cumul et qu'on a pas de date max, on ajoute la derniére valeur
+					$data['dataPoints'][] = array('x' => "new Date('".$dateMax."')", 'y' => $oldValue, 'name'=> $name);
+				}
                 $datas[$i] = $data;
                 $i++;
             }

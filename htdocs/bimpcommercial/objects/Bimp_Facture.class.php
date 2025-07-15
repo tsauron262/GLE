@@ -358,12 +358,13 @@ class Bimp_Facture extends BimpComm
 			$errors[] = 'Attention la réf client ne peut pas être vide : <br/>' . nl2br($client->getData('consigne_ref_ext'));
 		}
 
-		if (is_a($this, 'Bimp_Facture') && $this->field_exists('id_client_final') && (int) $this->getData('id_client_final')) {
-			$client = $this->getChildObject('client_final');
-		}
-		if (!BimpObject::objectLoaded($client)) {
-			$client = $this->getChildObject('client');
-		}
+//		if (is_a($this, 'Bimp_Facture') && $this->field_exists('id_client_final') && (int) $this->getData('id_client_final')) {
+//			$client = $this->getChildObject('client_final');
+//		}
+//		if (!BimpObject::objectLoaded($client)) {
+//			$client = $this->getChildObject('client');
+//		}
+		$client = $this->getClientFinal();
 
 		if ($this->hasRemiseCRT()) {
 			if (!$client->getData('type_educ')) {
@@ -1057,6 +1058,43 @@ class Bimp_Facture extends BimpComm
 		}
 
 		return $show;
+	}
+
+	public function quickPaiement(&$errors = array(), &$warnings = array()){
+		global $user;
+
+		require_once(DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php');
+		$paiement = new Paiement($this->db->db);
+		$paiement->amounts = array($this->id => $this->getData('total_ttc'));
+		$paiement->fk_account = $this->getData('fk_account');
+		$paiement->paiementid = $this->getData('fk_mode_reglement');
+		$paiement->datepaye = $this->getData('datef');
+		$paiement->create($user);
+		if(isset($paiement->error) && $paiement->error != '')
+			$errors[] = $paiement->error;
+		else{
+			$result = $paiement->addPaymentToBank($user, 'payment', 'Paiement facture client', $this->getData('fk_account'), '', '');
+			$this->checkIsPaid();
+		}
+	}
+
+	// Getters params:
+	public function getActionsButtonsList()
+	{
+		$buttons = array();
+
+		if ($this->can("create")) {
+			$buttons[] = array(
+				'label'   => 'Cloner',
+				'icon'    => 'fas_copy',
+				'onclick' => $this->getJsActionOnclick('duplicate', array(
+					'datef' => date('Y-m-d')
+				), array(
+					'form_name' => 'duplicate'
+				))
+			);
+		}
+		return $buttons;
 	}
 
 	// Getters params:

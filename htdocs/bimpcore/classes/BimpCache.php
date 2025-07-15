@@ -658,19 +658,25 @@ class BimpCache
 		return $result;
 	}
 
-	public static function getObjectFieldsArray(BimpObject $object, $include_empty = false)
+	public static function getObjectFieldsArray(BimpObject $object, $include_empty = false, $viewable_only = true)
 	{
 		if (!is_null($object) && is_a($object, 'BimpObject')) {
 			$cache_key = $object->module . '_' . $object->object_name . '_fields_array';
+
+			if ($viewable_only) {
+				$cache_key .= '_viewable';
+			}
 			if (!isset(self::$cache[$cache_key])) {
 				self::$cache[$cache_key] = array();
 
 				if (isset($object->params['fields'])) {
 					foreach ($object->params['fields'] as $field_name) {
 						if ($object->isFieldActivated($field_name)) {
-							if ($object->getConf('fields/' . $field_name . '/viewable', 1, false, 'bool')) {
-								self::$cache[$cache_key][$field_name] = $object->getConf('fields/' . $field_name . '/label', $field_name, true);
+							if ($viewable_only && !$object->getConf('fields/' . $field_name . '/viewable', 1, false, 'bool')) {
+								continue;
 							}
+
+							self::$cache[$cache_key][$field_name] = $object->getConf('fields/' . $field_name . '/label', $field_name, true);
 						}
 					}
 				}

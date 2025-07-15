@@ -207,7 +207,6 @@ fields:
                         - hide_in_pdf
         default_value: 0
         depends_on: pu_ht,qty,type
-
     duree_tot:
         label: Durée Totale
         type: timer

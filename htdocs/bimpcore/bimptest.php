@@ -30,21 +30,14 @@ if (!$user->admin) {
 	exit;
 }
 
-///** @var BCT_ContratLine $line */
-//$id_line = 19166;
-//$line = BimpCache::getBimpObjectInstance('bimpcontrat', 'BCT_ContratLine', $id_line);
-//if (BimpObject::objectLoaded($line)) {
-//	echo 'Ligne #' . $id_line . ' : ';
-//	$line_errors = array();
-//	$lines_renouv = array();
-//	$line->renouvAbonnement(array(
-//		'renouv_auto' => 1
-//	), $lines_renouv, $line_errors);
+// Test log urgent :
+//echo 'LOG URGENT : ';
+//$err = BimpCore::addlog('TEST', 4);
 //
-//	echo 'RENOUV<pre>' . print_r($lines_renouv, 1) . '</pre>';
-//	echo 'ERR<pre>' . print_r($line_errors, 1) . '</pre>';
+//if (count($err)) {
+//	echo 'Err<pre>' . print_r($err, 1) . '</pre>';
 //} else {
-//	echo 'FAIL';
+//	echo 'ok';
 //}
 
 echo '<br/>FIN';

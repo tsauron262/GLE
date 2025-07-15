@@ -206,6 +206,36 @@ class Bimp_Ticket extends BimpDolObject
 					))
 				);
 			}
+			if ($this->isActionAllowed('newStatus') && $this->canSetAction('newStatus')) {
+				$cur_status = (int) $this->getData('fk_statut');
+				$buttons[] = array(
+					'label'   => 'Changer le statut',
+					'icon'    => 'fas_pen',
+					'onclick' => $this->getJsActionOnclick('newStatus', array(), array(
+						'form_name' => 'new_status'
+					))
+				);
+
+				if ($cur_status < self::STATUS_IN_PROGRESS) {
+					if ($this->isActionAllowed('newStatus') && $this->canSetAction('newStatus')) {
+						$buttons[] = array(
+							'label'   => 'En cours',
+							'icon'    => 'fas_cogs',
+							'onclick' => $this->getJsActionOnclick('newStatus', array(
+								'new_status' => self::STATUS_IN_PROGRESS,
+							), array())
+						);
+					}
+				} elseif ($cur_status < self::STATUS_CLOSED) {
+					$buttons[] = array(
+						'label'   => 'Terminé',
+						'icon'    => 'fas_check',
+						'onclick' => $this->getJsActionOnclick('newStatus', array(
+							'new_status' => self::STATUS_CLOSED,
+						), array())
+					);
+				}
+			}
 		}
 
 		return $buttons;

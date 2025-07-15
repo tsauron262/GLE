@@ -95,11 +95,11 @@ fields:
     address: 
         label: Adresse
         user_edit: 1
-        default_value:
-            callback:
-                method: getParentData
-                params:
-                    - address
+#        default_value:
+#            callback:
+#                method: getParentData
+#                params:
+#                    - address
     zip: 
         label: Code postal
         user_edit: 1
@@ -114,11 +114,11 @@ fields:
                 type: text
             type: value_part
             part_type: beginning
-        default_value:
-            callback:
-                method: getParentData
-                params:
-                    - zip
+#        default_value:
+#            callback:
+#                method: getParentData
+#                params:
+#                    - zip
     town: 
         label: Ville
         user_edit: 1
@@ -132,11 +132,11 @@ fields:
             input: 
                 type: text
             type: value_part
-        default_value:
-            callback:
-                method: getParentData
-                params:
-                    - town
+#        default_value:
+#            callback:
+#                method: getParentData
+#                params:
+#                    - town
     fk_pays: 
         label: Pays
         user_edit: 1
@@ -228,7 +228,74 @@ fields:
 
 #address zip town fk_pays email phone phone_perso phone_mobile phone_mobile fax poste note_public
 
-forms: 
+forms:
+    default:
+        rows:
+            fk_soc:
+                field: fk_soc
+                hidden: true
+            statut:
+                field: statut
+            civility:
+                field: civility
+            lastname:
+                field: lastname
+            firstname:
+                field: firstname
+            customAdddress:
+                label: Utiliser l'adresse du tiers
+                custom: 1
+                input_name: customAdddress
+                data_type: bool
+                input:
+                    type: toggle
+                value: 
+                    callback: isAddressEmpty
+            address:
+                field: address
+                display_if:
+                    field_name: customAdddress
+                    show_values: 0
+            zip:
+                field: zip
+                display_if:
+                    field_name: customAdddress
+                    show_values: 0
+            town:
+                field: town
+                display_if:
+                    field_name: customAdddress
+                    show_values: 0
+            fk_pays:
+                field: fk_pays
+                display_if:
+                    field_name: customAdddress
+                    show_values: 0
+            fk_departement:
+                field: fk_departement
+                display_if:
+                    field_name: customAdddress
+                    show_values: 0
+            email:
+                field: email
+            phone:
+                field: phone
+            phone_perso:
+                field: phone_perso
+            phone_mobile:
+                field: phone_mobile
+            fax:
+                field: fax
+            birthday:
+                field: birthday
+            poste:
+                field: poste
+            note_private:
+                field: note_private
+            note_public:
+                field: note_public
+            rpps:
+                field: rpps
     public_create: 
         rows: 
             civility: 

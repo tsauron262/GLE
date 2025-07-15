@@ -2275,6 +2275,31 @@ class BimpComm extends BimpDolObject
 
 	// Rendus HTML:
 
+
+	public function renderTotals(){
+		$html = '';
+		$bcFieldsTable = new BC_FieldsTable($this, 'totals');
+		$html .= $bcFieldsTable->renderHtml();
+		return $html;
+	}
+
+	public function getClientFinal(){
+		if (is_a($this, 'Bimp_Facture') && $this->field_exists('id_client_final') && (int) $this->getData('id_client_final')) {
+			$client = $this->getChildObject('client_final');
+			return $client;
+		}
+		$id_contact = $this->getIdContact('external', 'CLIFINAL');
+		if ($id_contact > 0) {
+			$id_client = (int) $this->db->getValue('socpeople', 'fk_soc', 'rowid = ' . $id_contact);
+			if ($id_client) {
+				$client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+				return $client;
+			}
+		}
+		$client = $this->getChildObject('client');
+		return $client;
+	}
+
 	public function renderHeaderExtraLeft()
 	{
 		$html = '';
@@ -2293,13 +2318,7 @@ class BimpComm extends BimpDolObject
 
 		if (BimpCore::isEntity('bimp')) {
 			if ($this->hasRemiseCRT()) {
-				$client = null;
-				if (is_a($this, 'Bimp_Facture') && $this->field_exists('id_client_final') && (int) $this->getData('id_client_final')) {
-					$client = $this->getChildObject('client_final');
-				}
-				if (!BimpObject::objectLoaded($client)) {
-					$client = $this->getChildObject('client');
-				}
+				$client = $this->getClientFinal();
 
 				if (BimpObject::objectLoaded($client)) {
 					if (!$client->getData('type_educ')) {
@@ -2662,6 +2681,25 @@ class BimpComm extends BimpDolObject
 		return $html;
 	}
 
+	public function getEventElement()
+	{
+		$type_element = static::$dol_module;
+		switch ($type_element) {
+			case 'facture':
+				$type_element = 'invoice';
+				break;
+
+			case 'commande':
+				$type_element = 'order';
+				break;
+
+			case 'commande_fournisseur':
+				$type_element = 'order_supplier';
+				break;
+		}
+		return $type_element;
+	}
+
 	public function renderEventsTable()
 	{
 		$html = '';
@@ -2673,22 +2711,9 @@ class BimpComm extends BimpDolObject
 
 			BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
 
-			$type_element = static::$dol_module;
+			$type_element = $this->getEventElement();
 			$fk_soc = (int) $this->getData('fk_soc');
-			switch ($type_element) {
-				case 'facture':
-					$type_element = 'invoice';
-					break;
 
-				case 'commande':
-					$type_element = 'order';
-					break;
-
-				case 'commande_fournisseur':
-					$type_element = 'order_supplier';
-					$fk_soc = 0;
-					break;
-			}
 			$ActionComm = new ActionComm($this->db->db);
 			$list = $ActionComm->getActions($fk_soc, $this->id, $type_element);
 
@@ -2791,6 +2816,9 @@ class BimpComm extends BimpDolObject
 				$html .= '</tbody>';
 				$html .= '</table>';
 
+				$actioncom = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ActionComm');
+
+
 				$html = BimpRender::renderPanel('Evénements', $html, '', array(
 					'foldable'       => true,
 					'type'           => 'secondary-forced',
@@ -2801,7 +2829,11 @@ class BimpComm extends BimpDolObject
 							'icon_before' => 'plus-circle',
 							'classes'     => array('btn', 'btn-default'),
 							'attr'        => array(
-								'onclick' => 'window.location = \'' . $href . '\''
+								'onclick' => $actioncom->getJsLoadModalForm('add', 'Nouvelle événement', array('fields' => array(
+								    'fk_element' => $this->id,
+									'elementtype' => $this->getEventElement(),
+									'fk_soc'	 => (int) $this->getData('fk_soc'),
+								)))//'window.location = \'' . $href . '\''
 							)
 						)
 					)
@@ -3237,6 +3269,22 @@ class BimpComm extends BimpDolObject
 
 			$this->reset();
 			$this->fetch($new_object->id);
+		}
+
+		if(isset($new_data['validate']) && $new_data['validate']){
+			$inut = array();
+			$inut2 = '';
+			$return = $this->actionValidate($inut, $inut2);
+			$warnings = BimpTools::merge_array($warnings, $return['warnings']);
+			$errors = BimpTools::merge_array($errors, $return['errors']);
+			if(!count($errors)){
+				if(isset($new_data['addPaiement']) && $new_data['addPaiement']){
+					if(method_exists($this, 'quickPaiement'))
+						$this->quickPaiement($errors, $warnings);
+					else
+						$errors[] = 'Pas de gestion rapide des paiements';
+				}
+			}
 		}
 
 		return $errors;
@@ -4209,11 +4257,11 @@ class BimpComm extends BimpDolObject
 					$tabComm = $client->dol_object->getSalesRepresentatives($user);
 
 					// Il y a un commercial pour ce client
-					if (count($tabComm) > 0) {
+					if (count($tabComm) > 0 && isset($tabComm[0]['id'])) {
 						$this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
 						$ok = true;
 						// Il y a un commercial définit par défaut (bimpcore)
-					} elseif ((int) BimpCore::getConf('user_as_default_commercial', null, 'bimpcommercial')) {
+					} elseif ((int) BimpCore::getConf('user_as_default_commercial', null, 'bimpcommercial') && $user->id) {
 						$this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
 						$ok = true;
 						// L'objet est une facture et elle a une facture d'origine
@@ -4235,7 +4283,7 @@ class BimpComm extends BimpDolObject
 
 				// Vérif contact signataire:
 				$tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
-				if (count($tabConatact) < 1) {
+				if (count($tabConatact) < 1 && $user->id) {
 					$this->dol_object->add_contact($user->id, 'SALESREPSIGN', 'internal');
 				}
 			}
@@ -4908,7 +4956,7 @@ class BimpComm extends BimpDolObject
 		$url = '';
 
 		if (!count($errors)) {
-			$url = $_SERVER['php_self'] . '?fc=' . $this->getController() . '&id=' . $this->id;
+			$url = $this->getUrl();
 		}
 
 		if (!count($warnings)) {

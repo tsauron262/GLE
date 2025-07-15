@@ -319,8 +319,12 @@ class Bimp_PaiementFourn extends BimpObject
 
         global $db, $user, $conf;
 
-        $id_account = (int) BimpTools::getPostFieldValue('id_account', $this->getDefaultBankAccount(), 'int');
-        $account = null;
+		if(!$this->getData('fk_bank')) {
+			$id_account = (int) BimpTools::getPostFieldValue('id_account', BimpCore::getConf('id_default_bank_account', 0), 'int');
+		}
+		else
+			$id_account = $this->getData('fk_bank');
+		$account = null;
 
         if ($id_account) {
             BimpTools::loadDolClass('compta/bank', 'account');
@@ -336,7 +340,7 @@ class Bimp_PaiementFourn extends BimpObject
 
         $total_to_pay = (float) BimpTools::getValue('total_to_pay', 0, 'float');
         $total_avoirs = (float) BimpTools::getValue('total_avoirs', 0, 'float');
-        $total_paid = (float) BimpTools::getValue('total_paid_amount', 0, 'float');
+        $total_paid = (float) BimpTools::getValue('total_paid_amount', $this->getData('amount'), 'float');
 
         $avoirs = json_decode(BimpTools::getValue('avoirs_amounts', '', 'json_nohtml'), true);
         $total_factures_versements = 0;
@@ -348,7 +352,7 @@ class Bimp_PaiementFourn extends BimpObject
         $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $this->dol_object->paiementid);
         if (is_null($type_paiement) || !(string) $type_paiement) {
             $errors[] = 'Mode de paiement invalide';
-        } elseif (($total_paid + $total_avoirs) > $total_to_pay && $type_paiement !== 'LIQ') {
+        } elseif (($total_paid + $total_avoirs) > $total_to_pay && $type_paiement !== 'LIQ' && $total_to_pay > 0) {
             $errors[] = 'Le versement d\'une somme supérieure au total des factures n\'est possible que pour un paiement en espèces';
         }
 

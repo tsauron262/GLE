@@ -758,10 +758,8 @@ class Bimp_Log extends BimpObject
 
 					$message .= "\n\n" . "Extra Data : " . $this->displayExtraData();
 
-					if ((int) BimpCore::getConf('send_logs_urgents_emails')) {
-						$code = 'send_log_to_dev_urgent';
-						BimpUserMsg::envoiMsg($code, 'LOG URGENT', $message);
-					}
+					$code = 'send_log_to_dev_urgent';
+					BimpUserMsg::envoiMsg($code, 'LOG URGENT', $message);
 				}
 			}
 		}
@@ -786,5 +784,27 @@ class Bimp_Log extends BimpObject
 		}
 
 		return parent::update($warnings, $force_update);
+	}
+
+	public function delete(&$warnings = array(), $force_delete = false)
+	{
+		$id = $this->id;
+		$errors = parent::delete($warnings, $force_delete);
+
+		if (!count($errors) && $id) {
+			$this->db->delete('bimpcore_log_datetime', 'id_log = ' . $id);
+			$this->db->delete('bimpcore_note', 'obj_name = \'Bimp_Log\' AND id_obj = ' . $id);
+		}
+
+		return $errors;
+	}
+
+	// Méthodes statiques:
+
+	public static function cleanLogs()
+	{
+		$bdb = BimpCache::getBdb(true);
+		$bdb->delete('bimpcore_log_datetime', '(SELECT COUNT(l.id) FROM ' . MAIN_DB_PREFIX . 'bimpcore_log l WHERE l.id = id_log) = 0');
+		$bdb->delete('bimpcore_note', 'obj_name = \'Bimp_Log\' AND (SELECT COUNT(l.id) FROM ' . MAIN_DB_PREFIX . 'bimpcore_log l WHERE l.id = id_obj) = 0');
 	}
 }

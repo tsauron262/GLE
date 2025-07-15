@@ -121,7 +121,7 @@ fields:
         type: qty
         unsigned: 0
     fk_categorie_maitre:
-        label: Catégorie Maitre
+        label: Catégorie maître
         type: items_list
         values:
             dict: societe_rdc_cat_maitre
@@ -406,6 +406,12 @@ forms:
                     type: select
                     options:
                         callback: getListButtons
+            -   field: commentaire_statut_ko
+                display_if:
+                    field_name: status
+                    show_values: 
+                        array: show_comm_statut_ko
+                
 
 filters_panels:
     default:
@@ -438,6 +444,7 @@ lists:
     rdc:
         configurable: 1
         checkboxes: 1
+        allow_csv_imports: 1
         title: Liste des Marchands
         filters_panel: default
         bulk_actions:

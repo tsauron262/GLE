@@ -1,17 +1,138 @@
-var bimp_hashReady = true;
+var valDef = {};
+var valSpe = {};
+var oldHash = '';
 
-function ecrireHash(paramNav) {
-	if (bimp_hashReady) {
-		console.log('ecrireHash', paramNav);
-		var hashExistant = window.location.hash;
-		var newHash = '';
-		for (var valueParam of paramNav) {
-			if (newHash !== '') {
-				newHash += '&';
+$(document).ready(function () {
+	$('body').on('bimp_ready', function () {
+		valSpe = getHashObj();
+	});
+
+	$(window).on('hashchange', function (event) {
+		if('#'+oldHash != window.location.hash) {
+			var infos = getHashObj(true);
+			for (const [key, value] of Object.entries(infos)) {
+				if(typeof value === 'object') {
+					var $list = $('#' + key);
+					traiteList($list, value);
+				}
+				else {
+					const aTag = document.querySelector('li[data-navtab_id="' + value + '"] a');
+					if (aTag) {
+						$(aTag).tab('show'); // Affiche l'onglet correspondant
+					}
+				}
 			}
-			newHash += valueParam;
 		}
-		window.location.hash = newHash;
+	});
+
+	$('body').on('listLoaded', function (event) {
+		var $list = event.$list;
+		//voir si info dans getHashTabs
+		
+		//sinon ecrire dans valDef
+		if(valDef[$list.attr('id')] === undefined) {
+			valDef[$list.attr('id')] = {};
+		}
+		valDef[$list.attr('id')]['fl'] = getFiltersId($list);
+		valDef[$list.attr('id')]['pa'] = getPageCourante($list);
+		
+
+		var infos = getHashObj();
+		if(infos[$list.attr('id')] !== undefined) {
+			traiteList($list, infos[$list.attr('id')]);
+		}
+	});
+	$('body').on('listRefresh', function (event) {
+		var $list = event.$list;
+		if(valSpe[$list.attr('id')] === undefined) {
+			valSpe[$list.attr('id')] = {};
+		}
+		valSpe[$list.attr('id')]['fl'] = getFiltersId($list);
+		valSpe[$list.attr('id')]['pa'] = getPageCourante($list);
+		ecrireHash2();
+	});
+	$('body').on('navTabsLoaded', function (event) {
+		//voir si info dans getHashTabs
+		var infos = getHashObj();
+		var idNavTabs = event.$nav_tabs.attr('id').replace('navtabs_', 'navtab-');
+		var idNavTab = event.$nav_tabs.find('li.active').data('navtab_id');
+		if(valDef[idNavTabs] === undefined)
+			valDef[idNavTabs] = idNavTab;//ecrire dans valDef
+		if (infos[idNavTabs] !== undefined){//on doit aller a un onglet
+			event.$nav_tabs.find('li[data-navtab_id="' + infos[idNavTabs] + '"] a').tab('show');
+		}
+	});
+	$('body').on('navTabShow', function (event) {
+		var idNavTab = event.$nav_tab.data('navtab_id');
+		var idNavTabs = event.$nav_tab.parent('ul').attr('id').replace('navtabs_', 'navtab-');
+		valSpe[idNavTabs] = idNavTab;
+		ecrireHash2();
+	});
+});
+
+
+function getHashObj(withDef = false){
+	var $return = {};
+	if (window.location.hash) {
+		var hash = window.location.hash.replaceAll('#', '');
+		var elements = hash.split('&');
+		const values = Object.values(elements);
+		values.forEach(value => {
+			var parts = value.split('=');
+			if (parts[1] !== undefined && parts[1].indexOf('{') > -1) {
+				$return [parts[0]] = JSON.parse(decodeURIComponent(parts[1]));
+			}
+			else
+				$return [parts[0]] = parts[1];
+		});
+	}
+	if(!withDef) {
+		return $return;
+	}
+	else {
+		return Object.assign(structuredClone(valDef), $return);
+	}
+}
+
+function ecrireHash2() {
+	var newHash = '';
+	for (const [key, value] of Object.entries(valSpe)) {
+
+		if(typeof value === 'object'){
+			if(JSON.stringify(valDef[key]) !== JSON.stringify(value)){
+				newHash += key + '=' + JSON.stringify(value) + '&';
+			}
+		}
+		else{
+			if(valDef[key] !== value) {
+				newHash += key + '=' + value + '&';
+			}
+		}
+	}
+	oldHash = newHash;
+	window.location.hash = newHash;
+	updateBookMark();
+}
+
+function getFiltersId($list){
+	var id = $list.find('#id_filters_to_load').val();
+	if(id <= 0 || id === undefined || id === null) {
+		id = 0;
+	}
+	return parseInt(id);
+}
+function getPageCourante($list){
+	return $list.find('input[name="param_p"]').val();
+}
+
+function traiteList($list, value){
+	var filters_id = $list.find('.object_filters_panel').attr("id");
+	var filter_id = value['fl'];
+	if(filters_id && filter_id != getFiltersId($list)) {
+		loadSavedFilters(filters_id, filter_id, 1);
+	}
+	if(value['pa']  != getPageCourante($list)) {
+		loadPage($list, value['pa']);
 	}
 }
 
@@ -37,262 +158,3 @@ function updateBookMark() {
 		}
 	}
 }
-
-function reportFilterHash(c, id) {
-	const innerDivId = c.prevObject[0].id;
-	const innerDiv = document.getElementById(innerDivId);
-	var idDiv = '';
-
-	let parent = innerDiv.parentElement;
-	while (parent) {
-		if (parent.tagName === 'DIV' && parent.id && parent.id !== innerDivId) {
-			idDiv = parent.id;
-			break;
-		}
-		parent = parent.parentElement;
-	}
-	if (!parent) {
-		console.log('Aucune div parente avec un id trouvé.');
-	}
-	else {
-		var hash = window.location.hash;
-		hash = hash.substring(1); // Enlever le #
-		var elements = hash.split('&');
-		var values = Object.entries(elements);
-		var ct = {};
-		var indexct = -1;
-		values.forEach(([key, value]) => {
-			var parts = value.split('=');
-			if (parts[0] === 'ct') {
-				indexct = key;
-				ct = JSON.parse(decodeURIComponent(parts[1]).replaceAll('%22', '"'));
-				if (typeof ct[idDiv] === 'undefined') {
-					ct[idDiv] = {fl: id};
-				}
-				else {
-					ct[idDiv].fl = id;
-				}
-			}
-		});
-		if (indexct !== -1) {
-			elements[indexct] = 'ct=' + JSON.stringify(ct).replaceAll('"', '%22');
-			hash = elements.join('&');
-			window.location.hash = hash;
-		}
-		else {
-			ct[idDiv] = {fl: id};
-			elements.push('ct=' + JSON.stringify(ct).replaceAll('"', '%22'));
-			hash = elements.join('&');
-			window.location.hash = hash;
-		}
-	}
-}
-
-function reportPageHash(c, p) {
-	var divId = c[0].id;
-	// console.log('reportPageHash', divId, p);
-	if (divId) {
-		var hash = window.location.hash;
-		hash = hash.substring(1); // Enlever le #
-		var elements = hash.split('&');
-		var values = Object.entries(elements);
-		values.forEach(([index, value]) => {
-			var parts = value.split('=');
-			if (parts[0] === 'ct') {
-				var ct = JSON.parse(decodeURIComponent(parts[1]).replaceAll('%22', '"'));
-				if (ct[divId]) {
-					ct[divId].pa = p;
-				} else {
-					ct[divId] = {pa: p};
-				}
-				elements[index] = 'ct=' + JSON.stringify(ct).replaceAll('"', '%22');
-			}
-		});
-		console.log('reportPageHash', elements, p);
-	}
-}
-
-function traitementHash(hash) {
-	hash = window.location.hash.replaceAll('#', '');
-	// console.log('traitementHash', hash);
-	var elements = hash.split('&');
-	const values = Object.values(elements);
-	var isCtPresent = false;
-	var isFlPresent = false;
-	var isPaPresent = false;
-	values.forEach(value => {
-		var parts = value.split('=');
-		if(parts[0] != 'ct') {
-			// console.log(parts);
-			const aTag = document.querySelector('li[data-navtab_id="' + parts[1] + '"] a');
-			if (aTag) {
-				bimp_hashReady = false;
-				$(aTag).tab('show'); // Affiche l'onglet correspondant
-				setTimeout(function() {
-					bimp_hashReady = true;
-				}, 1000);
-			}
-		}
-		else {
-			isCtPresent = true;
-			var ct = JSON.parse(decodeURIComponent(parts[1]).replaceAll('%22', '"'));
-			// console.log(parts, ct);
-			for (const [divId, params] of Object.entries(ct)) {
-				var isPaPresent = false;
-				for (var [param, id] of Object.entries(params)) {
-					if (param === 'fl') {
-						var div = document.getElementById(divId);
-						if (div) {
-							var $input = $(div.querySelector('select#id_filters_to_load'));
-							if ($input.length) {
-								var filters_panel = $input.findParentByClass('object_component object_filters_panel').attr('id');
-								$input.val(id).change();
-								loadSavedFilters(filters_panel, id, 1);
-							}
-						}
-					}
-					if (param === 'pa') {
-						isPaPresent = true;
-						var $list = $('#' + divId);
-						// depuis $list, trouver la page max
-						var pageButtons = document.getElementById(divId + '_pagination');
-						var pageSpans = pageButtons.querySelectorAll('.pageBtn');
-						var pageCourante = null;
-						var pageMax = null;
-						pageSpans.forEach(function(span) {
-							var page = parseInt(span.getAttribute('data-p'), 10);
-							// Vérifie si c'est la page active (courante)
-							if (span.classList.contains('active')) {
-								pageCourante = page;
-							}
-							// pageMax sera mis à jour à chaque itération, le dernier "data-p" est supposé être le max
-							if (pageMax === null || page > pageMax) {
-								pageMax = page;
-							}
-						});
-						// console.log($list);
-						if (id === 0) id = 1;
-						if (id > pageMax) id = pageMax;
-						if (pageCourante !== id) {
-							loadPage($list, id);
-						}
-					}
-				}
-				if (!isPaPresent) 	{
-					// console.log('Paramètre:', param, ', ID:', id, ', Div ID:', divId, ', isPaPresent:', isPaPresent);
-					// Si on n'a pas trouvé de paramètre pa, on charge la première page
-					var $list = $('#' + divId);
-					if ($list.length) {
-						loadPage($list, 1);
-					}
-				}
-			}
-		}
-	});
-	if(!isCtPresent) {
-		// Aucun ct trouvé dans le hash on vide les filtres
-		viderFiltres();
-	}
-}
-
-function chargerFiltreSelonHash() {
-	if (window.location.hash) {
-		var hash = window.location.hash.replaceAll('#', '');
-		var elements = hash.split('&');
-		const values = Object.values(elements);
-		values.forEach(value => {
-			var parts = value.split('=');
-			if(parts[0] === 'ct') {
-				var ct = JSON.parse(parts[1].replaceAll('%22', '"'));
-				for (const [divId, params] of Object.entries(ct)) {
-					// console.log(divId, params);
-					for (const [param, id] of Object.entries(params)) {
-						// console.log('Paramètre:', param, ', ID:', id, ', Div ID:', divId);
-						if (param === 'fl') {
-							var div = document.getElementById(divId);
-							// console.log('Div trouvée :', div);
-							if (div) {
-								var $input = $(div.querySelector('select#id_filters_to_load'));
-								if ($input.length) {
-									var filters_panel = $input.findParentByClass('object_component object_filters_panel').attr('id');
-									$input.val(id).change();
-									loadSavedFilters(filters_panel, id, 1);
-								}
-							}
-						}
-						else if (param === 'pa') {
-							if (id) {
-								var pageButtons = document.getElementById(divId + '_pagination');
-								if (!pageButtons) {
-									// console.warn('Pagination non trouvée pour le div:', divId);
-									return;
-								}
-								var pageSpans = pageButtons.querySelectorAll('.pageBtn');
-								var pageCourante = null;
-								var pageMax = null;
-								pageSpans.forEach(function(span) {
-									var page = parseInt(span.getAttribute('data-p'), 10);
-									// Vérifie si c'est la page active (courante)
-									if (span.classList.contains('active')) {
-										pageCourante = page;
-									}
-									// pageMax sera mis à jour à chaque itération, le dernier "data-p" est supposé être le max
-									if (pageMax === null || page > pageMax) {
-										pageMax = page;
-									}
-								});
-								if (pageCourante !== id) {
-									if (id > pageMax) {
-										var p = pageMax;
-									}
-									else {
-										var p = id;
-									}
-									var $list = $('#' + divId);
-									loadPage($list, p);
-								}
-							}
-						}
-					}
-				}
-			}
-		});
-	}
-}
-
-function viderFiltres()	{
-	var filters = document.querySelectorAll('.object_component.object_filters_panel');
-	filters.forEach(function(filter) {
-		var select = filter.querySelector('select#id_filters_to_load');
-		if (select) {
-			select.value = '';
-			select.dispatchEvent(new Event('change'));
-		}
-	});
-}
-
-$(window).on('hashchange', function () {
-	// console.log('changement de hash.');
-	if( window.location.hash) {
-		traitementHash(window.location.hash);
-	}
-	else {
-		ecrireHash(getTabsParams());
-		viderFiltres();
-	}
-	updateBookMark();
-});
-
-$(document).ready(function () {
-	$('body').on('bimp_ready', function () {
-		if (window.location.hash) {
-			traitementHash(window.location.hash);
-		}
-		else ecrireHash(getTabsParams());
-		updateBookMark();
-	});
-	$('body').on('listLoaded', function () {
-		chargerFiltreSelonHash();
-	});
-	
-});

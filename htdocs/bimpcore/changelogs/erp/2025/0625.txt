@@ -1,0 +1,1 @@
+- Envoi des commandes fournisseurs par e-mail : ajout du choix de l'adresse e-mail du groupe achat en émetteur. 

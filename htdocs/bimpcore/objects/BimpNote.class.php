@@ -543,7 +543,7 @@ class BimpNote extends BimpObject
 	public function getMailFrom($withName = true)
 	{
 		$parent = $this->getParentInstance();
-		if (method_exists($parent, 'getMailFrom')) {
+		if (is_object($parent) && method_exists($parent, 'getMailFrom')) {
 			$infoMail = $parent->getMailFrom();
 			if (is_array($infoMail) && isset($infoMail[1]) && $withName) {
 				return $infoMail[1] . '<' . $infoMail[0] . '>';
@@ -625,7 +625,7 @@ class BimpNote extends BimpObject
 				return $this->getData('email');
 
 			case self::BN_AUTHOR_GROUP:
-				$group = $this->getChildObject('author_group');
+				$group = $this->getChildObject('bimp_author_group');
 				if (BimpObject::objectLoaded($group)) {
 					return $group->getName();
 				}
@@ -648,7 +648,7 @@ class BimpNote extends BimpObject
 				return '';
 
 			case self::BN_DEST_GROUP:
-				$group = $this->getChildObject('user_group');
+				$group = $this->getChildObject('bimp_user_group');
 				if (BimpObject::objectLoaded($group)) {
 					return $group->getName();
 				}

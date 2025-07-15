@@ -135,6 +135,9 @@ fields:
         label: Nombre de fois
         type: int
         
+    hash: 
+        label: Hash
+        
 forms: 
     send_to: 
         rows: 

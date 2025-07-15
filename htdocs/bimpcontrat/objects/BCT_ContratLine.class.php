@@ -6458,7 +6458,6 @@ class BCT_ContratLine extends BimpObject
 		$propal_line->tva_tx = $prod->getData('tva_tx');
 		$propal_line->pa_ht = $this->getData('buy_price_ht');
 		$propal_line->id_fourn_price = $this->getData('fk_product_fournisseur_price');
-		$propal_line->remise = $this->getData('remise_percent');
 		$propal_line->date_from = $this->getData('date_ouverture_prevue');
 
 		$propal_line_errors = $propal_line->validateArray(array(
@@ -6485,6 +6484,15 @@ class BCT_ContratLine extends BimpObject
 			$err = $this->update($warnings, true);
 			if (count($err)) {
 				$errors[] = BimpTools::getMsgFromArray($err, 'Echec de l\'enregistrement de la ligne du devis liée à la nouvelle ligne de contrat');
+			}
+
+			$remise_percent = (float) $this->getData('remise_percent');
+			if ($remise_percent) {
+				$r_warnings = array();
+				$rem_errors = $propal_line->addRemise($remise_percent, '', 1, 0, $r_warnings, true);
+				if (count($rem_errors)) {
+					$errors[] = BimpTools::getMsgFromArray($rem_errors, 'Echec de l\'ajout de la remise de ' . $remise_percent . ' % sur la ligne du devis liée à la nouvelle ligne de contrat');
+				}
 			}
 
 			$success .= ($success ? '<br/>' : '') . 'Ajout de la ligne au devis ' . $propal->getLink() . ' OK';
@@ -6539,6 +6547,7 @@ class BCT_ContratLine extends BimpObject
 						$bundle_propal_line->majBundle($err);
 
 						if (count($err)) {
+							$bundle_prod = $bundle_line->getChildObject('product');
 							$errors[] = BimpTools::getMsgFromArray($err, 'Echec du traitement des remises bundle (Produit ' . (BimpObject::objectLoaded($bundle_prod) ? $bundle_line->getRef() : '#' . $bundle_line->getData('fk_product')) . ')');
 						} else {
 							$bundle_line->set('line_origin_type', 'propal_line');
@@ -7698,24 +7707,24 @@ class BCT_ContratLine extends BimpObject
 						} else {
 							// Création de la facture :
 							$fac_errors = array();
-							$id_entrepot = (int) BimpTools::getArrayValueFromPath($fac_data, 'id_entrepot', 0, $fac_errors, true, 'Facture n° ' . ($fac_idx + 1) . ' pour le client ' . $client->getName() . ': entrepôt absent');
-							$secteur = BimpTools::getArrayValueFromPath($fac_data, 'secteur', '', $fac_errors, true, 'Facture n° ' . ($fac_idx + 1) . ' pour le client ' . $client->getName() . ': secteur absent');
-							$expertise = BimpTools::getArrayValueFromPath($fac_data, 'expertise', '', $fac_errors, true, 'Facture n° ' . ($fac_idx + 1) . ' pour le client ' . $client->getName() . ': expertise absente');
-							$id_mode_reglement = (int) BimpTools::getArrayValueFromPath($fac_data, 'id_mode_reglement', 0, $fac_errors, true, 'Facture n° ' . ($fac_idx + 1) . ' pour le client ' . $client->getName() . ': mode de réglement absent');
-							$id_cond_reglement = (int) BimpTools::getArrayValueFromPath($fac_data, 'id_cond_reglement', 0, $fac_errors, true, 'Facture n° ' . ($fac_idx + 1) . ' pour le client ' . $client->getName() . ': conditions de réglement absentes');
-							$libelle = BimpTools::getArrayValueFromPath($fac_data, 'libelle', 'Facturation périodique');
+							$new_fac_data = array(
+								'fk_soc'            => $id_client,
+								'expertise'         => BimpTools::getArrayValueFromPath($fac_data, 'expertise', '', $fac_errors, true, 'Facture n° ' . ($fac_idx + 1) . ' pour le client ' . $client->getName() . ': expertise absente'),
+								'libelle'           => BimpTools::getArrayValueFromPath($fac_data, 'libelle', 'Facturation périodique'),
+								'fk_mode_reglement' => (int) BimpTools::getArrayValueFromPath($fac_data, 'id_mode_reglement', 0, $fac_errors, true, 'Facture n° ' . ($fac_idx + 1) . ' pour le client ' . $client->getName() . ': mode de réglement absent'),
+								'fk_cond_reglement' => (int) BimpTools::getArrayValueFromPath($fac_data, 'id_cond_reglement', 0, $fac_errors, true, 'Facture n° ' . ($fac_idx + 1) . ' pour le client ' . $client->getName() . ': conditions de réglement absentes'),
+								'datef'             => date('Y-m-d')
+							);
+
+							if ((int) BimpCore::getConf('USE_ENTREPOT')) {
+								$new_fac_data['entrepot'] = (int) BimpTools::getArrayValueFromPath($fac_data, 'id_entrepot', 0, $fac_errors, true, 'Facture n° ' . ($fac_idx + 1) . ' pour le client ' . $client->getName() . ': entrepôt absent');
+							}
+							if ((int) BimpCore::getConf('USE_SECTEUR')) {
+								$new_fac_data['ef_type'] = BimpTools::getArrayValueFromPath($fac_data, 'secteur', '', $fac_errors, true, 'Facture n° ' . ($fac_idx + 1) . ' pour le client ' . $client->getName() . ': secteur absent');
+							}
 
 							if (!count($fac_errors)) {
-								$fac = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
-									'fk_soc'            => $id_client,
-									'entrepot'          => $id_entrepot,
-									'ef_type'           => $secteur,
-									'expertise'         => $expertise,
-									'libelle'           => $libelle,
-									'fk_mode_reglement' => $id_mode_reglement,
-									'fk_cond_reglement' => $id_cond_reglement,
-									'datef'             => date('Y-m-d')
-								), true, $fac_errors);
+								$fac = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', $new_fac_data, true, $fac_errors);
 							}
 
 							if (count($fac_errors)) {

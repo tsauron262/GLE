@@ -406,7 +406,6 @@ forms:
                     type: select
                     options:
                         callback : getSelectStatusArray
-#                        callback: getListButtons => nom changé car "getListButtons" est un nom générique souvents utilisé pour obtenir les boutons d'une liste (rique de conflits avec une classe parente) 
             -   field: commentaire_statut_ko
                 display_if:
                     field_name: status

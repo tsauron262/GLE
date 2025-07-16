@@ -250,6 +250,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			'icon'    => 'fas_calendar-plus',
 			'onclick' => $actioncomm->getJsLoadModalForm('formCREchange', 'Compte rendu d\\\'échange', array('fields' => array('fk_soc' => $this->id)))
 		);
+		$buttons[]= array(
+			'label' => 'Changer le statut',
+			'icon' => 'fas_edit',
+			'onclick' => $this->getJsActionOnclick('change_status_rdc', array(), array('form_name' => 'formActionRdc'))
+		);
 		return $buttons;
 	}
 

@@ -182,7 +182,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function isUserManager()
 	{
 		global $user;
-		return BimpTools::isUserInGroup($user->id, 'MANAGER') || BimpTools::isUserInGroup($user->id, 'ADMIN');
+		return ($user->admin || BimpTools::isUserInGroup($user->id, 'MANAGER') || BimpTools::isUserInGroup($user->id, 'ADMIN'));
 	}
 
 	public function isUserTECH()
@@ -224,8 +224,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		);
 
 		$buttons[] = array(
-			'label'   => 'Actions',
-			'icon'    => 'fas_edit',
+			'label'   => 'Changer le statut',
+			'icon'    => 'fas_pen',
 			'onclick' => $this->getJsActionOnclick('change_status_rdc', array(), array('form_name' => 'formActionRdc'))
 		);
 
@@ -245,9 +245,9 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		global $user;
 		$buttons = array();
 
-		$statu = $this->getData('fk_statut_rdc');
-		if (isset(self::$actions_selon_statut_rdc[$statu])) {
-			foreach (self::$actions_selon_statut_rdc[$statu] as $statut) {
+		$statut_rdc = $this->getData('fk_statut_rdc');
+		if (isset(self::$actions_selon_statut_rdc[$statut_rdc])) {
+			foreach (self::$actions_selon_statut_rdc[$statut_rdc] as $statut) {
 				$listGroup_allowed = self::$group_allowed_actions[$statut];
 				$user_in_group = false;
 				foreach ($listGroup_allowed as $group) {

@@ -409,6 +409,10 @@ views:
             - cols:
                 -   type: list
                     col_lg: 12
+                    show: 
+                        conf: 
+                            name: use_tickets
+                            module: bimpsupport
                     list:
                         children: ticket
 

@@ -11836,6 +11836,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 							}
 
 							if (!is_null($model)) {
+								echo 'MATCHES<pre>' . print_r($model_matches, 1) . '</pre>';
+								exit;
 								$model->set('sep', $sep);
 								$model->set('import_params', array(
 									'matches'        => $model_matches,
@@ -11855,6 +11857,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 										$errors[] = BimpTools::getMsgFromArray($model_errors, 'Echec de la création du nouveau modèle');
 									}
 								}
+							} else {
+								die('ICI');
 							}
 						}
 

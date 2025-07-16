@@ -397,15 +397,16 @@ forms:
     
     
     formActionRdc:
-        title: Choisir une action
+        title: Changer le statut d'un marchand
         rows:
             -   custom: 1
-                label: Actions
+                label: Nouveau statut
                 input_name: status
                 input:
                     type: select
                     options:
-                        callback: getListButtons
+                        callback : getSelectStatusArray
+#                        callback: getListButtons => nom changé car "getListButtons" est un nom générique souvents utilisé pour obtenir les boutons d'une liste (rique de conflits avec une classe parente) 
             -   field: commentaire_statut_ko
                 display_if:
                     field_name: status

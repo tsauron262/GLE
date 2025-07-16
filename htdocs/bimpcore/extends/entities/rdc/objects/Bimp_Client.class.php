@@ -252,7 +252,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		);
 		$buttons[]= array(
 			'label' => 'Changer le statut',
-			'icon' => 'fas_edit',
+			'icon' => 'fas_pen',
 			'onclick' => $this->getJsActionOnclick('change_status_rdc', array(), array('form_name' => 'formActionRdc'))
 		);
 		return $buttons;

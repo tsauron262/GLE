@@ -11837,7 +11837,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 							if (!is_null($model)) {
 								echo 'MATCHES<pre>' . print_r($model_matches, 1) . '</pre>';
-								exit;
 								$model->set('sep', $sep);
 								$model->set('import_params', array(
 									'matches'        => $model_matches,
@@ -11850,6 +11849,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 									$model_errors = $model->update($w, true);
 									if (count($model_errors)) {
 										$errors[] = BimpTools::getMsgFromArray($model_errors, 'Echec de la mise à jour du modèle');
+									} else {
+										die('MODEL OK');
 									}
 								} else {
 									$model_errors = $model->create($w, true);

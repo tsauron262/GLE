@@ -11836,9 +11836,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 							}
 
 							if (!is_null($model)) {
-								echo 'MATCHES<pre>' . print_r($model_matches, 1) . '</pre>';
 								$model->set('sep', $sep);
-								$model->set('import_params', array(
+								$model->set('params', array(
 									'matches'        => $model_matches,
 									'maj_check_mode' => $maj_check_mode,
 									'maj_check_keys' => $maj_check_keys
@@ -11849,8 +11848,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 									$model_errors = $model->update($w, true);
 									if (count($model_errors)) {
 										$errors[] = BimpTools::getMsgFromArray($model_errors, 'Echec de la mise à jour du modèle');
-									} else {
-										die('MODEL OK');
 									}
 								} else {
 									$model_errors = $model->create($w, true);
@@ -11858,8 +11855,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 										$errors[] = BimpTools::getMsgFromArray($model_errors, 'Echec de la création du nouveau modèle');
 									}
 								}
-							} else {
-								die('ICI');
 							}
 						}
 

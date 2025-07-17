@@ -60,11 +60,8 @@ class BimpMailCore
 			}
 		}
 
-		$subject = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $subject);
-		$subject = BimpTools::replaceUrlRoot(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
-
-		$msg = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $msg);
-		$msg = BimpTools::replaceUrlRoot(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
+		$subject = BimpTools::checkErpUrlRoot($subject);
+		$msg = BimpTools::checkErpUrlRoot($msg);
 
 		if (BimpTools::cleanEmailsStr($to) == '') {
 			BimpCore::addlog('Echec envoi email sans destinatiare ', Bimp_Log::BIMP_LOG_ALERTE, 'email', null, array(

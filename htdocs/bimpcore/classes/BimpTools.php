@@ -2993,6 +2993,22 @@ class BimpTools
 		return str_replace($old_root, $new_root, $text);
 	}
 
+	public static function checkErpUrlRoot($text)
+	{
+		global $dolibarr_main_url_root;
+
+		if (BimpCore::getExtendsEntity() === 'rdc') {
+			// pour ne pas remplacer juste DOL_URL_ROOT qui peut être une partie d'une URL externe.
+			$text = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), '[DOL_URL_ROOT]', $text);
+			$text = self::replaceUrlRoot('[DOL_URL_ROOT]', $dolibarr_main_url_root, $text);
+		} else {
+			$text = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $text);
+			$text = self::replaceUrlRoot(DOL_URL_ROOT, $dolibarr_main_url_root, $text);
+		}
+
+		return $text;
+	}
+
 	public static function escapeForHtml($txt)
 	{
 		$txt = str_replace("'", "\\'", $txt);

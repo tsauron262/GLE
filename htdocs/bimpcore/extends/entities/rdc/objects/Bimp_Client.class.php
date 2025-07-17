@@ -806,6 +806,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function appelMiraklS20(&$warnings = array())
 	{
+global $user;
 		$shopid = $this->getData('shopid');
 		if (BimpTools::isModuleDoliActif('bimpapi')) {
 			require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
@@ -819,8 +820,10 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$warnings[] = 'Erreur lors de la récupération des données Mirakl';
 				return;
 			}
-echo '<pre>' . print_r($this, true) . '</pre>';
-  exit();
+			if($user->id == 4) {
+				echo '<pre>' . print_r($this, true) . '</pre>';
+				exit();
+			}
 			$errors = array();
 			if ($data['total_count'] == 0) {
 				$warnings[] = 'ShopId ' . $shopid . ' non trouvé sur mirakl';

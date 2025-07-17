@@ -3248,7 +3248,16 @@ class BimpTools
 	public static function arraySearchInsensitive($needle, $haystack)
 	{
 		foreach ($haystack as $key => $value) {
-			if (strcasecmp($needle, $value) === 0) {
+			if (is_array($value)) {
+				foreach (array('label', 'title', 'value', 'content', 'name') as $label_type) {
+					if (isset($value[$label_type])) {
+						$value = $value[$label_type];
+						break;
+					}
+				}
+			}
+
+			if (strcasecmp($needle, (string) $value) === 0) {
 				return $key;
 			}
 		}

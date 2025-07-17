@@ -103,7 +103,8 @@ class cron extends BimpCron
 		// faire la liste des marchands à mettre à jour (Date de mise à jour Mirakl vide ou > 1 jour) et shopid > 0
 		global $db;
 		$bdd = new BimpDb($db);
-		$list = $bdd->getRows('societe', 'shopid > 0 AND (date_maj_mirakl <= DATE_SUB(NOW(), INTERVAL 1 DAY) OR date_maj_mirakl IS NULL)', 250, 'array', array('rowid'));
+//		$list = $bdd->getRows('societe', 'shopid > 0 AND (date_maj_mirakl <= DATE_SUB(NOW(), INTERVAL 1 DAY) OR date_maj_mirakl IS NULL)', 250, 'array', array('rowid'));
+		$list = $bdd->getRows('societe', 'rowid = 36806', 250, 'array', array('rowid'));
 		foreach ($list as $element) {
 			// on ne met à jour que les marchands
 			$socMarchand = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $element['rowid']);

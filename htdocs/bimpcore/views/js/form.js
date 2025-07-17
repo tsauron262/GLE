@@ -1218,7 +1218,7 @@ function getInputValue($inputContainer) {
 				break;
 		}
 	}
-	
+
 	// console.log('VAL OF ' + field_name);
 	// console.log(value);
 
@@ -5253,7 +5253,7 @@ function BimpFileUploader() {
 					}
 
 					if (!file_ok) {
-						bimp_msg('Extension non autorisée pour le fichier "' + new_files[i].name + '"', 'danger', null, true);
+						bimp_msg('Extension "' + ext + '" non autorisée pour le fichier "' + new_files[i].name + '"', 'danger', null, true);
 						ext_check = false;
 					}
 				}

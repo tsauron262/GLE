@@ -819,7 +819,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$warnings[] = 'Erreur lors de la récupération des données Mirakl';
 				return;
 			}
-
+echo '<pre>' . print_r($this, true) . '</pre>';
+  exit();
 			$errors = array();
 			if ($data['total_count'] == 0) {
 				$warnings[] = 'ShopId ' . $shopid . ' non trouvé sur mirakl';

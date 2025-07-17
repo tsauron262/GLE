@@ -5178,6 +5178,9 @@ function BimpFileUploader() {
 	};
 
 	this.checkFiles = function ($area, new_files) {
+		console.log('FILES');
+		console.log(new_files);
+		
 		var $container = $area.findParentByClass('bimp_drop_files_container');
 
 		if (!$.isOk($container)) {

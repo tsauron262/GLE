@@ -11793,6 +11793,17 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			if (!file_exists($file)) {
 				$errors[] = 'Le fichier "' . $files[0] . '" semble ne pas avoir été télécharger correctement';
 			} else {
+				// varif encodage :
+				$file_content = file_get_contents($file);
+				if (!mb_check_encoding($file_content, 'UTF-8')) {
+					$uft8_content = mb_convert_encoding($contenu, 'UTF-8');
+					if ($uft8_content) {
+						file_put_contents($file, $uft8_content);
+					} else {
+						$errors[] = 'Le fichier semnle ne pas être encodé correctement et la conversion en UTF-8 a échoué';
+					}
+				}
+
 				$lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
 				if (empty($lines)) {

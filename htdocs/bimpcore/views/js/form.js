@@ -1218,7 +1218,7 @@ function getInputValue($inputContainer) {
 				break;
 		}
 	}
-	
+
 	// console.log('VAL OF ' + field_name);
 	// console.log(value);
 
@@ -5178,6 +5178,9 @@ function BimpFileUploader() {
 	};
 
 	this.checkFiles = function ($area, new_files) {
+		console.log('FILES');
+		console.log(new_files);
+		
 		var $container = $area.findParentByClass('bimp_drop_files_container');
 
 		if (!$.isOk($container)) {
@@ -5253,7 +5256,7 @@ function BimpFileUploader() {
 					}
 
 					if (!file_ok) {
-						bimp_msg('Extension non autorisée pour le fichier "' + new_files[i].name + '"', 'danger', null, true);
+						bimp_msg('Extension "' + ext + '" non autorisée pour le fichier "' + new_files[i].name + '"', 'danger', null, true);
 						ext_check = false;
 					}
 				}

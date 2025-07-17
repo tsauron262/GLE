@@ -2485,6 +2485,10 @@ class BimpObject extends BimpCache
 		$errors = array();
 
 		foreach ($data as $field_name => $value) {
+			if (is_null($value)) {
+				continue;
+			}
+
 			if (!$this->field_exists($field_name)) {
 				$errors[] = 'Le champ "' . $field_name . '" n\'existe pas pour les ' . $this->getLabel('name_plur');
 				continue;
@@ -2498,7 +2502,9 @@ class BimpObject extends BimpCache
 				if (!isset($values[$value])) {
 					$key_val = BimpTools::arraySearchInsensitive($value, $values);
 					if ($key_val === false) {
-						$errors[] = 'Champ "' . $field_label . '" Valeur invalide : ' . $value;
+						if (!empty($value)) {
+							$errors[] = 'Champ "' . $field_label . '" Valeur invalide : ' . $value;
+						}
 						continue;
 					} else {
 						$value = $key_val;
@@ -2545,7 +2551,9 @@ class BimpObject extends BimpCache
 				}
 			}
 
-			$this->set($field_name, $value);
+			if ($value !== '') {
+				$this->set($field_name, $value);
+			}
 		}
 
 		return $errors;
@@ -11793,6 +11801,17 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			if (!file_exists($file)) {
 				$errors[] = 'Le fichier "' . $files[0] . '" semble ne pas avoir été télécharger correctement';
 			} else {
+				// varif encodage :
+				$file_content = file_get_contents($file);
+				if (!mb_check_encoding($file_content, 'UTF-8')) {
+					$uft8_content = mb_convert_encoding($contenu, 'UTF-8');
+					if ($uft8_content) {
+						file_put_contents($file, $uft8_content);
+					} else {
+						$errors[] = 'Le fichier semnle ne pas être encodé correctement et la conversion en UTF-8 a échoué';
+					}
+				}
+
 				$lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
 				if (empty($lines)) {
@@ -11837,7 +11856,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 							if (!is_null($model)) {
 								$model->set('sep', $sep);
-								$model->set('import_params', array(
+								$model->set('params', array(
 									'matches'        => $model_matches,
 									'maj_check_mode' => $maj_check_mode,
 									'maj_check_keys' => $maj_check_keys

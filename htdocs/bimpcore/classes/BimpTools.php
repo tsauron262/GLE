@@ -3245,6 +3245,16 @@ class BimpTools
 		return $array;
 	}
 
+	public static function arraySearchInsensitive($needle, $haystack)
+	{
+		foreach ($haystack as $key => $value) {
+			if (strcasecmp($needle, $value) === 0) {
+				return $key;
+			}
+		}
+		return false;
+	}
+
 	// Gestion des nombres:
 
 	public static function getDecimalesNumber($float_number)

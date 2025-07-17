@@ -167,6 +167,7 @@ fields_tables:
                   callback: displayObj
             - field: msg
             - field: nb_occurence
+            - field: hash  
             
     url: 
         title: URL

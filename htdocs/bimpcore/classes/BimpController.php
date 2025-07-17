@@ -228,6 +228,19 @@ class BimpController
 
 					$send_email = (int) BimpCore::getConf('send_fatal_errors_emails');
 					if ($send_email) {
+						$email_exceptions = array(
+							'Maximum execution time of'
+						);
+
+						foreach ($email_exceptions as $exception) {
+							if (stripos($msg, $exception) !== false) {
+								$send_email = false;
+								break;
+							}
+						}
+					}
+
+					if ($send_email) {
 						$logs = json_decode(file_get_contents(DOL_DATA_ROOT . '/bimpcore/fatal_errors_logs.json'), 1);
 						if (!is_array($logs)) {
 							$logs = array();

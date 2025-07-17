@@ -9,10 +9,11 @@
 class BWSApi
 {
 
-	protected $request_name = '';
-	protected $ws_user = null;
-	protected $params = array();
-	protected $errors = array();
+	public $request_name = '';
+	public $ws_user = null;
+	public $params = array();
+	public $errors = array();
+	public $log_request = false;
 	public $response_code = 200;
 
 	protected $check_erp_user_rights = true;

@@ -34,6 +34,7 @@ global $dolibarr_main_url_root;
 
 echo '$dolibarr_main_url_root : ' . $dolibarr_main_url_root . '<br/>';
 echo 'DOL_URL_ROOT : ' . DOL_URL_ROOT . '<br/>';
+echo '$_SERVER[\'SERVER_NAME\'] . DOL_URL_ROOT : ' . $_SERVER['SERVER_NAME'] . DOL_URL_ROOT . '<br/>';
 
 echo '<br/>FIN';
 echo '</body></html>';

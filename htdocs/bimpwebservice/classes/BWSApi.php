@@ -332,7 +332,7 @@ class BWSApi
 			$module = BimpTools::getArrayValueFromPath($this->params, 'module', 'any');
 			$object_name = BimpTools::getArrayValueFromPath($this->params, 'object_name', 'any');
 
-			if (!$this->ws_user->hasRight($this->request_name, $module, $object_name)) {
+			if (!$this->ws_user->hasRight($this->request_name, $module, $object_name, $this->log_request)) {
 				$this->addError('FORBIDDEN', 'Opération non permise');
 				$this->response_code = 403;
 				return false;

@@ -141,7 +141,7 @@ class BWS_User extends BimpObject
 		$id_right = (int) $this->getRightId($request_name, $module, $object_name);
 
 		if ($id_right) {
-			$right = BimpCache::getBimpObjectInstance('bimpwebservice', 'BWS_Right', $id_right);
+			$right = BimpCache::getBimpObjectInstance('bimpwebservice', 'BWS_ProfileRight', $id_right);
 			if (BimpObject::objectLoaded($right)) {
 				$log_request = (int) $right->getData('log_requests');
 			}

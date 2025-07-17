@@ -2485,6 +2485,10 @@ class BimpObject extends BimpCache
 		$errors = array();
 
 		foreach ($data as $field_name => $value) {
+			if (is_null($value)) {
+				continue;
+			}
+
 			if (!$this->field_exists($field_name)) {
 				$errors[] = 'Le champ "' . $field_name . '" n\'existe pas pour les ' . $this->getLabel('name_plur');
 				continue;
@@ -2498,7 +2502,9 @@ class BimpObject extends BimpCache
 				if (!isset($values[$value])) {
 					$key_val = BimpTools::arraySearchInsensitive($value, $values);
 					if ($key_val === false) {
-						$errors[] = 'Champ "' . $field_label . '" Valeur invalide : ' . $value;
+						if (!empty($value)) {
+							$errors[] = 'Champ "' . $field_label . '" Valeur invalide : ' . $value;
+						}
 						continue;
 					} else {
 						$value = $key_val;
@@ -2545,7 +2551,9 @@ class BimpObject extends BimpCache
 				}
 			}
 
-			$this->set($field_name, $value);
+			if ($value !== '') {
+				$this->set($field_name, $value);
+			}
 		}
 
 		return $errors;

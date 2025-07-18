@@ -808,6 +808,9 @@ class BimpCommDemandeFin extends BimpObject
 			if (isset($data['nb_loyers']) && $data['nb_loyers']) {
 				$content .= '<b>Nombre de loyers :</b> ' . $data['nb_loyers'] . '<br/>';
 			}
+			if (isset($data['date_fin']))	{
+				$content .= '<b>Date de fin :</b> ' . date('d/m/Y', strtotime($data['date_fin'])) . '<br/>';
+			}
 			$content .= '<br/>';
 
 			if (!empty($data['montants'])) {

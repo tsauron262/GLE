@@ -309,7 +309,8 @@ class BWSApi_ExtEntity extends BWSApi
 						'phone' => ''
 					),
 					'logs'              => array(),
-					'notes'             => array()
+					'notes'             => array(),
+					'date_fin'			=> $demande->getData('date_fin'),
 				);
 
 				if ($status >= 10 && $status < 20) {

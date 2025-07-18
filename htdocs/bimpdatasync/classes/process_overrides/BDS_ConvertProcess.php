@@ -1557,9 +1557,9 @@ class BDS_ConvertProcess extends BDSProcess
 					$requete[] = $sql;
 					$db->query($sql);
 
+					$sql = "UPDATE llx_societe SET anonym_dev = 1 WHERE rowid = " . $socid;
+					$requete[] = $sql;
 				}
-				$sql = "UPDATE llx_societe SET anonym_dev = 1 WHERE rowid = " . $socid;
-				$requete[] = $sql;
 				$db->query($sql);
 			}
 			$this->Success('OK : Anonymisation de ' . json_encode($soc) . '<br>'.json_encode($requete));

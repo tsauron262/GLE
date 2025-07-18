@@ -316,7 +316,7 @@ class InpiAPI extends BimpAPI
 //                break;
 
 			case '401':
-				$errors[] = 'Non autentifié';
+				$errors[] = 'Non authentifié';
 				$return = 'unauthenticate';
 				break;
 
@@ -329,7 +329,7 @@ class InpiAPI extends BimpAPI
 				break;
 
 			case '405':
-				$errors[] = 'Format de la requête non supoorté';
+				$errors[] = 'Format de la requête non supporté';
 				break;
 
 			case '500':

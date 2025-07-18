@@ -69,7 +69,6 @@ if (!$action) {
 		'test_divers'                               => 'Test divers',
 		'users_bdd'                                 => 'List Users BDD',
 		'correct_propal_remises'                    => 'Correction des remises des propales',
-//		'anonymize_dev'								=> 'Anonymisation des base de dev'
 		'purge_doublon_rdc'							=> 'Purger doublon contact rdc',
 	);
 
@@ -754,102 +753,6 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 				}
 			}
 		}
-		break;
-
-	case 'anonymize_dev':
-		if (MOD_DEV)	{
-			$sql = "SELECT rowid FROM llx_societe WHERE is_anonymized = 0 AND anonym_dev = 0";
-			$query = $db->query($sql);
-			if (!$query->num_rows) {
-				echo '<h3>La base est entierement anonymisée</h3>';
-			}
-			else {
-				echo '<h3>Il reste ' . number_format($query->num_rows, 0, ',' , ' ') . ' tiers à traiter</h3>';
-				echo '<div style="margin-bottom: 10px">';
-				echo '<a href="?action=conf_anonymize_dev" class="btn btn-default">';
-				echo 'Confirmer l\'anonymisation des données ' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
-				echo '</a>';
-				echo '</div>';
-			}
-		}
-		else echo '<h3>ceci ne fonctionne qu\'en mode DEV</h3>';
-		break;
-
-	case 'conf_anonymize_dev':
-		echo date('Y-m-d H:i:s');
-		global $conf;
-		$sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '";
-		$sql .= $conf->db->name;
-		$sql .= "' AND TABLE_NAME = 'llx_societe' AND COLUMN_NAME = 'anonym_dev'";
-		$query = $db->query($sql);
-		if($query->num_rows == 0)	{
-			$sql = "ALTER TABLE llx_societe ADD COLUMN `anonym_dev` INTEGER default 0";
-			$query = $db->query($sql);
-			echo 'create anonym_dev column';
-		}
-
-
-		$sql = "SELECT rowid FROM llx_societe WHERE is_anonymized = 0 AND anonym_dev = 0 LIMIT 1000";
-		$query = $db->query($sql);
-		while($res = $db->fetch_object($query))	{
-			$errors = array();
-			$num = (string) $res->rowid;
-			$nbZ = 8 - strlen($num);
-			$num = str_repeat('0', $nbZ) . $num;
-			$soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $res->rowid);
-			$fields_values = array(
-				'nom' => $num,
-			);
-			if($soc->getData('address'))	$fields_values['adresse'] = $num . $num . substr($soc->getData('address'), 16);
-			if($soc->getData('email'))		$fields_values['email'] = $num . strstr($soc->getData('email'), '@', false);
-			if($soc->getData('phone'))			$fields_values['phone'] = '00' . $num;
-			if($soc->getData('fax'))			$fields_values['fax'] = '00' . $num;
-			$fields_values['siret'] = "";
-			$fields_values['siren'] = "";
-			$errors_tiers = $soc->updateFields($fields_values);
-			if($errors_tiers) $errors[] = $errors_tiers;
-
-			$contacts = $soc->getContactsArray(false);
-			foreach ($contacts as $index => $contact) {
-				$contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $index);
-				$fields_values = array(
-					'lastname' => $num,
-					'address' => '',
-					'zip' => '',
-					'town' => '',
-				);
-				if($contact->getData('email'))			$fields_values['email'] = $num . strstr($contact->getData('email'), '@', false);
-				if($contact->getData('phone'))			$fields_values['phone'] = '00' . $num;
-				if($contact->getData('phone_perso'))	$fields_values['phone_perso'] = '00' . $num;
-				if($contact->getData('phone_mobile'))	$fields_values['phone_mobile'] = '00' . $num;
-				if($contact->getData('fax'))			$fields_values['fax'] = '00' . $num;
-				$errors_contact = $contact->updateFields($fields_values);
-				if($errors_contact) $errors[] = $errors_contact;
-			}
-
-			$ribs = BimpCache::getSocieteRibsArray($soc->id);
-			foreach ($ribs as $index => $rib) {
-				$rib = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_SocBankAccount', $index);
-				$fields_values = array(
-					'rum' => substr($rib->getData('rum'), 0, 2) . $num . substr($rib->getData('rum'), 10),
-				);
-				if ($rib->getData('number'))	$fields_values['number'] = $num . substr($rib->getData('number'), 8);
-				if ($rib->getData('bic'))		$fields_values['bic'] = substr($rib->getData('bic'), 8) . $num;
-				if ($rib->getData('proprio'))	$fields_values['proprio'] = 'client ' . $num;
-				if ($rib->getData('owner_address')) $fields_values['owner_address'] = '';
-				$errors_rib = $rib->updateFields($fields_values);
-				if ($errors_rib) $errors[] = $errors_rib;
-			}
-
-			if($errors)	{
-				echo '<pre>' . print_r($errors, true) . '</pre>';
-			}
-			else	{
-				$sql = "UPDATE llx_societe SET anonym_dev = 1 WHERE rowid = " .$soc->id;
-				$db->query($sql);
-			}
-		}
-		echo '<br>' . date('Y-m-d H:i:s');
 		break;
 
 	case 'purge_doublon_rdc' :

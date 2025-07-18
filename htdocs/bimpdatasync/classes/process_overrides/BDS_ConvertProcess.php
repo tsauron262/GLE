@@ -16,11 +16,12 @@ class BDS_ConvertProcess extends BDSProcess
         'ShipmentsToConvert'       => 'Conversion des lignes d\'expédition',
         'ReceptionsToConvert'      => 'Conversion des lignes de réception',
         'abosToConvert'            => 'Conversion des Abonnements',
-        'abosPropalLinesToConvert' => 'Conversion des données abo dans propales'
+        'abosPropalLinesToConvert' => 'Conversion des données abo dans propales',
+		'anonymize_dev'				=> 'Anonymisation des données sur les instances de dev' // https://erp.bimp.fr/bimp8/bimpdatasync/index.php?fc=process&id=56
     );
     public static $default_public_title = 'Scripts de conversions des données';
 
-    // Process : 
+    // Process :
 
     public function initConvert(&$data, &$errors = array())
     {
@@ -720,7 +721,7 @@ class BDS_ConvertProcess extends BDSProcess
         return array();
     }
 
-    // Abonnements: 
+    // Abonnements:
 
     public function findAbosToConvert(&$errors = array())
     {
@@ -1298,7 +1299,7 @@ class BDS_ConvertProcess extends BDSProcess
                                 } else {
                                     $contrat_line->updateField('statut', $contrat_line_data['statut']);
 
-                                    // Maj ligne de commande : 
+                                    // Maj ligne de commande :
                                     $commande_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $contrat_line_data['id_line_origin']);
                                     if (BimpObject::objectLoaded($commande_line)) {
                                         $line_ref = 'Ligne #' . $commande_line->id . ' (n° ' . $commande_line->getData('position') . ')';
@@ -1322,7 +1323,7 @@ class BDS_ConvertProcess extends BDSProcess
                                             continue 2;
                                         }
 
-                                        // Annulation réservations : 
+                                        // Annulation réservations :
                                         $reservations = $commande_line->getReservations('status', 'asc', array(0, 2, 3, 4, 100, 101, 200));
 
                                         foreach ($reservations as $res) {
@@ -1335,7 +1336,7 @@ class BDS_ConvertProcess extends BDSProcess
                                             }
                                         }
 
-                                        // Régul stock : 
+                                        // Régul stock :
                                         if (isset($regul_stocks[$commande_line->id])) {
                                             $product = $commande_line->getProduct();
                                             $mvt = ($regul_stocks[$commande_line->id] < 0 ? 1 : 0);
@@ -1400,7 +1401,7 @@ class BDS_ConvertProcess extends BDSProcess
         }
     }
 
-    // Données abos propales: 
+    // Données abos propales:
 
     public function findAbosPropalLinesToConvert(&$errors = array())
     {
@@ -1484,7 +1485,89 @@ class BDS_ConvertProcess extends BDSProcess
         }
     }
 
-    // install : 
+	public function findAnonymize_dev(&$errors = array())
+	{
+		// si necessaire : ALTER TABLE llx_societe ADD COLUMN `anonym_dev` INTEGER default 0
+		$sql = "SELECT rowid FROM llx_societe WHERE is_anonymized = 0 AND anonym_dev = 0";
+		$rows = $this->db->executeS($sql, 'array');
+		if (is_array($rows)) {
+			foreach ($rows as $r) {
+				$elems[] = (int) $r['rowid'];
+			}
+		} else {
+			$errors[] = $this->db->err();
+		}
+
+		return $elems;
+	}
+
+	public function execAnonymize_dev(&$errors = array())
+	{
+		global $db;
+
+		foreach ($this->references as $socid) {
+			$requete = array();
+			$this->incProcessed();
+			$num = (string) $socid;
+			$nbZ = 8 - strlen($num);
+			$num = str_repeat('0', $nbZ) . $num;
+			$sql = "SELECT rowid, nom, address, email, phone, fax FROM llx_societe WHERE rowid = " . $socid;
+			$req = $db->query($sql);
+			$soc = $db->fetch_object($req);
+			$sql = "UPDATE llx_societe SET nom = 'cli_" .$num . "'";
+			if($soc->address)
+				$sql .= ", address = '" . $num . htmlentities(substr($soc->address, 8)) . "'";
+			if($soc->email)
+				$sql .= ", email = '" . $num . strstr($soc->email, '@', false) . "'";
+			if($soc->phone)
+				$sql .= ", phone = '" . '00' . $num . "'";
+			if($soc->fax)
+				$sql .= ", fax = '" . '00' . $num . "'";
+
+			$sql .= ", siret = '', siren = ''";
+			$sql .= " WHERE rowid = " . $socid;
+			$requete[] = $sql;
+			$res = $db->query($sql);
+
+			if($res) {
+				$sql = "SELECT rowid FROM llx_socpeople WHERE fk_soc = " . $socid;
+				$req = $db->query($sql);
+				while ($contact = $db->fetch_object($req)) {
+					$sql = "UPDATE llx_socpeople SET lastname = '" . $num . "', address = '', zip = '', town = '' WHERE rowid = " . $contact->rowid;
+					$requete[] = $sql;
+					$db->query($sql);
+				}
+
+				$sql = "SELECT rowid, rum, number, bic, proprio FROM llx_societe_rib WHERE fk_soc = " . $socid;
+				$req = $db->query($sql);
+				while ($rib = $db->fetch_object($req)) {
+					$rum = substr($rib->rum, 0, 2) . $num . substr($rib->rum, 10);
+					$sql = "UPDATE llx_societe_rib SET rum = '" . $rum . "'";
+					if($rib->number)
+						$sql .= ", number = '" . $num . substr($rib->number, 8) . "'";
+					if($rib->bic)
+						$sql .= ", bic = '" . $num . substr($rib->bic, 8) . "'";
+					if($rib->proprio)
+						$sql .= ", proprio = 'cli_" . $num . "', owner_address = ''";
+					$sql .= " WHERE rowid = " . $rib->rowid;
+					$requete[] = $sql;
+					$db->query($sql);
+
+					$sql = "UPDATE llx_bic_user SET email = CONCAT('".$num."', SUBSTRING(email, POSITION('@' IN email))) WHERE id_client = " . $socid;
+					$requete[] = $sql;
+					$db->query($sql);
+
+				}
+				$sql = "UPDATE llx_societe SET anonym_dev = 1 WHERE rowid = " . $socid;
+				$requete[] = $sql;
+				$db->query($sql);
+			}
+			$this->Success('OK : Anonymisation de ' . json_encode($soc) . '<br>'.json_encode($requete));
+		}
+	}
+
+
+    // install :
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
@@ -1498,7 +1581,7 @@ class BDS_ConvertProcess extends BDSProcess
                         ), true, $errors, $warnings);
 
         if (BimpObject::objectLoaded($process)) {
-            // Options: 
+            // Options:
 
             $options = array();
 
@@ -1544,7 +1627,7 @@ class BDS_ConvertProcess extends BDSProcess
                 $options[] = (int) $opt->id;
             }
 
-            // Opérations: 
+            // Opérations:
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $process->id,
                         'title'         => 'Conversions / corrections',

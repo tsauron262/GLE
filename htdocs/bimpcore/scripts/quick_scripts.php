@@ -68,7 +68,9 @@ if (!$action) {
 		'check_attribut_entity'                     => 'Vérifier les attributs par entité',
 		'test_divers'                               => 'Test divers',
 		'users_bdd'                                 => 'List Users BDD',
-		'correct_propal_remises'                    => 'Correction des remises des propales'
+		'correct_propal_remises'                    => 'Correction des remises des propales',
+//		'anonymize_dev'								=> 'Anonymisation des base de dev'
+		'purge_doublon_rdc'							=> 'Purger doublon contact rdc',
 	);
 
 	$path = pathinfo(__FILE__);
@@ -751,6 +753,204 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 					echo '<span class="danger">Une remise existe déjà côté Bimp</span>';
 				}
 			}
+		}
+		break;
+
+	case 'anonymize_dev':
+		if (MOD_DEV)	{
+			$sql = "SELECT rowid FROM llx_societe WHERE is_anonymized = 0 AND anonym_dev = 0";
+			$query = $db->query($sql);
+			if (!$query->num_rows) {
+				echo '<h3>La base est entierement anonymisée</h3>';
+			}
+			else {
+				echo '<h3>Il reste ' . number_format($query->num_rows, 0, ',' , ' ') . ' tiers à traiter</h3>';
+				echo '<div style="margin-bottom: 10px">';
+				echo '<a href="?action=conf_anonymize_dev" class="btn btn-default">';
+				echo 'Confirmer l\'anonymisation des données ' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
+				echo '</a>';
+				echo '</div>';
+			}
+		}
+		else echo '<h3>ceci ne fonctionne qu\'en mode DEV</h3>';
+		break;
+
+	case 'conf_anonymize_dev':
+		echo date('Y-m-d H:i:s');
+		global $conf;
+		$sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '";
+		$sql .= $conf->db->name;
+		$sql .= "' AND TABLE_NAME = 'llx_societe' AND COLUMN_NAME = 'anonym_dev'";
+		$query = $db->query($sql);
+		if($query->num_rows == 0)	{
+			$sql = "ALTER TABLE llx_societe ADD COLUMN `anonym_dev` INTEGER default 0";
+			$query = $db->query($sql);
+			echo 'create anonym_dev column';
+		}
+
+
+		$sql = "SELECT rowid FROM llx_societe WHERE is_anonymized = 0 AND anonym_dev = 0 LIMIT 1000";
+		$query = $db->query($sql);
+		while($res = $db->fetch_object($query))	{
+			$errors = array();
+			$num = (string) $res->rowid;
+			$nbZ = 8 - strlen($num);
+			$num = str_repeat('0', $nbZ) . $num;
+			$soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $res->rowid);
+			$fields_values = array(
+				'nom' => $num,
+			);
+			if($soc->getData('address'))	$fields_values['adresse'] = $num . $num . substr($soc->getData('address'), 16);
+			if($soc->getData('email'))		$fields_values['email'] = $num . strstr($soc->getData('email'), '@', false);
+			if($soc->getData('phone'))			$fields_values['phone'] = '00' . $num;
+			if($soc->getData('fax'))			$fields_values['fax'] = '00' . $num;
+			$fields_values['siret'] = "";
+			$fields_values['siren'] = "";
+			$errors_tiers = $soc->updateFields($fields_values);
+			if($errors_tiers) $errors[] = $errors_tiers;
+
+			$contacts = $soc->getContactsArray(false);
+			foreach ($contacts as $index => $contact) {
+				$contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $index);
+				$fields_values = array(
+					'lastname' => $num,
+					'address' => '',
+					'zip' => '',
+					'town' => '',
+				);
+				if($contact->getData('email'))			$fields_values['email'] = $num . strstr($contact->getData('email'), '@', false);
+				if($contact->getData('phone'))			$fields_values['phone'] = '00' . $num;
+				if($contact->getData('phone_perso'))	$fields_values['phone_perso'] = '00' . $num;
+				if($contact->getData('phone_mobile'))	$fields_values['phone_mobile'] = '00' . $num;
+				if($contact->getData('fax'))			$fields_values['fax'] = '00' . $num;
+				$errors_contact = $contact->updateFields($fields_values);
+				if($errors_contact) $errors[] = $errors_contact;
+			}
+
+			$ribs = BimpCache::getSocieteRibsArray($soc->id);
+			foreach ($ribs as $index => $rib) {
+				$rib = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_SocBankAccount', $index);
+				$fields_values = array(
+					'rum' => substr($rib->getData('rum'), 0, 2) . $num . substr($rib->getData('rum'), 10),
+				);
+				if ($rib->getData('number'))	$fields_values['number'] = $num . substr($rib->getData('number'), 8);
+				if ($rib->getData('bic'))		$fields_values['bic'] = substr($rib->getData('bic'), 8) . $num;
+				if ($rib->getData('proprio'))	$fields_values['proprio'] = 'client ' . $num;
+				if ($rib->getData('owner_address')) $fields_values['owner_address'] = '';
+				$errors_rib = $rib->updateFields($fields_values);
+				if ($errors_rib) $errors[] = $errors_rib;
+			}
+
+			if($errors)	{
+				echo '<pre>' . print_r($errors, true) . '</pre>';
+			}
+			else	{
+				$sql = "UPDATE llx_societe SET anonym_dev = 1 WHERE rowid = " .$soc->id;
+				$db->query($sql);
+			}
+		}
+		echo '<br>' . date('Y-m-d H:i:s');
+		break;
+
+	case 'purge_doublon_rdc' :
+
+		if ( ! GETPOSTISSET('run') ) 		exit('&run=1&debug=1');
+		if ( ! GETPOSTISSET('debug') )	exit('&run=1&debug=1') ;
+		$run = GETPOST('run', 'int');
+		$debug = GETPOST('debug', 'int');
+		$rowid = GETPOST('rowid', 'int');
+
+		$sql = "SELECT UNIQUE(s.rowid) FROM llx_societe s INNER JOIN llx_socpeople p WHERE s.shopid AND s.rowid = p.fk_soc";	// AND s.rowid in(33120, 33193)";
+		if ($rowid > 0) $sql .= " AND s.rowid = " . $rowid;
+		$query = $db->query($sql);
+		while ($soc = $db->fetch_object($query)) {
+			$contacts = array();
+			$sql = 'SELECT rowid, lastname, firstname, email, poste FROM llx_socpeople p WHERE p.fk_soc = ' . $soc->rowid;
+			$q_people = $db->query($sql);
+			if ($q_people->num_rows < 2) {
+				continue;
+			}
+			while ($contact = $db->fetch_object($q_people)) {
+//				echo $soc->rowid . ' // ' . $contact->rowid . ' ' . $contact->lastname . ' ' . $contact->firstname . ' ' . $contact->email . ' ' . $contact->poste . '<br>';
+				$contacts[] = $contact;
+			}
+
+			$contactsSains = array(
+				'lastname' => array(),
+				'firstname' => array(),
+				'email' => array(),
+				'poste' => array(),
+			);
+			$contactsSainsControl = array();
+			$contactsDoublon = array();
+
+			foreach ($contacts as $contact) {
+//				echo '<pre>' . print_r($contact, true) . '</pre>';
+				// ce contact est il dans contacts sains
+				if(
+					in_array($contact->lastname, $contactsSains['lastname']) &&
+					in_array($contact->firstname, $contactsSains['firstname']) &&
+					in_array($contact->email, $contactsSains['email']) &&
+					in_array($contact->poste, $contactsSains['poste'])
+				)	{
+					// non, alors il est double, il faut trouver l'id dans les sains qui correspond
+					// pour cela, faire un boucle sur $contactsSainsControl
+					$idSain = 0;
+					foreach ($contactsSainsControl as $id => $control) {
+						if($control['lastname'] == $contact->lastname
+						&& $control['firstname'] == $contact->firstname
+						&& $control['email'] == $contact->email
+						&& $control['poste'] == $contact->poste) $idSain = $id;
+					}
+
+					// puis le mettre dans les Doublon
+					$contactsDoublon[$idSain][] = $contact->rowid;
+//					$contactsDoublon[$idSain]['rowid'][] = $contact->rowid;
+//					$contactsDoublon[$idSain]['lastname'][] = $contact->lastname;
+//					$contactsDoublon[$idSain]['firstname'][] = $contact->firstname;
+//					$contactsDoublon[$idSain]['email'][] = $contact->email;
+//					$contactsDoublon[$idSain]['poste'][] = $contact->poste;
+				}
+				else {
+					$contactsSains['lastname'][$contact->rowid] = $contact->lastname;
+					$contactsSains['firstname'][$contact->rowid] = $contact->firstname;
+					$contactsSains['email'][$contact->rowid] = $contact->email;
+					$contactsSains['poste'][$contact->rowid] = $contact->poste;
+					$contactsSainsControl[$contact->rowid]['lastname'] = $contact->lastname;
+					$contactsSainsControl[$contact->rowid]['firstname'] = $contact->firstname;
+					$contactsSainsControl[$contact->rowid]['email'] = $contact->email;
+					$contactsSainsControl[$contact->rowid]['poste'] = $contact->poste;
+				}
+			}
+			if(count($contactsDoublon) && $run) {
+				echo '<hr>';
+//				echo '<pre>' . print_r($contactsSainsControl, true) . '</pre>';
+//				var_dump(count($contactsDoublon)); 	echo '==><pre>' . print_r($contactsDoublon, true) . '</pre>';
+				foreach ($contactsDoublon as $indexConserve => $item) {
+					foreach ($item as $indexSupp) {
+						echo '<p>Je supp ' .$indexSupp. ' au profit de ' . $indexConserve .'</p>';
+						if (!$indexConserve) continue;
+						// update ActionComm
+						$sql = "UPDATE llx_actioncomm SET fk_contact = " . $indexConserve . " WHERE fk_contact = " . $indexSupp;
+						if ($debug) echo $sql . ';<br>';
+						else $db->query($sql);
+
+						// update llx_c_type_contact
+						$sql = "UPDATE llx_element_contact ec
+									INNER JOIN ERP_PREPROD_RDC.llx_c_type_contact tc on tc.rowid = ec.fk_c_type_contact AND tc.source = 'external'
+									SET ec.fk_socpeople = " . $indexConserve . "
+									WHERE ec.fk_socpeople = " . $indexSupp;
+						if ($debug) echo $sql . ';<br>';
+						else $db->query($sql);
+
+						// delete socpeople
+						$sql = "DELETE FROM llx_socpeople WHERE rowid = " . $indexSupp;
+						if ($debug) echo $sql . ';<br>';
+						else $db->query($sql);
+					}
+				}
+			}
+			if($debug) exit('fin debug');
 		}
 		break;
 

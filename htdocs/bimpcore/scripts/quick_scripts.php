@@ -864,8 +864,7 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 		$query = $db->query($sql);
 		var_dump($query);
 		while ($log = $db->fetch_object($query)) {
-			echo '<pre>' . print_r($log, true) . '</pre>';
-			  exit();
+			$bt = json_decode($log->backtrace);
 		}
 		// en extraire la bonne requette
 

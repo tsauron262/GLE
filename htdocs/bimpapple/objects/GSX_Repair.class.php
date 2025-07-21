@@ -2536,11 +2536,13 @@ class GSX_Repair extends BimpObject
 				if (!count($errors)) {
 					$dir = $this->getFilesDir();
 
-					$warnings[] = 'CHEM : "' . $filePath . '" - URL : "' . $fileUrl . '" - DIR : ' . $dir;
+					if (!$dir)
+						$warnings[] = 'CHEM : "' . $filePath . '" - URL : "' . $fileUrl . '" - DIR : ' . $dir;
 
 					$files = scandir($dir);
 
-					$warnings[] = 'Fichiers : <pre>' . print_r($files, 1) . '</pre>';
+					if (!$files)
+						$warnings[] = 'Fichiers : <pre>' . print_r($files, 1) . '</pre>';
 
 					if (!file_exists($filePath)) {
 						$errors[] = 'Fichier absent ';

@@ -861,8 +861,8 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 	case 'pb_droit_purge_doublon':
 		// selectionner dans bimplog
 		$sql = 'SELECT backtrace FROM llx_bimpcore_log WHERE msg LIKE "%llx_c_type_contact%" AND date LIKE "2025-07-18%"';
-
 		$query = $db->query($sql);
+		var_dump($query);
 		while ($log = $db->fetch_object($query)) {
 			echo '<pre>' . print_r($log, true) . '</pre>';
 			  exit();

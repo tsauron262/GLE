@@ -17,7 +17,7 @@ class BDS_ConvertProcess extends BDSProcess
         'ReceptionsToConvert'      => 'Conversion des lignes de réception',
         'abosToConvert'            => 'Conversion des Abonnements',
         'abosPropalLinesToConvert' => 'Conversion des données abo dans propales',
-		'anonymize_dev'				=> 'Anonymisation des données sur les instances de dev' // https://erp.bimp.fr/bimp8/bimpdatasync/index.php?fc=process&id=56
+//		'anonymize_dev'				=> 'Anonymisation des données sur les instances de dev' // https://erp.bimp.fr/bimp8/bimpdatasync/index.php?fc=process&id=56
     );
     public static $default_public_title = 'Scripts de conversions des données';
 

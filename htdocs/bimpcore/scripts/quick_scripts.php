@@ -872,7 +872,6 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 			$sql = str_replace('ERP_PREPROD_RDC.', '', $sql);
 
 			// rexcuter la requete
-			exit($sql);
 			$db->query($sql);
 		}
 		break;

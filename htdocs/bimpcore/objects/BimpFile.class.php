@@ -801,7 +801,7 @@ class BimpFile extends BimpObject
 
                     if (!count($errors)) {
                         $errors = parent::create($warnings, $force_create);
-						if (!count($errors)) {
+						if (!count($errors) && $this->getData('parent_module') == 'bimpcore' && $this->getData('parent_object_name') == 'Bimp_Societe') {
 							$soc = $this->getParentInstance();
 							if (BimpObject::objectLoaded($soc)) {
 								$soc->setActivity('Ajout ' . $this->getLabel('of_the') . ' {{Fichier:' . $this->id . '}}');

@@ -862,7 +862,6 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 		// selectionner dans bimplog
 		$sql = 'SELECT backtrace FROM llx_bimpcore_log WHERE msg LIKE "%llx_c_type_contact%" AND date LIKE "2025-07-18%"';
 		$query = $db->query($sql);
-		var_dump($query);
 		while ($log = $db->fetch_object($query)) {
 			// en extraire la bonne requette
 			$bt = json_decode($log->backtrace);
@@ -872,6 +871,7 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 			$sql = str_replace('ERP_PREPROD_RDC.', '', $sql);
 
 			// rexcuter la requete
+			echo $sql . '<br />';
 			$db->query($sql);
 		}
 		break;

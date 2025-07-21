@@ -865,9 +865,9 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 		var_dump($query);
 		while ($log = $db->fetch_object($query)) {
 			$bt = json_decode($log->backtrace);
-			$erreur = $bt[0]['lines'][0];
-			$pos = strpos($erreur, 'UPDATE');
-			$sql = substr($erreur, $pos, -1);
+//			$erreur = $bt[0]->lines[0];
+//			$pos = strpos($erreur, 'UPDATE');
+//			$sql = substr($erreur, $pos, -1);
 			echo '<pre>' . print_r($bt, true) . '</pre>';
 			  exit(var_dump($sql));
 		}

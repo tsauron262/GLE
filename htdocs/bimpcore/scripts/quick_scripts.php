@@ -864,16 +864,17 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 		$query = $db->query($sql);
 		var_dump($query);
 		while ($log = $db->fetch_object($query)) {
+			// en extraire la bonne requette
 			$bt = json_decode($log->backtrace);
 			$erreur = $bt[0]->lines[0];
 			$pos = strpos($erreur, 'UPDATE');
 			$sql = substr($erreur, $pos, -1);
-			echo '<pre>' . print_r($bt, true) . '</pre>';
-			  exit(var_dump($sql));
-		}
-		// en extraire la bonne requette
+			$sql = str_replace('ERP_PREPROD_RDC.', '', $sql);
 
-		// reexcuter la requete
+			// rexcuter la requete
+			exit($sql);
+			$db->query($sql);
+		}
 		break;
 
 	default:

@@ -801,6 +801,12 @@ class BimpFile extends BimpObject
 
                     if (!count($errors)) {
                         $errors = parent::create($warnings, $force_create);
+						if (!count($errors)) {
+							$soc = $this->getParentInstance();
+							if (BimpObject::objectLoaded($soc)) {
+								$soc->setActivity('Ajout ' . $this->getLabel('of_the') . ' {{Fichier:' . $this->id . '}}');
+							}
+						}
                     }
 
                     if (count($errors) && !$this->dontRemove) {

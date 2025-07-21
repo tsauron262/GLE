@@ -5,7 +5,7 @@ class BS_CentreSav extends BimpObject
 	public function canCreate()
 	{
 		global $user;
-		if ($user->admin) {
+		if ($user->admin || $user->login == 'f.lauby') {
 			return 1;
 		} else {
 			return 0;

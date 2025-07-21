@@ -869,7 +869,7 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 			$pos = strpos($erreur, 'UPDATE');
 			$sql = substr($erreur, $pos, -1);
 			echo '<pre>' . print_r($bt, true) . '</pre>';
-			  exit($sql);
+			  exit(var_dump($sql));
 		}
 		// en extraire la bonne requette
 

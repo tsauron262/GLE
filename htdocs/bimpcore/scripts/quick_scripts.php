@@ -70,6 +70,7 @@ if (!$action) {
 		'users_bdd'                                 => 'List Users BDD',
 		'correct_propal_remises'                    => 'Correction des remises des propales',
 		'purge_doublon_rdc'							=> 'Purger doublon contact rdc',
+		'pb_droit_purge_doublon'					=> 'Traiter les erreur de purge',
 	);
 
 	$path = pathinfo(__FILE__);
@@ -840,7 +841,7 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 
 						// update llx_c_type_contact
 						$sql = "UPDATE llx_element_contact ec
-									INNER JOIN ERP_PREPROD_RDC.llx_c_type_contact tc on tc.rowid = ec.fk_c_type_contact AND tc.source = 'external'
+									INNER JOIN llx_c_type_contact tc on tc.rowid = ec.fk_c_type_contact AND tc.source = 'external'
 									SET ec.fk_socpeople = " . $indexConserve . "
 									WHERE ec.fk_socpeople = " . $indexSupp;
 						if ($debug) echo $sql . ';<br>';
@@ -855,6 +856,19 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 			}
 			if($debug) exit('fin debug');
 		}
+		break;
+
+	case 'pb_droit_purge_doublon':
+		// selectionner dans bimplog
+		$sql = 'SELECT backtrace FROM llx_bimpcore_log WHERE msg LIKE "llx_c_type_contact" AND date LIKE "2025-07-18"';
+		$query = $db->query($sql);
+		while ($log = $db->fetch_object($query)) {
+			echo '<pre>' . print_r($log, true) . '</pre>';
+			  exit();
+		}
+		// en extraire la bonne requette
+
+		// reexcuter la requete
 		break;
 
 	default:

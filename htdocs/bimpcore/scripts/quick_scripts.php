@@ -69,8 +69,7 @@ if (!$action) {
 		'test_divers'                               => 'Test divers',
 		'users_bdd'                                 => 'List Users BDD',
 		'correct_propal_remises'                    => 'Correction des remises des propales',
-		'purge_doublon_rdc'							=> 'Purger doublon contact rdc',
-		'pb_droit_purge_doublon'					=> 'Traiter les erreur de purge',
+//		'purge_doublon_rdc'							=> 'Purger doublon contact rdc',
 	);
 
 	$path = pathinfo(__FILE__);
@@ -855,24 +854,6 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 				}
 			}
 			if($debug) exit('fin debug');
-		}
-		break;
-
-	case 'pb_droit_purge_doublon':
-		// selectionner dans bimplog
-		$sql = 'SELECT backtrace FROM llx_bimpcore_log WHERE msg LIKE "%llx_c_type_contact%" AND date LIKE "2025-07-18%"';
-		$query = $db->query($sql);
-		while ($log = $db->fetch_object($query)) {
-			// en extraire la bonne requette
-			$bt = json_decode($log->backtrace);
-			$erreur = $bt[0]->lines[0];
-			$pos = strpos($erreur, 'UPDATE');
-			$sql = substr($erreur, $pos, -1);
-			$sql = str_replace('ERP_PREPROD_RDC.', '', $sql);
-
-			// rexcuter la requete
-			echo $sql . '<br />';
-			$db->query($sql);
 		}
 		break;
 

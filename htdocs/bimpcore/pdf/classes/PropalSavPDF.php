@@ -59,9 +59,6 @@ class PropalSavPDF extends PropalPDF
 							$centres = BimpCache::getCentresData();
 							if (isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
 								$centre = $centres[$code_centre];
-								$this->fromCompany->address = $centre['address'];
-								$this->fromCompany->zip = $centre['zip'];
-								$this->fromCompany->town = $centre['town'];
 								$this->fromCompany->phone = $centre['tel'];
 								$this->fromCompany->email = $centre['mail'];
 							}
@@ -74,20 +71,6 @@ class PropalSavPDF extends PropalPDF
 					break;
 
 				case 'actimac':
-					$code_centre = $this->sav->getData('code_centre');
-					if (!$code_centre) {
-						$this->errors[] = 'Centre absent pour ' . $this->bimpCommObject->getLabel('this');
-					} else {
-						$centres = BimpCache::getCentresData();
-						if (isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
-							$centre = $centres[$code_centre];
-							$this->fromCompany->address = $centre['address'];
-							$this->fromCompany->zip = $centre['zip'];
-							$this->fromCompany->town = $centre['town'];
-							$this->fromCompany->phone = $centre['tel'];
-							$this->fromCompany->email = $centre['mail'];
-						}
-					}
 					$cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_actimac.pdf';
 					break;
 			}

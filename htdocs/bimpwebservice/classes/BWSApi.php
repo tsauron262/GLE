@@ -1243,6 +1243,7 @@ class BWSApi
 								// Validation auto commande :
 								BimpTools::cleanDolEventsMsgs();
 								$result = $commande->dol_object->valid($user);
+
 								$comm_errors = BimpTools::getDolEventsMsgs(array('errors'));
 								$warnings = array_merge($warnings, BimpTools::getDolEventsMsgs(array('warnings')));
 
@@ -1285,6 +1286,9 @@ class BWSApi
 
 								foreach ($lines as $line) {
 									$product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line['id_product']);
+
+									$message .= '<tr>';
+
 									$message .= '<td style="padding: 5px; border-bottom: 1px solid #999999;">';
 									$message .= '<b>' . $product->getRef() . '</b><br/>';
 									$message .= $product->getName();
@@ -1305,6 +1309,8 @@ class BWSApi
 									$message .= '<td style="padding: 5px; border-bottom: 1px solid #999999;">';
 									$message .= BimpTools::displayMoneyValue((float) $line['pu_ht'] * (1 + ((float) $line['tva_tx'] / 100)) * (float) $line['quantite']);
 									$message .= '</td>';
+
+									$message .= '</tr>';
 								}
 
 								$message .= '</tbody>';

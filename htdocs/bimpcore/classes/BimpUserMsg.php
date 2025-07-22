@@ -28,7 +28,7 @@ class BimpUserMsg
 			)
 		),
 		'valide_commande_client'                     => array(    // \Bimp_Commande::onValidate
-			'label'  => 'Commande XXX pour le client ... a été validée',
+			'label'  => 'Votre commande XXX pour le client ... a été validée',
 			'dests'  => 'object::commercial',
 			'module' => 'bimpcommercial',
 			'params' => array(
@@ -1107,7 +1107,7 @@ class BimpUserMsg
 
 								if (!in_array($id_sup, $idsDejaAjoutes)) {
 									$superior = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_sup);
-									if (BimpObject::objectLoaded($superior) && $superior->getData('statut') && (!$params['check_availability'] || $superior->isAvailable())) {
+									if (BimpObject::objectLoaded($superior) && $superior->getData('statut') && (!$params['check_availability'] || $superior->isNotHoliday())) {
 										$userDestinataires[] = $superior;
 										$idsDejaAjoutes[] = $superior->id;
 										$redir_reasons[$superior->id] = 'Message recu en tant que supérieur de ' . $user->getFullName() .' car cet utilisateur ' . $unallowed_reason;

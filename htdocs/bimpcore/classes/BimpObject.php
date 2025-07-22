@@ -2526,9 +2526,11 @@ class BimpObject extends BimpCache
 									$results = $obj_instance->getSearchResults('all', $value);
 
 									if (!count($results)) {
-										$errors[] = 'Champ "' . $field_label . '" : aucun ' . $obj_instance->getLabel() . ' trouvé' . $obj_instance->e() . ' pour la valeur "' . $value . '"';
 										$value = 0;
-										continue 2;
+										if (!empty($value)) {
+											$errors[] = 'Champ "' . $field_label . '" : aucun ' . $obj_instance->getLabel() . ' trouvé' . $obj_instance->e() . ' pour la valeur "' . $value . '"';
+											continue 2;
+										}
 									} elseif (count($results) > 1) {
 										$msg = count($results) . ' ' . $obj_instance->getLabel('name_plur') . ' trouvé' . $obj_instance->e() . 's pour la valeur "' . $value . '"';
 										foreach ($results as $id_obj => $result) {

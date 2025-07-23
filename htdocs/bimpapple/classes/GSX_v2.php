@@ -1170,6 +1170,26 @@ class GSX_v2 extends GSX_Const
 		return $this->exec('consignmentOrderShipment', $params);
 	}
 
+	public function getConsignmentPackingList($shipTo, $shipment_number)
+	{
+		if (self::$mode == 'test') {
+			$shipTo = self::$test_ids['ship_to'];
+		}
+
+		if ($shipTo) {
+			$shipTo = BimpTools::addZeros($shipTo, 10);
+		}
+
+		$response_headers = array();
+
+		return $this->exec('getFile', array(
+			'identifiers' => array(
+				'shipmentNumber' => $shipment_number,
+				'shipTo'         => $shipTo
+			)
+		), $response_headers, array('url_params' => array('documentType' => 'consignmentPackingList')));
+	}
+
 	// Commandes de stocks internes :
 
 	public function stockingOrderPartsSummary($params)

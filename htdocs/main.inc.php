@@ -297,14 +297,6 @@ function analyseVarsForSqlAndScriptsInjection(&$var, $type, $stopcode = 1)
 					print $errormessage2;
 					print "\n" . '-->';
 
-					if (!defined('BIMP_LIB')) {
-						require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-					}
-
-					BimpCore::addlog('Blocage anti injection', 1, 'secu', null, array(
-
-					), true);
-
 					// Add entry into the PHP server error log
 					if (function_exists('error_log')) {
 						error_log($errormessage . ' ' . substr($errormessage2, 2000));

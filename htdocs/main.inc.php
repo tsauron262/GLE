@@ -305,7 +305,7 @@ function analyseVarsForSqlAndScriptsInjection(&$var, $type, $stopcode = 1)
 					/*moddrsi (20.2)*/
 					// Pour débug :
 					if (is_dir(DOL_DOCUMENT_ROOT . '/bimpressources')) {
-						$hfile = fopen(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.php', 'a');
+						$hfile = fopen(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt', 'a');
 						if ($hfile) {
 							fwrite($hfile, '------------------------------------' . "\n" . date('d / m / Y H:i') . "\n" . $errormessage . ' ' . substr($errormessage2, 2000) ."\n\n\n");
 							fclose($hfile);

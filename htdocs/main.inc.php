@@ -297,21 +297,18 @@ function analyseVarsForSqlAndScriptsInjection(&$var, $type, $stopcode = 1)
 					print $errormessage2;
 					print "\n" . '-->';
 
+					if (!defined('BIMP_LIB')) {
+						require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+					}
+
+					BimpCore::addlog('Blocage anti injection', 1, 'secu', null, array(
+
+					), true);
+
 					// Add entry into the PHP server error log
 					if (function_exists('error_log')) {
 						error_log($errormessage . ' ' . substr($errormessage2, 2000));
 					}
-
-					/*moddrsi (20.2)*/
-					// Pour débug :
-					if (is_dir(DOL_DOCUMENT_ROOT . '/bimpressources')) {
-						$hfile = fopen(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.php', 'a');
-						if ($hfile) {
-							fwrite($hfile, '------------------------------------' . "\n" . date('d / m / Y H:i') . "\n" . $errormessage . ' ' . substr($errormessage2, 2000) ."\n\n\n");
-							fclose($hfile);
-						}
-					}
-					/*fmoddrsi (20.2)*/
 
 					// Note: No addition into security audit table is done because we don't want to execute code in such a case.
 					// Detection of too many such requests can be done with a fail2ban rule on 403 error code or into the PHP server error log.

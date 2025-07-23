@@ -3,7 +3,7 @@
 class BC_Paiement extends BimpObject
 {
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isEditable($force_edit = false, &$errors = array())
     {
@@ -26,7 +26,7 @@ class BC_Paiement extends BimpObject
                 $paiement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement', (int) $this->getData('id_paiement'));
 
                 if (BimpObject::objectLoaded($paiement)) {
-                    // Surtout pas d'appel à $paiement->isEditable() sinon boucle infinie. 
+                    // Surtout pas d'appel à $paiement->isEditable() sinon boucle infinie.
                     if ($paiement->getData('exported') == 1) {
                         $errors[] = 'Paiement exporté en compta';
                         return 0;
@@ -43,7 +43,7 @@ class BC_Paiement extends BimpObject
         return $this->isEditable($force_delete, $errors);
     }
 
-    // Getters: 
+    // Getters:
 
     public function getListFilters()
     {
@@ -59,7 +59,7 @@ class BC_Paiement extends BimpObject
 
         return $filters;
     }
-    
+
     public function getAmount()
     {
         $paiement = $this->getChildObject('paiement');
@@ -71,7 +71,7 @@ class BC_Paiement extends BimpObject
         return 0;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayType()
     {
@@ -129,7 +129,28 @@ class BC_Paiement extends BimpObject
 
         return '';
     }
-    
+
+	public function displayDateFacture()
+	{
+		if ((int) $this->getData('id_facture')) {
+			$facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('id_facture'));
+			if ($facture->isLoaded()) {
+				return date('d/m/Y H:i', strtotime($facture->getData('datec')));
+			}
+		}
+	}
+
+	public function displayNumSav()
+	{
+		if ((int)$this->getData('id_facture')) {
+			$sav = $this->db->getRow('bs_sav', 'id_facture = ' . (int) $this->getData('id_facture'), array('ref'));
+			if (!is_null($sav)) {
+				return $sav->ref;
+			}
+		}
+		return '';
+	}
+
     public function getClient(){
         if (!$this->isLoaded()) {
             return null;

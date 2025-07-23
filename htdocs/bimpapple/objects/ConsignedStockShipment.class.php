@@ -892,7 +892,7 @@ class ConsignedStockShipment extends BimpObject
 
 		if ($shipTo) {
 			require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSXRequests_v2.php';
-			$gsx = GSX_v2::getInstance();
+			$gsx = GSX_v2::getInstance(true, $shipTo);
 
 			$result = false;
 			if ($gsx->logged) {

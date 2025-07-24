@@ -11552,6 +11552,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 						$errors[] = 'Echec de la création du dossier de destination - ' .$dir_err;
 					}
 				}
+
+				$warnings[] = 'DIR : ' . $dir;
+
 				if (!count($errors)) {
 					$pdf = new BimpConcatPdf();
 					$pdf->concatFiles($dir . $fileName, $files, 'F');

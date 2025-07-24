@@ -392,3 +392,4 @@ forms:
 lists: 
     default: 
         objects_change_reload: ObjectLineRemise,RemiseGlobale,ObjectLineRemiseArriere,Bimp_Propal
+        item_checkbox: 1

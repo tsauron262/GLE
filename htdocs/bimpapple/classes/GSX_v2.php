@@ -1184,8 +1184,10 @@ class GSX_v2 extends GSX_Const
 
 		return $this->exec('getFile', array(
 			'identifiers' => array(
-				'shipmentNumber' => array($shipment_number),
-				'shipTo'         => $shipTo
+				array(
+					'shipmentNumber' => $shipment_number,
+					'shipTo'         => $shipTo
+				)
 			)
 		), $response_headers, array('url_params' => array('documentType' => 'consignmentPackingList')));
 	}

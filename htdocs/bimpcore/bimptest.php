@@ -30,7 +30,6 @@ if (!$user->admin) {
 	exit;
 }
 
-
 echo '<br/>FIN';
 echo '</body></html>';
 

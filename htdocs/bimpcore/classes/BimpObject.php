@@ -11543,12 +11543,15 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				global $user;
 				require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
 				$fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
-//				$dir = $this->getFilesDirComplexe(false, false);
+//				$dir = $this->getFilesDirComplexe(false, false); // Process modifié car ça ne fonctionnait pas du tout...
 				$file_infos = BimpTools::getTmpFileInfos($fileName, true, $errors);
 
 				$warnings[] = 'INFOS : <pre>' . print_r($file_infos, 1) . '</pre>';
 
 				if (!count($errors)) {
+					if (file_exists($file_infos['path'])) {
+						unlink($file_infos['path']);
+					}
 					$pdf = new BimpConcatPdf();
 //					$pdf->concatFiles($dir . $fileName, $files, 'F');
 					$pdf->concatFiles($file_infos['path'], $files, 'F');
@@ -11606,22 +11609,26 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 				if (!empty($files)) {
 					global $user;
-					$dir = $this->getFilesDirComplexe(false, true);
-
 					$fileName = 'zip_' . $this->dol_object->element . '_' . $user->id . '.zip';
-					if (file_exists($dir . $fileName)) {
-						unlink($dir . $fileName);
-					}
-					$zip = new ZipArchive();
-					if ($zip->open($dir . $fileName, ZipArchive::CREATE) === true) {
-						foreach ($files as $tabFile) {
-							$zip->addFile($tabFile[0], $tabFile[1]);
-						}
-					}
-					$zip->close();
+//					$dir = $this->getFilesDirComplexe(false, true); // Process modifié car ça ne fonctionnait pas du tout...
+					$file_infos = BimpTools::getTmpFileInfos($fileName, true, $errors);
 
-					$url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
-					$success_callback = 'window.open(\'' . $url . '\');';
+					if (!count($errors)) {
+						if (file_exists($file_infos['path'])) {
+							unlink($file_infos['path']);
+						}
+
+						$zip = new ZipArchive();
+						if ($zip->open($file_infos['path'], ZipArchive::CREATE) === true) {
+							foreach ($files as $tabFile) {
+								$zip->addFile($tabFile[0], $tabFile[1]);
+							}
+						}
+						$zip->close();
+
+//						$url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
+						$success_callback = 'window.open(\'' . $file_infos['url'] . '\');';
+					}
 				} else {
 					$errors[] = 'Aucun PDF trouvé';
 				}

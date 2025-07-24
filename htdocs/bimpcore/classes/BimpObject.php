@@ -11543,7 +11543,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				global $user;
 				require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
 				$fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
-				$dir = $this->getFilesDirComplexe(false, true);
+				$dir = $this->getFilesDirComplexe(false, false);
 
 				if (!is_dir($dir)) {
 					$dir_err = BimpTools::makeDirectories($dir, PATH_TMP);

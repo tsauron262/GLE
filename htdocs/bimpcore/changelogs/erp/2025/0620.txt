@@ -1,0 +1,1 @@
+- SAV : Modif de la règle d'envoi des notifications aux clients (toogle Notifier sur Non par defaut si moins de 6h écoulé depuis de dernier message) 

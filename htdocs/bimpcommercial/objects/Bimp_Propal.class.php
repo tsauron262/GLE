@@ -2509,7 +2509,11 @@ class Bimp_Propal extends Bimp_PropalTemp
 		$new_data['commande_status'] = 0;
 		$new_data['contrats_status'] = 0;
 
+		$join_files = $new_data['join_files'];
+		unset($new_data['join_files']);
+
 		$errors = parent::duplicate($new_data, $warnings, $force_create);
+		$new_id_propal = $this->id; // this etant re-fetché dans parent::duplicate
 
 		if ($date_diff) {
 			$lines = $this->getChildrenObjects('lines');
@@ -2533,7 +2537,12 @@ class Bimp_Propal extends Bimp_PropalTemp
 				}
 			}
 		}
-
+		if (!$errors)	{
+			if ($join_files) {
+				$err = $this->copyMoveFile($join_files, $new_id_propal);
+				if ($err) $errors[] = $err;
+			}
+		}
 		return $errors;
 	}
 
@@ -2695,6 +2704,11 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 		$new_id_propal = $this->review(false, $errors, $warnings, false, $update_products_prices);
 
+		if ($data['join_files']) {
+			$err = $this->copyMoveFile($data['join_files'], $new_id_propal);
+			if ($err) $errors[] = $err;
+		}
+
 		$url = DOL_URL_ROOT . '/bimpcommercial/index.php?fc=propal&id=' . $new_id_propal;
 
 		return array(
@@ -2702,6 +2716,22 @@ class Bimp_Propal extends Bimp_PropalTemp
 			'warnings'         => $warnings,
 			'success_callback' => 'window.location = \'' . $url . '\''
 		);
+	}
+
+	public function copyMoveFile($dataFile, $id_propal)
+	{
+		$errors = array();
+		// copie des fichiers selectionnés dans le nouvel object
+		$new_propal = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_propal);
+
+		if (BimpObject::objectLoaded($new_propal)) {
+			foreach ($dataFile as $join_file_id) {
+				$objFile = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $join_file_id);
+				$err = $objFile->moveToObject($new_propal, true);
+				if($err)	$errors[] = $err;
+			}
+		}
+		return $errors;
 	}
 
 	public function actionCreateContrat($data, &$success = '')

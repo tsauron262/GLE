@@ -789,9 +789,11 @@ class BimpObject extends BimpCache
 					$more .= '/' . $this->getData('entity');
 				}
 			} else {
-				global $conf;
-				if ($conf->entity > 0) {
-					$more .= '/' . $conf->entity;
+				if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+					global $conf;
+					if ($conf->entity > 0) {
+						$more .= '/' . $conf->entity;
+					}
 				}
 			}
 			if ($path_tmp) {
@@ -11543,11 +11545,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				$fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
 				$dir = $this->getFilesDirComplexe(false, true);
 
-				$pdf = new BimpConcatPdf();
-				$pdf->concatFiles($dir . $fileName, $files, 'F');
+				if (!count($errors)) {
+					$pdf = new BimpConcatPdf();
+					$pdf->concatFiles($dir . $fileName, $files, 'F');
 
-				$url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
-				$success_callback = 'window.open(\'' . $url . '\');';
+					$url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
+					$success_callback = 'window.open(\'' . $url . '\');';
+				}
 			} else {
 				$errors[] = 'Aucun PDF trouvé';
 			}

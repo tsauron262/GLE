@@ -11545,6 +11545,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				$fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
 				$dir = $this->getFilesDirComplexe(false, true);
 
+				if (!is_dir($dir)) {
+					$dir_err = BimpTools::makeDirectories($dir, PATH_TMP);
+
+					if ($dir_err) {
+						$errors[] = 'Echec de la création du dossier de destination - ' .$dir_err;
+					}
+				}
 				if (!count($errors)) {
 					$pdf = new BimpConcatPdf();
 					$pdf->concatFiles($dir . $fileName, $files, 'F');

@@ -1190,7 +1190,7 @@ class BimpDolObject extends BimpObject
 						$url = DOL_URL_ROOT . '/document.php?modulepart=' . $module_part . '&entity=' . $this->getData('entity') . '&file=' . urlencode($fileName);
 					}
 
-					$success_callback = 'window.open(\'' . $url . '\');';
+					if(!isset($data['no_success_callback'])) $success_callback = 'window.open(\'' . $url . '\');';
 				}
 			}
 		} else {

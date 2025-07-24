@@ -864,6 +864,8 @@ lists:
             - label: Dupliquer les lignes sélectionnées
               icon: fas_copy
               onclick: setSelectedObjectsAction($(this), 'list_id', 'duplicateLines', {}, null, 'Veuillez confirmer', true)
+        extra_bulk_actions:
+            callback: getListExtraBulkActions
         sort_field: position
         sort_way: asc
         n: 0

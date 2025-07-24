@@ -237,6 +237,39 @@ class BimpTools
 		return 'bimpcore/tmp_files/' . date('Ymd');
 	}
 
+	public static function getTmpFileInfos($file_name, $make_dir = true, &$errors = array())
+	{
+		$tmp_dir = self::getTmpFilesDir();
+		$tmp_dir_for_url = $tmp_dir;
+		$file_path = DOL_DATA_ROOT . '/' . $tmp_dir . '/' . $file_name;
+		$entity = 1;
+		if (preg_match('/^\/?([^\/]+)\/?(.*)$/', $tmp_dir_for_url, $matches) && is_numeric($matches[1])) {
+			$entity = $matches[1];
+			$tmp_dir_for_url = str_replace('/' . $entity . '/', '', $tmp_dir_for_url);
+		}
+
+		if ($make_dir && !is_dir($file_infos['dir'])) {
+			$dir_err = BimpTools::makeDirectories($tmp_dir);
+
+			if ($dir_err) {
+				$errors[] = 'Echec de la création du dossier de destination - ' .$dir_err;
+			}
+		}
+
+		$url = '';
+		if (preg_match('/^\/?([^\/]+)\/?(.*)$/', $tmp_dir_for_url, $matches)) {
+			$module = $matches[1];
+			$fileName = urlencode(($matches[2] ? $matches[2] . '/' : '') . $file_name);
+			$url = DOL_URL_ROOT . '/document.php?' . ($entity ? 'entity=' . $entity . '&' : '') . 'modulepart=' . $module . '&file=' . $fileName;
+		}
+
+		return array(
+			'dir'  => $tmp_dir,
+			'path' => $file_path,
+			'url'  => $url
+		);
+	}
+
 	public static function getAjaxFileName($field_name)
 	{
 		return str_replace("C:fakepath", '', BimpTools::getPostFieldValue($field_name, '', 'alphanohtml'));

@@ -11543,24 +11543,18 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				global $user;
 				require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
 				$fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
-				$dir = $this->getFilesDirComplexe(false, false);
+//				$dir = $this->getFilesDirComplexe(false, false);
+				$file_infos = BimpTools::getTmpFileInfos($fileName, true, $errors);
 
-				if (!is_dir($dir)) {
-					$dir_err = BimpTools::makeDirectories($dir);
-
-					if ($dir_err) {
-						$errors[] = 'Echec de la création du dossier de destination - ' .$dir_err;
-					}
-				}
-
-				$warnings[] = 'DIR : ' . $dir;
+				$warnings[] = 'INFOS : <pre>' . print_r($file_infos, 1) . '</pre>';
 
 				if (!count($errors)) {
 					$pdf = new BimpConcatPdf();
-					$pdf->concatFiles($dir . $fileName, $files, 'F');
+//					$pdf->concatFiles($dir . $fileName, $files, 'F');
+					$pdf->concatFiles($file_infos['path'], $files, 'F');
 
-					$url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
-					$success_callback = 'window.open(\'' . $url . '\');';
+//					$url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
+					$success_callback = 'window.open(\'' . $file_infos['url'] . '\');';
 				}
 			} else {
 				$errors[] = 'Aucun PDF trouvé';

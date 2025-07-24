@@ -11546,7 +11546,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				$dir = $this->getFilesDirComplexe(false, false);
 
 				if (!is_dir($dir)) {
-					$dir_err = BimpTools::makeDirectories($dir, PATH_TMP);
+					$dir_err = BimpTools::makeDirectories($dir);
 
 					if ($dir_err) {
 						$errors[] = 'Echec de la création du dossier de destination - ' .$dir_err;

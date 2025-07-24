@@ -1,0 +1,4 @@
+- Ajout de la possibilité de copier ou déplacer des lignes d'un devis source vers un autre devis cible.
+Le devis cible doit tjours etre en brouillon. le devis source doit l'etre uniquement pour pouvoir déplacer les lignes
+
+- Ajout de la possibilité de copier/déplacer des documents d'un devis en cas de clonage ou revision 

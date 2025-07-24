@@ -584,6 +584,28 @@ forms:
                 type: select
                 options: 
                     callback: getProductAvailableRemisesArrieresArray
+    duplicateMoveOtherPropal:
+        msgs:
+            - type: info
+              content: L'option "Déplacer" n'est disponible que si le devis actuel est en brouillon
+#                  callback: displayAlertDuplicateNoProv
+        rows:
+            - custom: 1
+              label: Action souhaité
+              required: 1
+              input_name: type_action
+              input:
+                type: select
+                options:
+                    callback: get_options_type_action
+            - custom: 1
+              required: 1
+              label: Devis cible
+              input_name: devis_cible
+              input:
+                  type: select
+                  options:
+                      callback: getDevisCibles
 
 filters: 
     id_commercial: 

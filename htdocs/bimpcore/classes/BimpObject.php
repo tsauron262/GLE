@@ -2077,9 +2077,10 @@ class BimpObject extends BimpCache
 					$obj = $this->getChildObject($nom);
 					$value = $this->recursiveGetExport($niveau, $pref, $obj);
 				}
-			} else {
-				print_r($infoObj);
 			}
+//			else {
+//				print_r($infoObj);
+//			}
 			$tabResult[$nom] = $value;
 		}
 

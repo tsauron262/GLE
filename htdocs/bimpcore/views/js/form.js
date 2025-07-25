@@ -2953,10 +2953,7 @@ function setFormEvents($form) {
 			if ($input.length && !parseInt($input.data('form_init_input_change'))) {
 				$input.data('form_init_input_change', 1);
 				if (inputsEvents[i].trigger) {
-					bimp_msg('TRIGGER : ' + inputsEvents[i].input_name, 'info');
 					$input.change();
-				} else {
-					bimp_msg('NO TRIGGER : ' + inputsEvents[i].input_name, 'info');
 				}
 			}
 		}

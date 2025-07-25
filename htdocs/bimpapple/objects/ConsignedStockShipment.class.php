@@ -25,14 +25,8 @@ class ConsignedStockShipment extends BimpObject
 		switch ($action) {
 			case 'submit':
 			case 'ship':
-				return 1;
-
 			case 'downloadPackingList':
-				global $user;
-				if ($user->login == 'f.martinez') {
-					return 1;
-				}
-				return 0;
+				return 1;
 
 		}
 

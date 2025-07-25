@@ -190,10 +190,8 @@ class BimpSignature extends BimpObject
 				if ($this->isObjectValid($errors, $obj)) {
 					if (method_exists($obj, 'isSignatureCancellable')) {
 						if (!$obj->isSignatureCancellable($this->getData('doc_type'), $errors)) {
-//							echo '<pre>' . print_r($errors, 1) . '</pre>';
-//							exit;
-//							return 0;
-//						}
+							return 0;
+						}
 					}
 				}
 				return (count($errors) ? 0 : 1);

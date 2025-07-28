@@ -22,7 +22,7 @@ class BimpDolObject extends BimpObject
 	public static $external_contact_type_required = true;
 	public static $internal_contact_type_required = true;
 	public $output = '';
-	public static $expertise = [ // Obsolète
+	public static $expertise = [ // Obsolète, valeurs déplacées dans dictionnaire "expertises"
 		''  => "",
 		10  => "Arts graphiques",
 		20  => "Constructions",

@@ -77,10 +77,6 @@ forms:
                     type: text
                 required: 1
 
-
-
-
-
 lists:
     default:
         title: Dictionnaires

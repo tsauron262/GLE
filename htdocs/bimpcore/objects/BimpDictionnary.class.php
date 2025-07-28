@@ -255,7 +255,7 @@ class BimpDictionnary extends BimpObject
 						$label_field = (isset($values_params['label_field']) ? $values_params['label_field'] : 'label');
 
 						foreach ($values as $key => $value) {
-							if (isset($value['icon']) || isset($value['class'])) {
+							if (!empty($value['icon']) || !empty($value['class'])) {
 								self::$cache[$cache_key][$key] = array(
 									'label'   => (isset($value[$label_field]) ? $value[$label_field] : $key),
 									'icon'    => (isset($value['icon']) ? $value['icon'] : ''),
@@ -461,7 +461,7 @@ class BimpDictionnary extends BimpObject
 						$errors[] = 'Pas de valeurs définies pour le champ "' . $field . '"';
 					} else {
 						/* @var BimpDictionnary $dict */
-						$dict = BimpDict::addDefaultDictionnary($code, $name, 1, 'values', 'id', array(), $err);
+						$dict = BimpDict::addDefaultDictionnary($code, $name, 1, 'values', 'code', array(), $err);
 
 						if (BimpObject::objectLoaded($dict)) {
 							$errors = $dict->setAllValues($values);

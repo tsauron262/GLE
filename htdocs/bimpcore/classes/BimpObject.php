@@ -1369,7 +1369,7 @@ class BimpObject extends BimpCache
 				continue;
 			}
 
-			if (!$with_common_fields == in_array($field_name, static::$common_fields)) {
+			if (!$with_common_fields && in_array($field_name, static::$common_fields)) {
 				continue;
 			}
 

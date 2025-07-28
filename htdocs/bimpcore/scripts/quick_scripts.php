@@ -69,6 +69,7 @@ if (!$action) {
 		'test_divers'                               => 'Test divers',
 		'users_bdd'                                 => 'List Users BDD',
 		'correct_propal_remises'                    => 'Correction des remises des propales',
+		'convert_dictionnary'                       => 'Convertir les valeurs d\'un champ en dictionnaire',
 //		'purge_doublon_rdc'							=> 'Purger doublon contact rdc',
 	);
 
@@ -662,6 +663,7 @@ VALUES
 			}
 		}
 		break;
+
 	case 'test_divers':
 		BimpUserMsg::envoiMsg('paiements_non_identif_auto', 'Paiements non identifiés', 'msg de test');
 		break;
@@ -757,14 +759,20 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 
 	case 'purge_doublon_rdc' :
 
-		if ( ! GETPOSTISSET('run') ) 		exit('&run=1&debug=1');
-		if ( ! GETPOSTISSET('debug') )	exit('&run=1&debug=1') ;
+		if (!GETPOSTISSET('run')) {
+			exit('&run=1&debug=1');
+		}
+		if (!GETPOSTISSET('debug')) {
+			exit('&run=1&debug=1');
+		}
 		$run = GETPOST('run', 'int');
 		$debug = GETPOST('debug', 'int');
 		$rowid = GETPOST('rowid', 'int');
 
-		$sql = "SELECT UNIQUE(s.rowid) FROM llx_societe s INNER JOIN llx_socpeople p WHERE s.shopid AND s.rowid = p.fk_soc";	// AND s.rowid in(33120, 33193)";
-		if ($rowid > 0) $sql .= " AND s.rowid = " . $rowid;
+		$sql = "SELECT UNIQUE(s.rowid) FROM llx_societe s INNER JOIN llx_socpeople p WHERE s.shopid AND s.rowid = p.fk_soc";    // AND s.rowid in(33120, 33193)";
+		if ($rowid > 0) {
+			$sql .= " AND s.rowid = " . $rowid;
+		}
 		$query = $db->query($sql);
 		while ($soc = $db->fetch_object($query)) {
 			$contacts = array();
@@ -779,10 +787,10 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 			}
 
 			$contactsSains = array(
-				'lastname' => array(),
+				'lastname'  => array(),
 				'firstname' => array(),
-				'email' => array(),
-				'poste' => array(),
+				'email'     => array(),
+				'poste'     => array(),
 			);
 			$contactsSainsControl = array();
 			$contactsDoublon = array();
@@ -790,20 +798,22 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 			foreach ($contacts as $contact) {
 //				echo '<pre>' . print_r($contact, true) . '</pre>';
 				// ce contact est il dans contacts sains
-				if(
+				if (
 					in_array($contact->lastname, $contactsSains['lastname']) &&
 					in_array($contact->firstname, $contactsSains['firstname']) &&
 					in_array($contact->email, $contactsSains['email']) &&
 					in_array($contact->poste, $contactsSains['poste'])
-				)	{
+				) {
 					// non, alors il est double, il faut trouver l'id dans les sains qui correspond
 					// pour cela, faire un boucle sur $contactsSainsControl
 					$idSain = 0;
 					foreach ($contactsSainsControl as $id => $control) {
-						if($control['lastname'] == $contact->lastname
-						&& $control['firstname'] == $contact->firstname
-						&& $control['email'] == $contact->email
-						&& $control['poste'] == $contact->poste) $idSain = $id;
+						if ($control['lastname'] == $contact->lastname
+							&& $control['firstname'] == $contact->firstname
+							&& $control['email'] == $contact->email
+							&& $control['poste'] == $contact->poste) {
+							$idSain = $id;
+						}
 					}
 
 					// puis le mettre dans les Doublon
@@ -813,8 +823,7 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 //					$contactsDoublon[$idSain]['firstname'][] = $contact->firstname;
 //					$contactsDoublon[$idSain]['email'][] = $contact->email;
 //					$contactsDoublon[$idSain]['poste'][] = $contact->poste;
-				}
-				else {
+				} else {
 					$contactsSains['lastname'][$contact->rowid] = $contact->lastname;
 					$contactsSains['firstname'][$contact->rowid] = $contact->firstname;
 					$contactsSains['email'][$contact->rowid] = $contact->email;
@@ -825,37 +834,105 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 					$contactsSainsControl[$contact->rowid]['poste'] = $contact->poste;
 				}
 			}
-			if(count($contactsDoublon) && $run) {
+			if (count($contactsDoublon) && $run) {
 				echo '<hr>';
 //				echo '<pre>' . print_r($contactsSainsControl, true) . '</pre>';
 //				var_dump(count($contactsDoublon)); 	echo '==><pre>' . print_r($contactsDoublon, true) . '</pre>';
 				foreach ($contactsDoublon as $indexConserve => $item) {
 					foreach ($item as $indexSupp) {
-						echo '<p>Je supp ' .$indexSupp. ' au profit de ' . $indexConserve .'</p>';
-						if (!$indexConserve) continue;
+						echo '<p>Je supp ' . $indexSupp . ' au profit de ' . $indexConserve . '</p>';
+						if (!$indexConserve) {
+							continue;
+						}
 						// update ActionComm
 						$sql = "UPDATE llx_actioncomm SET fk_contact = " . $indexConserve . " WHERE fk_contact = " . $indexSupp;
-						if ($debug) echo $sql . ';<br>';
-						else $db->query($sql);
+						if ($debug) {
+							echo $sql . ';<br>';
+						} else {
+							$db->query($sql);
+						}
 
 						// update llx_c_type_contact
 						$sql = "UPDATE llx_element_contact ec
 									INNER JOIN llx_c_type_contact tc on tc.rowid = ec.fk_c_type_contact AND tc.source = 'external'
 									SET ec.fk_socpeople = " . $indexConserve . "
 									WHERE ec.fk_socpeople = " . $indexSupp;
-						if ($debug) echo $sql . ';<br>';
-						else $db->query($sql);
+						if ($debug) {
+							echo $sql . ';<br>';
+						} else {
+							$db->query($sql);
+						}
 
 						// delete socpeople
 						$sql = "DELETE FROM llx_socpeople WHERE rowid = " . $indexSupp;
-						if ($debug) echo $sql . ';<br>';
-						else $db->query($sql);
+						if ($debug) {
+							echo $sql . ';<br>';
+						} else {
+							$db->query($sql);
+						}
 					}
 				}
 			}
-			if($debug) exit('fin debug');
+			if ($debug) {
+				exit('fin debug');
+			}
 		}
 		break;
+
+	case 'convert_dictionnary':
+		$module = BimpTools::getValue('m', '');
+		$obj_name = BimpTools::getValue('o', '');
+		$field = BimpTools::getValue('f', '');
+		$code = BimpTools::getValue('c', '');
+		$name = BimpTools::getValue('n', '');
+
+		$err = array();
+		if (!$module) {
+			$err[] = 'Module absent (param m)';
+		}
+		if (!$obj_name) {
+			$err[] = 'Nom objet absent (param o)';
+		}
+		if (!$field) {
+			$err[] = 'Nom du champ absent (param f)';
+		}
+		if (!$code) {
+			$err[] = 'Code dictionnaire absent (param c)';
+		}
+		if (!$name) {
+			$err[] = 'Nom dictionnaire absent (param n)';
+		}
+
+		if (!count($err)) {
+			$obj = BimpObject::getInstance($module, $obj_name);
+
+			if (!is_a($obj, $obj_name)) {
+				$err[] = 'Objet invalide : ' . $obj_name;
+			} else {
+				$values = $obj->getConf('fields/' . $field . '/values', array());
+
+				if (empty($values)) {
+					$err[] = 'Pas de valeurs définies pour le champ "' . $field . '"';
+				} else {
+					echo 'VALEURS : <pre>' . print_r($values, 1) . '</pre>';
+
+					/* @var BimpDictionnary $dict*/
+					$dict = BimpDict::addDefaultDictionnary($code, $name, 1, 'values', 'id', array(), $err);
+
+					if (BimpObject::objectLoaded($dict)) {
+						$err = $dict->setAllValues($values);
+					}
+				}
+			}
+		}
+
+		if (count($err)) {
+			echo 'Erreurs : <pre>' . print_r($err, 1) . '</pre>';
+		} else {
+			echo 'Ajout des valeurs ok';
+		}
+		break;
+
 
 	default:
 		echo 'Action invalide';

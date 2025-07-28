@@ -1,5 +1,7 @@
 <?php
 
+// Version LDLC
+
 require_once DOL_DOCUMENT_ROOT . '/bimpsupport/objects/BS_SAV.class.php';
 
 /*
@@ -11,100 +13,103 @@ class BS_SAV_ExtVersion extends BS_SAV
 
 	public static $required_fields_ecologic = array(
 		'address' => 'l\'adresse',
-		'zip' => 'le code postal',
-		'town' => 'la ville',
-		'phone' => 'le télephone',
-		'email' =>  'l\'E-mail',
+		'zip'     => 'le code postal',
+		'town'    => 'la ville',
+		'phone'   => 'le télephone',
+		'email'   => 'l\'E-mail',
 	);
 
 	public static $status_ecologic_list = array(
-        -2   => array('label' => 'Refusée', 'icon' => 'fas_not-equal', 'classes' => array('important')),
-        -1   => array('label' => 'Non Applicable', 'icon' => 'fas_not-equal', 'classes' => array('important')),
-        0    => array('label' => 'En attente', 'icon' => 'fas_times', 'classes' => array('danger')),
-        1    => array('label' => 'Attente déclaration', 'icon' => 'fas_times', 'classes' => array('danger')),
-        99   => array('label' => 'Déclarré', 'icon' => 'arrow-right', 'classes' => array('danger')),
-        1000 => array('label' => 'Payée', 'icon' => 'arrow-right', 'classes' => array('success'))
-    );
+		-2   => array('label' => 'Refusée', 'icon' => 'fas_not-equal', 'classes' => array('important')),
+		-1   => array('label' => 'Non Applicable', 'icon' => 'fas_not-equal', 'classes' => array('important')),
+		0    => array('label' => 'En attente', 'icon' => 'fas_times', 'classes' => array('danger')),
+		1    => array('label' => 'Attente déclaration', 'icon' => 'fas_times', 'classes' => array('danger')),
+		99   => array('label' => 'Déclarré', 'icon' => 'arrow-right', 'classes' => array('danger')),
+		1000 => array('label' => 'Payée', 'icon' => 'arrow-right', 'classes' => array('success'))
+	);
 
-    public function actionRestitute($data, &$success)
-    {
-        $return = parent::actionRestitute($data, $success);
-        if (!count($return['errors'])) {
-            if ($this->asProdEcologic()) {
-                $this->updateField('status_ecologic', 1);
-            } else {
-                $this->updateField('status_ecologic', -1);
-            }
-        }
+	public function actionRestitute($data, &$success)
+	{
+		$return = parent::actionRestitute($data, $success);
+		if (!count($return['errors'])) {
+			if ($this->asProdEcologic()) {
+				$this->updateField('status_ecologic', 1);
+			} else {
+				$this->updateField('status_ecologic', -1);
+			}
+		}
 
-        //si cote 45 et montant inférieur 180 - 45 = 135 erreur montant non éligible
+		//si cote 45 et montant inférieur 180 - 45 = 135 erreur montant non éligible
 
-        return $return;
-    }
+		return $return;
+	}
 
-    public function asProdEcologic()
-    {
-        $asProd = false;
-        $tabIdProd = json_decode(BimpCore::getConf('prod_ecologic', '', 'bimpsupport'));
-        if (is_array($tabIdProd)) {
-            foreach ($this->getPropalLines() as $line) {
-                $dolLine = $line->getChildObject('line');
-                if (in_array($dolLine->fk_product, $tabIdProd) && $dolLine->qty > 0)
-                    $asProd = true;
-            }
-        }
-        return $asProd;
-    }
+	public function asProdEcologic()
+	{
+		$asProd = false;
+		$tabIdProd = json_decode(BimpCore::getConf('prod_ecologic', '', 'bimpsupport'));
+		if (is_array($tabIdProd)) {
+			foreach ($this->getPropalLines() as $line) {
+				$dolLine = $line->getChildObject('line');
+				if (in_array($dolLine->fk_product, $tabIdProd) && $dolLine->qty > 0) {
+					$asProd = true;
+				}
+			}
+		}
+		return $asProd;
+	}
 
-    public function findEcologicSupportAmount()
-    {
-        $tabIdProd = json_decode(BimpCore::getConf('prod_ecologic', '', 'bimpsupport'));
-        if (is_array($tabIdProd)) {
-            foreach ($this->getPropalLines() as $line) {
-                $dolLine = $line->getChildObject('line');
-                if (in_array($dolLine->fk_product, $tabIdProd) && $dolLine->qty > 0) {
+	public function findEcologicSupportAmount()
+	{
+		$tabIdProd = json_decode(BimpCore::getConf('prod_ecologic', '', 'bimpsupport'));
+		if (is_array($tabIdProd)) {
+			foreach ($this->getPropalLines() as $line) {
+				$dolLine = $line->getChildObject('line');
+				if (in_array($dolLine->fk_product, $tabIdProd) && $dolLine->qty > 0) {
 
 //                    if(- $dolLine->subprice == 45)
 //                        return 50;
 //                    print_r($dolLine);die;
-                    return -$dolLine->subprice /** 1.2*/;
-                }
-            }
-        }
-        return 0;
-    }
+					return -$dolLine->subprice/** 1.2*/ ;
+				}
+			}
+		}
+		return 0;
+	}
 
-    public function getIRISSymtoms($type = null)
-    {
-        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+	public function getIRISSymtoms($type = null)
+	{
+		require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 
-        $api = BimpAPI::getApiInstance('ecologic');
+		$api = BimpAPI::getApiInstance('ecologic');
 
-        $result = $api->executereqWithCache('printproducttypewithlabellist');
+		$result = $api->executereqWithCache('printproducttypewithlabellist');
 
-        $resultList = array();
+		$resultList = array();
 
-        if (isset($result['ResponseData']) && !empty($result['ResponseData'])) {
-            foreach ($result['ResponseData'] as $typeMat) {
-                if (is_null($type) || $typeMat['ProductId'] == $type) {
-                    foreach ($typeMat['IRISSymtoms'] as $val)
-                        $resultList[$val['Code']] = $val['Label'];
-                }
-            }
-        }
-        if(!count($resultList))
-            $resultList['XX1'] = 'Autre';
+		if (isset($result['ResponseData']) && !empty($result['ResponseData'])) {
+			foreach ($result['ResponseData'] as $typeMat) {
+				if (is_null($type) || $typeMat['ProductId'] == $type) {
+					foreach ($typeMat['IRISSymtoms'] as $val) {
+						$resultList[$val['Code']] = $val['Label'];
+					}
+				}
+			}
+		}
+		if (!count($resultList)) {
+			$resultList['XX1'] = 'Autre';
+		}
 
-        return $resultList;
-    }
+		return $resultList;
+	}
 
-    public function getRepairCodes($type = null)
-    {
-        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+	public function getRepairCodes($type = null)
+	{
+		require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 
-        $api = BimpAPI::getApiInstance('ecologic');
+		$api = BimpAPI::getApiInstance('ecologic');
 
-        $result = $api->executereqWithCache('printproducttypewithlabellist');
+		$result = $api->executereqWithCache('printproducttypewithlabellist');
 
 		global $user;
 		if ($user->login == 'f.martinez') {
@@ -112,418 +117,443 @@ class BS_SAV_ExtVersion extends BS_SAV
 			exit;
 		}
 
-        $resultList = array();
-        if (isset($result['ResponseData']) && !empty($result['ResponseData'])) {
-            foreach ($result['ResponseData'] as $typeMat) {
-                if (is_null($type) || $typeMat['ProductId'] == $type) {
-                    foreach ($typeMat['RepairCodes'] as $val)
-                        $resultList[$val['Code']] = $val['Label'];
-                }
-            }
-        }
+		$resultList = array();
+		if (isset($result['ResponseData']) && !empty($result['ResponseData'])) {
+			foreach ($result['ResponseData'] as $typeMat) {
+				if (is_null($type) || $typeMat['ProductId'] == $type) {
+					foreach ($typeMat['RepairCodes'] as $val) {
+						$resultList[$val['Code']] = $val['Label'];
+					}
+				}
+			}
+		}
 
-        return $resultList;
-    }
+		return $resultList;
+	}
 
-    public function getEcologicProductId()
-    {
-        $label = $this->getEquipmentData('product_label');
+	public function getEcologicProductId()
+	{
+		$label = $this->getEquipmentData('product_label');
 
-        $equipement = $this->getChildObject('equipment');
-        if ((int) $equipement->getData('id_product')) {
-            $label .= $equipement->displayProduct('nom') . '<br/>';
-        }
-        if (stripos($label, 'imac') !== false)
-            return 'EEE.M2.045';
-        if (stripos($label, 'mac') !== false)
-            return 'EEE.M2.044';
-        if (stripos($label, 'ipad') !== false)
-            return 'EEE.M2.057';
-        if (stripos($label, 'iphone') !== false)
-            return 'EEE.M6.060';
-        if (stripos($label, 'blabla tel fixe') !== false)
-            return 'EEE.M6.059';
-        if (stripos($label, 'blabla imprimante scanner') !== false)
-            return 'EEE.M6.031';
-        if (stripos($label, 'DISPLAY') !== false)
-//            return 'EEE.M2.044';
-            return 'EEE.M2.042';//code display ne fonctionne pas
+		$equipement = $this->getChildObject('equipment');
+		if ((int) $equipement->getData('id_product')) {
+			$label .= $equipement->displayProduct('nom') . '<br/>';
+		}
+		if (stripos($label, 'imac') !== false) {
+			return 'EEE.M2.045';
+		}
+		if (stripos($label, 'mac') !== false) {
+			return 'EEE.M2.044';
+		}
+		if (stripos($label, 'ipad') !== false) {
+			return 'EEE.M2.057';
+		}
+		if (stripos($label, 'iphone') !== false) {
+			return 'EEE.M6.060';
+		}
+		if (stripos($label, 'blabla tel fixe') !== false) {
+			return 'EEE.M6.059';
+		}
+		if (stripos($label, 'blabla imprimante scanner') !== false) {
+			return 'EEE.M6.031';
+		}
+		if (stripos($label, 'DISPLAY') !== false) //            return 'EEE.M2.044';
+		{
+			return 'EEE.M2.042';
+		}//code display ne fonctionne pas
 
 
-        return '';
-    }
+		return '';
+	}
 
-    public function actionToRestitute($data, &$success)
-    {
-        $datas = $this->getData('ecologic_data');
-        $datas['IRISSymtoms'] = $data['IRISSymtoms'];
-        $datas['RepairCodes'] = $data['RepairCodes'];
-        $this->updateField('ecologic_data', $datas);
+	public function actionToRestitute($data, &$success)
+	{
+		$datas = $this->getData('ecologic_data');
+		$datas['IRISSymtoms'] = $data['IRISSymtoms'];
+		$datas['RepairCodes'] = $data['RepairCodes'];
+		$this->updateField('ecologic_data', $datas);
 
-        return parent::actionToRestitute($data, $success);
-    }
+		return parent::actionToRestitute($data, $success);
+	}
 
-    public function actionCodeEcologic($data, &$success)
-    {
-        $success = 'Ok';
-        $datas = $this->getData('ecologic_data');
-        $datas['IRISSymtoms'] = $data['IRISSymtoms'];
-        $datas['RepairCodes'] = $data['RepairCodes'];
-        $this->updateField('ecologic_data', $datas);
+	public function actionCodeEcologic($data, &$success)
+	{
+		$success = 'Ok';
+		$errors = array();
 
-        return array('errors' => array(), 'warnings' => array());
-    }
+		$datas = $this->getData('ecologic_data');
+		$datas['IRISSymtoms'] = $data['IRISSymtoms'];
+		$datas['RepairCodes'] = $data['RepairCodes'];
 
-    public function traiteVilleNameEcologic($name)
-    {
-        $tabName = explode('1', $name);
-        $name = trim($tabName[0]);
-        $tabName = explode('2', $name);
-        $name = trim($tabName[0]);
-        $tabName = explode('3', $name);
-        $name = trim($tabName[0]);
-        $tabName = explode('4', $name);
-        $name = trim($tabName[0]);
-        $tabName = explode('5', $name);
-        $name = trim($tabName[0]);
-        $tabName = explode('6', $name);
-        $name = trim($tabName[0]);
-        $tabName = explode('7', $name);
-        $name = trim($tabName[0]);
-        $tabName = explode('8', $name);
-        $name = trim($tabName[0]);
-        $tabName = explode('9', $name);
-        $name = trim($tabName[0]);
-        $name = str_replace('-', ' ', $name);
-        $name = str_replace('\'', ' ', $name);
-        $name = str_replace('ç', 'c', $name);
-        $name = str_replace('é', 'e', $name);
-        $name = str_replace('è', 'e', $name);
-        $name = str_replace('É', 'E', $name);
-        $name = str_replace('â', 'a', $name);
-        $name = str_replace('ê', 'e', $name);
-        $name = str_replace('ô', 'o', $name);
-        $name = str_replace('Saint', 'St', $name);
+		$errors = $this->updateField('ecologic_data', $datas);
+
+		return array('errors' => $errors, 'warnings' => array());
+	}
+
+	public function traiteVilleNameEcologic($name)
+	{
+		$tabName = explode('1', $name);
+		$name = trim($tabName[0]);
+		$tabName = explode('2', $name);
+		$name = trim($tabName[0]);
+		$tabName = explode('3', $name);
+		$name = trim($tabName[0]);
+		$tabName = explode('4', $name);
+		$name = trim($tabName[0]);
+		$tabName = explode('5', $name);
+		$name = trim($tabName[0]);
+		$tabName = explode('6', $name);
+		$name = trim($tabName[0]);
+		$tabName = explode('7', $name);
+		$name = trim($tabName[0]);
+		$tabName = explode('8', $name);
+		$name = trim($tabName[0]);
+		$tabName = explode('9', $name);
+		$name = trim($tabName[0]);
+		$name = str_replace('-', ' ', $name);
+		$name = str_replace('\'', ' ', $name);
+		$name = str_replace('ç', 'c', $name);
+		$name = str_replace('é', 'e', $name);
+		$name = str_replace('è', 'e', $name);
+		$name = str_replace('É', 'E', $name);
+		$name = str_replace('â', 'a', $name);
+		$name = str_replace('ê', 'e', $name);
+		$name = str_replace('ô', 'o', $name);
+		$name = str_replace('Saint', 'St', $name);
 //        $name = ucfirst(strtolower($name));
-        return $name;
-    }
+		return $name;
+	}
 
-    public function renderHeaderExtraLeft() {
-        $html = parent::renderHeaderExtraLeft();
+	public function renderHeaderExtraLeft()
+	{
+		$html = parent::renderHeaderExtraLeft();
 
-        $client = $this->getChildObject('client');
-        $nomClient = str_replace('  ', ' ', $client->getData('nom'));
-        $tabName = explode(' ', $nomClient);
-        if((!isset($tabName[1]) || $tabName[1] == '' || $client->getData('fk_typent') != 8) && $this->asProdEcologic()){
-            $html .= BimpRender::renderAlerts('! Attention les PROS ne sont pas concernés par le programme QualiRepair !');
-            $this->isClosable = false;
-        }
+		$client = $this->getChildObject('client');
+		$nomClient = str_replace('  ', ' ', $client->getData('nom'));
+		$tabName = explode(' ', $nomClient);
+		if ((!isset($tabName[1]) || $tabName[1] == '' || $client->getData('fk_typent') != 8) && $this->asProdEcologic()) {
+			$html .= BimpRender::renderAlerts('! Attention les PROS ne sont pas concernés par le programme QualiRepair !');
+			$this->isClosable = false;
+		}
 
-        if ($this->asProdEcologic()) {
-            $ok = false;
-            $sav_dir = $this->getFilesDir();
-            $file = 'infos_materiel';
-            $tabExt = array('jpeg', 'jpg', 'png', 'pdf', 'JPEG', 'JPG', 'PNG', 'PDF');
-            foreach($tabExt as $ext){
-                if(file_exists($sav_dir.$file.'.'.$ext))
-                        $ok = true;
-            }
-            if(!$ok){
-                $ok = $this->convertHeic($sav_dir.$file);
-            }
-            if(!$ok){
-                $html .= BimpRender::renderAlerts('Attention le fichier '.$file.' n\'est pas présent. '.BimpRender::renderButton(array(
-                    'onclick' => $this->getJsActionOnclick('infoMateriel', array(), array(
-                        'form_name' => 'info_materiel'
-                    )),
-                     'label' => 'Télécharger',
-                     'icon_before' => 'upload'
-                )));
-                if(BimpCore::getExtendsEntity() == 'actimac')
-                    $this->isRestituable = false;
-                else
-                    $this->isClosable = false;
-            }
+		if ($this->asProdEcologic()) {
+			$ok = false;
+			$sav_dir = $this->getFilesDir();
+			$file = 'infos_materiel';
+			$tabExt = array('jpeg', 'jpg', 'png', 'pdf', 'JPEG', 'JPG', 'PNG', 'PDF');
+			foreach ($tabExt as $ext) {
+				if (file_exists($sav_dir . $file . '.' . $ext)) {
+					$ok = true;
+				}
+			}
+			if (!$ok) {
+				$ok = $this->convertHeic($sav_dir . $file);
+			}
+			if (!$ok) {
+				$html .= BimpRender::renderAlerts('Attention le fichier ' . $file . ' n\'est pas présent. ' . BimpRender::renderButton(array(
+						'onclick'     => $this->getJsActionOnclick('infoMateriel', array(), array(
+							'form_name' => 'info_materiel'
+						)),
+						'label'       => 'Télécharger',
+						'icon_before' => 'upload'
+					)));
+				if (BimpCore::getExtendsEntity() == 'actimac') {
+					$this->isRestituable = false;
+				} else {
+					$this->isClosable = false;
+				}
+			}
 
 			// .... SAV - Alerte champs Tiers manquants https://erp.bimp.fr/bimp8/bimptask/index.php?fc=task&id=106339
 			// faire une boucle sur les $requiredFieldElogic (a creer) pour spécifier quels sont les champs manquants
 			$dataMissing = array();
-			foreach (self::$required_fields_ecologic as $field => $label)	{
+			foreach (self::$required_fields_ecologic as $field => $label) {
 				$data = $client->getData($field);
-				if ($data == "")	{
+				if ($data == "") {
 					$dataMissing[] = $label;
 				}
 			}
 			if (!empty($dataMissing)) {
 				$text = 'Pour la prise en charge QualiRépar, il manque ' . implode(', ', $dataMissing);
 				$text .= '<br />' . BimpRender::renderButton(array(
-					'onclick' => $client->getJsLoadModalForm(
-						'default',
-						'Compléter ' . htmlentities(implode(', ', $dataMissing))
+						'onclick'     => $client->getJsLoadModalForm(
+							'default',
+							'Compléter ' . htmlentities(implode(', ', $dataMissing))
 //						, array(),
 //						'triggerObjectChange("bimpsupport", "BS_SAV", ' . $this->getData('id') . ')',
 //						'', '', 0, '$(this)',
 //						'triggerObjectChange(\'bimpsupport\', \'BS_SAV\', ' . $this->getData('id') . ')'
-					),
-					'label' => 'Compléter',
-					'icon_before' => 'edit'
-				));
+						),
+						'label'       => 'Compléter',
+						'icon_before' => 'edit'
+					));
 				$html .= BimpRender::renderAlerts($text);
 			}
 		}
-        return $html;
-    }
+		return $html;
+	}
 
-    public function convertHeic($fileSansExt){
-        $tab = array('heic', 'HEIC');
-        foreach($tab as $ext){
-            if(file_exists($fileSansExt.'.'.$ext)){
-                exec("/usr/local/sbin/heic2jpg ".$fileSansExt.'.'.$ext." ".$fileSansExt.".jpg");
-                if(file_exists($fileSansExt.".jpg"))
-                   return 1;
-            }
-        }
-    }
-
-
-    public function actionInfoMateriel($data, &$success)
-    {
-        $errors = $warnings = array();
-
-        if (isset($data['file']) && $data['file'] != '')
-            BimpTools::moveAjaxFile($errors, 'file', $this->getFilesDir(), 'infos_materiel');
-        else
-            $errors[] = 'Aucun fichier uploadé';
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionSendDemandeEcologic($data, &$success)
-    {
-        $this->useNoTransactionsDb();
-        $errors = $warnings = array();
-        $success = 'Demande envoyée';
-        $data = array();
-        $client = $this->getChildObject('client');
-        $nomClient = str_replace('  ', ' ', $client->getData('nom'));
-        $tabName = explode(' ', $nomClient);
-        $data['Consumer'] = array(
-            "Title"          => 1,
-            "LastName"       => $tabName[0],
-            "FirstName"      => $tabName[1],
-            "StreetNumber"   => '',
-            "Address1"       => $client->getData('address'),
-            "Address2"       => "",
-            "Address3"       => "",
-            "Zip"            => $client->getData('zip'),
-            "City"           => $this->traiteVilleNameEcologic($client->getData('town')),
-            "Country"        => "250",
-            "Phone"          => $client->getData('phone'),
-            "Email"          => $client->getData('email'),
-            "AutoValidation" => true
-        );
-
-        $equipment = $this->getChildObject('equipment');
-        $prod = $equipment->getChildObject('product');
-        $ecologicData = $this->getData('ecologic_data');
-        $facture = $this->getChildObject('facture');
-        $ref = '';
-        if (BimpObject::objectLoaded($prod))
-            $ref = $prod->ref;
+	public function convertHeic($fileSansExt)
+	{
+		$tab = array('heic', 'HEIC');
+		foreach ($tab as $ext) {
+			if (file_exists($fileSansExt . '.' . $ext)) {
+				exec("/usr/local/sbin/heic2jpg " . $fileSansExt . '.' . $ext . " " . $fileSansExt . ".jpg");
+				if (file_exists($fileSansExt . ".jpg")) {
+					return 1;
+				}
+			}
+		}
+	}
 
 
-        $data['Product'] = array(
-            "ProductId"          => $this->getEcologicProductId(),
-            "BrandId"            => "243",
-            "CommercialRef"      => $prod->ref,
-            "SerialNumber"       => $this->getSerial(false, true),
-            "SerialNumber2"       => $this->getSerial(false, false),
-            "PurchaseDate"       => "",
-            "IRISCondition"      => "",
-            "IRISConditionEX"    => "",
-            "IRISSymptom"        => $ecologicData['IRISSymtoms'],
-            "IRISSection"        => $ecologicData['RepairCodes'],
-            "IRISDefault"        => "",
-            "IRISRepair"         => "",
-            "FailureDescription" => $this->getData('symptomes'),
-            "DefectCode"         => ""
-        );
+	public function actionInfoMateriel($data, &$success)
+	{
+		$errors = $warnings = array();
 
-        $totalSpare = 0;
-        $data["SpareParts"] = array();
-        foreach ($this->getPropalLines(array(
-            'linked_object_name' => 'sav_apple_part'
-        )) as $line) {
-            if ($line->getTotalHT() > 0) {
-                $data["SpareParts"][] = array(
-                    "Partref"  => $line->desc,
-                    "Quantity" => $line->qty,
-                    "Status"   => ""
-                );
-                $totalSpare += $line->getTotalHT();
-            }
+		if (isset($data['file']) && $data['file'] != '') {
+			BimpTools::moveAjaxFile($errors, 'file', $this->getFilesDir(), 'infos_materiel');
+		} else {
+			$errors[] = 'Aucun fichier uploadé';
+		}
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
+	public function actionSendDemandeEcologic($data, &$success)
+	{
+		$this->useNoTransactionsDb();
+		$errors = $warnings = array();
+		$success = 'Demande envoyée';
+		$data = array();
+		$client = $this->getChildObject('client');
+		$nomClient = str_replace('  ', ' ', $client->getData('nom'));
+		$tabName = explode(' ', $nomClient);
+		$data['Consumer'] = array(
+			"Title"          => 1,
+			"LastName"       => $tabName[0],
+			"FirstName"      => $tabName[1],
+			"StreetNumber"   => '',
+			"Address1"       => $client->getData('address'),
+			"Address2"       => "",
+			"Address3"       => "",
+			"Zip"            => $client->getData('zip'),
+			"City"           => $this->traiteVilleNameEcologic($client->getData('town')),
+			"Country"        => "250",
+			"Phone"          => $client->getData('phone'),
+			"Email"          => $client->getData('email'),
+			"AutoValidation" => true
+		);
+
+		$equipment = $this->getChildObject('equipment');
+		$prod = $equipment->getChildObject('product');
+		$ecologicData = $this->getData('ecologic_data');
+		$facture = $this->getChildObject('facture');
+		$ref = '';
+		if (BimpObject::objectLoaded($prod)) {
+			$ref = $prod->ref;
+		}
+
+
+		$data['Product'] = array(
+			"ProductId"          => $this->getEcologicProductId(),
+			"BrandId"            => "243",
+			"CommercialRef"      => $prod->ref,
+			"SerialNumber"       => $this->getSerial(false, true),
+			"SerialNumber2"      => $this->getSerial(false, false),
+			"PurchaseDate"       => "",
+			"IRISCondition"      => "",
+			"IRISConditionEX"    => "",
+			"IRISSymptom"        => $ecologicData['IRISSymtoms'],
+			"IRISSection"        => $ecologicData['RepairCodes'],
+			"IRISDefault"        => "",
+			"IRISRepair"         => "",
+			"FailureDescription" => $this->getData('symptomes'),
+			"DefectCode"         => ""
+		);
+
+		$totalSpare = 0;
+		$data["SpareParts"] = array();
+		foreach ($this->getPropalLines(array(
+			'linked_object_name' => 'sav_apple_part'
+		)) as $line) {
+			if ($line->getTotalHT() > 0) {
+				$data["SpareParts"][] = array(
+					"Partref"  => $line->desc,
+					"Quantity" => $line->qty,
+					"Status"   => ""
+				);
+				$totalSpare += $line->getTotalHT();
+			}
 //            echo '<pre>';
 //////            print_r($line->printData());
 //            print_r($line->getTotalHT());
-        }
+		}
 
-        if ($totalSpare > $facture->getData('total_ht'))
-            $totalSpare = $facture->getData('total_ht');
+		if ($totalSpare > $facture->getData('total_ht')) {
+			$totalSpare = $facture->getData('total_ht');
+		}
 
-        $prime = $this->findEcologicSupportAmount();
+		$prime = $this->findEcologicSupportAmount();
 
-        $data["Quote"] = array(
-            "LaborCost"          => array(
-                "Amount"   => round($facture->getData('total_ht') - $totalSpare, 2),
-                "Currency" => "EUR"
-            ),
-            "SparePartsCost"     => array(
-                "Amount"   => round($totalSpare + ($prime /*/ 1.2*/), 2),
-                "Currency" => "EUR"
-            ),
-            "TravelCost"         => array(
-                "Amount"   => 0.00,
-                "Currency" => "EUR"
-            ),
-            "TotalAmountExclVAT" => array(
-                "Amount"   => round($facture->getData('total_ht') + ($prime /*/ 1.2*/), 2),
-                "Currency" => "EUR"
-            ),
-            "TotalAmountInclVAT" => array(
-                "Amount"   => round($facture->getData('total_ttc') + $prime, 2),
-                "Currency" => "EUR"
-            ),
-            "SupportAmount"      => array(
-                "Amount"   => $prime,
-                "Currency" => "EUR"
-            )
-        );
+		$data["Quote"] = array(
+			"LaborCost"          => array(
+				"Amount"   => round($facture->getData('total_ht') - $totalSpare, 2),
+				"Currency" => "EUR"
+			),
+			"SparePartsCost"     => array(
+				"Amount"   => round($totalSpare + ($prime /*/ 1.2*/), 2),
+				"Currency" => "EUR"
+			),
+			"TravelCost"         => array(
+				"Amount"   => 0.00,
+				"Currency" => "EUR"
+			),
+			"TotalAmountExclVAT" => array(
+				"Amount"   => round($facture->getData('total_ht') + ($prime /*/ 1.2*/), 2),
+				"Currency" => "EUR"
+			),
+			"TotalAmountInclVAT" => array(
+				"Amount"   => round($facture->getData('total_ttc') + $prime, 2),
+				"Currency" => "EUR"
+			),
+			"SupportAmount"      => array(
+				"Amount"   => $prime,
+				"Currency" => "EUR"
+			)
+		);
 
-        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+		require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 
-        $api = BimpAPI::getApiInstance('ecologic');
+		$api = BimpAPI::getApiInstance('ecologic');
 
-        $tabFile = array();
+		$tabFile = array();
 
-        $tabFile[] = array($facture->getFilesDir(), $facture->getData('ref'), 'pdf', 'INVOICE');
-        $tabFile[] = array($this->getFilesDir(), 'Restitution_' . $this->getData('ref') . '_signe', 'pdf', 'CONSUMERVALIDATION');
-        if(!is_file($this->getFilesDir(). 'infos_materiel.jpg'))
-            $this->convertHeic($this->getFilesDir(). 'infos_materiel');
-        $list = BimpObject::getBimpObjectObjects('bimpcore', 'BimpFile', array('parent_object_name'=>'BS_SAV', 'id_parent'=>$this->id));
-        foreach($list as $bimp_file){
-            $bimp_file->useNoTransactionsDb();
-            if(stripos($bimp_file->getData('file_name'), 'infos_materiel') !== false)
-                    $bimp_file->resize(1);
-        }
-        $tabFile[] = array($this->getFilesDir(), 'infos_materiel', 'pdf', 'NAMEPLATE');
+		$tabFile[] = array($facture->getFilesDir(), $facture->getData('ref'), 'pdf', 'INVOICE');
+		$tabFile[] = array($this->getFilesDir(), 'Restitution_' . $this->getData('ref') . '_signe', 'pdf', 'CONSUMERVALIDATION');
+		if (!is_file($this->getFilesDir() . 'infos_materiel.jpg')) {
+			$this->convertHeic($this->getFilesDir() . 'infos_materiel');
+		}
+		$list = BimpObject::getBimpObjectObjects('bimpcore', 'BimpFile', array('parent_object_name' => 'BS_SAV', 'id_parent' => $this->id));
+		foreach ($list as $bimp_file) {
+			$bimp_file->useNoTransactionsDb();
+			if (stripos($bimp_file->getData('file_name'), 'infos_materiel') !== false) {
+				$bimp_file->resize(1);
+			}
+		}
+		$tabFile[] = array($this->getFilesDir(), 'infos_materiel', 'pdf', 'NAMEPLATE');
 
-        $api->traiteReq($errors, $warnings, $data, $ecologicData, $this->getDefaultSiteId(), $this->getData('ref'), $tabFile, date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), $facture->getData('ref'), $this);
+		$api->traiteReq($errors, $warnings, $data, $ecologicData, $this->getDefaultSiteId(), $this->getData('ref'), $tabFile, date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), $facture->getData('ref'), $this);
 
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
 
-    public function getDefaultSiteId()
-    {
+	public function getDefaultSiteId()
+	{
 //        global $tabCentre;
-        $tabCentre = BimpCache::getCentresData();
-		if (isset($tabCentre[$this->getData('code_centre_repa')]) && isset($tabCentre[$this->getData('code_centre_repa')]['token']))
-            return $tabCentre[$this->getData('code_centre_repa')]['token'];
-        elseif (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')]['token']))
-            return $tabCentre[$this->getData('code_centre')]['token'];
-    }
+		$tabCentre = BimpCache::getCentresData();
+		$code_centre_repa = $this->getData('code_centre_repa');
+		$code_centre = $this->getData('code_centre');
 
-    public function getActionsButtons()
-    {
-        $btn = parent::getActionsButtons();
-        if ($this->asProdEcologic() && in_array($this->getData('status_ecologic'), array(1, 0))) {
-            if ($this->getStatus() == 999)
-                $btn[] = array(
-                    'label'   => 'Envoyée a Ecologic',
-                    'icon'    => 'fas_times',
-                    'onclick' => $this->getJsActionOnclick('sendDemandeEcologic', array(), array())
-                );
-            if (in_array($this->getStatus(), array(999, 9)))
-                $btn[] = array(
-                    'label'   => 'Codes Ecologic',
-                    'icon'    => 'fas_times',
-                    'onclick' => $this->getJsActionOnclick('codeEcologic', array(), array(
-                        'form_name' => 'ecologic'
-                    ))
-                );
+		if (isset($tabCentre[$code_centre_repa]) && isset($tabCentre[$code_centre_repa]['token'])) {
+			return $tabCentre[$code_centre_repa]['token'];
+		} elseif (isset($tabCentre[$code_centre]) && isset($tabCentre[$code_centre]['token'])) {
+			return $tabCentre[$code_centre]['token'];
+		}
+	}
 
-        }
-        if ($this->asProdEcologic()){
-            $btn[] = array(
-                'label'   => 'Télécharger infos matériel',
-                'icon'    => 'upload',
-                'onclick' => $this->getJsActionOnclick('infoMateriel', array(), array(
-                    'form_name' => 'info_materiel'
-                ))
-            );
-        }
-        return $btn;
-    }
+	public function getActionsButtons()
+	{
+		$btn = parent::getActionsButtons();
+		if ($this->asProdEcologic() && in_array($this->getData('status_ecologic'), array(1, 0))) {
+			if ($this->getStatus() == 999) {
+				$btn[] = array(
+					'label'   => 'Envoyer à Ecologic',
+					'icon'    => 'fas_arrow-circle-right',
+					'onclick' => $this->getJsActionOnclick('sendDemandeEcologic', array(), array())
+				);
+			}
+			if (in_array($this->getStatus(), array(999, 9))) {
+				$btn[] = array(
+					'label'   => 'Codes Ecologic',
+					'icon'    => 'fas_pen',
+					'onclick' => $this->getJsActionOnclick('codeEcologic', array(), array(
+						'form_name' => 'ecologic'
+					))
+				);
+			}
 
-    public function getListHeaderExtraBtn()
-    {
-        $btn[] = array(
-            'label'   => 'Ecologic Payée',
-            'icon'    => 'fas_times',
-            'onclick' => $this->getJsActionOnclick('ecologicPaye', array(), array(
-                'form_name' => 'ecologicPaye'
-            ))
-        );
-        return $btn;
-    }
+		}
+		if ($this->asProdEcologic()) {
+			$btn[] = array(
+				'label'   => 'Télécharger infos matériel',
+				'icon'    => 'fas_upload',
+				'onclick' => $this->getJsActionOnclick('infoMateriel', array(), array(
+					'form_name' => 'info_materiel'
+				))
+			);
+		}
+		return $btn;
+	}
 
-    public function actionEcologicPaye($data, &$success)
-    {
-        $success = 'Ok';
-        $errors = $warnings = array();
+	public function getListHeaderExtraBtn()
+	{
+		$btn[] = array(
+			'label'   => 'Ecologic Payée',
+			'icon'    => 'fas_times',
+			'onclick' => $this->getJsActionOnclick('ecologicPaye', array(), array(
+				'form_name' => 'ecologicPaye'
+			))
+		);
+		return $btn;
+	}
 
-        $tmp = $data['ecologicPaye'];
-        if (strlen($tmp) < 4)
-            $errors['Saisir les numéros'];
-        else {
-            $tmp = str_replace(' ', ',', $tmp);
-            $tmp = str_replace(';', ',', $tmp);
-            $nums = explode(',', $tmp);
-            $bdb = BimpObject::getBdb(true);
-            $db = $bdb->db;
-            foreach ($nums as $num) {
-                $sql = $db->query("SELECT a.id
+	public function actionEcologicPaye($data, &$success)
+	{
+		$success = 'Ok';
+		$errors = $warnings = array();
+
+		$tmp = $data['ecologicPaye'];
+		if (strlen($tmp) < 4) {
+			$errors['Saisir les numéros'];
+		} else {
+			$tmp = str_replace(' ', ',', $tmp);
+			$tmp = str_replace(';', ',', $tmp);
+			$nums = explode(',', $tmp);
+			$bdb = BimpObject::getBdb(true);
+			$db = $bdb->db;
+			foreach ($nums as $num) {
+				$sql = $db->query("SELECT a.id
 FROM llx_bs_sav a
-WHERE a.ecologic_data LIKE '%\"ClaimId\":".trim($num)."%'");
-                if($db->num_rows($sql) < 1){
-                    $errors[] = 'Code : ' . $num . ' introuvable';
-                }
-                elseif($db->num_rows($sql) > 1){
-                    $errors[] = 'Code : ' . $num . ' trouvé plusieurs fois';
-                }
-                else{
-                    $ln = $db->fetch_object($sql);
-                    $db->query('UPDATE llx_bs_sav SET `status_ecologic` = "1000"
-WHERE `id` = '.$ln->id);
-                }
+WHERE a.ecologic_data LIKE '%\"ClaimId\":" . trim($num) . "%'");
+				if ($db->num_rows($sql) < 1) {
+					$errors[] = 'Code : ' . $num . ' introuvable';
+				} elseif ($db->num_rows($sql) > 1) {
+					$errors[] = 'Code : ' . $num . ' trouvé plusieurs fois';
+				} else {
+					$ln = $db->fetch_object($sql);
+					$db->query('UPDATE llx_bs_sav SET `status_ecologic` = "1000"
+WHERE `id` = ' . $ln->id);
+				}
 //                $sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', array('ecologic_data' => array('operator' => 'LIKE', 'value' => '%"ClaimId":' . trim($num) . '%')));
 //                if (!$sav || !$sav->isLoaded())
 //                    $errors[] = 'Code : ' . $num . ' introuvable';
 //                else {
 //                    $sav->updateField('status_ecologic', 1000);
 //                }
-            }
-        }
+			}
+		}
 
 
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
 }

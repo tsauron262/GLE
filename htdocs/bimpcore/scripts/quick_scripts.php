@@ -69,7 +69,6 @@ if (!$action) {
 		'test_divers'                               => 'Test divers',
 		'users_bdd'                                 => 'List Users BDD',
 		'correct_propal_remises'                    => 'Correction des remises des propales',
-		'convert_dictionnary'                       => 'Convertir les valeurs d\'un champ en dictionnaire',
 //		'purge_doublon_rdc'							=> 'Purger doublon contact rdc',
 	);
 
@@ -878,61 +877,6 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 			}
 		}
 		break;
-
-	case 'convert_dictionnary':
-		$module = BimpTools::getValue('m', '');
-		$obj_name = BimpTools::getValue('o', '');
-		$field = BimpTools::getValue('f', '');
-		$code = BimpTools::getValue('c', '');
-		$name = BimpTools::getValue('n', '');
-
-		$err = array();
-		if (!$module) {
-			$err[] = 'Module absent (param m)';
-		}
-		if (!$obj_name) {
-			$err[] = 'Nom objet absent (param o)';
-		}
-		if (!$field) {
-			$err[] = 'Nom du champ absent (param f)';
-		}
-		if (!$code) {
-			$err[] = 'Code dictionnaire absent (param c)';
-		}
-		if (!$name) {
-			$err[] = 'Nom dictionnaire absent (param n)';
-		}
-
-		if (!count($err)) {
-			$obj = BimpObject::getInstance($module, $obj_name);
-
-			if (!is_a($obj, $obj_name)) {
-				$err[] = 'Objet invalide : ' . $obj_name;
-			} else {
-				$values = $obj->getConf('fields/' . $field . '/values', array());
-
-				if (empty($values)) {
-					$err[] = 'Pas de valeurs définies pour le champ "' . $field . '"';
-				} else {
-					echo 'VALEURS : <pre>' . print_r($values, 1) . '</pre>';
-
-					/* @var BimpDictionnary $dict*/
-					$dict = BimpDict::addDefaultDictionnary($code, $name, 1, 'values', 'id', array(), $err);
-
-					if (BimpObject::objectLoaded($dict)) {
-						$err = $dict->setAllValues($values);
-					}
-				}
-			}
-		}
-
-		if (count($err)) {
-			echo 'Erreurs : <pre>' . print_r($err, 1) . '</pre>';
-		} else {
-			echo 'Ajout des valeurs ok';
-		}
-		break;
-
 
 	default:
 		echo 'Action invalide';

@@ -7779,6 +7779,30 @@ ORDER BY a.val_max DESC");
 				$warnings[] = BimpTools::getMsgFromArray($signature_errors);
 			}
 
+			$savForSac = array();
+			$w = 'status >= ' . self::BS_SAV_NEW . ' AND status < ' . self::BS_SAV_FERME;
+			foreach ($data['sacs'] as $sac) {
+				$where = $w . ' AND sacs LIKE "%' .$sac .'%"';
+				$req_sac = $this->db->getRows('bs_sav as sav', $where, null, 'object', array('sav.id', 'sav.ref'/*, 'sac.ref as refsac'*/), null, null);
+
+				foreach ($req_sac as $rs) {
+					if (!in_array($rs->ref, $savForSac))	{
+						$savForSac[$sac] = array($rs->id => $rs->ref);
+					}
+				}
+			}
+			if (count($savForSac)) {
+				$txtForSac = '';
+				foreach ($savForSac as $sac => $dataSac) {
+					$s = ''; if (count($dataSac) > 1) $s = 's';
+					$txtForSac .= 'Sac'.$s . ($s == ''? ' utilisé dans le SAV non fermé suivant' : ' utilisé dans les SAVs non fermé suivants') . '<br>';
+					foreach ($dataSac as $idSav => $ref	) {
+						$txtForSac .= '<a href="'.DOL_URL_ROOT.'/bimpsupport/index.php?fc=sav&id='.$idSav.'" target="_blank">'.$ref.BimpRender::renderIcon('fas_external-link-alt', 'iconRight').'</a><br>';
+					}
+					$warnings[] = $txtForSac;
+				}
+			}
+
 			$success_callback = $this->getCreateJsCallback();
 		}
 

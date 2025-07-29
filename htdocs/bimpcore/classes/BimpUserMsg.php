@@ -370,7 +370,7 @@ class BimpUserMsg
 		),
 		'update_prices_file_marge_neg'               => array( // \BDS_ImportsLdlcProcess::executeUpdateFromFile
 			'label'       => 'Voici la liste des produits avec une marge négative',
-			'dests'       => 'conf::devs_email',
+			'dests'       => 'to:t.sauron@bimp.fr',
 			'module'      => 'bimpdatasync',
 			'type_metier' => 'devs'
 		),

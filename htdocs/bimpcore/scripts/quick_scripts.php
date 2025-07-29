@@ -70,6 +70,7 @@ if (!$action) {
 		'users_bdd'                                 => 'List Users BDD',
 		'correct_propal_remises'                    => 'Correction des remises des propales',
 //		'purge_doublon_rdc'							=> 'Purger doublon contact rdc',
+		'correc'									=> 'correction',
 	);
 
 	$path = pathinfo(__FILE__);
@@ -856,7 +857,14 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 			if($debug) exit('fin debug');
 		}
 		break;
-
+	case 'correc':
+		$sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', 667299);
+		$sav->updateField('status', -1);
+		$sav->updateField('user_update', 151);
+		$sav->updateField('date_update', $sav->getData('date_create'));
+		$sav->updateField('date_pc', null);
+		$sav->updateField('id_signature_pc', 0);
+		break;
 	default:
 		echo 'Action invalide';
 		break;

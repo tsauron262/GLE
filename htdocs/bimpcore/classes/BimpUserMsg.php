@@ -15,7 +15,7 @@ class BimpUserMsg
 			'module' => 'bimpcommercial',
 			'params' => array(
 				'check_availability' => 1,
-				'prio_comm_client' => 1,
+				'prio_comm_client'   => 1,
 			)
 		),
 		'change_statut_facturation'                  => array(    // \Bimp_Commande::checkInvoiceStatus
@@ -24,7 +24,7 @@ class BimpUserMsg
 			'module' => 'bimpcommercial',
 			'params' => array(
 				'check_availability' => 1,
-				'prio_comm_client' => 1
+				'prio_comm_client'   => 1
 			)
 		),
 		'valide_commande_client'                     => array(    // \Bimp_Commande::onValidate
@@ -33,7 +33,7 @@ class BimpUserMsg
 			'module' => 'bimpcommercial',
 			'params' => array(
 				'check_availability' => 1,
-				'prio_comm_client' => 1
+				'prio_comm_client'   => 1
 			)
 		),
 		'rappel_commande_brouillon'                  => array(    // \Bimp_Commande::sendRappelCommandesBrouillons
@@ -64,7 +64,7 @@ class BimpUserMsg
 			'module' => 'bimpcommercial',
 			'params' => array(
 				'check_availability' => 1,
-				'prio_comm_client' => 1
+				'prio_comm_client'   => 1
 			)
 		),
 		'rappel_facture_brouillon'                   => array( // \Bimp_Facture::sendRappelFacturesBrouillons
@@ -123,7 +123,7 @@ class BimpUserMsg
 			'module' => 'bimpcontract',
 			'params' => array(
 				'check_availability' => 0,
-				'prio_comm_client' => 1
+				'prio_comm_client'   => 1
 			)
 		),
 		'avenant_signe'                              => array(    // \BContract_avenant::signed
@@ -259,11 +259,12 @@ class BimpUserMsg
 		),
 		'page_tres_lourde'                           => array(    // \BimpDebug::testLogDebug
 			'label'       => 'Page trés lourde - X sec.',
-			'dests'       => 'conf::devs_email',
+//			'dests'       => 'conf::devs_email',
+			'dests'       => 'to:t.sauron@bimp.fr',
 			'module'      => 'bimpcore',
 			'type_metier' => 'devs'
 		),
-		'pb_envoi_ecologic'                           => array(    // \BimpDebug::testLogDebug
+		'pb_envoi_ecologic'                          => array(    // \BimpDebug::testLogDebug
 			'label'       => 'Page trés lourde - X sec.',
 			'dests'       => 'conf::default_sav_email/bimpsupport',
 			'module'      => 'bimpcore',
@@ -751,47 +752,47 @@ class BimpUserMsg
 			'module' => 'bimpcore',
 			'metier' => 'metier'
 		),*/
-		'rechercheManquantMirakl'	=> array(
+		'rechercheManquantMirakl'                    => array(
 			'label'  => 'Rapport de recherche de shops manquants dans Mirakl',
 			'dests'  => 'to::team-marketplace@rueducommerce.fr::s.conti@rueducommerce.fr::m.chapsal@rueducommerce.fr',
 			'module' => 'bimpcore',
 			'metier' => 'metier'
 		),
-		'alerte_pre_anonymisation'	=> array(
-			'label' => 'Les clients suivants seront anonymisés dans 30 jours en raison d\'une absence de mouvements depuis 5 ans.',
-			'dests' => 'object::id_user',
+		'alerte_pre_anonymisation'                   => array(
+			'label'  => 'Les clients suivants seront anonymisés dans 30 jours en raison d\'une absence de mouvements depuis 5 ans.',
+			'dests'  => 'object::id_user',
 			'module' => 'bimpdatasync',
 			'metier' => 'metier'
 		),
-		'fin_financement_resp_prolease'	=> array(
-			'label' => 'Bonjour xxx, Le contrat de location XXX arrive à expiration le d/m/Y',
-			'dests'	=> 'object::commercial',
-			'module'=> 'bimpcommercial',
+		'fin_financement_resp_prolease'              => array(
+			'label'  => 'Bonjour xxx, Le contrat de location XXX arrive à expiration le d/m/Y',
+			'dests'  => 'object::commercial',
+			'module' => 'bimpcommercial',
 			'params' => array(
-				'canal_diffusion' => 'msgerp',
+				'canal_diffusion'    => 'msgerp',
 				'check_availability' => 1,
-				'prio_comm_client' => 1
+				'prio_comm_client'   => 1
 			),
 		),
-		'fin_financement_apporteur_externe'	=> array(
-			'label' => 'Bonjour xxx, Le contrat de location XXX arrive à expiration le d/m/Y',
-			'dests'	=> 'to::obj',
-			'module'=> 'bimpfinancement',
+		'fin_financement_apporteur_externe'          => array(
+			'label'  => 'Bonjour xxx, Le contrat de location XXX arrive à expiration le d/m/Y',
+			'dests'  => 'to::obj',
+			'module' => 'bimpfinancement',
 		),
-		'fin_financement_apporteur_interne'	=> array(
-			'label' => 'Bonjour xxx, Le contrat de location XXX arrive à expiration le d/m/Y',
-			'dests'	=> 'object::commercial',
-			'module'=> 'bimpcommercial',
+		'fin_financement_apporteur_interne'          => array(
+			'label'  => 'Bonjour xxx, Le contrat de location XXX arrive à expiration le d/m/Y',
+			'dests'  => 'object::commercial',
+			'module' => 'bimpcommercial',
 			'params' => array(
-				'canal_diffusion' => 'msgerp',
+				'canal_diffusion'    => 'msgerp',
 				'check_availability' => 1,
-				'prio_comm_client' => 1
+				'prio_comm_client'   => 1
 			),
 		)
 	);
 
 	public static $canaux_diff_msg = array(
-		'email'   => 'Email',
+		'email'  => 'Email',
 		'msgerp' => 'Message interne'
 	);
 
@@ -799,8 +800,8 @@ class BimpUserMsg
 		'active'             => 1,
 		'required'           => 1,
 		'canal_diffusion'    => 'email',
-		'msgerp_Visibility'	 => BimpNote::BN_MEMBERS,
-		'msgerp_TypeDest'	 => BimpNote::BN_DEST_USER,
+		'msgerp_Visibility'  => BimpNote::BN_MEMBERS,
+		'msgerp_TypeDest'    => BimpNote::BN_DEST_USER,
 		'def_abo'            => 1,
 		'type_metier'        => 'metier',
 		'check_availability' => 0,
@@ -1070,7 +1071,7 @@ class BimpUserMsg
 						$user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
 
 						if (BimpObject::objectLoaded($user)) {
-							 // exit();
+							// exit();
 							$unallowed_reason = '';
 							if ($user->isMsgAllowed($code, $params['check_availability'], $unallowed_reason)) {
 								$userDestinataires[] = $user;
@@ -1093,12 +1094,12 @@ class BimpUserMsg
 									}
 								}
 							}
-							if ($params['prio_comm_client'] && strstr($datasMessage['dests'], 'object::commercial') !== false && !$userDestinataires)	{
-								$client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int)($obj->getData('fk_soc')?$obj->getData('fk_soc'):$obj->getData('id_client')));
+							if ($params['prio_comm_client'] && strstr($datasMessage['dests'], 'object::commercial') !== false && !$userDestinataires) {
+								$client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) ($obj->getData('fk_soc') ? $obj->getData('fk_soc') : $obj->getData('id_client')));
 								$user_commClient = $client->getCommercial();
 								if ($user_commClient->id != $user->id && $user_commClient->isMsgAllowed($code, 1, $unallowed_reason)) {
 									$userDestinataires[] = $user_commClient;
-									$redir_reasons[$user_commClient->id] = 'Message recu en tant que commercial du client';										// exit();
+									$redir_reasons[$user_commClient->id] = 'Message recu en tant que commercial du client';                                        // exit();
 								}
 							}
 							if ($params['allow_superior'] && !$userDestinataires) {
@@ -1110,7 +1111,7 @@ class BimpUserMsg
 									if (BimpObject::objectLoaded($superior) && $superior->getData('statut') && (!$params['check_availability'] || $superior->isNotHoliday())) {
 										$userDestinataires[] = $superior;
 										$idsDejaAjoutes[] = $superior->id;
-										$redir_reasons[$superior->id] = 'Message recu en tant que supérieur de ' . $user->getFullName() .' car cet utilisateur ' . $unallowed_reason;
+										$redir_reasons[$superior->id] = 'Message recu en tant que supérieur de ' . $user->getFullName() . ' car cet utilisateur ' . $unallowed_reason;
 									}
 								}
 							}
@@ -1187,28 +1188,28 @@ class BimpUserMsg
 						BimpCore::addlog('Message utilisateur "' . $code . '" non envoyé (aucun destinataire)', 2, 'email', (is_a($obj, 'BimpObject') ? $obj : ''));
 					}
 				}
-			}
-			elseif ($params['canal_diffusion'] == 'msgerp')	{
+			} elseif ($params['canal_diffusion'] == 'msgerp') {
 				if (!count($errors)) {
 					if (count($userDestinataires)) {
 						foreach ($userDestinataires as $u) {
 							if (isset($redir_reasons[$u->id])) {
 								$contenu = $redir_reasons[$u->id] . "\n" . $contenu;
 							}
-							$err = $obj->addNote($contenu, $params['msgerp_Visibility'], 0 ,1, '', BimpNote::BN_AUTHOR_GROUP, $params['msgerp_TypeDest'],
+							$err = $obj->addNote($contenu, $params['msgerp_Visibility'], 0, 1, '', BimpNote::BN_AUTHOR_GROUP, $params['msgerp_TypeDest'],
 								$params['msgerp_TypeDest'] == BimpNote::BN_DEST_GROUP ? $u->id : 0,
 								$params['msgerp_TypeDest'] == BimpNote::BN_DEST_USER ? $u->id : 0);
-							if($err) $errors[] = implode(',', $err);
+							if ($err) {
+								$errors[] = implode(',', $err);
+							}
 						}
 					}
 				} else {
 					BimpCore::addlog('Message utilisateur "' . $code . '" non envoyé (aucun destinataire)', 2, 'note', (is_a($obj, 'BimpObject') ? $obj : ''));
 				}
-			}
-			else	{
+			} else {
 				$errors[] = 'canal de diffusion erroné';
 			}
-			 // exit();
+			// exit();
 			if (count($errors)) {
 				BimpCore::addlog('Erreurs envoi message utilisateur "' . $code . '"', 3, 'email', (is_a($obj, 'BimpObject') ? $obj : ''), array(
 					'Erreurs' => $errors

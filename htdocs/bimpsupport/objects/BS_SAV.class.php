@@ -324,8 +324,7 @@ class BS_SAV extends BimpObject
 		if (count($notes) > 0) {
 			$dernote = reset($notes);
 			$date = $dernote->getData('date_create');
-		}
-		else	{
+		} else {
 			$date = $this->getData('date_create');
 		}
 
@@ -1988,6 +1987,20 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 		return 0;
 	}
 
+	public function getUserLimitEncours()
+	{
+		global $db, $user;
+		$sql = $db->query("SELECT val_max
+FROM llx_validate_comm a
+WHERE a.user = '" . $user->id . "' AND a.secteur = 'S' AND a.type = '0'
+ORDER BY a.val_max DESC");
+		if ($db->num_rows($sql) > 0) {
+			$ln = $db->fetch_object($sql);
+			return $ln->val_max;
+		}
+		return 0;
+	}
+
 	// Affichage:
 
 	public function displayFactureAmountToPay()
@@ -2288,7 +2301,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 				$besoin = $encoursActu + $propal->dol_object->total_ht;
 
 				if ($besoin > ($authorisation + 1)) {
-						$html .= BimpRender::renderAlerts('Le client doit payer comptant (Carte bancaire, A réception de facture), son encours autorisé (' . price($authorisation) . ' €) est inférieur au besoin (' . price($besoin) . ' €)');
+					$html .= BimpRender::renderAlerts('Le client doit payer comptant (Carte bancaire, A réception de facture), son encours autorisé (' . price($authorisation) . ' €) est inférieur au besoin (' . price($besoin) . ' €)');
 				}
 			}
 		}
@@ -5918,20 +5931,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 		);
 	}
 
-	public function getUserLimitEncours()
-	{
-		global $db, $user;
-		$sql = $db->query("SELECT val_max
-FROM llx_validate_comm a
-WHERE a.user = '" . $user->id . "' AND a.secteur = 'S' AND a.type = '0'
-ORDER BY a.val_max DESC");
-		if ($db->num_rows($sql) > 0) {
-			$ln = $db->fetch_object($sql);
-			return $ln->val_max;
-		}
-		return 0;
-	}
-
 	public function actionPropalAccepted($data, &$success)
 	{
 		$warnings = array();
@@ -8335,7 +8334,7 @@ ORDER BY a.val_max DESC");
 			}
 			$prop = $this->getChildObject('propal');
 			$prop->set('fk_cond_reglement', $id_cond_reglement);
-			$prop->set('fk_mode_reglement',  $id_mode_reglement);
+			$prop->set('fk_mode_reglement', $id_mode_reglement);
 			$prop->update($warnings);
 		}
 

@@ -860,10 +860,11 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 	case 'correc':
 		$sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', 667299);
 		$sav->updateField('status', -1);
-		$sav->updateField('user_update', 151);
+		$sav->updateField('user_update', 1151);
 		$sav->updateField('date_update', $sav->getData('date_create'));
 		$sav->updateField('date_pc', null);
 		$sav->updateField('id_signature_pc', 0);
+		$sav->updateField('sacs', array());
 		break;
 	default:
 		echo 'Action invalide';

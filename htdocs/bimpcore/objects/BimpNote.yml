@@ -130,6 +130,7 @@ fields:
         default_value:
             callback: getContentDefaultValue
         depends_on: note_modele,obj_module,obj_name,id_obj
+        reload_now: 0
     viewed:
         label: Vue
         type: bool

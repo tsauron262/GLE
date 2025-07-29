@@ -1,7 +1,7 @@
 var inputsEvents = [];
 var bimpSignaturePads = [];
 
-function addInputEvent(form_id, input_name, event, callback) {
+function addInputEvent(form_id, input_name, event, callback, trigger = 1) {
 	for (i in inputsEvents) {
 		if (inputsEvents[i].form_id === form_id &&
 			inputsEvents[i].input_name === input_name &&
@@ -14,7 +14,8 @@ function addInputEvent(form_id, input_name, event, callback) {
 		form_id: form_id,
 		input_name: input_name,
 		event: event,
-		callback: callback
+		callback: callback,
+		trigger: trigger
 	});
 }
 
@@ -2951,7 +2952,9 @@ function setFormEvents($form) {
 			var $input = $form.find('[name=' + inputsEvents[i].input_name + ']');
 			if ($input.length && !parseInt($input.data('form_init_input_change'))) {
 				$input.data('form_init_input_change', 1);
-				$input.change();
+				if (inputsEvents[i].trigger) {
+					$input.change();
+				}
 			}
 		}
 	}
@@ -5180,7 +5183,7 @@ function BimpFileUploader() {
 	this.checkFiles = function ($area, new_files) {
 		console.log('FILES');
 		console.log(new_files);
-		
+
 		var $container = $area.findParentByClass('bimp_drop_files_container');
 
 		if (!$.isOk($container)) {

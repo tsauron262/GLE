@@ -2481,6 +2481,13 @@ class Bimp_Propal extends Bimp_PropalTemp
 		}
 	}
 
+	public function onSignaturecancelled(BimpSignature $signature)
+	{
+		if ((int) $this->getData('fk_statut') === 2) {
+			$this->updateField('fk_statut', 1);
+		}
+	}
+
 	// Traitements - overrides BimpComm:
 
 	public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
@@ -2537,10 +2544,12 @@ class Bimp_Propal extends Bimp_PropalTemp
 				}
 			}
 		}
-		if (!$errors)	{
+		if (!$errors) {
 			if ($join_files) {
 				$err = $this->copyMoveFile($join_files, $new_id_propal);
-				if ($err) $errors[] = $err;
+				if ($err) {
+					$errors[] = $err;
+				}
 			}
 		}
 		return $errors;
@@ -2706,7 +2715,9 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 		if ($data['join_files']) {
 			$err = $this->copyMoveFile($data['join_files'], $new_id_propal);
-			if ($err) $errors[] = $err;
+			if ($err) {
+				$errors[] = $err;
+			}
 		}
 
 		$url = DOL_URL_ROOT . '/bimpcommercial/index.php?fc=propal&id=' . $new_id_propal;
@@ -2728,7 +2739,9 @@ class Bimp_Propal extends Bimp_PropalTemp
 			foreach ($dataFile as $join_file_id) {
 				$objFile = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $join_file_id);
 				$err = $objFile->moveToObject($new_propal, true);
-				if($err)	$errors[] = $err;
+				if ($err) {
+					$errors[] = $err;
+				}
 			}
 		}
 		return $errors;
@@ -3756,12 +3769,22 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 	public function isSignatureCancellable($doc_type, &$errors = array())
 	{
+		$check = 1;
+
 		$sav = $this->getSav();
 		if (!BimpObject::objectLoaded($sav)) {
-			return 1;
+			// Pas de vérif, car pour l'instant, annulation réservée aux admins
+//			if ((int) $this->getData('commande_status') > 1) {
+//				$errors[] = 'Ce devis a donné lieu à une commande';
+//				$check = 0;
+//			}
+//			if ((int) $this->getData('contrats_status') > 1) {
+//				$errors[] = 'Ce devis a donné lieu à un contrat d\'abonnement';
+//				$check = 0;
+//			}
 		}
 
-		return 1;
+		return $check;
 	}
 
 	public function isSignatureReopenable($doc_type, &$errors = array())
@@ -3828,7 +3851,6 @@ class Bimp_Propal extends Bimp_PropalTemp
 	}
 
 
-
 	public static function checkMargesAll()
 	{
 		$where = '';
@@ -3861,7 +3883,6 @@ class Bimp_Propal extends Bimp_PropalTemp
 				BimpCore::setConf('propals_marges_last_check_tms', date('Y-m-d H:i:s'));
 			}
 		}
-
 
 
 		return $nchecked . ' propal(s) vérifée(s)';

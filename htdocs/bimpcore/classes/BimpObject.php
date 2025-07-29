@@ -1369,7 +1369,7 @@ class BimpObject extends BimpCache
 				continue;
 			}
 
-			if (!$with_common_fields == in_array($field_name, static::$common_fields)) {
+			if (!$with_common_fields && in_array($field_name, static::$common_fields)) {
 				continue;
 			}
 
@@ -2077,9 +2077,10 @@ class BimpObject extends BimpCache
 					$obj = $this->getChildObject($nom);
 					$value = $this->recursiveGetExport($niveau, $pref, $obj);
 				}
-			} else {
-				print_r($infoObj);
 			}
+//			else {
+//				print_r($infoObj);
+//			}
 			$tabResult[$nom] = $value;
 		}
 

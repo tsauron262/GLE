@@ -30,6 +30,10 @@ if (!$user->admin) {
 	exit;
 }
 
+$values = BimpDict::getValuesArray('expertises', false, true, '');
+
+echo '<pre>' . print_r($values, 1) . '</pre>';
+
 echo '<br/>FIN';
 echo '</body></html>';
 

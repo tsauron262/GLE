@@ -95,6 +95,12 @@ class BimpSignature extends BimpObject
 					return 1;
 				}
 				return 0;
+
+			case 'cancel':
+				if ((int) $this->getData('status') > 0) {
+					return (int) $user->admin;
+				}
+				return 1;
 		}
 		return parent::canSetAction($action);
 	}
@@ -175,11 +181,11 @@ class BimpSignature extends BimpObject
 				return 1;
 
 			case 'cancel':
-				if ((int) $this->getData('status') !== 0) {
-					$errors[] = 'Il n\'est pas possible d\'annuler la signature';
+				if ((int) $this->getData('status') < 0) {
+					$errors[] = 'Cette signature a déjà été annulée ou refusée';
 					return 0;
 				}
-
+//
 				$obj = $this->getObj();
 				if ($this->isObjectValid($errors, $obj)) {
 					if (method_exists($obj, 'isSignatureCancellable')) {
@@ -406,7 +412,7 @@ class BimpSignature extends BimpObject
 		return $files;
 	}
 
-    // Getters defaults:
+	// Getters defaults:
 
 	public static function getDefaultSignDistEmailContent($type = 'elec')
 	{
@@ -443,7 +449,7 @@ class BimpSignature extends BimpObject
 		return $message;
 	}
 
-    // Getters données:
+	// Getters données:
 
 	public function getInputValue($field_name)
 	{
@@ -1902,8 +1908,8 @@ class BimpSignature extends BimpObject
 										$msg .= '<b>Objet lié: </b>' . $obj->getLink() . '<br/>';
 									}
 									$msg .= '<b>Fiche signature: </b>' . $this->getLink(array(), 'private') . '<br/><br/>';
-                                $code = 'confirm_sign_docusign';
-								BimpUserMsg::envoiMsg($code, $subject, $msg, $email);
+									$code = 'confirm_sign_docusign';
+									BimpUserMsg::envoiMsg($code, $subject, $msg, $email);
 								}
 							}
 							$this->onFullySigned();

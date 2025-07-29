@@ -1,0 +1,2 @@
+- Renvois sotck consignés SAV : ajout du téléchargement du bordereau d'expédition depuis GSX. 
+- Ajout bouton "Annuler" dans les fiches signatures (réservé aux admin).

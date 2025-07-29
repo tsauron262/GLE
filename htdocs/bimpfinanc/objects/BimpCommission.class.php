@@ -195,7 +195,7 @@ class BimpCommission extends BimpObject
 		return '';
 	}
 
-    // Getters cache:
+	// Getters cache:
 
 	public function getRevalorisationsListCacheKey()
 	{
@@ -483,8 +483,8 @@ class BimpCommission extends BimpObject
 			$data['total_marges_serv'] = $data['total_ca_serv'] - $data['total_pa_serv'];
 			$data['total_marges_prod'] = $data['total_ca_prod'] - $data['total_pa_prod'];
 
-            // Revalorisations:
-            $revals_list = $this->getRevalorisationsList(true);
+			// Revalorisations:
+			$revals_list = $this->getRevalorisationsList(true);
 
 			foreach ($revals_list as $id_reval) {
 				$reval = BimpCache::getBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', (int) $id_reval);
@@ -518,7 +518,7 @@ class BimpCommission extends BimpObject
 		return self::$cache[$cache_key];
 	}
 
-    // Affichages:
+	// Affichages:
 
 	public function displayTaux($type = "marque")
 	{
@@ -782,6 +782,7 @@ class BimpCommission extends BimpObject
 			'warnings' => $warnings
 		);
 	}
+
 	public function actionValidate($data, &$success)
 	{
 		$errors = array();
@@ -1131,6 +1132,8 @@ class BimpCommission extends BimpObject
 	{
 		switch ($step_name) {
 			case 'process_lines':
+				$id_prod_commission = (int) $this->db->getValue('product', 'rowid', 'ref = \'Commission_AppleCare\'');
+
 				$id_facture = (int) BimpTools::getArrayValueFromPath($operation_extra_data, 'operation/id_facture', 0);
 				if (!$id_facture) {
 					$errors[] = 'ID de la facture absent';
@@ -1473,7 +1476,7 @@ class BimpCommission extends BimpObject
 								$fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
 								$fac_line->validateArray(array(
 									'id_obj'      => (int) $facture->id,
-									'type'        => 3,
+									'type'        => ($id_prod_commission ? 1 : 3),
 									'pa_editable' => 1
 								));
 
@@ -1484,6 +1487,7 @@ class BimpCommission extends BimpObject
 								$fac_line->pu_ht = $price;
 								$fac_line->tva_tx = $tva_tx;
 								$fac_line->pa_ht = 0;
+								$fac_line->id_product = $id_prod_commission;
 
 								$line_warnings = array();
 								$line_errors = $fac_line->create($line_warnings, true);
@@ -1570,7 +1574,7 @@ class BimpCommission extends BimpObject
 		return $result;
 	}
 
-    // Overrides:
+	// Overrides:
 
 	public function create(&$warnings = array(), $force_create = false)
 	{

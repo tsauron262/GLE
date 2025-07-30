@@ -2391,7 +2391,7 @@ class BCT_Contrat extends BimpDolObject
 				$infos .= '<br/><br/>Contrat ' . $contrat->getLink() . ' : <br/>';
 
 				$suppl_desc = '';
-				if (!$id_commercial || true) {
+				if (!$id_commercial) {
 					if ($contrat->getData('fk_soc'))	{
 						$comm = $client->getCommercial();
 						$id_commercial = $comm->id;

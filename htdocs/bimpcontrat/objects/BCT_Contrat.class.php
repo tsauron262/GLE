@@ -2395,7 +2395,7 @@ class BCT_Contrat extends BimpDolObject
 					if ($contrat->getData('fk_soc'))	{
 						$comm = $client->getCommercial();
 						$id_commercial = $comm->id;
-						$suppl_desc = 'Vous recevez cette tache car il n\'a pas de commercial actif sur ce contrat<br />';
+						$suppl_desc = 'Vous recevez cette tache car il n\'a pas de commercial actif sur ce contrat.<br />';
 					}
 					if (!$id_commercial) {
 						BimpCore::addlog('Aucun commercial pour renouvellements manuels', Bimp_Log::BIMP_LOG_URGENT, 'contrat', $contrat);

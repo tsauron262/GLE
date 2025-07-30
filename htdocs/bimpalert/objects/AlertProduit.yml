@@ -97,6 +97,14 @@ fields:
             field_name: type_notif
             show_values: 0
             
+    msgToCreator:
+        label: Notifier le créateur de la pièce
+        type: bool
+        default_value: 0
+    msgToCommClient:
+        label: Notifier le commercial client
+        type: bool
+        default_value: 0
     message_notif:
         label: Message
         type: text

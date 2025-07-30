@@ -1,0 +1,3 @@
+ALTER TABLE llx_bimpalert_produit
+	ADD COLUMN msgToCreator BOOLEAN NOT NULL DEFAULT 0,
+	ADD COLUMN msgToCommClient BOOLEAN NOT NULL DEFAULT 0;

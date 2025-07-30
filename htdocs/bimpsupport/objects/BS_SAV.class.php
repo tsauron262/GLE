@@ -324,8 +324,7 @@ class BS_SAV extends BimpObject
 		if (count($notes) > 0) {
 			$dernote = reset($notes);
 			$date = $dernote->getData('date_create');
-		}
-		else	{
+		} else {
 			$date = $this->getData('date_create');
 		}
 
@@ -1988,6 +1987,20 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 		return 0;
 	}
 
+	public function getUserLimitEncours()
+	{
+		global $db, $user;
+		$sql = $db->query("SELECT val_max
+FROM llx_validate_comm a
+WHERE a.user = '" . $user->id . "' AND a.secteur = 'S' AND a.type = '0'
+ORDER BY a.val_max DESC");
+		if ($db->num_rows($sql) > 0) {
+			$ln = $db->fetch_object($sql);
+			return $ln->val_max;
+		}
+		return 0;
+	}
+
 	// Affichage:
 
 	public function displayFactureAmountToPay()
@@ -2288,7 +2301,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 				$besoin = $encoursActu + $propal->dol_object->total_ht;
 
 				if ($besoin > ($authorisation + 1)) {
-						$html .= BimpRender::renderAlerts('Le client doit payer comptant (Carte bancaire, A réception de facture), son encours autorisé (' . price($authorisation) . ' €) est inférieur au besoin (' . price($besoin) . ' €)');
+					$html .= BimpRender::renderAlerts('Le client doit payer comptant (Carte bancaire, A réception de facture), son encours autorisé (' . price($authorisation) . ' €) est inférieur au besoin (' . price($besoin) . ' €)');
 				}
 			}
 		}
@@ -5918,20 +5931,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 		);
 	}
 
-	public function getUserLimitEncours()
-	{
-		global $db, $user;
-		$sql = $db->query("SELECT val_max
-FROM llx_validate_comm a
-WHERE a.user = '" . $user->id . "' AND a.secteur = 'S' AND a.type = '0'
-ORDER BY a.val_max DESC");
-		if ($db->num_rows($sql) > 0) {
-			$ln = $db->fetch_object($sql);
-			return $ln->val_max;
-		}
-		return 0;
-	}
-
 	public function actionPropalAccepted($data, &$success)
 	{
 		$warnings = array();
@@ -6099,9 +6098,7 @@ ORDER BY a.val_max DESC");
 
 							$frais = (float) (isset($data['frais']) ? $data['frais'] : 0);
 
-//                            if (!BimpObject::objectLoaded($line)) {
 							$line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
-//                            }
 
 							$line->validateArray(array(
 								'id_obj'    => (int) $new_id_propal,
@@ -6728,35 +6725,36 @@ ORDER BY a.val_max DESC");
 															'cancel_only' => true
 														), $fac_cancel);
 
-														if (!count($fac_cancel_errors)) {
-															if (!BimpObject::objectLoaded($fac_cancel)) {
-																$fac_cancel_errors[] = 'Echec de la créatio de l\'avoir d\'annulation de la facture initiale pour une raison inconnue';
-															} else {
-																$fac_cancel->fetch($fac_cancel->id);
-																$fac_cancel->dol_object->fetch_lines();
-																$fac_cancel->dol_object->update_price(1);
-																$fac_cancel->checkIsPaid();
-
-																// conversion avoir client en remise et application dans la nouvelle facture :
-																if ($fac_cancel->getRemainToPay(true, false) < 0) {
-																	$conv_errors = $fac_cancel->convertToRemise();
-
-																	if (count($conv_errors)) {
-																		$fac_cancel_errors[] = BimpTools::getMsgFromArray($conv_errors, 'Echec de la conversion en remise ' . $fac_cancel->getLabel('of_the') . ' d\'annulation');
-																	} else {
-																		BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
-																		$cancel_discount = new DiscountAbsolute($this->db->db);
-																		$cancel_discount->fetch(0, $fac_cancel->id);
-
-																		if (BimpObject::objectLoaded($cancel_discount)) {
-																			if ($cancel_discount->link_to_invoice(0, $bimpFacture->id) <= 0) {
-																				$fac_cancel_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($cancel_discount), 'Echec de l\'application de la remise ' . $bimpFacture->getLabel('to') . ' d\'origine');
-																			}
-																		}
-																	}
-																}
-															}
-														}
+														// Maintenant géré dans Bimp_Facture::cancelAndRefacture() si cancel_only = true
+//														if (!count($fac_cancel_errors)) {
+//															if (!BimpObject::objectLoaded($fac_cancel)) {
+//																$fac_cancel_errors[] = 'Echec de la création de l\'avoir d\'annulation de la facture initiale pour une raison inconnue';
+//															} else {
+//																$fac_cancel->fetch($fac_cancel->id);
+//																$fac_cancel->dol_object->fetch_lines();
+//																$fac_cancel->dol_object->update_price(1);
+//																$fac_cancel->checkIsPaid();
+//
+//																// conversion avoir client en remise et application dans la nouvelle facture :
+//																if ($fac_cancel->getRemainToPay(true, false) < 0) {
+//																	$conv_errors = $fac_cancel->convertToRemise();
+//
+//																	if (count($conv_errors)) {
+//																		$fac_cancel_errors[] = BimpTools::getMsgFromArray($conv_errors, 'Echec de la conversion en remise ' . $fac_cancel->getLabel('of_the') . ' d\'annulation');
+//																	} else {
+//																		BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+//																		$cancel_discount = new DiscountAbsolute($this->db->db);
+//																		$cancel_discount->fetch(0, $fac_cancel->id);
+//
+//																		if (BimpObject::objectLoaded($cancel_discount)) {
+//																			if ($cancel_discount->link_to_invoice(0, $bimpFacture->id) <= 0) {
+//																				$fac_cancel_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($cancel_discount), 'Echec de l\'application de la remise ' . $bimpFacture->getLabel('to') . ' d\'origine');
+//																			}
+//																		}
+//																	}
+//																}
+//															}
+//														}
 
 														if (count($fac_cancel_errors)) {
 															$errors[] = BimpTools::getMsgFromArray($fac_cancel_errors, 'Echec de la création de l\'avoir d\'annulation de la facture initiale');
@@ -7783,11 +7781,11 @@ ORDER BY a.val_max DESC");
 			$savForSac = array();
 			$w = 'status >= ' . self::BS_SAV_NEW . ' AND status < ' . self::BS_SAV_FERME;
 			foreach ($data['sacs'] as $sac) {
-				$where = $w . ' AND sacs LIKE "%' .$sac .'%"';
+				$where = $w . ' AND sacs LIKE "%' . $sac . '%"';
 				$req_sac = $this->db->getRows('bs_sav as sav', $where, null, 'object', array('sav.id', 'sav.ref'/*, 'sac.ref as refsac'*/), null, null);
 
 				foreach ($req_sac as $rs) {
-					if (!in_array($rs->ref, $savForSac))	{
+					if (!in_array($rs->ref, $savForSac)) {
 						$savForSac[$sac] = array($rs->id => $rs->ref);
 					}
 				}
@@ -7795,10 +7793,13 @@ ORDER BY a.val_max DESC");
 			if (count($savForSac)) {
 				$txtForSac = '';
 				foreach ($savForSac as $sac => $dataSac) {
-					$s = ''; if (count($dataSac) > 1) $s = 's';
-					$txtForSac .= 'Sac'.$s . ($s == ''? ' utilisé dans le SAV non fermé suivant' : ' utilisé dans les SAVs non fermé suivants') . '<br>';
-					foreach ($dataSac as $idSav => $ref	) {
-						$txtForSac .= '<a href="'.DOL_URL_ROOT.'/bimpsupport/index.php?fc=sav&id='.$idSav.'" target="_blank">'.$ref.BimpRender::renderIcon('fas_external-link-alt', 'iconRight').'</a><br>';
+					$s = '';
+					if (count($dataSac) > 1) {
+						$s = 's';
+					}
+					$txtForSac .= 'Sac' . $s . ($s == '' ? ' utilisé dans le SAV non fermé suivant' : ' utilisé dans les SAVs non fermé suivants') . '<br>';
+					foreach ($dataSac as $idSav => $ref) {
+						$txtForSac .= '<a href="' . DOL_URL_ROOT . '/bimpsupport/index.php?fc=sav&id=' . $idSav . '" target="_blank">' . $ref . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a><br>';
 					}
 					$warnings[] = $txtForSac;
 				}
@@ -7976,6 +7977,7 @@ ORDER BY a.val_max DESC");
 		$errors = array();
 		$warnings = array();
 		$success = 'Réouverture effectuée';
+		$sc = '';
 
 		$errors = $this->updateField('status', 9);
 
@@ -8012,13 +8014,55 @@ ORDER BY a.val_max DESC");
 						}
 					}
 				}
+			} else {
+				$ids = array(
+					'id_facture'       => (int) $this->getData('id_facture'),
+					'id_facture_avoir' => (int) $this->getData('id_facture_avoir')
+				);
 
-				if ((int) $this->getData('id_facture')) {
-					$this->updateField('id_facture', 0);
+				foreach ($ids as $id_fac) {
+					$fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_fac);
+					if (!BimpObject::objectLoaded($fac)) {
+						continue;
+					}
+
+					$rows = $this->db->getRows('societe_remise_except', '`fk_facture` = ' . $id_fac, null, 'array');
+					if (!is_null($rows) && count($rows)) {
+						foreach ($rows as $r) {
+							$discount = new DiscountAbsolute($this->db->db);
+							if ($discount->fetch((int) $r['rowid']) > 0) {
+								if ($discount->unlink_invoice() <= 0) {
+									$warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Echec du retrait de la remise #' . $r['rowid'] . ' de ' . $discount->amount_ttc . ' €');
+								}
+							}
+						}
+					}
+
+					$fac->fetch($fac->id);
+					$fac->checkIsPaid();
+
+					$fac_cancel = null;
+					$cancel_errors = $fac->cancelAndRefacture(array(
+						'cancel_only' => true
+					), $fac_cancel);
+
+					if (count($cancel_errors)) {
+						$warnings[] = BimpTools::getMsgFromArray($cancel_errors, 'Echec de l\'annulation ' . $fac->getLabel('of_the') . ' ' . $fac->getRef());
+					} else {
+						$url = $fac_cancel->getUrl();
+						if ($url) {
+							$success .= ($success ? '<br/>' : '') . 'Création ' . $fac_cancel->getLabel('of_the') .' d\'annulation effectuée avec succès - ' . $fac_cancel->getLink();
+							$sc .= 'window.open(\'' . $url . '\');';
+						}
+					}
 				}
-				if ((int) $this->getData('id_facture_avoir')) {
-					$this->updateField('id_facture_avoir', 0);
-				}
+			}
+
+			if ((int) $this->getData('id_facture')) {
+				$this->updateField('id_facture', 0);
+			}
+			if ((int) $this->getData('id_facture_avoir')) {
+				$this->updateField('id_facture_avoir', 0);
 			}
 
 			// Emplacement équipement :
@@ -8060,8 +8104,9 @@ ORDER BY a.val_max DESC");
 		}
 
 		return array(
-			'errors'   => $errors,
-			'warnings' => $warnings
+			'errors'           => $errors,
+			'warnings'         => $warnings,
+			'success_callback' => $sc
 		);
 	}
 
@@ -8359,7 +8404,7 @@ ORDER BY a.val_max DESC");
 			}
 			$prop = $this->getChildObject('propal');
 			$prop->set('fk_cond_reglement', $id_cond_reglement);
-			$prop->set('fk_mode_reglement',  $id_mode_reglement);
+			$prop->set('fk_mode_reglement', $id_mode_reglement);
 			$prop->update($warnings);
 		}
 

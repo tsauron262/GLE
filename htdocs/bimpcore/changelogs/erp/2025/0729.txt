@@ -1,0 +1,1 @@
+- SAV: annulation auto des factures après réouverture d'un dossier fermé pour non-restitution + réintégration des acomptes dans le devis initial.

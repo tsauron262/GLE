@@ -432,6 +432,27 @@ class devController extends BimpController
 		return $html;
 	}
 
+	public function renderInjectionsTab()
+	{
+		$html = '';
+
+		if (file_exists(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt')) {
+			$html .= '<div class="buttonsContainer align-right">';
+			$html .= '<span class="btn btn-danger" onclick="BimpAjax(\'deleteInjectionsLogFile\', {}, null, {})">';
+			$html .= BimpRender::renderIcon('fas_trash', 'iconLeft') . 'Supprimer le fichier de log';
+			$html .= '</span>';
+			$html .= '</div>';
+
+			$html .= '<div style="margin-top: 30px">';
+			$html .= file_get_contents(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt');
+			$html .= '</div>';
+		} else {
+			$html .= BimpRender::renderAlerts('Fichier de log absent', 'danger');
+		}
+
+		return $html;
+	}
+
 	public function renderYmlTab()
 	{
 		require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpYml.php';
@@ -800,6 +821,26 @@ class devController extends BimpController
 	{
 		$success = '';
 		$errors = BimpCore::afterGitPullProcess(true, $success);
+		return array(
+			'errors'     => $errors,
+			'success'    => $success,
+			'warnings'   => array(),
+			'request_id' => BimpTools::getValue('request_id', 0, 'int')
+		);
+	}
+
+	public function ajaxProcessDeleteInjectionsLogFile()
+	{
+		$success = '';
+
+		if (file_exists(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt')) {
+			if (unlink(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt')) {
+				$success = 'Fichier de log supprimé avec succès';
+			} else {
+				$errors[] = 'Echec de la suppression du fichier';
+			}
+		}
+
 		return array(
 			'errors'     => $errors,
 			'success'    => $success,

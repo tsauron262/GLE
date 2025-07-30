@@ -302,6 +302,17 @@ function analyseVarsForSqlAndScriptsInjection(&$var, $type, $stopcode = 1)
 						error_log($errormessage.' '.substr($errormessage2, 2000));
 					}
 
+					/*moddrsi (20.2)*/
+					// Pour débug :
+					if (is_dir(DOL_DOCUMENT_ROOT . '/bimpressources')) {
+						$hfile = fopen(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt', 'a');
+						if ($hfile) {
+							fwrite($hfile, '------------------------------------' . "\n" . date('d / m / Y H:i') . "\n" . $errormessage . ' ' . substr($errormessage2, 2000) ."\n\n\n");
+							fclose($hfile);
+						}
+					}
+					/*fmoddrsi (20.2)*/
+
 					// Note: No addition into security audit table is done because we don't want to execute code in such a case.
 					// Detection of too many such requests can be done with a fail2ban rule on 403 error code or into the PHP server error log.
 
@@ -445,9 +456,9 @@ if (!defined('NOSESSION')) {
 require_once 'master.inc.php';
 /* moddrsi (20.2) */
 if(!defined('NOREQUIREDB')){
-    include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
-    $synopsisHook = new synopsisHook();
-    global $synopsisHook; //Pour vision global de l'objet
+	include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
+	$synopsisHook = new synopsisHook();
+	global $synopsisHook; //Pour vision global de l'objet
 }
 /* fmoddrsi */
 
@@ -1445,9 +1456,9 @@ if (!empty($conf->browser->layout) && $conf->browser->layout != 'classic') {
 
 // If on smartphone or optimized for small screen
 if ((!empty($conf->browser->layout) && $conf->browser->layout == 'phone')
-			|| (!empty($_SESSION['dol_screenwidth']) && $_SESSION['dol_screenwidth'] < 400)
-			|| (!empty($_SESSION['dol_screenheight']) && $_SESSION['dol_screenheight'] < 400
-				|| getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER'))
+	|| (!empty($_SESSION['dol_screenwidth']) && $_SESSION['dol_screenwidth'] < 400)
+	|| (!empty($_SESSION['dol_screenheight']) && $_SESSION['dol_screenheight'] < 400
+		|| getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER'))
 ) {
 	$conf->dol_optimize_smallscreen = 1;
 
@@ -2198,12 +2209,12 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
 			}
 
 
-                        /*moddrsi (20.2)*/
-                        global $bimp_layout_js_vars;
-                        if ($bimp_layout_js_vars) {
-                            print $bimp_layout_js_vars;
-                        }
-                        /*fmoddrsi*/
+			/*moddrsi (20.2)*/
+			global $bimp_layout_js_vars;
+			if ($bimp_layout_js_vars) {
+				print $bimp_layout_js_vars;
+			}
+			/*fmoddrsi*/
 
 
 
@@ -2301,8 +2312,8 @@ function top_menu($head, $title = '', $target = '', $disablejs = 0, $disablehead
 		$menumanager->showmenu('top', array('searchform' => $searchform)); // This contains a \n
 		print "</div>\n";
 
-                // Define link to login card
-                /* moddrsi (20.2)*/
+		// Define link to login card
+		/* moddrsi (20.2)*/
 //		$appli = constant('DOL_APPLICATION_TITLE');
 //		if (getDolGlobalString('MAIN_APPLICATION_TITLE')) {
 //			$appli = getDolGlobalString('MAIN_APPLICATION_TITLE');
@@ -2316,7 +2327,7 @@ function top_menu($head, $title = '', $target = '', $disablejs = 0, $disablehead
 //		} else {
 //			$appli .= " ".DOL_VERSION;
 //		}
-                /* fmoddrsi */
+		/* fmoddrsi */
 
 		if (getDolGlobalInt('MAIN_FEATURES_LEVEL')) {
 			$appli .= "<br>".$langs->trans("LevelOfFeature").': '.getDolGlobalInt('MAIN_FEATURES_LEVEL');
@@ -2466,18 +2477,18 @@ function top_menu($head, $title = '', $target = '', $disablejs = 0, $disablehead
 			$toprightmenu .= $form->textwithtooltip('', $appli, 2, 1, $text, 'login_block_elem', 2);
 		}
 
-                /*moddrsi (20.2)*/
+		/*moddrsi (20.2)*/
 //                if (class_exists('BimpCore')) {
 //                    $toprightmenu .= BimpCore::renderUserTopAccountHtml();
 //                } else {
-                    // Logout link
-                    $toprightmenu .= $form->textwithtooltip('', $logouthtmltext, 2, 1, $logouttext, 'login_block_elem logout-btn', 2);
+		// Logout link
+		$toprightmenu .= $form->textwithtooltip('', $logouthtmltext, 2, 1, $logouttext, 'login_block_elem logout-btn', 2);
 
-                    $toprightmenu .= '</div>'; // end div class="login_block_other"
+		$toprightmenu .= '</div>'; // end div class="login_block_other"
 
 
-                    // Add login user link
-                    $toprightmenu .= '<div class="login_block_user">';
+		// Add login user link
+		$toprightmenu .= '<div class="login_block_user">';
 
 		// Login name with photo and tooltip
 		$mode = -1;
@@ -2493,15 +2504,15 @@ function top_menu($head, $title = '', $target = '', $disablejs = 0, $disablehead
 			$toprightmenu .= top_menu_quickadd();
 		}
 
-                    // Add bookmark dropdown
-                    $toprightmenu .= top_menu_bookmark();
+		// Add bookmark dropdown
+		$toprightmenu .= top_menu_bookmark();
 
-                    // Add user dropdown
-                    $toprightmenu .= top_menu_user();
+		// Add user dropdown
+		$toprightmenu .= top_menu_user();
 
 		$toprightmenu .= '</div>';
 //                }
-                /*fmoddrsi*/
+		/*fmoddrsi*/
 
 		$toprightmenu .= '</div>'."\n";
 
@@ -3360,87 +3371,87 @@ function left_menu($menu_array_before, $helppagename = '', $notused = '', $menu_
 			$form = new Form($db);
 		}
 		$selected = -1;
-                /*moddrsi (20.2)*/
-                $searchform.=$form->selectArrayAjax('searchselectcombo', DOL_URL_ROOT . '/core/ajax/selectsearchbox.php', $selected, '', '', 0, 1, 'vmenusearchselectcombo', 1, $langs->trans("Search"), 1);
-                /*
-		if (!getDolGlobalString('MAIN_USE_TOP_MENU_SEARCH_DROPDOWN')) {
-			// Select with select2 is awful on smartphone. TODO Is this still true with select2 v4 ?
-			if ($conf->browser->layout == 'phone') {
-				$conf->global->MAIN_USE_OLD_SEARCH_FORM = 1;
-			}
+		/*moddrsi (20.2)*/
+		$searchform.=$form->selectArrayAjax('searchselectcombo', DOL_URL_ROOT . '/core/ajax/selectsearchbox.php', $selected, '', '', 0, 1, 'vmenusearchselectcombo', 1, $langs->trans("Search"), 1);
+		/*
+if (!getDolGlobalString('MAIN_USE_TOP_MENU_SEARCH_DROPDOWN')) {
+	// Select with select2 is awful on smartphone. TODO Is this still true with select2 v4 ?
+	if ($conf->browser->layout == 'phone') {
+		$conf->global->MAIN_USE_OLD_SEARCH_FORM = 1;
+	}
 
-			$usedbyinclude = 1;
-			$arrayresult = array();
-			include DOL_DOCUMENT_ROOT.'/core/ajax/selectsearchbox.php'; // This make initHooks('searchform') then set $arrayresult
+	$usedbyinclude = 1;
+	$arrayresult = array();
+	include DOL_DOCUMENT_ROOT.'/core/ajax/selectsearchbox.php'; // This make initHooks('searchform') then set $arrayresult
 
-			if ($conf->use_javascript_ajax && !getDolGlobalString('MAIN_USE_OLD_SEARCH_FORM')) {
-				// accesskey is for Windows or Linux:  ALT + key for chrome, ALT + SHIFT + KEY for firefox
-				// accesskey is for Mac:               CTRL + key for all browsers
-				$stringforfirstkey = $langs->trans("KeyboardShortcut");
-				if ($conf->browser->name == 'chrome') {
-					$stringforfirstkey .= ' ALT +';
-				} elseif ($conf->browser->name == 'firefox') {
-					$stringforfirstkey .= ' ALT + SHIFT +';
-				} else {
-					$stringforfirstkey .= ' CTL +';
-				}
-
-				//$textsearch = $langs->trans("Search");
-				$textsearch = '<span class="fa fa-search paddingright pictofixedwidth"></span>'.$langs->trans("Search");
-				$searchform .= $form->selectArrayFilter('searchselectcombo', $arrayresult, $selected, 'accesskey="s"', 1, 0, (!getDolGlobalString('MAIN_SEARCHBOX_CONTENT_LOADED_BEFORE_KEY') ? 1 : 0), 'vmenusearchselectcombo', 1, $textsearch, 1, $stringforfirstkey.' s');
-			} else {
-				if (is_array($arrayresult)) {
-					foreach ($arrayresult as $key => $val) {
-						$searchform .= printSearchForm($val['url'], $val['url'], $val['label'], 'maxwidth125', 'search_all', (empty($val['shortcut']) ? '' : $val['shortcut']), 'searchleft'.$key, $val['img']);
-					}
-				}
-			}
-
-			// Execute hook printSearchForm
-			$parameters = array('searchform' => $searchform);
-			$reshook = $hookmanager->executeHooks('printSearchForm', $parameters); // Note that $action and $object may have been modified by some hooks
-			if (empty($reshook)) {
-				$searchform .= $hookmanager->resPrint;
-			} else {
-				$searchform = $hookmanager->resPrint;
-			}
-
-			// Force special value for $searchform for text browsers or very old search form
-			if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER') || empty($conf->use_javascript_ajax)) {
-				$urltosearch = DOL_URL_ROOT.'/core/search_page.php?showtitlebefore=1';
-				$searchform = '<div class="blockvmenuimpair blockvmenusearchphone"><div id="divsearchforms1"><a href="'.$urltosearch.'" accesskey="s" alt="'.dol_escape_htmltag($langs->trans("ShowSearchFields")).'">'.$langs->trans("Search").'...</a></div></div>';
-			} elseif ($conf->use_javascript_ajax && getDolGlobalString('MAIN_USE_OLD_SEARCH_FORM')) {
-				$searchform = '<div class="blockvmenuimpair blockvmenusearchphone"><div id="divsearchforms1"><a href="#" alt="'.dol_escape_htmltag($langs->trans("ShowSearchFields")).'">'.$langs->trans("Search").'...</a></div><div id="divsearchforms2" style="display: none">'.$searchform.'</div>';
-				$searchform .= '<script>
-            	jQuery(document).ready(function () {
-            		jQuery("#divsearchforms1").click(function(){
-	                   jQuery("#divsearchforms2").toggle();
-	               });
-            	});
-                </script>' . "\n";
-				$searchform .= '</div>';
-			}
-
-			// Key map shortcut
-			$searchform .= '<script>
-				jQuery(document).keydown(function(e){
-					if( e.which === 70 && e.ctrlKey && e.shiftKey ){
-						console.log(\'control + shift + f : trigger open global-search dropdown\');
-		                openGlobalSearchDropDown();
-		            }
-		            if( (e.which === 83 || e.which === 115) && e.altKey ){
-		                console.log(\'alt + s : trigger open global-search dropdown\');
-		                openGlobalSearchDropDown();
-		            }
-		        });
-
-		        var openGlobalSearchDropDown = function() {
-		            jQuery("#searchselectcombo").select2(\'open\');
-		        }
-			</script>';
+	if ($conf->use_javascript_ajax && !getDolGlobalString('MAIN_USE_OLD_SEARCH_FORM')) {
+		// accesskey is for Windows or Linux:  ALT + key for chrome, ALT + SHIFT + KEY for firefox
+		// accesskey is for Mac:               CTRL + key for all browsers
+		$stringforfirstkey = $langs->trans("KeyboardShortcut");
+		if ($conf->browser->name == 'chrome') {
+			$stringforfirstkey .= ' ALT +';
+		} elseif ($conf->browser->name == 'firefox') {
+			$stringforfirstkey .= ' ALT + SHIFT +';
+		} else {
+			$stringforfirstkey .= ' CTL +';
 		}
-                 * fmoddrsi
-                 */
+
+		//$textsearch = $langs->trans("Search");
+		$textsearch = '<span class="fa fa-search paddingright pictofixedwidth"></span>'.$langs->trans("Search");
+		$searchform .= $form->selectArrayFilter('searchselectcombo', $arrayresult, $selected, 'accesskey="s"', 1, 0, (!getDolGlobalString('MAIN_SEARCHBOX_CONTENT_LOADED_BEFORE_KEY') ? 1 : 0), 'vmenusearchselectcombo', 1, $textsearch, 1, $stringforfirstkey.' s');
+	} else {
+		if (is_array($arrayresult)) {
+			foreach ($arrayresult as $key => $val) {
+				$searchform .= printSearchForm($val['url'], $val['url'], $val['label'], 'maxwidth125', 'search_all', (empty($val['shortcut']) ? '' : $val['shortcut']), 'searchleft'.$key, $val['img']);
+			}
+		}
+	}
+
+	// Execute hook printSearchForm
+	$parameters = array('searchform' => $searchform);
+	$reshook = $hookmanager->executeHooks('printSearchForm', $parameters); // Note that $action and $object may have been modified by some hooks
+	if (empty($reshook)) {
+		$searchform .= $hookmanager->resPrint;
+	} else {
+		$searchform = $hookmanager->resPrint;
+	}
+
+	// Force special value for $searchform for text browsers or very old search form
+	if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER') || empty($conf->use_javascript_ajax)) {
+		$urltosearch = DOL_URL_ROOT.'/core/search_page.php?showtitlebefore=1';
+		$searchform = '<div class="blockvmenuimpair blockvmenusearchphone"><div id="divsearchforms1"><a href="'.$urltosearch.'" accesskey="s" alt="'.dol_escape_htmltag($langs->trans("ShowSearchFields")).'">'.$langs->trans("Search").'...</a></div></div>';
+	} elseif ($conf->use_javascript_ajax && getDolGlobalString('MAIN_USE_OLD_SEARCH_FORM')) {
+		$searchform = '<div class="blockvmenuimpair blockvmenusearchphone"><div id="divsearchforms1"><a href="#" alt="'.dol_escape_htmltag($langs->trans("ShowSearchFields")).'">'.$langs->trans("Search").'...</a></div><div id="divsearchforms2" style="display: none">'.$searchform.'</div>';
+		$searchform .= '<script>
+		jQuery(document).ready(function () {
+			jQuery("#divsearchforms1").click(function(){
+			   jQuery("#divsearchforms2").toggle();
+		   });
+		});
+		</script>' . "\n";
+		$searchform .= '</div>';
+	}
+
+	// Key map shortcut
+	$searchform .= '<script>
+		jQuery(document).keydown(function(e){
+			if( e.which === 70 && e.ctrlKey && e.shiftKey ){
+				console.log(\'control + shift + f : trigger open global-search dropdown\');
+				openGlobalSearchDropDown();
+			}
+			if( (e.which === 83 || e.which === 115) && e.altKey ){
+				console.log(\'alt + s : trigger open global-search dropdown\');
+				openGlobalSearchDropDown();
+			}
+		});
+
+		var openGlobalSearchDropDown = function() {
+			jQuery("#searchselectcombo").select2(\'open\');
+		}
+	</script>';
+}
+		 * fmoddrsi
+		 */
 
 		// Left column
 		print '<!-- Begin left menu -->'."\n";
@@ -3884,30 +3895,30 @@ if (!function_exists("llxFooter")) {
 				print "\n<!-- JS CODE TO ENABLE log when making a download or a preview of a document -->\n";
 				?>
 				<script>
-				jQuery(document).ready(function () {
-					$('a.documentpreview').click(function() {
-						console.log("Call /blockedlog/ajax/block-add on a.documentpreview");
-						$.post('<?php echo DOL_URL_ROOT."/blockedlog/ajax/block-add.php" ?>'
+					jQuery(document).ready(function () {
+						$('a.documentpreview').click(function() {
+							console.log("Call /blockedlog/ajax/block-add on a.documentpreview");
+							$.post('<?php echo DOL_URL_ROOT."/blockedlog/ajax/block-add.php" ?>'
 								, {
 									id:<?php echo $object->id; ?>
 									, element:'<?php echo dol_escape_js($object->element) ?>'
 									, action:'DOC_PREVIEW'
 									, token: '<?php echo currentToken(); ?>'
 								}
-						);
-					});
-					$('a.documentdownload').click(function() {
-						console.log("Call /blockedlog/ajax/block-add a.documentdownload");
-						$.post('<?php echo DOL_URL_ROOT."/blockedlog/ajax/block-add.php" ?>'
+							);
+						});
+						$('a.documentdownload').click(function() {
+							console.log("Call /blockedlog/ajax/block-add a.documentdownload");
+							$.post('<?php echo DOL_URL_ROOT."/blockedlog/ajax/block-add.php" ?>'
 								, {
 									id:<?php echo $object->id; ?>
 									, element:'<?php echo dol_escape_js($object->element) ?>'
 									, action:'DOC_DOWNLOAD'
 									, token: '<?php echo currentToken(); ?>'
 								}
-						);
+							);
+						});
 					});
-				});
 				</script>
 				<?php
 			}
@@ -3926,7 +3937,7 @@ if (!function_exists("llxFooter")) {
 
 			if (!getDolGlobalString('MAIN_FIRST_PING_OK_DATE')
 				|| (!empty($conf->file->instance_unique_id) && ($hash_unique_id != $conf->global->MAIN_FIRST_PING_OK_ID) && (getDolGlobalString('MAIN_FIRST_PING_OK_ID') != 'disabled'))
-			|| $forceping) {
+				|| $forceping) {
 				// No ping done if we are into an alpha version
 				if (strpos('alpha', DOL_VERSION) > 0 && !$forceping) {
 					print "\n<!-- NO JS CODE TO ENABLE the anonymous Ping. It is an alpha version -->\n";
@@ -3950,51 +3961,51 @@ if (!function_exists("llxFooter")) {
 							$distrib = $dolibarr_distrib;
 						}
 						?>
-							<script>
+						<script>
 							jQuery(document).ready(function (tmp) {
 								console.log("Try Ping with hash_unique_id is dol_hash('dolibarr'+instance_unique_id, 'sha256')");
 								$.ajax({
-									  method: "POST",
-									  url: "<?php echo $url_for_ping ?>",
-									  timeout: 500,     // timeout milliseconds
-									  cache: false,
-									  data: {
-										  hash_algo: 'dol_hash-sha256',
-										  hash_unique_id: '<?php echo dol_escape_js($hash_unique_id); ?>',
-										  action: 'dolibarrping',
-										  version: '<?php echo (float) DOL_VERSION; ?>',
-										  entity: '<?php echo (int) $conf->entity; ?>',
-										  dbtype: '<?php echo dol_escape_js($db->type); ?>',
-										  country_code: '<?php echo $mysoc->country_code ? dol_escape_js($mysoc->country_code) : 'unknown'; ?>',
-										  php_version: '<?php echo dol_escape_js(phpversion()); ?>',
-										  os_version: '<?php echo dol_escape_js(version_os('smr')); ?>',
-										  db_version: '<?php echo dol_escape_js(version_db()); ?>',
-										  distrib: '<?php echo $distrib ? dol_escape_js($distrib) : 'unknown'; ?>',
-										  token: 'notrequired'
-									  },
-									  success: function (data, status, xhr) {   // success callback function (data contains body of response)
-											console.log("Ping ok");
-											$.ajax({
-												method: 'GET',
-												url: '<?php echo DOL_URL_ROOT.'/core/ajax/pingresult.php'; ?>',
-												timeout: 500,     // timeout milliseconds
-												cache: false,
-												data: { hash_algo: 'dol_hash-sha256', hash_unique_id: '<?php echo dol_escape_js($hash_unique_id); ?>', action: 'firstpingok', token: '<?php echo currentToken(); ?>' },	// for update
-											  });
-									  },
-									  error: function (data,status,xhr) {   // error callback function
-											console.log("Ping ko: " + data);
-											$.ajax({
-												  method: 'GET',
-												  url: '<?php echo DOL_URL_ROOT.'/core/ajax/pingresult.php'; ?>',
-												  timeout: 500,     // timeout milliseconds
-												  cache: false,
-												  data: { hash_algo: 'dol_hash-sha256', hash_unique_id: '<?php echo dol_escape_js($hash_unique_id); ?>', action: 'firstpingko', token: '<?php echo currentToken(); ?>' },
-												});
-									  }
+									method: "POST",
+									url: "<?php echo $url_for_ping ?>",
+									timeout: 500,     // timeout milliseconds
+									cache: false,
+									data: {
+										hash_algo: 'dol_hash-sha256',
+										hash_unique_id: '<?php echo dol_escape_js($hash_unique_id); ?>',
+										action: 'dolibarrping',
+										version: '<?php echo (float) DOL_VERSION; ?>',
+										entity: '<?php echo (int) $conf->entity; ?>',
+										dbtype: '<?php echo dol_escape_js($db->type); ?>',
+										country_code: '<?php echo $mysoc->country_code ? dol_escape_js($mysoc->country_code) : 'unknown'; ?>',
+										php_version: '<?php echo dol_escape_js(phpversion()); ?>',
+										os_version: '<?php echo dol_escape_js(version_os('smr')); ?>',
+										db_version: '<?php echo dol_escape_js(version_db()); ?>',
+										distrib: '<?php echo $distrib ? dol_escape_js($distrib) : 'unknown'; ?>',
+										token: 'notrequired'
+									},
+									success: function (data, status, xhr) {   // success callback function (data contains body of response)
+										console.log("Ping ok");
+										$.ajax({
+											method: 'GET',
+											url: '<?php echo DOL_URL_ROOT.'/core/ajax/pingresult.php'; ?>',
+											timeout: 500,     // timeout milliseconds
+											cache: false,
+											data: { hash_algo: 'dol_hash-sha256', hash_unique_id: '<?php echo dol_escape_js($hash_unique_id); ?>', action: 'firstpingok', token: '<?php echo currentToken(); ?>' },	// for update
+										});
+									},
+									error: function (data,status,xhr) {   // error callback function
+										console.log("Ping ko: " + data);
+										$.ajax({
+											method: 'GET',
+											url: '<?php echo DOL_URL_ROOT.'/core/ajax/pingresult.php'; ?>',
+											timeout: 500,     // timeout milliseconds
+											cache: false,
+											data: { hash_algo: 'dol_hash-sha256', hash_unique_id: '<?php echo dol_escape_js($hash_unique_id); ?>', action: 'firstpingko', token: '<?php echo currentToken(); ?>' },
+										});
+									}
 								});
 							});
-							</script>
+						</script>
 						<?php
 					}
 				} else {
@@ -4014,11 +4025,11 @@ if (!function_exists("llxFooter")) {
 		}
 
 
-                /*moddrsi (20.2)*/
-                if (class_exists('BimpLayout') && BimpLayout::hasInstance()) {
-                    BimpLayout::getInstance()->end();
-                }
-                /*fmoddrsi*/
+		/*moddrsi (20.2)*/
+		if (class_exists('BimpLayout') && BimpLayout::hasInstance()) {
+			BimpLayout::getInstance()->end();
+		}
+		/*fmoddrsi*/
 
 		print "</body>\n";
 		print "</html>\n";

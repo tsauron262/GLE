@@ -209,6 +209,37 @@ class Bimp_User extends BimpObject
 			$dt = $date;
 		}
 
+		/*$hour = (int) $dt->format('h');
+
+		if ($hour < 12) {
+			// Si on est avant midi, on vérifie les dispo à 10h
+			$date = $dt->format('Y-m-d 10:00:00');
+		} elseif ($hour < 18) {
+			// Si on est après-midi mais pas le soir, on vérifie les dispo à 15h
+			$date = $dt->format('Y-m-d 15:00:00');
+		} else {
+			// Pendant la soirée on vérifie les dispo le lendemain matin (10h)
+			$date = BimpTools::getNextOpenDay($dt->format('Y-m-d')) . ' 10:00:00';
+		}*/
+
+		// L'utilisateur est-il off ?
+		if ($this->isOff($dt, $errors)) {
+			$unavailable_reason = 'en off';
+			return 0;
+		}
+
+		return $this->isNotHoliday($date, $errors, $unavailable_reason);
+	}
+	public function isNotHoliday($date = null, &$errors = array(), &$unavailable_reason = '')
+	{
+		if (empty($date)) {
+			$dt = new DateTime();
+		} elseif (is_string($date)) {
+			$dt = new DateTime($date);
+		} elseif (is_a($date, 'DateTime')) {
+			$dt = $date;
+		}
+
 		$hour = (int) $dt->format('h');
 
 		if ($hour < 12) {
@@ -220,12 +251,6 @@ class Bimp_User extends BimpObject
 		} else {
 			// Pendant la soirée on vérifie les dispo le lendemain matin (10h)
 			$date = BimpTools::getNextOpenDay($dt->format('Y-m-d')) . ' 10:00:00';
-		}
-
-		// L'utilisateur est-il off ?
-		if ($this->isOff($dt, $errors)) {
-			$unavailable_reason = 'en off';
-			return 0;
 		}
 
 		$sql = 'SELECT *';
@@ -246,7 +271,6 @@ class Bimp_User extends BimpObject
 
 		return 1;
 	}
-
 	public function isUserSuperior($id_user_to_check, $max_depth = 100)
 	{
 		if ($this->isLoaded()) {
@@ -276,7 +300,7 @@ class Bimp_User extends BimpObject
 
 		if ($check_availability) {
 			$err = array();
-			if (!$this->isAvailable(null, $err, $unallowed_reason)) {
+			if (!$this->isNotHoliday(null, $err, $unallowed_reason)) {
 				$unallowed_reason = 'est ' . $unallowed_reason;
 				return 0;
 			}

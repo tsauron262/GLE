@@ -789,9 +789,11 @@ class BimpObject extends BimpCache
 					$more .= '/' . $this->getData('entity');
 				}
 			} else {
-				global $conf;
-				if ($conf->entity > 0) {
-					$more .= '/' . $conf->entity;
+				if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+					global $conf;
+					if ($conf->entity > 0) {
+						$more .= '/' . $conf->entity;
+					}
 				}
 			}
 			if ($path_tmp) {
@@ -1367,7 +1369,7 @@ class BimpObject extends BimpCache
 				continue;
 			}
 
-			if (!$with_common_fields == in_array($field_name, static::$common_fields)) {
+			if (!$with_common_fields && in_array($field_name, static::$common_fields)) {
 				continue;
 			}
 
@@ -2075,9 +2077,10 @@ class BimpObject extends BimpCache
 					$obj = $this->getChildObject($nom);
 					$value = $this->recursiveGetExport($niveau, $pref, $obj);
 				}
-			} else {
-				print_r($infoObj);
 			}
+//			else {
+//				print_r($infoObj);
+//			}
 			$tabResult[$nom] = $value;
 		}
 
@@ -2485,6 +2488,10 @@ class BimpObject extends BimpCache
 		$errors = array();
 
 		foreach ($data as $field_name => $value) {
+			if (is_null($value)) {
+				continue;
+			}
+
 			if (!$this->field_exists($field_name)) {
 				$errors[] = 'Le champ "' . $field_name . '" n\'existe pas pour les ' . $this->getLabel('name_plur');
 				continue;
@@ -2498,7 +2505,9 @@ class BimpObject extends BimpCache
 				if (!isset($values[$value])) {
 					$key_val = BimpTools::arraySearchInsensitive($value, $values);
 					if ($key_val === false) {
-						$errors[] = 'Champ "' . $field_label . '" Valeur invalide : ' . $value;
+						if (!empty($value)) {
+							$errors[] = 'Champ "' . $field_label . '" Valeur invalide : ' . $value;
+						}
 						continue;
 					} else {
 						$value = $key_val;
@@ -2520,9 +2529,11 @@ class BimpObject extends BimpCache
 									$results = $obj_instance->getSearchResults('all', $value);
 
 									if (!count($results)) {
-										$errors[] = 'Champ "' . $field_label . '" : aucun ' . $obj_instance->getLabel() . ' trouvé' . $obj_instance->e() . ' pour la valeur "' . $value . '"';
 										$value = 0;
-										continue 2;
+										if (!empty($value)) {
+											$errors[] = 'Champ "' . $field_label . '" : aucun ' . $obj_instance->getLabel() . ' trouvé' . $obj_instance->e() . ' pour la valeur "' . $value . '"';
+											continue 2;
+										}
 									} elseif (count($results) > 1) {
 										$msg = count($results) . ' ' . $obj_instance->getLabel('name_plur') . ' trouvé' . $obj_instance->e() . 's pour la valeur "' . $value . '"';
 										foreach ($results as $id_obj => $result) {
@@ -2545,7 +2556,9 @@ class BimpObject extends BimpCache
 				}
 			}
 
-			$this->set($field_name, $value);
+			if ($value !== '') {
+				$this->set($field_name, $value);
+			}
 		}
 
 		return $errors;
@@ -11531,13 +11544,22 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 				global $user;
 				require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
 				$fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
-				$dir = $this->getFilesDirComplexe(false, true);
+//				$dir = $this->getFilesDirComplexe(false, false); // Process modifié car ça ne fonctionnait pas du tout...
+				$file_infos = BimpTools::getTmpFileInfos($fileName, true, $errors);
 
-				$pdf = new BimpConcatPdf();
-				$pdf->concatFiles($dir . $fileName, $files, 'F');
+				$warnings[] = 'INFOS : <pre>' . print_r($file_infos, 1) . '</pre>';
 
-				$url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
-				$success_callback = 'window.open(\'' . $url . '\');';
+				if (!count($errors)) {
+					if (file_exists($file_infos['path'])) {
+						unlink($file_infos['path']);
+					}
+					$pdf = new BimpConcatPdf();
+//					$pdf->concatFiles($dir . $fileName, $files, 'F');
+					$pdf->concatFiles($file_infos['path'], $files, 'F');
+
+//					$url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
+					$success_callback = 'window.open(\'' . $file_infos['url'] . '\');';
+				}
 			} else {
 				$errors[] = 'Aucun PDF trouvé';
 			}
@@ -11588,22 +11610,26 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 				if (!empty($files)) {
 					global $user;
-					$dir = $this->getFilesDirComplexe(false, true);
-
 					$fileName = 'zip_' . $this->dol_object->element . '_' . $user->id . '.zip';
-					if (file_exists($dir . $fileName)) {
-						unlink($dir . $fileName);
-					}
-					$zip = new ZipArchive();
-					if ($zip->open($dir . $fileName, ZipArchive::CREATE) === true) {
-						foreach ($files as $tabFile) {
-							$zip->addFile($tabFile[0], $tabFile[1]);
-						}
-					}
-					$zip->close();
+//					$dir = $this->getFilesDirComplexe(false, true); // Process modifié car ça ne fonctionnait pas du tout...
+					$file_infos = BimpTools::getTmpFileInfos($fileName, true, $errors);
 
-					$url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
-					$success_callback = 'window.open(\'' . $url . '\');';
+					if (!count($errors)) {
+						if (file_exists($file_infos['path'])) {
+							unlink($file_infos['path']);
+						}
+
+						$zip = new ZipArchive();
+						if ($zip->open($file_infos['path'], ZipArchive::CREATE) === true) {
+							foreach ($files as $tabFile) {
+								$zip->addFile($tabFile[0], $tabFile[1]);
+							}
+						}
+						$zip->close();
+
+//						$url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
+						$success_callback = 'window.open(\'' . $file_infos['url'] . '\');';
+					}
 				} else {
 					$errors[] = 'Aucun PDF trouvé';
 				}
@@ -11793,6 +11819,17 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			if (!file_exists($file)) {
 				$errors[] = 'Le fichier "' . $files[0] . '" semble ne pas avoir été télécharger correctement';
 			} else {
+				// varif encodage :
+				$file_content = file_get_contents($file);
+				if (!mb_check_encoding($file_content, 'UTF-8')) {
+					$uft8_content = mb_convert_encoding($contenu, 'UTF-8');
+					if ($uft8_content) {
+						file_put_contents($file, $uft8_content);
+					} else {
+						$errors[] = 'Le fichier semnle ne pas être encodé correctement et la conversion en UTF-8 a échoué';
+					}
+				}
+
 				$lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
 				if (empty($lines)) {
@@ -11837,7 +11874,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 							if (!is_null($model)) {
 								$model->set('sep', $sep);
-								$model->set('import_params', array(
+								$model->set('params', array(
 									'matches'        => $model_matches,
 									'maj_check_mode' => $maj_check_mode,
 									'maj_check_keys' => $maj_check_keys

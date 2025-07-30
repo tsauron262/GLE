@@ -29,7 +29,32 @@ class BimpDictionnary extends BimpObject
 		return (int) BimpCore::isUserDev();
 	}
 
+	public function canSetAction($action)
+	{
+		switch ($action) {
+			case 'createFromObjFieldValues':
+				return BimpCore::isUserDev();
+		}
+		return parent::canSetAction($action);
+	}
+
 	// Getters params :
+	public function getListHeaderButtons()
+	{
+		$buttons = array();
+
+		if ($this->isActionAllowed('createFromObjFieldValues') && $this->canSetAction('createFromObjFieldValues')) {
+			$buttons[] = array(
+				'label'   => 'Créer à partir des valeurs d\'un champ',
+				'icon'    => 'fas_plus-circle',
+				'onclick' => $this->getJsActionOnclick('createFromObjFieldValues', array(), array(
+					'form_name' => 'convert_values'
+				))
+			);
+		}
+
+		return $buttons;
+	}
 
 	public function getListsButtons()
 	{
@@ -230,7 +255,7 @@ class BimpDictionnary extends BimpObject
 						$label_field = (isset($values_params['label_field']) ? $values_params['label_field'] : 'label');
 
 						foreach ($values as $key => $value) {
-							if (isset($value['icon']) || isset($value['class'])) {
+							if (!empty($value['icon']) || !empty($value['class'])) {
 								self::$cache[$cache_key][$key] = array(
 									'label'   => (isset($value[$label_field]) ? $value[$label_field] : $key),
 									'icon'    => (isset($value['icon']) ? $value['icon'] : ''),
@@ -283,7 +308,86 @@ class BimpDictionnary extends BimpObject
 		return ($include_empty ? array($empty_value => $empty_label) : array());
 	}
 
+	public function getObjFieldsToConvertArray()
+	{
+		$fields = array();
+		$obj = BimpTools::getPostFieldValue('obj', '');
+
+		if ($obj) {
+			$data = explode('-', $obj);
+
+			$module = $data[0];
+			$obj_name = $data[1];
+
+			if ($module && $obj_name) {
+				$instance = BimpObject::getInstance($module, $obj_name);
+
+				if (is_a($instance, 'BimpObject')) {
+					foreach ($instance->getFieldsList(false, false) as $field_name) {
+						if ($instance->config->isDefined('fields/' . $field_name . '/values')) {
+							$fields[$field_name] = $instance->config->get('fields/' . $field_name . '/label', $field_name) . ' (' . $field_name . ')';
+						}
+					}
+				}
+			}
+		}
+
+		return $fields;
+	}
+
 	// Traitements :
+
+	public function addValues($values)
+	{
+		$errors = array();
+
+		if ($this->isLoaded($errors)) {
+			foreach ($values as $code => $val_data) {
+				$label = '';
+				$icon = '';
+				$class = '';
+
+				if (is_array($val_data)) {
+					$label = isset($val_data['label']) ? $val_data['label'] : '';
+					$icon = isset($val_data['icon']) ? $val_data['icon'] : '';
+					$classes = isset($val_data['classes']) ? $val_data['classes'] : '';
+					$class = isset($classes[0]) ? $classes[0] : '';
+				} else {
+					$label = (string) $val_data;
+				}
+
+				$val_errors = array();
+				BimpObject::createBimpObject('bimpcore', 'BimpDictionnaryValue', array(
+					'id_dict' => $this->id,
+					'code'    => $code,
+					'label'   => $label,
+					'icon'    => $icon,
+					'class'   => $class
+				), true, $val_errors);
+
+				if (count($val_errors)) {
+					$errors[] = BimpTools::getMsgFromArray($val_errors, 'Echec de l\'ajout de la valeur ' . $code . ' - ' . $label);
+				}
+			}
+		}
+
+		return $errors;
+	}
+
+	public function setAllValues($values)
+	{
+		$errors = array();
+
+		if ($this->isLoaded($errors)) {
+			if ($this->db->delete('bimpcore_dictionnary_value', 'id_dict = ' . $this->id) <= 0) {
+				$errors[] = 'Echec de la suppression des valeurs actuelles - ' . $this->db->err();
+			} else {
+				$errors = $this->addValues($values);
+			}
+		}
+
+		return $errors;
+	}
 
 	public function resetCache()
 	{
@@ -305,5 +409,71 @@ class BimpDictionnary extends BimpObject
 		if (is_a($child, 'BimpDictionnaryValue')) {
 			$this->resetCache();
 		}
+	}
+
+	// Actions :
+
+	public function actionCreateFromObjFieldValues($data, &$success = '')
+	{
+		$errors = array();
+		$warnings = array();
+		$success = 'Création dictionnaire ok';
+
+		$obj = BimpTools::getArrayValueFromPath($data, 'obj', '');
+		$field = BimpTools::getArrayValueFromPath($data, 'field_name', '');
+		$code = BimpTools::getArrayValueFromPath($data, 'code_dict', '');
+		$name = BimpTools::getArrayValueFromPath($data, 'name_dict', '');
+
+		if (!$obj) {
+			$errors[] = 'Objet absent';
+		}
+		if (!$field) {
+			$errors[] = 'Nom du champ absent';
+		}
+		if (!$code) {
+			$errors[] = 'Code dictionnaire absent';
+		}
+		if (!$name) {
+			$errors[] = 'Nom dictionnaire absent';
+		}
+
+		if (!count($errors)) {
+			$obj_data = explode('-', $obj);
+			$module = $obj_data[0];
+			$obj_name = $obj_data[1];
+
+			if (!$module) {
+				$errors[] = 'Module absent';
+			}
+			if (!$obj_name) {
+				$errors[] = 'Nom objet absent';
+			}
+
+			if (!count($errors)) {
+				$obj = BimpObject::getInstance($module, $obj_name);
+
+				if (!is_a($obj, $obj_name)) {
+					$errors[] = 'Objet invalide : ' . $obj_name;
+				} else {
+					$values = $obj->getConf('fields/' . $field . '/values', array(), false, 'array');
+
+					if (!is_array($values) || empty($values)) {
+						$errors[] = 'Pas de valeurs définies pour le champ "' . $field . '"';
+					} else {
+						/* @var BimpDictionnary $dict */
+						$dict = BimpDict::addDefaultDictionnary($code, $name, 1, 'values', 'code', array(), $err);
+
+						if (BimpObject::objectLoaded($dict)) {
+							$errors = $dict->setAllValues($values);
+						}
+					}
+				}
+			}
+		}
+
+		return array(
+			'errors'           => $errors,
+			'warnings'         => $warnings
+		);
 	}
 }

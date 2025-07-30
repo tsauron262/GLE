@@ -1,4 +1,4 @@
-CREATE TABLE llx_usergroup_revue (
+CREATE TABLE IF NOT EXISTS llx_usergroup_revue (
 	  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	  `id_group` int(10) UNSIGNED NOT NULL DEFAULT '0',
 	  `fk_user` INT NOT NULL DEFAULT '0',

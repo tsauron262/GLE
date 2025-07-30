@@ -2481,6 +2481,13 @@ class Bimp_Propal extends Bimp_PropalTemp
 		}
 	}
 
+	public function onSignaturecancelled(BimpSignature $signature)
+	{
+		if ((int) $this->getData('fk_statut') === 2) {
+			$this->updateField('fk_statut', 1);
+		}
+	}
+
 	// Traitements - overrides BimpComm:
 
 	public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
@@ -2509,7 +2516,11 @@ class Bimp_Propal extends Bimp_PropalTemp
 		$new_data['commande_status'] = 0;
 		$new_data['contrats_status'] = 0;
 
+		$join_files = $new_data['join_files'];
+		unset($new_data['join_files']);
+
 		$errors = parent::duplicate($new_data, $warnings, $force_create);
+		$new_id_propal = $this->id; // this etant re-fetché dans parent::duplicate
 
 		if ($date_diff) {
 			$lines = $this->getChildrenObjects('lines');
@@ -2533,7 +2544,14 @@ class Bimp_Propal extends Bimp_PropalTemp
 				}
 			}
 		}
-
+		if (!$errors) {
+			if ($join_files) {
+				$err = $this->copyMoveFile($join_files, $new_id_propal);
+				if ($err) {
+					$errors[] = $err;
+				}
+			}
+		}
 		return $errors;
 	}
 
@@ -2695,6 +2713,13 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 		$new_id_propal = $this->review(false, $errors, $warnings, false, $update_products_prices);
 
+		if ($data['join_files']) {
+			$err = $this->copyMoveFile($data['join_files'], $new_id_propal);
+			if ($err) {
+				$errors[] = $err;
+			}
+		}
+
 		$url = DOL_URL_ROOT . '/bimpcommercial/index.php?fc=propal&id=' . $new_id_propal;
 
 		return array(
@@ -2702,6 +2727,24 @@ class Bimp_Propal extends Bimp_PropalTemp
 			'warnings'         => $warnings,
 			'success_callback' => 'window.location = \'' . $url . '\''
 		);
+	}
+
+	public function copyMoveFile($dataFile, $id_propal)
+	{
+		$errors = array();
+		// copie des fichiers selectionnés dans le nouvel object
+		$new_propal = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_propal);
+
+		if (BimpObject::objectLoaded($new_propal)) {
+			foreach ($dataFile as $join_file_id) {
+				$objFile = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $join_file_id);
+				$err = $objFile->moveToObject($new_propal, true);
+				if ($err) {
+					$errors[] = $err;
+				}
+			}
+		}
+		return $errors;
 	}
 
 	public function actionCreateContrat($data, &$success = '')
@@ -3726,12 +3769,22 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 	public function isSignatureCancellable($doc_type, &$errors = array())
 	{
+		$check = 1;
+
 		$sav = $this->getSav();
 		if (!BimpObject::objectLoaded($sav)) {
-			return 1;
+			// Pas de vérif, car pour l'instant, annulation réservée aux admins
+//			if ((int) $this->getData('commande_status') > 1) {
+//				$errors[] = 'Ce devis a donné lieu à une commande';
+//				$check = 0;
+//			}
+//			if ((int) $this->getData('contrats_status') > 1) {
+//				$errors[] = 'Ce devis a donné lieu à un contrat d\'abonnement';
+//				$check = 0;
+//			}
 		}
 
-		return 1;
+		return $check;
 	}
 
 	public function isSignatureReopenable($doc_type, &$errors = array())
@@ -3798,7 +3851,6 @@ class Bimp_Propal extends Bimp_PropalTemp
 	}
 
 
-
 	public static function checkMargesAll()
 	{
 		$where = '';
@@ -3831,7 +3883,6 @@ class Bimp_Propal extends Bimp_PropalTemp
 				BimpCore::setConf('propals_marges_last_check_tms', date('Y-m-d H:i:s'));
 			}
 		}
-
 
 
 		return $nchecked . ' propal(s) vérifée(s)';

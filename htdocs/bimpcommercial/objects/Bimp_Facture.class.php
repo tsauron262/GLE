@@ -1060,19 +1060,20 @@ class Bimp_Facture extends BimpComm
 		return $show;
 	}
 
-	public function quickPaiement(&$errors = array(), &$warnings = array()){
+	public function quickPaiement(&$errors = array(), &$warnings = array())
+	{
 		global $user;
 
-		require_once(DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php');
+		require_once(DOL_DOCUMENT_ROOT . '/compta/paiement/class/paiement.class.php');
 		$paiement = new Paiement($this->db->db);
 		$paiement->amounts = array($this->id => $this->getData('total_ttc'));
 		$paiement->fk_account = $this->getData('fk_account');
 		$paiement->paiementid = $this->getData('fk_mode_reglement');
 		$paiement->datepaye = $this->getData('datef');
 		$paiement->create($user);
-		if(isset($paiement->error) && $paiement->error != '')
+		if (isset($paiement->error) && $paiement->error != '') {
 			$errors[] = $paiement->error;
-		else{
+		} else {
 			$result = $paiement->addPaymentToBank($user, 'payment', 'Paiement facture client', $this->getData('fk_account'), '', '');
 			$this->checkIsPaid();
 		}
@@ -1544,7 +1545,7 @@ class Bimp_Facture extends BimpComm
 				'label'   => 'Vérifier remises arrières',
 				'icon'    => 'fas_search-dollar',
 				'onclick' => $this->getJsActionOnclick('checkRa', array(), array(
-					'form_name'      => 'check_ra',
+					'form_name' => 'check_ra',
 				))
 			);
 		}
@@ -5122,9 +5123,14 @@ class Bimp_Facture extends BimpComm
 			$remain_to_pay = round($remain_to_pay, 2);
 
 			$max_rtp = (float) BimpCore::getConf('max_rtp_for_classify_paid', null, 'bimpcommercial');
+
+			if (!(int) $this->getData('paye')) {
+				$this->dol_object->paye = 0;
+			}
+
 			if (!$remain_to_pay || ($max_rtp > 0 && $remain_to_pay > 0 && $remain_to_pay < $max_rtp)) {
 				$paiement_status = 2; // Entièrement payé.
-				if (!$paiement_status_only && !$paye) {
+				if (!$paiement_status_only && !(int) $this->getData('paye')) {
 					$success = '';
 					$close_code = '';
 
@@ -5559,66 +5565,82 @@ class Bimp_Facture extends BimpComm
 					$fac_cancel->dol_object->update_price(1);
 					$new_fac->dol_object->update_price(1);
 
-					// Création et applications des remises :
 					$this->checkIsPaid();
-
-					$cancel_discount = null;
-					if ($fac_cancel->getRemainToPay(true, false) < 0) {
-						$conv_errors = $fac_cancel->convertToRemise();
-
-						if (count($conv_errors)) {
-							$remises_errors[] = BimpTools::getMsgFromArray($conv_errors, 'Echec de la conversion en remise ' . $fac_cancel->getLabel('of_the') . ' d\'annulation');
-						} else {
-							BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
-							$cancel_discount = new DiscountAbsolute($this->db->db);
-							$cancel_discount->fetch(0, $fac_cancel->id);
-
-							if ($this->getRemainToPay(true, false) > 0 && BimpObject::objectLoaded($cancel_discount)) {
-								if ($cancel_discount->link_to_invoice(0, $this->id) <= 0) {
-									$remises_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($cancel_discount), 'Echec de l\'application de la remise ' . $this->getLabel('to') . ' d\'origine');
-								} else {
-									$cancel_discount = null;
-								}
-							}
-						}
-					}
-
-					if (!count($remises_errors)) {
-						$fac_discount = null;
-						if ($this->getRemainToPay(true, false) < 0) {
-							$conv_errors = $this->convertToRemise();
-
-							if (count($conv_errors)) {
-								$remises_errors[] = BimpTools::getMsgFromArray($conv_errors, 'Echec de la conversion en remise ' . $this->getLabel('of_the') . ' d\'origine');
-							} else {
-								BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
-								$fac_discount = new DiscountAbsolute($this->db->db);
-								$fac_discount->fetch(0, $this->id);
-							}
-						}
-
-						if (!count($remises_errors)) {
-							if (BimpObject::objectLoaded($cancel_discount)) {
-								if ($cancel_discount->link_to_invoice(0, $new_fac->id) <= 0) {
-									$remises_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($cancel_discount), 'Echec de l\'application de la remise ' . $this->getLabel('to') . ' de correction');
-								}
-							}
-							if (BimpObject::objectLoaded($fac_discount)) {
-								if ($fac_discount->link_to_invoice(0, $new_fac->id) <= 0) {
-									$remises_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($fac_discount), 'Echec de l\'application de la remise ' . $this->getLabel('to') . ' de correction');
-								}
-							}
-						}
-					}
-
-					if (count($remises_errors)) {
-						$warnings[] = BimpTools::getMsgFromArray($remises_errors);
-					}
-
-					$this->checkIsPaid();
-					$fac_cancel->checkIsPaid();
-					$new_fac->checkIsPaid();
 				}
+			}
+		}
+
+		if (!count($errors)) {
+			// Création et applications des remises :
+			$remises_errors = array();
+			$cancel_discount = null;
+
+			if (BimpObject::objectLoaded($fac_cancel) && $fac_cancel->getRemainToPay(true, false) < 0) {
+				$conv_errors = $fac_cancel->convertToRemise();
+
+				if (count($conv_errors)) {
+					$remises_errors[] = BimpTools::getMsgFromArray($conv_errors, 'Echec de la conversion en remise ' . $fac_cancel->getLabel('of_the') . ' d\'annulation');
+				} else {
+					BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+					$cancel_discount = new DiscountAbsolute($this->db->db);
+					$cancel_discount->fetch(0, $fac_cancel->id);
+
+					if ($this->getRemainToPay(true, false) > 0 && BimpObject::objectLoaded($cancel_discount)) {
+						if ($cancel_discount->link_to_invoice(0, $this->id) <= 0) {
+							$remises_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($cancel_discount), 'Echec de l\'application de la remise ' . $this->getLabel('to') . ' d\'origine');
+						} else {
+							$cancel_discount = null;
+						}
+					}
+				}
+			}
+
+			if (!count($remises_errors)) {
+				$fac_discount = null;
+				if ($this->getRemainToPay(true, false) < 0) {
+					$conv_errors = $this->convertToRemise();
+
+					if (count($conv_errors)) {
+						$remises_errors[] = BimpTools::getMsgFromArray($conv_errors, 'Echec de la conversion en remise ' . $this->getLabel('of_the') . ' d\'origine');
+					} else {
+						BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+						$fac_discount = new DiscountAbsolute($this->db->db);
+						$fac_discount->fetch(0, $this->id);
+					}
+				}
+
+				if (!count($remises_errors)) {
+					if (BimpObject::objectLoaded($cancel_discount) && BimpObject::objectLoaded($new_fac)) {
+						if ($cancel_discount->link_to_invoice(0, $new_fac->id) <= 0) {
+							$remises_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($cancel_discount), 'Echec de l\'application de la remise ' . $this->getLabel('to') . ' de correction');
+						}
+					}
+					if (BimpObject::objectLoaded($fac_discount)) {
+						if (BimpObject::objectLoaded($new_fac)) {
+							if ($fac_discount->link_to_invoice(0, $new_fac->id) <= 0) {
+								$remises_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($fac_discount), 'Echec de l\'application de la remise ' . $this->getLabel('to') . ' de correction');
+							}
+						} elseif (BimpObject::objectLoaded($fac_cancel)) {
+							if ($fac_discount->link_to_invoice(0, $fac_cancel->id) <= 0) {
+								$remises_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($fac_discount), 'Echec de l\'application de la remise ' . $this->getLabel('to') . ' d\'annulation');
+							}
+						}
+					}
+				}
+			}
+
+			if (count($remises_errors)) {
+				$warnings[] = BimpTools::getMsgFromArray($remises_errors);
+			}
+
+			$this->checkIsPaid();
+
+			if (BimpObject::objectLoaded($fac_cancel)) {
+				$fac_cancel->checkIsPaid();
+			}
+
+			if (BimpObject::objectLoaded($new_fac)) {
+				$new_fac->checkIsPaid();
 			}
 		}
 

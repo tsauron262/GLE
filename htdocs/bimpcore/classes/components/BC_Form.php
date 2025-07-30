@@ -46,6 +46,7 @@ class BC_Form extends BC_Panel
 		'no_container'    => array('data_type' => 'bool', 'default' => 0),
 		'multiple'        => array('data_type' => 'bool', 'default' => 0),
 		'keep_new_value'  => array('data_type' => 'bool', 'default' => null),
+		'reload_now'      => array('data_type' => 'bool', 'default' => 1),
 		'items_data_type' => array()
 	);
 	public static $object_params = array(
@@ -621,7 +622,7 @@ class BC_Form extends BC_Panel
 				$keep_new_value = (isset($this->params['values']['fields'][$params['input_name']]) ? 1 : 0);
 			}
 
-			$html .= BC_Field::renderDependsOnScriptStatic($this->object, $this->identifier, $params['input_name'], $params['depends_on'], $this->fields_prefix, $keep_new_value);
+			$html .= BC_Field::renderDependsOnScriptStatic($this->object, $this->identifier, $params['input_name'], $params['depends_on'], $this->fields_prefix, $keep_new_value, (int) $this->params['reload_now']);
 		}
 
 		$current_bc = $prev_bc;

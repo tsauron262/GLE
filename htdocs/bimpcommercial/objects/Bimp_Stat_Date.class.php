@@ -91,7 +91,7 @@ class Bimp_Stat_Date extends BimpObject
 //        if($field == 'date'){
 //            return $this->displayDate();
 //        }
-//        
+//
 //        return parent::displayData($field, $display_name, $display_input_value, $no_html);
 //    }
 
@@ -321,7 +321,7 @@ class Bimp_Stat_Date extends BimpObject
         else
             return array();
     }
-    
+
     public function prepareForGraph(){
         $this->isOk = true;
         $this->signatureFilter = '[]{"facture_type":["3"]}[]"day"';
@@ -342,7 +342,7 @@ class Bimp_Stat_Date extends BimpObject
         $dt = new DateTime();
         $dow = (int) $dt->format('w');
         if ($dow > 0) {
-            $dt->sub(new DateInterval('P' . $dow . 'D')); // Premier dimanche précédent. 
+            $dt->sub(new DateInterval('P' . $dow . 'D')); // Premier dimanche précédent.
         }
         $date_to = $dt->format('Y-m-d');
 
@@ -466,14 +466,15 @@ class Bimp_Stat_Date extends BimpObject
                     'tx_marque'                        => 'Taux de marque'
                 );
                 BimpObject::loadClass('bimpcommercial', 'BimpComm');
-                $metiers = BimpComm::$expertise;
+//                $metiers = BimpComm::$expertise;
+				$metiers = BimpDict::getValuesArray('expertises', false, true, '');
 
                 $data = BimpComm::getReportData($date_from, $date_to, array(
                             'include_ca_details_by_users' => $include_ca_details_by_users
                                 ), $errors);
 
                 if (!count($errors)) {
-                    // Données globales: 
+                    // Données globales:
                     $sheet = $spread_sheet->getActiveSheet();
                     $sheet->setTitle('Données globales');
 
@@ -489,7 +490,7 @@ class Bimp_Stat_Date extends BimpObject
 
                     unset($data_types['nb_new_clients_by_commerciaux']);
 
-                    // Données par utilisateurs: 
+                    // Données par utilisateurs:
                     $sheet = $spread_sheet->createSheet();
                     $sheet->setTitle('Commerciaux');
 
@@ -567,7 +568,7 @@ class Bimp_Stat_Date extends BimpObject
                         'tx_marque' => 'Taux de marque'
                     );
 
-                    // Données par métiers: 
+                    // Données par métiers:
                     $sheet = $spread_sheet->createSheet();
                     $sheet->setTitle('Métiers');
 
@@ -603,7 +604,7 @@ class Bimp_Stat_Date extends BimpObject
                         }
                     }
 
-                    // Données par région: 
+                    // Données par région:
                     $sheet = $spread_sheet->createSheet();
                     $sheet->setTitle('Régions');
 
@@ -628,7 +629,7 @@ class Bimp_Stat_Date extends BimpObject
                         }
                     }
 
-                    // Données par secteur: 
+                    // Données par secteur:
                     $sheet = $spread_sheet->createSheet();
                     $sheet->setTitle('Secteurs');
 

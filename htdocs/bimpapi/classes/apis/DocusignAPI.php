@@ -368,7 +368,7 @@ class DocusignAPI extends BimpAPI
 //                break;
 
             case '401':
-                $errors[] = 'Non autentifié';
+                $errors[] = 'Non authentifié';
                 $return = 'unauthenticate';
                 break;
 

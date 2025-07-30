@@ -291,6 +291,30 @@ forms:
                 field: datep
             date_liv: 
                 field: date_livraison
+            join_files:
+                custom: 1
+                label: Fichiers joints
+                input_name: join_files
+                data_type: id_object
+                input:
+                    type: check_list
+                    items:
+                        callback:
+                            method: getFilesArray
+                            params:
+                                - 0
+                depends_on: id_model
+                object: files
+                create_form: upload
+                create_form_label: Ajouter
+                create_form_values:
+                    fields:
+                        parent_module:
+                            prop: module
+                        parent_object_name:
+                            prop: object_name
+                        id_parent:
+                            prop: id
     
     contrat:
         msgs:
@@ -690,6 +714,38 @@ forms:
                     type: toggle
                     help: Si OUI, les prix d'achat et de vente seront mis à jour en fonction des prix actuels de chaque produit
                 value: 1
+            join_files:
+                custom: 1
+                label: Fichiers joints
+                input_name: join_files
+                data_type: id_object
+                input:
+                    type: check_list
+                    items:
+                        callback:
+                            method: getFilesArray
+                            params:
+                                - 0
+                depends_on: id_model
+                object: files
+                create_form: upload
+                create_form_label: Ajouter
+                create_form_values:
+                    fields:
+                        parent_module:
+                            prop: module
+                        parent_object_name:
+                            prop: object_name
+                        id_parent:
+                            prop: id
+#            keep_copy:
+#                custom: 1
+#                label: Garder les fichiers originaux
+#                input_name: keep_copy
+#                data_type: bool
+#                input:
+#                    type: toggle
+#                value: 1
 fields_tables: 
     infos: 
         rows: 

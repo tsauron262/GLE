@@ -14,18 +14,18 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		self::APPROVED           => array('label' => 'KYC validé', 'icon' => 'fas_check', 'classes' => array('success')),
 		self::REFUSED            => array('label' => 'KYC non valide', 'icon' => 'fas_times', 'classes' => array('danger')),
 	);
-	CONST STATUS_RDC_PROSPECT_DEM_ENTRANT = 1;
-	CONST STATUS_RDC_PROSPECT_LEAD_IDENTIF = 2;
-	CONST STATUS_RDC_PROSPECT_PRISE_CONTACT = 3;
-	CONST STATUS_RDC_PROSPECT_CONTACT_PRES_OK = 4;
-	CONST STATUS_RDC_PROSPECT_KO = 5;
-	CONST STATUS_RDC_ATTENTE_ONBORDING = 8;
-	CONST STATUS_RDC_ONBOARDING_KO = 9;
-	CONST STATUS_RDC_ONBOARDING_OK = 10;
-	CONST STATUS_RDC_LIVE = 11;
-	CONST STATUS_RDC_RESIL = 12;
-	CONST STATUS_RDC_SUSPENDED = 13;
-	CONST STATUS_RDC_CLOSED = 14;
+	const STATUS_RDC_PROSPECT_DEM_ENTRANT = 1;
+	const STATUS_RDC_PROSPECT_LEAD_IDENTIF = 2;
+	const STATUS_RDC_PROSPECT_PRISE_CONTACT = 3;
+	const STATUS_RDC_PROSPECT_CONTACT_PRES_OK = 4;
+	const STATUS_RDC_PROSPECT_KO = 5;
+	const STATUS_RDC_ATTENTE_ONBORDING = 8;
+	const STATUS_RDC_ONBOARDING_KO = 9;
+	const STATUS_RDC_ONBOARDING_OK = 10;
+	const STATUS_RDC_LIVE = 11;
+	const STATUS_RDC_RESIL = 12;
+	const STATUS_RDC_SUSPENDED = 13;
+	const STATUS_RDC_CLOSED = 14;
 
 	public static $statusRdc = array(
 		0  => array('label' => 'N/C', 'icon' => 'fas_calendar-day', 'classes' => array('danger')),
@@ -182,7 +182,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 	public function isUserManager()
 	{
 		global $user;
-		return BimpTools::isUserInGroup($user->id, 'MANAGER') || BimpTools::isUserInGroup($user->id, 'ADMIN');
+		return ($user->admin || BimpTools::isUserInGroup($user->id, 'MANAGER') || BimpTools::isUserInGroup($user->id, 'ADMIN'));
 	}
 
 	public function isUserTECH()
@@ -224,8 +224,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		);
 
 		$buttons[] = array(
-			'label'   => 'Actions',
-			'icon'    => 'fas_edit',
+			'label'   => 'Changer le statut',
+			'icon'    => 'fas_pen',
 			'onclick' => $this->getJsActionOnclick('change_status_rdc', array(), array('form_name' => 'formActionRdc'))
 		);
 
@@ -240,42 +240,6 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return $buttons;
 	}
 
-	public function getListButtons()
-	{
-		global $user;
-		$buttons = array();
-
-		$statu = $this->getData('fk_statut_rdc');
-		if (isset(self::$actions_selon_statut_rdc[$statu])) {
-			foreach (self::$actions_selon_statut_rdc[$statu] as $statut) {
-				$listGroup_allowed = self::$group_allowed_actions[$statut];
-				$user_in_group = false;
-				foreach ($listGroup_allowed as $group) {
-					if (BimpTools::isUserInGroup($user->id, $group) || $this->isUserManager()) {
-						$user_in_group = true;
-						break;
-					}
-				}
-				if ($user_in_group) {
-					$buttons[$statut] = array(
-						'label'   => 'Passer le statut à ' . self::$statusRdc[$statut]['label'],
-						'icon'    => 'fas_edit',
-						'onclick' => $this->getJsActionOnclick('change_status_rdc', array('status' => $statut))
-					);
-				} else {
-					$buttons[$statut] = array(
-						'label'    => 'Passer le statut à ' . self::$statusRdc[$statut]['label'],
-						'icon'     => 'fas_times',
-						'onclick'  => '',
-						'disabled' => 1,
-						'popover'  => 'Vous n\'avez pas les droits pour effectuer cette action'
-					);
-				}
-			}
-		}
-		return $buttons;
-	}
-
 	public function getDefaultListExtraButtons()
 	{
 		$buttons = array();
@@ -285,6 +249,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			'label'   => 'Ajouter un evenement',
 			'icon'    => 'fas_calendar-plus',
 			'onclick' => $actioncomm->getJsLoadModalForm('formCREchange', 'Compte rendu d\\\'échange', array('fields' => array('fk_soc' => $this->id)))
+		);
+		$buttons[]= array(
+			'label' => 'Changer le statut',
+			'icon' => 'fas_pen',
+			'onclick' => $this->getJsActionOnclick('change_status_rdc', array(), array('form_name' => 'formActionRdc'))
 		);
 		return $buttons;
 	}
@@ -359,6 +328,30 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			$users[$row->rowid] = $row->nomComplet;
 		}
 		return $users;
+	}
+
+	public function getSelectStatusArray()
+	{
+		global $user;
+		$status_options = array();
+
+		$statut_rdc = $this->getData('fk_statut_rdc');
+		if (isset(self::$actions_selon_statut_rdc[$statut_rdc])) {
+			foreach (self::$actions_selon_statut_rdc[$statut_rdc] as $statut) {
+				$listGroup_allowed = self::$group_allowed_actions[$statut];
+				$user_in_group = false;
+				foreach ($listGroup_allowed as $group) {
+					if (BimpTools::isUserInGroup($user->id, $group) || $this->isUserManager()) {
+						$user_in_group = true;
+						break;
+					}
+				}
+				if ($user_in_group) {
+					$status_options[$statut] = self::$statusRdc[$statut];
+				}
+			}
+		}
+		return $status_options;
 	}
 
 	// Getters Données
@@ -453,8 +446,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			$ret = '<span class="bs-popover"';
 			$ret .= BimpRender::renderPopoverData($url);
 			$ret .= '>' . $short . '</span>';
-		}
-		else {
+		} else {
 			$ret = $url;
 		}
 		return $ret . " " . $href;
@@ -483,7 +475,8 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 		return $html;
 	}
 
-	public function getCommentQuality()	{
+	public function getCommentQuality()
+	{
 		define('MAX_COMMENT_QUALITY_LENGTH', 150);
 		$comment = $this->getData('comment_quality');
 		if ($comment) {
@@ -493,8 +486,9 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 				$ret .= BimpRender::renderPopoverData($comment);
 				$ret .= '>' . $short . '</span>';
 				return $ret;
+			} else {
+				return $comment;
 			}
-			else return $comment;
 		}
 		return '';
 	}
@@ -656,7 +650,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 	public function updateContact($contact, $info)
 	{
-		if ($contact->getData('email') == $info['email']) {
+		if ($this->cleanData($contact->getData('email')) == $this->cleanData($info['email'])) {
 			$contact = $this->setObj($contact, $info);
 			$poste = $contact->getData('poste');
 			if (!$poste || $poste && strstr($poste, $info['poste']) === false) {
@@ -675,6 +669,11 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			}
 		}
 		return 0;
+	}
+
+	public function cleanData($txt)
+	{
+		return strtolower(trim($txt));
 	}
 
 	public function setObj($obj, $contact)
@@ -989,11 +988,9 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 
 		if (!$data['status']) {
 			$errors[] = 'Aucun statut sélectionné';
-		}
-		elseif ($data['status'] == self::STATUS_RDC_PROSPECT_KO && !$data['commentaire_statut_ko']) {
+		} elseif ($data['status'] == self::STATUS_RDC_PROSPECT_KO && !$data['commentaire_statut_ko']) {
 			$errors[] = 'Merci de remplir le commentaire';
-		}
-		else {
+		} else {
 			// update de la date_debut_prospect (si statut_rdc dans la liste des statuts de début de prospection)
 			if (in_array($data['status'], self::$statut_rdc_prospect_array)) {
 				if (empty($this->getData('date_debut_prospect'))) {
@@ -1002,8 +999,9 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 			}
 			$this->set('fk_statut_rdc', $data['status']);
 			$this->set('date_changement_statut_rdc', date('Y-m-d'));
-			if ($data['status'] == self::STATUS_RDC_PROSPECT_KO)
+			if ($data['status'] == self::STATUS_RDC_PROSPECT_KO) {
 				$this->set('commentaire_statut_ko', $data['commentaire_statut_ko']);
+			}
 
 			$this->update($warnings, true);
 		}

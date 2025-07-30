@@ -22,7 +22,7 @@ class BimpDolObject extends BimpObject
 	public static $external_contact_type_required = true;
 	public static $internal_contact_type_required = true;
 	public $output = '';
-	public static $expertise = [
+	public static $expertise = [ // Obsolète, valeurs déplacées dans dictionnaire "expertises"
 		''  => "",
 		10  => "Arts graphiques",
 		20  => "Constructions",
@@ -1190,7 +1190,7 @@ class BimpDolObject extends BimpObject
 						$url = DOL_URL_ROOT . '/document.php?modulepart=' . $module_part . '&entity=' . $this->getData('entity') . '&file=' . urlencode($fileName);
 					}
 
-					$success_callback = 'window.open(\'' . $url . '\');';
+					if(!isset($data['no_success_callback'])) $success_callback = 'window.open(\'' . $url . '\');';
 				}
 			}
 		} else {

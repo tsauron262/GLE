@@ -847,6 +847,8 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         $this->prime3 = 0;
         if (is_array($this->object->lines) && !empty($this->object->lines)) {
             foreach ($this->object->lines as $line) {
+				$row = array();
+				$i++;
 
                 if (stripos($line->product_label, 'Bonus réparation') === 0) {
                     //                $acompteHt = $line->subprice * (float) $line->qty;
@@ -860,9 +862,6 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 //                    $this->acompteTva[$line->tva_tx] -= $line->total_tva;
                     continue;
                 }
-
-                $row = array();
-                $i++;
 
                 $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
 

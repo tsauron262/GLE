@@ -237,6 +237,39 @@ class BimpTools
 		return 'bimpcore/tmp_files/' . date('Ymd');
 	}
 
+	public static function getTmpFileInfos($file_name, $make_dir = true, &$errors = array())
+	{
+		$tmp_dir = self::getTmpFilesDir();
+		$tmp_dir_for_url = $tmp_dir;
+		$file_path = DOL_DATA_ROOT . '/' . $tmp_dir . '/' . $file_name;
+		$entity = 1;
+		if (preg_match('/^\/?([^\/]+)\/?(.*)$/', $tmp_dir_for_url, $matches) && is_numeric($matches[1])) {
+			$entity = $matches[1];
+			$tmp_dir_for_url = str_replace('/' . $entity . '/', '', $tmp_dir_for_url);
+		}
+
+		if ($make_dir && !is_dir($file_infos['dir'])) {
+			$dir_err = BimpTools::makeDirectories($tmp_dir);
+
+			if ($dir_err) {
+				$errors[] = 'Echec de la création du dossier de destination - ' .$dir_err;
+			}
+		}
+
+		$url = '';
+		if (preg_match('/^\/?([^\/]+)\/?(.*)$/', $tmp_dir_for_url, $matches)) {
+			$module = $matches[1];
+			$fileName = urlencode(($matches[2] ? $matches[2] . '/' : '') . $file_name);
+			$url = DOL_URL_ROOT . '/document.php?' . ($entity ? 'entity=' . $entity . '&' : '') . 'modulepart=' . $module . '&file=' . $fileName;
+		}
+
+		return array(
+			'dir'  => $tmp_dir,
+			'path' => $file_path,
+			'url'  => $url
+		);
+	}
+
 	public static function getAjaxFileName($field_name)
 	{
 		return str_replace("C:fakepath", '', BimpTools::getPostFieldValue($field_name, '', 'alphanohtml'));
@@ -2993,6 +3026,22 @@ class BimpTools
 		return str_replace($old_root, $new_root, $text);
 	}
 
+	public static function checkErpUrlRoot($text)
+	{
+		global $dolibarr_main_url_root;
+
+		if (BimpCore::getExtendsEntity() === 'rdc') {
+			// pour ne pas remplacer juste DOL_URL_ROOT qui peut être une partie d'une URL externe.
+			$text = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), '[DOL_URL_ROOT]', $text);
+			$text = self::replaceUrlRoot('[DOL_URL_ROOT]', $dolibarr_main_url_root, $text);
+		} else {
+			$text = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $text);
+			$text = self::replaceUrlRoot(DOL_URL_ROOT, $dolibarr_main_url_root, $text);
+		}
+
+		return $text;
+	}
+
 	public static function escapeForHtml($txt)
 	{
 		$txt = str_replace("'", "\\'", $txt);
@@ -3248,7 +3297,16 @@ class BimpTools
 	public static function arraySearchInsensitive($needle, $haystack)
 	{
 		foreach ($haystack as $key => $value) {
-			if (strcasecmp($needle, $value) === 0) {
+			if (is_array($value)) {
+				foreach (array('label', 'title', 'value', 'content', 'name') as $label_type) {
+					if (isset($value[$label_type])) {
+						$value = $value[$label_type];
+						break;
+					}
+				}
+			}
+
+			if (strcasecmp($needle, (string) $value) === 0) {
 				return $key;
 			}
 		}

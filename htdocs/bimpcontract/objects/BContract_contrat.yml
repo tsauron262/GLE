@@ -403,8 +403,9 @@ fields:
         label: Expertise Metier
         dol_extra_field: 1
         type: int
-        values: 
-            array: expertise
+        values:
+            dict: expertises
+#            array: expertise
     rib_client: 
         label: RIB client (pour prélèvements)
         type: id_object

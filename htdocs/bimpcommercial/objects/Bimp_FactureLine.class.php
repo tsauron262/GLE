@@ -871,6 +871,8 @@ class Bimp_FactureLine extends ObjectLine
 			}
 		}
 
+//		$infos[] = 'Ligne n° ' . $this->getData('position') . ' : TOT RA : <pre>' . print_r($tot_ra, 1) . '</pre>';
+
 		$dt = new DateTime($facture->getData('datec'));
 		foreach ($tot_ra as $type_ra => $ra_data) {
 			$ra_amount = 0;

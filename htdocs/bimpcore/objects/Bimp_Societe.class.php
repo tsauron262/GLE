@@ -3543,6 +3543,11 @@ class Bimp_Societe extends BimpDolObject
 		return $errors;
 	}
 
+	public function afterCreateNote($note)
+	{
+		$id = $note->id;
+		$this->setActivity('Creation ' . $note->getLabel('of_the') . '{{Notes:'.$id.'}}' );
+	}
 	// Actions:
 
 	public function actionAddCommercial($data, &$success)

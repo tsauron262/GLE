@@ -946,7 +946,7 @@ class Bimp_Client_ExtEntity extends Bimp_Client
 					if (isset($userAttr[0]['rowid']) && $userAttr[0]['rowid']) {
 						$this->set('fk_user_attr_rdc', $userAttr[0]['rowid']);
 					} else {
-						$warnings [] = 'Utilisateur d\'attribution non trouvé. ' . $emailAssign;
+						$warnings [] = 'Utilisateur d\'attribution non trouvé. ' . $emailAssign . ' ' . $this->id . ' ' . $this->getData('nom');
 					}
 				}
 				// surcharge statut

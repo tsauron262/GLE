@@ -1047,7 +1047,7 @@ class BT_ficheInter_det extends BimpDolObject
 
 					$commercial = $contrat->getCommercialClient(true);
 
-					$message = 'Bonjour ' . (BimpObject::objectLoaded($commercial) ? $commercial->getName() . ' ' : '') . ',<br />';
+					$message = 'Bonjour' . (BimpObject::objectLoaded($commercial) ? ' ' . $commercial->getName() : '') . ',<br />';
 					$message .= $user->firstname . ' ' . $user->lastname . ' a renseigné une ligne dans sa fiche d\'intervention qui crée un dépassement des heures prévues dans le contrat.';
 					$message .= '<br />Contrat: ' . $contrat->getNomUrl() . '<br />Client: ' . $client->getNomUrl() . ' ' . $client->getName() . '<br />Fiche: ' . $fi->getNomUrl();
 					$message .= '<br /><br />Détails:<br />';

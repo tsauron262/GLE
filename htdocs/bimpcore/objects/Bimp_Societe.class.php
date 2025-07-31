@@ -3546,8 +3546,9 @@ class Bimp_Societe extends BimpDolObject
 	public function afterCreateNote($note)
 	{
 		$id = $note->id;
-		$this->setActivity('Creation ' . $note->getLabel('of_the') . '{{Notes:'.$id.'}}' );
+		$this->setActivity('Creation ' . $note->getLabel('of_the') . '{{Notes:' . $id . '}}');
 	}
+
 	// Actions:
 
 	public function actionAddCommercial($data, &$success)
@@ -4229,51 +4230,60 @@ class Bimp_Societe extends BimpDolObject
 			$count_errors = array();
 
 			// Vérifs clients:
-			$nb = $this->db->getCount('propal', 'fk_soc = ' . (int) $this->id, 'rowid');
-			if ($nb) {
-				$count_errors[] = $nb . ' proposition(s) commerciale(s) créée(s)';
+			if (BimpCore::isModuleActive('bimpcommercial')) {
+				$nb = $this->db->getCount('propal', 'fk_soc = ' . (int) $this->id, 'rowid');
+				if ($nb) {
+					$count_errors[] = $nb . ' proposition(s) commerciale(s) créée(s)';
+				}
+
+				$nb = $this->db->getCount('commande', 'fk_soc = ' . (int) $this->id . ' OR id_client_facture = ' . $this->id, 'rowid');
+				if ($nb) {
+					$count_errors[] = $nb . ' commande(s) créée(s)';
+				}
+
+				$nb = $this->db->getCount('facture', 'fk_soc = ' . (int) $this->id, 'rowid');
+				if ($nb) {
+					$count_errors[] = $nb . ' facture(s) créée(s)';
+				}
+
+				// Vérifs Fournisseurs:
+				$nb = $this->db->getCount('commande_fournisseur', 'fk_soc = ' . (int) $this->id, 'rowid');
+				if ($nb) {
+					$count_errors[] = $nb . ' commande(s) fournisseur(s) créée(s)';
+				}
+
+				$nb = $this->db->getCount('facture_fourn', 'fk_soc = ' . (int) $this->id, 'rowid');
+				if ($nb) {
+					$count_errors[] = $nb . ' facture(s) fournisseur(s) créée(s)';
+				}
 			}
 
-			$nb = $this->db->getCount('commande', 'fk_soc = ' . (int) $this->id . ' OR id_client_facture = ' . $this->id, 'rowid');
-			if ($nb) {
-				$count_errors[] = $nb . ' commande(s) créée(s)';
+			if (BimpCore::isModuleActive('bimpcontrat') || BimpCore::isModuleActive('bimpcontract')) {
+				$nb = $this->db->getCount('contrat', 'fk_soc = ' . (int) $this->id, 'rowid');
+				if ($nb) {
+					$count_errors[] = $nb . ' contrat(s) créé(s)';
+				}
 			}
 
-			$nb = $this->db->getCount('facture', 'fk_soc = ' . (int) $this->id, 'rowid');
-			if ($nb) {
-				$count_errors[] = $nb . ' facture(s) créée(s)';
+			if (BimpCore::isModuleActive('bimpsupport')) {
+				$nb = $this->db->getCount('bs_sav', 'id_client = ' . (int) $this->id, 'id');
+				if ($nb) {
+					$count_errors[] = $nb . ' sav(s) créé(s)';
+				}
+
+				$nb = $this->db->getCount('bs_ticket', 'id_client = ' . (int) $this->id, 'id');
+				if ($nb) {
+					$count_errors[] = $nb . ' ticket(s) hotline créé(s)';
+				}
 			}
 
-			$nb = $this->db->getCount('contrat', 'fk_soc = ' . (int) $this->id, 'rowid');
-			if ($nb) {
-				$count_errors[] = $nb . ' contrat(s) créé(s)';
+			if (BimpCore::isModuleActive('bimptechnique')) {
+				$nb = $this->db->getCount('fichinter', 'fk_soc = ' . (int) $this->id, 'rowid');
+				if ($nb) {
+					$count_errors[] = $nb . ' fiche(s) d\'intervention créée(s)';
+				}
 			}
 
-			$nb = $this->db->getCount('bs_sav', 'id_client = ' . (int) $this->id, 'id');
-			if ($nb) {
-				$count_errors[] = $nb . ' sav(s) créé(s)';
-			}
-
-			$nb = $this->db->getCount('bs_ticket', 'id_client = ' . (int) $this->id, 'id');
-			if ($nb) {
-				$count_errors[] = $nb . ' ticket(s) hotline créé(s)';
-			}
-
-			$nb = $this->db->getCount('fichinter', 'fk_soc = ' . (int) $this->id, 'rowid');
-			if ($nb) {
-				$count_errors[] = $nb . ' fiche(s) d\'intervention créée(s)';
-			}
-
-			// Vérifs Fournisseurs:
-			$nb = $this->db->getCount('commande_fournisseur', 'fk_soc = ' . (int) $this->id, 'rowid');
-			if ($nb) {
-				$count_errors[] = $nb . ' commande(s) fournisseur(s) créée(s)';
-			}
-
-			$nb = $this->db->getCount('facture_fourn', 'fk_soc = ' . (int) $this->id, 'rowid');
-			if ($nb) {
-				$count_errors[] = $nb . ' facture(s) fournisseur(s) créée(s)';
-			}
 
 			if (count($count_errors)) {
 				$errors[] = BimpTools::getMsgFromArray($count_errors, 'Impossible de supprimer ce tiers');

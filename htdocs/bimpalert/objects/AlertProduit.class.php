@@ -242,7 +242,9 @@ class AlertProduit extends BimpObject
 	}
 
 	private function envoiOK($notes, $id_user, $type_dest = BimpNote::BN_DEST_USER) {
+		global $user;
 		if($type_dest == BimpNote::BN_DEST_USER) {
+			if($user->id == $id_user) return false; // Pas de note a l'utilisateur connecté
 			$user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
 			if (BimpObject::objectLoaded($user)) {
 				if (!(int) $user->getData('statut')) {

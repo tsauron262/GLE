@@ -23,6 +23,7 @@ class ActionsBimpticket
 			$folder = $bimpT->getFilesDir();
 
 			foreach ($parameters['data'] as $key => $value) {
+				if($key === 'undefined') continue;
 				$filename = $folder . '/' . $key;
 				$fp = file_put_contents($filename, $value);
 				if (!$fp) {
@@ -211,6 +212,7 @@ class ActionsBimpticket
 
 								foreach ($parameters['attachments'] as $attachment) {
 									$filename = $attachment->getName();
+									if($filename === 'undefined') continue;
 									$content = $attachment->getContent();
 									if (!file_put_contents($destdir . $filename, $content)) {
 										$errors[] = 'Echec de l\'enregistrement de la pièce jointe ' . $filename;

@@ -458,7 +458,7 @@ class BimpFile extends BimpObject
                     'id_parent'          => $id_object
                         ), null, null, 'id', 'asc', 'array', array('id', 'file_name', 'file_ext'));
         foreach ($rows as $r) {
-            $current_files[(int) $r['id']] = $r['file_name'] . '.' . $r['file_ext'];
+            $current_files[(int) $r['id']] = $r['file_name'] . ($r['file_ext'] ? '.' . $r['file_ext'] : '');
         }
 
         $this->set('parent_module', $module);

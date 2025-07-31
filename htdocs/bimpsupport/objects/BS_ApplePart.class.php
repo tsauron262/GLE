@@ -383,6 +383,10 @@ class BS_ApplePart extends BimpObject
 		}
 
 		switch ($ref) {
+			case 'ZD661-49946':
+			case 'ZD661-49947':
+				return 529 / 1.2;
+
 			case '661-44958':
 			case '661-44955':
 				return 489 / 1.2;
@@ -399,6 +403,10 @@ class BS_ApplePart extends BimpObject
 
 			case '661-49431':
 				return 269 / 1.2;
+
+			case '661-49429':
+			case '661-49430':
+				return 229 / 1.2;
 
 			case '661-44954':
 			case '661-42720':

@@ -2448,7 +2448,11 @@ class BCT_Contrat extends BimpDolObject
 	{
 		$nOk = 0;
 		$bdb = self::getBdb();
+
 		$id_group = BimpCore::getUserGroupId('console');
+		if (!$id_group) {
+			$id_group = BimpCore::getUserGroupId('contrat');
+		}
 
 		if ($id_group) {
 			$where = 'a.date_ouverture_prevue IS NOT NULL AND a.date_ouverture_prevue < \'' . date('Y-m-d') . ' 00:00:00\' AND a.statut = 0';

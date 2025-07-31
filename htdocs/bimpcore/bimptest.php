@@ -30,9 +30,13 @@ if (!$user->admin) {
 	exit;
 }
 
-$values = BimpDict::getValuesArray('expertises', false, true, '');
+BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
+$res = Bimp_Commande::checkLinesEcheances();
 
-echo '<pre>' . print_r($values, 1) . '</pre>';
+echo 'RES : <br/>';
+echo $res;
+
+echo '<br/><br/>';
 
 echo '<br/>FIN';
 echo '</body></html>';

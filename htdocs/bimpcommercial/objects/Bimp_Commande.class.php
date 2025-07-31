@@ -5348,14 +5348,35 @@ class Bimp_Commande extends Bimp_CommandeTemp
 					$msg .= 'Note: vous ne recevrez pas d\'autre alerte pour les produits listés ci-dessous.<br/><br/>';
 					$msg .= $html;
 
-					$return .= 'Mail to ' . ($id_commercial) . ' (' . $nProds . ' produit(s)) => ';
-					if (!count(BimpUserMsg::envoiMsg('product_duree_limitee_expire_soon', $subject, $msg, $user_commercial))) {
+					$return_label = '';
+					$errors = array();
+					switch (BimpCore::getConf('', null, 'bimpcommercial')) {
+						case 'email':
+						default:
+							$return_label .= 'Mail to ';
+							$errors = BimpUserMsg::envoiMsg('product_duree_limitee_expire_soon', $subject, $msg, $user_commercial);
+							break;
+
+						case 'task':
+							$return_label .= 'Task to ';
+							BimpObject::createBimpObject('bimptask', 'BIMP_Task', array(
+								'subj'          => $subject,
+								'txt'           => $msg,
+								'id_user_owner' => $id_commercial
+							), true, $errors);
+							break;
+					}
+
+
+
+					$return .= $return_label . ($id_commercial) . ' (' . $nProds . ' produit(s)) => ';
+					if (!count($errors)) {
 						$return .= '[OK]';
 						$bdb->update('bimp_commande_line', array(
 							'echeance_notif_send' => 1
 						), 'id IN (' . implode(',', $lines_done) . ')');
 					} else {
-						$return .= '[ECHEC]';
+						$return .= '[ECHEC]<pre>' . print_r($errors, 1) . '</pre>';
 					}
 					$return .= '<br/>';
 				}

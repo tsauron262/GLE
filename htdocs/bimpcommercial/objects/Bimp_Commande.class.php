@@ -5277,9 +5277,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
 				return 'Aucune échéance à notifier';
 			}
 
-			$return = 'Données : <pre>';
-			$return .= print_r($data, 1);
-			$return .= '</pre><br/><br/>';
+//			$return = 'Données : <pre>';
+//			$return .= print_r($data, 1);
+//			$return .= '</pre><br/><br/>';
 
 			// Envoi des e-mails:
 			foreach ($data as $id_commercial => $commandes) {
@@ -5321,11 +5321,13 @@ class Bimp_Commande extends Bimp_CommandeTemp
 								}
 							}
 
-							$html .= '<br/><br/><h3>Commande ' . $commande->getLink() . ' (' . $nLines . ' ligne(s) de commande)</h3><br/><br/>';
+							$html .= '<br/><span style="font-size: 13px; font-weight: bold">Commande ' . $commande->getLink() . ' (' . $nLines . ' ligne(s) de commande)</span><br/>';
 							$cli = $commande->getChildObject('client');
 							if (BimpObject::objectLoaded($cli)) {
-								$html .= '<h3>Commande ' . $cli->getLink() . '</h4><br/><br/>';
+								$html .= '<span style="font-size: 13px; font-weight: bold">Client ' . $cli->getLink() . '</span><br/>';
 							}
+
+							$html .= '<br/>';
 
 							$html .= '<table>';
 							$html .= '<thead>';

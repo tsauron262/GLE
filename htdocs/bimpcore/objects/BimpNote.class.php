@@ -82,7 +82,8 @@ class BimpNote extends BimpObject
 		switch ($action) {
 			case 'setAsViewed':
 				if ($this->isLoaded()) {
-					if ($this->getData('user_create') == $user->id && $this->getData('type_author') == self::BN_AUTHOR_USER) {
+					if ($this->getData('user_create') == $user->id && $this->getData('type_author') == self::BN_AUTHOR_USER &&
+						($this->getData('type_dest') != self::BN_DEST_USER || (int) $this->getData('fk_user_dest') != $user->id)) {
 						return 0;
 					}
 

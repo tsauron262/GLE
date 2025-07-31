@@ -30,11 +30,11 @@ if (!$user->admin) {
 	exit;
 }
 
-BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
-$res = Bimp_Commande::checkLinesEcheances();
-
-echo 'RES : <br/>';
-echo $res;
+//BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
+//$res = Bimp_Commande::checkLinesEcheances();
+//
+//echo 'RES : <br/>';
+//echo $res;
 
 echo '<br/><br/>';
 

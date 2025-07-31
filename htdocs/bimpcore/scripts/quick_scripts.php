@@ -70,6 +70,7 @@ if (!$action) {
 		'users_bdd'                                 => 'List Users BDD',
 		'correct_propal_remises'                    => 'Correction des remises des propales',
 //		'purge_doublon_rdc'							=> 'Purger doublon contact rdc',
+		'purge_undefined'							=> 'supprimer les fichiers "undefined" des tickets RDC'
 	);
 
 	$path = pathinfo(__FILE__);
@@ -854,6 +855,38 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 				}
 			}
 			if($debug) exit('fin debug');
+		}
+		break;
+
+	case 'purge_undefined':
+		// lister les tickets
+		$sql = 'SELECT rowid FROM llx_ticket WHERE 1'; // a la fin elever le where
+		$req = $db->query($sql);
+		while ($row = $db->fetch_object($req)) {
+			$rowid = $row->rowid;
+			$bimpT = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $rowid);
+			$folder = $bimpT->getFilesDir();
+			$scan = scandir($folder);
+			foreach ($scan as $file) {
+				if ($file != '.' && $file != '..' && is_file($folder . $file)) {
+					if ($file === "undefined") {
+						unlink($folder . $file);
+						var_dump($bimpT->getData('ref'), $bimpT->id);
+						echo '<br>';
+					}
+				}
+			}
+		}
+		echo '<hr>============<hr>';
+		$sql = 'SELECT id, file_name, id_parent FROM llx_bimpcore_file WHERE file_name LIKE "undefined%"';
+		$req = $db->query($sql);
+		while ($row = $db->fetch_object($req)) {
+			if($row->file_name == 'undefined' || preg_match('/^undefined_\d+_deleted$/', $row->file_name)) {
+				var_dump($row->id, $row->file_name, $row->id_parent);
+				echo '<br>';
+				$sql = 'DELETE FROM llx_bimpcore_file WHERE id = ' . $row->id;
+				$db->query($sql);
+			}
 		}
 		break;
 

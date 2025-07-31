@@ -326,6 +326,7 @@ params:
     rappels_commandes_echeances_mode:
         label: Mode d'envoi des rappels pour les produits arrivant à échéances des commandes
         cat: rappels
+        type: select
         values:
             email: Par E-mail
             task: Par Tâche

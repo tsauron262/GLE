@@ -5350,7 +5350,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
 					$return_label = '';
 					$errors = array();
-					switch (BimpCore::getConf('', null, 'bimpcommercial')) {
+					switch (BimpCore::getConf('rappels_commandes_echeances_mode', null, 'bimpcommercial')) {
 						case 'email':
 						default:
 							$return_label .= 'Mail to ';

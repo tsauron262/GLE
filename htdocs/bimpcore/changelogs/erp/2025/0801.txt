@@ -1,1 +1,2 @@
 Amélioration du PDF "relevé d'intervention" : tri par date croissante + ajout du total prévisionnel
+Actimac : Au moins un numéro de tel obligatoire pour les contacts professionnel

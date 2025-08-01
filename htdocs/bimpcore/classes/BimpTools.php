@@ -2428,6 +2428,31 @@ class BimpTools
 		return $html;
 	}
 
+	public static function displayTimeBetween2Dates($debut, $fin, $format = '%h h %i m')
+	{
+		if (is_string($debut)) {
+			$dd = new DateTime($debut);
+		}
+		else $dd = $debut;
+
+		if (is_string($fin)) {
+			$df = new DateTime($fin);
+		}
+		else $df = $fin;
+
+		if ($dd > $df)	{
+			$dtemp = clone $dd;
+			$dd = $df;
+			$df = $dtemp;
+		}
+
+		if($format == "tot_second")	{
+			return abs($df->getTimestamp() - $dd->getTimestamp());
+		}
+
+		$interval = $dd->diff($df);
+		return $interval->format($format);
+	}
 	// Gestion des dates:
 
 	public static function printDate($date, $balise = "span", $class = '', $format = 'd / m / Y H:i:s', $format_mini = 'd / m / Y')

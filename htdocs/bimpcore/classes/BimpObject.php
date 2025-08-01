@@ -2322,8 +2322,8 @@ class BimpObject extends BimpCache
 		global $conf;
 		$fk_account = BimpCore::getConf('id_default_bank_account', (!empty($conf->global->FACTURE_RIB_NUMBER) ? $conf->global->FACTURE_RIB_NUMBER : 0));
 		$dataSecteur = BimpCache::getSecteursData();
-		if (isset($dataSecteur[$this->getSecteur()]['id_default_bank_account']) && (int) $dataSecteur[$this->getSecteur()]['id_default_bank_account'] > 0) {
-			$fk_account = (int) $dataSecteur[$this->getSecteur()]['id_default_bank_account'];
+		if (isset($dataSecteur[$this->getSecteur()]['fk_bank_account_def']) && (int) $dataSecteur[$this->getSecteur()]['fk_bank_account_def'] > 0) {
+			$fk_account = (int) $dataSecteur[$this->getSecteur()]['fk_bank_account_def'];
 		}
 
 		if ((int) BimpCore::getConf('use_caisse_for_payments')) {

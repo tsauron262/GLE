@@ -245,9 +245,9 @@ class AlertProduit extends BimpObject
 		global $user;
 		if($type_dest == BimpNote::BN_DEST_USER) {
 			if($user->id == $id_user) return false; // Pas de note a l'utilisateur connecté
-			$user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-			if (BimpObject::objectLoaded($user)) {
-				if (!(int) $user->getData('statut')) {
+			$bimp_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+			if (BimpObject::objectLoaded($bimp_user)) {
+				if (!(int) $bimp_user->getData('statut')) {
 					return false;
 				}
 			}

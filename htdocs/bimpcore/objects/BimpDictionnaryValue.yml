@@ -75,6 +75,8 @@ lists:
         edit_btn: 1
         edit_form: default
         delete_btn: 1
+        header_buttons:
+            callback: getDefaultListExtraHeaderButtons
         cols: 
             id_dict:
             code:

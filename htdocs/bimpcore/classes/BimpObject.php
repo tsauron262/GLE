@@ -11349,6 +11349,17 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 		return $graph->getDatas($data['form']);
 	}
 
+	public function actionDeleteBlockedFile($data, &$success)
+	{
+		$errors = $warnings = array();
+		BimpTools::unlockAll();
+		$success = 'Fichiers supprimées';
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
 	public function actionEraseCache($data, &$success)
 	{
 		$success = 'Cache vidé';

@@ -4208,6 +4208,22 @@ class BimpTools
 
 	public static $nbMax = 60;
 
+	public static function unlockAll()
+	{
+		$errors = array();
+		$dir = static::getDirBloqued();
+		$files = scandir($dir);
+		foreach ($files as $file) {
+			if($file != '.' && $file != '..'){
+				unlink($dir . '/' . $file);
+			}
+		}
+
+		if (!empty($errors)) {
+			BimpCore::addlog('Problème lors du déverrouillage', Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors' => $errors));
+		}
+	}
+
 	public static function lockNum($type, $nb = 0, $errors = array())
 	{
 		if (!(int) BimpCore::getConf('use_lock_num', null, 'bimpcommercial')) {

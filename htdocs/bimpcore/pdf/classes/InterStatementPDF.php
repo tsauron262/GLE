@@ -10,7 +10,7 @@ class InterStatementPDF extends BimpCommDocumentPDF
     public $contrat = array();
     public $interventions = array();
     public $date_document = null;
-    
+
     public $date_start = null;
     public $date_stop = null;
     public $tech = null;
@@ -19,10 +19,10 @@ class InterStatementPDF extends BimpCommDocumentPDF
     public $target_label = 'test';
     public $filters = Array();
     public $string_filters = '';
-    
+
     private $bimpDb;
     public $total_time = 0;
-    
+
     public function __construct($db)
     {
         static::$use_cgv = false;
@@ -45,7 +45,7 @@ class InterStatementPDF extends BimpCommDocumentPDF
             $this->string_filters .= 'Du ' . $this->date_start->format('d/m/Y') . ' au ' . $this->date_stop->format('d/m/Y') . '<br /><br />';
             $this->filters['datei'] = array('min' => $this->object->date_start_relever, 'max' => $this->object->date_stop_relever);
         }
-        
+
         $this->string_filters .= 'Code client : '.$this->object->code_client.'<br/>Code compta : '.$this->object->code_compta;
 
         if($this->object->id_tech > 0) {
@@ -53,20 +53,20 @@ class InterStatementPDF extends BimpCommDocumentPDF
             $this->string_filters .= 'Technicien: ' . $this->tech->getName() . '<br />';
             $this->filters['fk_user_tech'] = $this->tech->id;
         }
-        
+
         $this->client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->object->id);
 //        $this->string_filters .= '<br/> Client: ' . $this->client->getName() . '<br />';
         $this->filters['fk_soc'] = $this->client->id;
-        
-        
+
+
         if($this->object->id_contrat > 0) {
             $this->want_contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $this->object->id_contrat);
             $this->client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->want_contrat->getData('fk_soc'));
             $this->string_filters .= '<br />Contrat: ' . $this->want_contrat->getRef() . '<br /><br />';
             $this->filters['fk_contrat'] = $this->want_contrat->id;
         }
-        
-        
+
+
     }
 
     protected function initHeader()
@@ -79,7 +79,7 @@ class InterStatementPDF extends BimpCommDocumentPDF
         $logo_width = 0;
         if (!file_exists($logo_file)) {
             $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
-        }   
+        }
 
         $logo_width = 0;
         if (!file_exists($logo_file)) {
@@ -106,7 +106,7 @@ class InterStatementPDF extends BimpCommDocumentPDF
                 }
             }
         }
-        
+
         $docRef .= "<br/>Commercial : ".$this->client->displayCommercials(true, false);
 
         $this->pdf->topMargin = 44;
@@ -122,9 +122,9 @@ class InterStatementPDF extends BimpCommDocumentPDF
             'doc_ref'       => $docRef,
             'ref_extra'     => ''
         );
-        
+
     }
-    
+
     public function getFileName()
     {
         return 'Releve_interventions.pdf';
@@ -132,34 +132,38 @@ class InterStatementPDF extends BimpCommDocumentPDF
 
     public function renderTop()
     {
-        
+
     }
-    
+
     public function renderLines()
     {
         $intervention = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
-        $inters_valid = $intervention->getList(BimpTools::merge_array($this->filters, Array('fk_statut' => array('operator' => '>', 'value' => 0))));
-                
+        $inters_valid = $intervention->getList(
+			BimpTools::merge_array($this->filters, Array('fk_statut' => array('operator' => '>', 'value' => 0))),
+			null, null,
+			'datei', 'ASC'
+		);
+
         if (!count($inters_valid)) {
             $this->writeContent('<p style="font-weight: bold; font-size: 12px">Aucune intervention effectuées</p>');
         } else {
-            
+
             $this->writeContent('<h3>Interventions effectuées</h3>');
-            
+
             $table = new BimpPDF_Table($this->pdf, true, $this->primary);
-            
+
             $table->addCol('ref', 'N° fiche intervention', 20, 'text-align: left;', '', 'text-align: left;');
             $table->addCol('contrat', 'Contrat', 20, 'text-align: left;', '', 'text-align: left;');
             $table->addCol('tech', 'Intervenant', 28, 'text-align: left;', '', 'text-align: left;');
             $table->addCol('date', 'Date d\'intervention', 20, 'text-align: center;', '', 'text-align: center;');
             $table->addCol('urgent', 'Intervention urgente', 23, 'text-align: center;', '', 'text-align: center;');
             $table->addCol('temps_passer', 'Temps passé', 25, 'text-align: center;', '', 'text-align: center;');
-            
+
             foreach($inters_valid as $data) {
                 $instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $data['rowid']);
                 $duree = $instance->getData('duree');
-                
-                
+
+
                 if($instance->getData('fk_contrat')){
                     $this->contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $instance->getData('fk_contrat'));
                     if(isset($this->filters['fk_contrat']) && $this->filters['fk_contrat'] > 0 && $this->filters['fk_contrat'] == $instance->getData('fk_contrat')){
@@ -171,9 +175,9 @@ class InterStatementPDF extends BimpCommDocumentPDF
                         }
                     }
                 }
-                
+
                 $this->total_time += $duree;
-                
+
                 $table->rows[] = array(
                     'ref'           => $instance->getRef(),
                     'contrat'       => ($this->contrat) ? $this->contrat->getRef() . ' (' . $this->contrat->displayData('statut') . ')' : 'Non liée',
@@ -186,29 +190,34 @@ class InterStatementPDF extends BimpCommDocumentPDF
             }
             $table->write();
         }
-        
-        
+
+
         if(isset($this->want_contrat) && is_object($this->want_contrat)){
             $vendue = $this->want_contrat->getDurreeVendu();
         }
         $html = $this->getTotauxRowsHtmlCustom($this->total_time, $vendue);
         $this->writeContent($html);
-        
-        $inters_valid_nok = $intervention->getList(BimpTools::merge_array($this->filters, Array('fk_statut' => array('operator' => '=', 'value' => 0))));
-            
+
+        $inters_valid_nok = $intervention->getList(
+			BimpTools::merge_array($this->filters, Array('fk_statut' => array('operator' => '=', 'value' => 0))),
+			null, null,
+			'datei', 'ASC'
+		);
+
             if(!count($inters_valid_nok)) {
                 $this->writeContent('<br /><p style="font-weight: bold; font-size: 12px">Aucune intervention à venir / en cours</p>');
             } else {
                 $this->writeContent('<br /><h3>Interventions à venir / en cours</h3>');
                 $table2 = new BimpPDF_Table($this->pdf, true, $this->primary);
-            
+
                 $table2->addCol('ref', 'N° fiche intervention', 20, 'text-align: left;', '', 'text-align: left;');
                 $table2->addCol('contrat', 'Contrat', 20, 'text-align: left;', '', 'text-align: left;');
                 $table2->addCol('tech', 'Intervenant', 28, 'text-align: left;', '', 'text-align: left;');
                 $table2->addCol('date', 'Date d\'intervention', 20, 'text-align: center;', '', 'text-align: center;');
                 $table2->addCol('urgent', 'Intervention urgente', 23, 'text-align: center;', '', 'text-align: center;');
-                $table2->addCol('temps_passer', 'Temps passé', 25, 'text-align: center;', '', 'text-align: center;');
+                $table2->addCol('temps_passer', 'Temps estimé', 25, 'text-align: center;', '', 'text-align: center;');
 
+				$total_previ = 0;
                 foreach($inters_valid_nok as $data) {
                     $instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $data['rowid']);
 
@@ -224,12 +233,25 @@ class InterStatementPDF extends BimpCommDocumentPDF
                         'tech'          => $instance->displayData('fk_user_tech', 'default', false, true),
                         'date'          => $instance->displayData('datei', 'default', false, true),
                         'urgent'        => $instance->displayData('urgent', 'default', false, true),
-                        'temps_passer'  => BimpTools::displayTimefromSeconds($instance->getData('duree'), '', 0, 0, 1, 2),
+                        'temps_passer'  => BimpTools::displayTimeBetween2Dates(
+											$instance->getData('datei').' '.$instance->getData('time_from'),
+											$instance->getData('datei').' '.$instance->getData('time_to')
+											),
                     );
+					$p = BimpTools::displayTimeBetween2Dates(
+						$instance->getData('datei').' '.$instance->getData('time_from'),
+						$instance->getData('datei').' '.$instance->getData('time_to'),
+						'tot_second'
+					);
+					$total_previ += $p;
+
                     $this->contrat = null;
                 }
-                
+
                 $table2->write();
+
+				$html = $this->getTotauxRowsHtmlCustom($total_previ, 0, 'Total prévisionnel');
+				$this->writeContent($html);
             }
     }
 
@@ -241,15 +263,15 @@ class InterStatementPDF extends BimpCommDocumentPDF
 
     public function calcTotaux()
     {
-        
+
     }
 
-    public function getTotauxRowsHtmlCustom($realisee, $vendue = 0)
+    public function getTotauxRowsHtmlCustom($realisee, $vendue = 0, $title_line = "Temps total consommé")
     {
         $html = "";
         $reste = 0;
-        
-        
+
+
 
         $html .= '<table style="width: 100%" cellpadding="5">';
 
@@ -263,7 +285,7 @@ class InterStatementPDF extends BimpCommDocumentPDF
             $reste = $vendue - $realisee;
         }
         $html .= '<tr>';
-        $html .= '<td style="background-color: #F0F0F0;">Temps total consommé</td>';
+        $html .= '<td style="background-color: #F0F0F0;">' . $title_line . '</td>';
         $html .= '<td style="text-align: center;background-color: #F0F0F0;">';
         $html .= BimpTools::displayTimefromSeconds($realisee, 0);
         $html .= '</td>';
@@ -284,6 +306,6 @@ class InterStatementPDF extends BimpCommDocumentPDF
 
     public function renderAfterLines()
     {
-        
+
     }
 }

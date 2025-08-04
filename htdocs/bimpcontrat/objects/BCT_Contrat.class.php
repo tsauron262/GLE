@@ -2390,10 +2390,18 @@ class BCT_Contrat extends BimpDolObject
 
 				$infos .= '<br/><br/>Contrat ' . $contrat->getLink() . ' : <br/>';
 
+				$suppl_desc = '';
 				if (!$id_commercial) {
-					BimpCore::addlog('Aucun commercial pour renouvellements manuels', Bimp_Log::BIMP_LOG_URGENT, 'contrat', $contrat);
-					$infos .= '<span class="danger">Aucun commercial</span>';
-					continue;
+					if ($contrat->getData('fk_soc'))	{
+						$comm = $client->getCommercial();
+						$id_commercial = $comm->id;
+						$suppl_desc = 'Vous recevez cette tache car il n\'a pas de commercial actif sur ce contrat.<br />';
+					}
+					if (!$id_commercial) {
+						BimpCore::addlog('Aucun commercial pour renouvellements manuels', Bimp_Log::BIMP_LOG_URGENT, 'contrat', $contrat);
+						$infos .= '<span class="danger">Aucun commercial</span>';
+						continue;
+					}
 				}
 
 				foreach ($lines as $id_line) {
@@ -2414,7 +2422,7 @@ class BCT_Contrat extends BimpDolObject
 
 						BimpObject::createBimpObject('bimptask', 'BIMP_Task', array(
 							'subj'          => 'Contrat d\'abonnement ' . $contrat->getRef() . ' - Renouvellement abonnement à effectuer',
-							'txt'           => $desc,
+							'txt'           => $suppl_desc . $desc,
 							'comment'       => 'Cette tâche sera automatiquement fermée lors du renouvellement',
 							'id_user_owner' => $id_commercial,
 							'test_ferme'    => 'contratdet:rowid = ' . $line->id . ' AND id_line_renouv > 0'
@@ -2440,7 +2448,11 @@ class BCT_Contrat extends BimpDolObject
 	{
 		$nOk = 0;
 		$bdb = self::getBdb();
+
 		$id_group = BimpCore::getUserGroupId('console');
+		if (!$id_group) {
+			$id_group = BimpCore::getUserGroupId('contrat');
+		}
 
 		if ($id_group) {
 			$where = 'a.date_ouverture_prevue IS NOT NULL AND a.date_ouverture_prevue < \'' . date('Y-m-d') . ' 00:00:00\' AND a.statut = 0';

@@ -94,7 +94,7 @@ llxHeader('', $title);
 
 /*moddrsi (20.2)*/$cache = cachePage("index?user=".$user->id, "1", /*isset($_REQUEST['action'])*/1);
 if(!$cache){/*fmoddrsi*/
-    
+
 
 $resultboxes = FormOther::getBoxesArea($user, "0"); // Load $resultboxes (selectboxlist + boxactivated + boxlista + boxlistb)
 
@@ -148,7 +148,10 @@ if (!getDolGlobalString('MAIN_REMOVE_INSTALL_WARNING')) {
 		$langs->load("errors");
 		//$langs->load("other");
 		//if (!empty($message)) $message.='<br>';
-		$message .= info_admin($langs->transnoentities("WarningConfFileMustBeReadOnly").' '.$langs->transnoentities("WarningUntilDirRemoved", DOL_DOCUMENT_ROOT."/install"), 0, 0, '1', 'clearboth');
+		/* moddrsi (20.2) */
+		// Selon Peter, il est nécessaire de laisser le fichier de conf en écriture. on évite donc d'afficher ce message.
+//		$message .= info_admin($langs->transnoentities("WarningConfFileMustBeReadOnly").' '.$langs->transnoentities("WarningUntilDirRemoved", DOL_DOCUMENT_ROOT."/install"), 0, 0, '1', 'clearboth');
+		/* fmoddrsi */
 	}
 
 	$object = new stdClass();
@@ -806,7 +809,7 @@ print $boxlist;
 print '</div>';
 
 //print 'mem='.memory_get_usage().' - '.memory_get_peak_usage();
-    
+
 
 /*moddrsi (20.2)*/
     cachePage("index?user=".$user->id);

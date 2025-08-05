@@ -20,7 +20,11 @@ class BS_SavPropal extends Bimp_Propal
 	public function getIdCommercial(){
 		$sav = $this->getSav();
 		if($sav && BimpObject::objectLoaded($sav)){
-			return $sav->getData('id_user_tech');
+			if ($sav->getData('id_user_tech'))
+				return $sav->getData('id_user_tech');
+			else	{
+				return BimpCore::getConf('id_responsable_sav', 0, 'bimpsupport');
+			}
 		}
 	}
 

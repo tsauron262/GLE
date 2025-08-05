@@ -55,3 +55,7 @@ params:
         label: Activer les centre SAV
         type: bool
         def: 0
+    
+    id_responsable_sav:
+        label: ID du responsable SAV
+        type: int

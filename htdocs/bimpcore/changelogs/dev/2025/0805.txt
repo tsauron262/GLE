@@ -1,0 +1,3 @@
+cf tache actimac # 2636 
+creation variable de conf "bimpsupport/id_responsable_sav (24 : michael Muller)
+retourner cet ID dans getIdCommercial() si on est dans un devis SAV (BS_SavPropal)

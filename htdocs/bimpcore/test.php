@@ -6,6 +6,6 @@ require_once("../main.inc.php");
        				  AND parent_object_name = 'BIMP_Task'
        				  AND id_parent  = 98033
        				  AND file_name LIKE '%_deleted'";
-$db->query($sql);
+var_dump($db->query($sql));
 
 die('llllicicicicicicic');

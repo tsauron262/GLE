@@ -547,16 +547,12 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
             }
         }
         if (count($tabOk) == 0 && $line['ean']) {//test avec ean
-			if(!BimpTools::isValidEAN13($line['ean'], true))	{
-				$this->Alert("code EAN invalide : " . $line['ean']);
-			}
-			else {
-				$rowid = (int) $this->db->getValue('product', 'rowid', 'barcode = "' . $line['ean'] . '"');
+			$rowid = (int) $this->db->getValue('product', 'rowid', 'barcode = "' . addslashes($line['ean']) . '"');
 
-				if ($rowid) {
-					$tabOk[] = $rowid;
-				}
+			if ($rowid) {
+				$tabOk[] = $rowid;
 			}
+
 
             if (count($tabOk) > 0) {
                 $this->Info("Code EAN reconnu " . $line['ean'], null, $line['ref_fourn']);

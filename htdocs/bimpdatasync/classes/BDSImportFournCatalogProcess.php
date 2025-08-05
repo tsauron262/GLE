@@ -547,7 +547,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
             }
         }
         if (count($tabOk) == 0 && $line['ean']) {//test avec ean
-			if(!BimpTools::isValidEAN13($line['ean']))	{
+			if(!BimpTools::isValidEAN13($line['ean'], true))	{
 				$this->Alert("code EAN invalide : " . $line['ean']);
 			}
 			else {

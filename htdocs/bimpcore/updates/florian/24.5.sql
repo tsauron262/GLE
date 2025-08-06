@@ -1,1 +1,0 @@
-ALTER TABLE `llx_user` CHANGE `day_off` `day_off` VARCHAR(255) NOT NULL DEFAULT '';

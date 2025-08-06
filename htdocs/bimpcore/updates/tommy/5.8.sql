@@ -1,1 +1,0 @@
-ALTER TABLE `llx_societe` ADD `date_atradius` DATETIME DEFAULT NULL;

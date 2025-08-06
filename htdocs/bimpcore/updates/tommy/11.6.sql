@@ -7,6 +7,3 @@ CREATE TABLE IF NOT EXISTS llx_usergroup_revue (
 ) ENGINE=InnoDB;
 
 ALTER table llx_usergroup ADD COLUMN IF NOT EXISTS fk_user int DEFAULT 0;
-
-
-INSERT into llx_usergroup_revue (SELECT null, u.rowid,fk_user, data_revue,1 FROM llx_usergroup u, llx_usergroup_extrafields ue WHERE ue.fk_object = u.rowid);

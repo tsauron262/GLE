@@ -34,8 +34,6 @@ ALTER TABLE `llx_bc_vente` CHANGE `date_update` `date_update` datetime NOT NULL 
 ALTER TABLE `llx_bc_caisse_mvt` CHANGE `date_create` `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
 ALTER TABLE `llx_bc_caisse_mvt` CHANGE `date_update` `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
-ALTER TABLE `llx_bs_sav` CHANGE `date_create` `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
-ALTER TABLE `llx_bs_sav` CHANGE `date_update` `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 ALTER TABLE `llx_bimp_note` CHANGE `date_create` `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
 ALTER TABLE `llx_bimp_note` CHANGE `date_update` `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
@@ -43,8 +41,6 @@ ALTER TABLE `llx_bimp_note` CHANGE `date_update` `date_update` datetime NOT NULL
 ALTER TABLE `llx_bimp_gsx_repair` CHANGE `date_create` `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
 ALTER TABLE `llx_bimp_gsx_repair` CHANGE `date_update` `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
-ALTER TABLE `llx_bs_pret` CHANGE `date_create` `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
-ALTER TABLE `llx_bs_pret` CHANGE `date_update` `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 ALTER TABLE `llx_bnf_frais` CHANGE `date_create` `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
 ALTER TABLE `llx_bnf_frais` CHANGE `date_update` `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;

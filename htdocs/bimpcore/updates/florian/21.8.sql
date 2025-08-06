@@ -1,24 +1,5 @@
-ALTER TABLE `llx_buc_filters_config` ADD INDEX `owner` (`owner_type`, `id_owner`);
-ALTER TABLE `llx_buc_filters_config` ADD INDEX `creator` (`id_user_create`);
-ALTER TABLE `llx_buc_filters_config` ADD INDEX `obj_data` (`obj_module`, `obj_name`);
-
-ALTER TABLE `llx_buc_list_filters` ADD INDEX `owner` (`owner_type`, `id_owner`);
-ALTER TABLE `llx_buc_list_filters` ADD INDEX `creator` (`id_user_create`);
-ALTER TABLE `llx_buc_list_filters` ADD INDEX `obj_data` (`obj_module`, `obj_name`);
-
-ALTER TABLE `llx_buc_list_table_config` ADD INDEX `owner` (`owner_type`, `id_owner`);
-ALTER TABLE `llx_buc_list_table_config` ADD INDEX `component` (`obj_module`, `obj_name`, `component_name`);
-ALTER TABLE `llx_buc_list_table_config` ADD INDEX `creator` (`id_user_create`);
-
-ALTER TABLE `llx_buc_stats_list_config` ADD INDEX `owner` (`owner_type`, `id_owner`);
-ALTER TABLE `llx_buc_stats_list_config` ADD INDEX `component` (`obj_module`, `obj_name`, `component_name`);
-ALTER TABLE `llx_buc_stats_list_config` ADD INDEX `creator` (`id_user_create`);
-
-ALTER TABLE `llx_buc_user_current_config` ADD INDEX `user_curren` (`config_object_name`, `config_type_key`, `id_user`);
-
 ALTER TABLE `llx_bimpcore_log` ADD INDEX `obj_data` (`obj_module`, `obj_name`, `id_object`);
 
-ALTER TABLE `llx_bs_sav_issue` ADD INDEX `sav` (`id_sav`);
 
 ALTER TABLE `llx_bds_process_cron` ADD INDEX `process` (`id_process`);
 ALTER TABLE `llx_bds_process_cron` ADD INDEX `cron` (`id_cronjob`);

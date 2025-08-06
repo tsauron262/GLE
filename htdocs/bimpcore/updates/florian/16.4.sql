@@ -1,1 +1,0 @@
-ALTER TABLE `llx_bs_sav_propal_line` ADD `remise_crt_percent` DECIMAL(24,4) NOT NULL DEFAULT '0';

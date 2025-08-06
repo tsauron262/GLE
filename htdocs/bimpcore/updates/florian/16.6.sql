@@ -1,1 +1,0 @@
-ALTER TABLE `llx_bimp_commande_fourn_line` CHANGE `receptions` `receptions` LONGTEXT NOT NULL; 

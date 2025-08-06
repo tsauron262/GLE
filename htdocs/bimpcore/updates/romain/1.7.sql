@@ -1,5 +1,5 @@
 -- Ajout du status fermé, on fait suivre les inventaires déjà fermé
-UPDATE llx_bl_inventory SET status=3 WHERE status=2
+UPDATE llx_bl_inventory SET status=3 WHERE status=2;
 
 -- Insertion du nouvel entrepôt pour les invenatires
 

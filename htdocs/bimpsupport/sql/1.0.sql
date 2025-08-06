@@ -84,7 +84,7 @@ ALTER TABLE `llx_bs_sav` ADD `acompte` FLOAT NOT NULL DEFAULT '0' AFTER `pword_a
 ALTER TABLE `llx_bs_sav` DROP `cover`;
 
 ALTER TABLE `llx_bs_sav_product` ADD `id_reservation` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_product`;
-ALTER TABLE `llx_bs_sav_product` ADD `id_equipment` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_product`; 
+ALTER TABLE `llx_bs_sav_product` ADD `id_equipment` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_product`;
 
 
 
@@ -234,6 +234,18 @@ UPDATE `llx_bs_apple_part` SET `price_type` = 'STOCK' WHERE `no_order` = 1;
 
 ALTER TABLE `llx_bs_sav_propal_line` ADD `force_qty_1` BOOLEAN NOT NULL;
 
+
+ALTER TABLE `llx_bs_sav_propal_line` ADD `id_parent_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_line`;
+
+ALTER TABLE `llx_bs_sav_propal_line` ADD `hide_product_label` TEXT;
+ALTER TABLE `llx_bs_sav_propal_line` ADD `remise_pa` DECIMAL(24,8) NOT NULL DEFAULT '0';
+ALTER TABLE `llx_bs_sav_propal_line` ADD `remise_crt` tinyint(1) NOT NULL DEFAULT '0';
+ALTER TABLE `llx_bs_sav_propal_line` CHANGE `remise` `remise` DOUBLE(24,8) NOT NULL DEFAULT '0';
+ALTER TABLE `llx_bs_sav_propal_line` ADD INDEX(`id_obj`);
+ALTER TABLE `llx_bs_sav_propal_line` ADD INDEX(`id_line`);
+ALTER TABLE `llx_bs_sav_propal_line` ADD `hide_in_pdf` BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE `llx_bs_sav_propal_line` ADD INDEX(`linked_object_name`, `linked_id_object`);
+
 CREATE TABLE IF NOT EXISTS `llx_bs_sav_issue` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `id_sav` int(11) NOT NULL DEFAULT 0,
@@ -248,4 +260,4 @@ CREATE TABLE IF NOT EXISTS `llx_bs_sav_issue` (
 
 
 
-ALTER TABLE `llx_bimp_gsx_repair` ADD `old_repair_number` VARCHAR(128) NOT NULL DEFAULT '' AFTER `canceled`; 
+ALTER TABLE `llx_bimp_gsx_repair` ADD `old_repair_number` VARCHAR(128) NOT NULL DEFAULT '' AFTER `canceled`;

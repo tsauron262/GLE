@@ -12,6 +12,29 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_commande_line` (
 	) ENGINE=InnoDB;
 
 
+CREATE TABLE IF NOT EXISTS `llx_bl_commande_fourn_reception` (
+																 `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	`id_commande_fourn` int(10) UNSIGNED NOT NULL DEFAULT '0',
+	`id_entrepot` int(10) UNSIGNED NOT NULL DEFAULT '0',
+	`ref` varchar(128) NOT NULL DEFAULT '',
+	`num_reception` int(10) UNSIGNED NOT NULL DEFAULT '0',
+	`status` int(11) NOT NULL DEFAULT '0',
+	`date_received` datetime DEFAULT NULL,
+	`info` text NOT NULL,
+	`user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
+	`date_create` datetime DEFAULT CURRENT_TIMESTAMP,
+	`user_update` int(11) NOT NULL DEFAULT '0',
+	`date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+	) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `llx_br_commande_shipment` (
+														  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	`id_commande_client` int(10) UNSIGNED NOT NULL DEFAULT '0',
+	`id_entrepot` int(10) UNSIGNED NOT NULL DEFAULT '0',
+	`num_livraison` int(10) UNSIGNED NOT NULL DEFAULT '1',
+	`qty` int(10) UNSIGNED NOT NULL DEFAULT '1',
+	`date` datetime DEFAULT NULL
+	) ENGINE=InnoDB;
+
 ALTER TABLE `llx_bimp_commande_line` ADD `remise` FLOAT NOT NULL DEFAULT '0' AFTER `position`;
 ALTER TABLE `llx_bimp_facture_line` ADD `remise` FLOAT NOT NULL DEFAULT '0' AFTER `position`;
 ALTER TABLE `llx_bimp_propal_line` ADD `remise` FLOAT NOT NULL DEFAULT '0' AFTER `position`;
@@ -44,7 +67,6 @@ ALTER TABLE `llx_bimp_commande_line` ADD `id_parent_line` INT UNSIGNED NOT NULL 
 ALTER TABLE `llx_bimp_facture_fourn_line` ADD `id_parent_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_line`;
 ALTER TABLE `llx_bimp_facture_line` ADD `id_parent_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_line`;
 ALTER TABLE `llx_bimp_propal_line` ADD `id_parent_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_line`;
-ALTER TABLE `llx_bs_sav_propal_line` ADD `id_parent_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_line`;
 
 
 
@@ -56,26 +78,11 @@ ALTER TABLE `llx_bimp_commande_line` CHANGE `remise` `remise` DOUBLE(24,8) NOT N
 ALTER TABLE `llx_bimp_facture_line` CHANGE `remise` `remise` DOUBLE(24,8) NOT NULL DEFAULT '0';
 
 ALTER TABLE `llx_bimp_propal_line` ADD `hide_product_label` TEXT;
-ALTER TABLE `llx_bs_sav_propal_line` ADD `hide_product_label` TEXT;
 ALTER TABLE `llx_bimp_commande_line` ADD `hide_product_label` TEXT;
 ALTER TABLE `llx_bimp_facture_line` ADD `hide_product_label` TEXT;
 ALTER TABLE `llx_bimp_commande_fourn_line` ADD `hide_product_label` TEXT;
 ALTER TABLE `llx_bimp_facture_fourn_line` ADD `hide_product_label` TEXT;
 
-CREATE TABLE IF NOT EXISTS `llx_bl_commande_fourn_reception` (
-																 `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	`id_commande_fourn` int(10) UNSIGNED NOT NULL DEFAULT '0',
-	`id_entrepot` int(10) UNSIGNED NOT NULL DEFAULT '0',
-	`ref` varchar(128) NOT NULL DEFAULT '',
-	`num_reception` int(10) UNSIGNED NOT NULL DEFAULT '0',
-	`status` int(11) NOT NULL DEFAULT '0',
-	`date_received` datetime DEFAULT NULL,
-	`info` text NOT NULL,
-	`user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
-	`date_create` datetime DEFAULT CURRENT_TIMESTAMP,
-	`user_update` int(11) NOT NULL DEFAULT '0',
-	`date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-	) ENGINE=InnoDB;
 
 ALTER TABLE `llx_bimp_commande_fourn_line` ADD `receptions` LONGTEXT NOT NULL;
 
@@ -96,16 +103,13 @@ ALTER TABLE `llx_commande` ADD `id_user_resp` INT NOT NULL DEFAULT '0';
 
 ALTER TABLE `llx_bimp_commande_line` ADD `remise_pa` DECIMAL(24,8) NOT NULL DEFAULT '0';
 ALTER TABLE `llx_bimp_propal_line` ADD `remise_pa` DECIMAL(24,8) NOT NULL DEFAULT '0';
-ALTER TABLE `llx_bs_sav_propal_line` ADD `remise_pa` DECIMAL(24,8) NOT NULL DEFAULT '0';
 ALTER TABLE `llx_bimp_facture_line` ADD `remise_pa` DECIMAL(24,8) NOT NULL DEFAULT '0';
 
 ALTER TABLE `llx_bimp_commande_line` ADD `remise_crt` tinyint(1) NOT NULL DEFAULT '0';
 ALTER TABLE `llx_bimp_propal_line` ADD `remise_crt` tinyint(1) NOT NULL DEFAULT '0';
-ALTER TABLE `llx_bs_sav_propal_line` ADD `remise_crt` tinyint(1) NOT NULL DEFAULT '0';
 ALTER TABLE `llx_bimp_facture_line` ADD `remise_crt` tinyint(1) NOT NULL DEFAULT '0';
 
 ALTER TABLE `llx_bimp_propal_line` CHANGE `remise` `remise` DOUBLE(24,8) NOT NULL DEFAULT '0';
-ALTER TABLE `llx_bs_sav_propal_line` CHANGE `remise` `remise` DOUBLE(24,8) NOT NULL DEFAULT '0';
 ALTER TABLE `llx_bimp_commande_line` CHANGE `remise` `remise` DOUBLE(24,8) NOT NULL DEFAULT '0';
 ALTER TABLE `llx_bimp_facture_line` CHANGE `remise` `remise` DOUBLE(24,8) NOT NULL DEFAULT '0';
 ALTER TABLE `llx_bimp_commande_fourn_line` CHANGE `remise` `remise` DOUBLE(24,8) NOT NULL DEFAULT '0';
@@ -154,8 +158,6 @@ ALTER TABLE `llx_bimp_commande_line` CHANGE `equipments_returned` `equipments_re
 ALTER TABLE `llx_bimp_propal_line` ADD INDEX(`id_obj`);
 ALTER TABLE `llx_bimp_propal_line` ADD INDEX(`id_line`);
 
-ALTER TABLE `llx_bs_sav_propal_line` ADD INDEX(`id_obj`);
-ALTER TABLE `llx_bs_sav_propal_line` ADD INDEX(`id_line`);
 
 ALTER TABLE `llx_bimp_commande_line` ADD INDEX(`id_obj`);
 ALTER TABLE `llx_bimp_commande_line` ADD INDEX(`id_line`);
@@ -177,8 +179,62 @@ ALTER TABLE `llx_bl_commande_shipment` ADD INDEX( `id_commande_client`);
 ALTER TABLE `llx_bl_commande_fourn_reception` ADD INDEX( `id_commande_fourn`);
 
 ALTER TABLE `llx_bimp_propal_line` ADD `hide_in_pdf` BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE `llx_bs_sav_propal_line` ADD `hide_in_pdf` BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE `llx_bimp_commande_line` ADD `hide_in_pdf` BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE `llx_bimp_facture_line` ADD `hide_in_pdf` BOOLEAN NOT NULL DEFAULT FALSE;
 
 ALTER TABLE `llx_bimp_commande_line` ADD `echeance_notif_send` tinyint(1) NOT NULL DEFAULT 0;
+
+ALTER TABLE `llx_bimp_commande_line` ADD `force_qty_1` BOOLEAN NOT NULL;
+ALTER TABLE `llx_bimp_propal_line` ADD `force_qty_1` BOOLEAN NOT NULL;
+ALTER TABLE `llx_bimp_commande_fourn_line` ADD `force_qty_1` BOOLEAN NOT NULL;
+ALTER TABLE `llx_bimp_facture_line` ADD `force_qty_1` BOOLEAN NOT NULL;
+ALTER TABLE `llx_bimp_facture_fourn_line` ADD `force_qty_1` BOOLEAN NOT NULL;
+
+
+ALTER TABLE `llx_br_commande_shipment` ADD `total_ttc` DECIMAL(24,8) NOT NULL DEFAULT '0' AFTER `info`;
+ALTER TABLE `llx_br_commande_shipment` ADD `total_ht` DECIMAL(24,8) NOT NULL DEFAULT '0' AFTER `info`;
+
+ALTER TABLE `llx_bl_commande_fourn_reception` ADD `total_ttc` DECIMAL(24,8) NOT NULL DEFAULT '0' AFTER `assign_lines_to_commandes_client`;
+ALTER TABLE `llx_bl_commande_fourn_reception` ADD `total_ht` DECIMAL(24,8) NOT NULL DEFAULT '0' AFTER `assign_lines_to_commandes_client`;
+
+
+ALTER TABLE `llx_commande` ADD `extra_status` INT NOT NULL DEFAULT '0' AFTER `logistique_status`;
+
+ALTER TABLE `llx_br_commande_shipment` ADD `id_user_resp` INT NOT NULL DEFAULT '0' AFTER `total_ttc`;
+ALTER TABLE `llx_bl_commande_fourn_reception` ADD `id_user_resp` INT NOT NULL DEFAULT '0' AFTER `total_ttc`;
+
+ALTER TABLE `llx_bl_commande_fourn_reception` ADD `id_facture` INT NOT NULL DEFAULT '0' AFTER `id_user_resp`;
+
+
+ALTER TABLE `llx_bl_commande_fourn_reception` CHANGE `date_received` `date_received` DATE NULL DEFAULT NULL;
+
+
+
+ALTER TABLE `llx_br_reservation_shipment` ADD `id_commande_client` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id`;
+ALTER TABLE `llx_br_reservation_shipment` ADD `id_shipment` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `ref_reservation`;
+
+
+ALTER TABLE `llx_br_commande_shipment` DROP `qty`;
+ALTER TABLE `llx_br_commande_shipment` ADD `id_contact` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `num_livraison`;
+ALTER TABLE `llx_br_commande_shipment` ADD `status` INT UNSIGNED NOT NULL DEFAULT '1' AFTER `num_livraison`;
+ALTER TABLE `llx_br_commande_shipment` CHANGE `date` `date_shipped` DATETIME NULL DEFAULT NULL;
+
+ALTER TABLE `llx_br_commande_shipment` ADD `date_update` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `date_shipped`;
+ALTER TABLE `llx_br_commande_shipment` ADD `user_update` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `date_shipped`;
+ALTER TABLE `llx_br_commande_shipment` ADD `date_create` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `date_shipped`;
+ALTER TABLE `llx_br_commande_shipment` ADD `user_create` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `date_shipped`;
+
+ALTER TABLE `llx_br_commande_shipment` ADD `ref` VARCHAR(255) NOT NULL AFTER `num_livraison`;
+
+ALTER TABLE `llx_br_commande_shipment` ADD `id_avoir` INT NOT NULL DEFAULT '0' AFTER `id_facture`;
+
+ALTER TABLE `llx_br_commande_shipment` ADD `info` TEXT NOT NULL;
+ALTER TABLE `llx_br_commande_shipment` ADD `signed` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `date_shipped`;
+ALTER TABLE `llx_br_commande_shipment` ADD `id_facture` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `date_shipped`;
+
+ALTER TABLE `llx_commande` ADD `id_facture` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `multicurrency_total_ttc`;
+
+
+ALTER TABLE `llx_br_commande_shipment` RENAME TO llx_bl_commande_shipment;
+
+

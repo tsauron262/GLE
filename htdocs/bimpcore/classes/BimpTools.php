@@ -4452,6 +4452,23 @@ class BimpTools
 		return "OK " . $i . ' mails envoyés';
 	}
 
+	public static function isValidEAN13($ean, $with_checkDigit = false) {
+		if (!preg_match('/^\d{13}$/', $ean)) {
+			return false;
+		}
+		if (!$with_checkDigit) return true;
+
+		$sum = 0;
+		for ($i = 0; $i < 12; $i++) {
+			$digit = (int) $ean[$i];
+			$sum += ($i % 2 === 0) ? $digit : $digit * 3;
+		}
+
+		$checkDigit = (10 - ($sum % 10)) % 10;
+
+		return $checkDigit === (int) $ean[12];
+	}
+
 	public function envoieMailGrouper()
 	{
 		$this->output = static::sendMailGrouper();

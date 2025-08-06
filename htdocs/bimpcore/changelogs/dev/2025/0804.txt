@@ -1,0 +1,1 @@
+creation d'un fonction BimpTools::isValidEAN13 pour eviter le plantage de CRON actimac id= 54, Processus bimpdatasync Imports FTP LDLC

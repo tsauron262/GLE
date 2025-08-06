@@ -9,8 +9,8 @@ class Bimp_Contact_ExtEntity extends Bimp_Contact
 		$phone_perso = BimpTools::getPostFieldValue('phone_perso', '', 'alphanohtml');
 		$phone_mobile = BimpTools::getPostFieldValue('phone_mobile', '', 'alphanohtml');
 
-		$client = $this->parent;
-		if($client && $client->isCompany() && empty($phone) && empty($phone_perso) && empty($phone_mobile)) {
+		$client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+		if(BimpObject::objectLoaded($client) && $client->isCompany() && empty($phone) && empty($phone_perso) && empty($phone_mobile)) {
 			$errors[] = 'Merci de remplir au moins un des N° de Portable.';
 		}
 		return $errors;

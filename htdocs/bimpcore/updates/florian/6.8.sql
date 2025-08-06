@@ -1,4 +1,3 @@
-ALTER TABLE `llx_bc_vente` ADD `vente_ht` BOOLEAN NOT NULL DEFAULT FALSE AFTER `id_facture`;
 ALTER TABLE `llx_bc_vente` ADD `id_avoir` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_facture`;
 
 

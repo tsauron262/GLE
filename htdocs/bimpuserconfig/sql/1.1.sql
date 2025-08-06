@@ -82,3 +82,21 @@ CREATE TABLE IF NOT EXISTS `llx_buc_filters_config` (
   `obj_name` varchar(255) NOT NULL DEFAULT '',
   `filters` mediumtext NOT NULL
 );
+
+ALTER TABLE `llx_buc_filters_config` ADD INDEX `owner` (`owner_type`, `id_owner`);
+ALTER TABLE `llx_buc_filters_config` ADD INDEX `creator` (`id_user_create`);
+ALTER TABLE `llx_buc_filters_config` ADD INDEX `obj_data` (`obj_module`, `obj_name`);
+
+ALTER TABLE `llx_buc_list_filters` ADD INDEX `owner` (`owner_type`, `id_owner`);
+ALTER TABLE `llx_buc_list_filters` ADD INDEX `creator` (`id_user_create`);
+ALTER TABLE `llx_buc_list_filters` ADD INDEX `obj_data` (`obj_module`, `obj_name`);
+
+ALTER TABLE `llx_buc_list_table_config` ADD INDEX `owner` (`owner_type`, `id_owner`);
+ALTER TABLE `llx_buc_list_table_config` ADD INDEX `component` (`obj_module`, `obj_name`, `component_name`);
+ALTER TABLE `llx_buc_list_table_config` ADD INDEX `creator` (`id_user_create`);
+
+ALTER TABLE `llx_buc_stats_list_config` ADD INDEX `owner` (`owner_type`, `id_owner`);
+ALTER TABLE `llx_buc_stats_list_config` ADD INDEX `component` (`obj_module`, `obj_name`, `component_name`);
+ALTER TABLE `llx_buc_stats_list_config` ADD INDEX `creator` (`id_user_create`);
+
+ALTER TABLE `llx_buc_user_current_config` ADD INDEX `user_curren` (`config_object_name`, `config_type_key`, `id_user`);

@@ -1,3 +1,6 @@
+
+ALTER TABLE `llx_facture` CHANGE `nb_relance` `nb_relance` INT(11) NOT NULL DEFAULT '0';
+
 CREATE TABLE IF NOT EXISTS `llx_bimp_commande_line` (
 														`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	`id_obj` int(10) UNSIGNED NOT NULL DEFAULT '0',
@@ -49,7 +52,6 @@ ALTER TABLE `llx_propal` ADD `remise_globale` DOUBLE(24,8) NOT NULL DEFAULT '0';
 ALTER TABLE `llx_facture` ADD `remise_globale` DOUBLE(24,8) NOT NULL DEFAULT '0';
 ALTER TABLE `llx_commande` ADD `remise_globale` DOUBLE(24,8) NOT NULL DEFAULT '0';
 
-ALTER TABLE `llx_object_line_remise` CHANGE `percent` `percent` FLOAT(24,8) NOT NULL DEFAULT '0';
 ALTER TABLE `llx_bimp_propal_line` ADD UNIQUE( `id_line`);
 
 
@@ -61,6 +63,20 @@ ALTER TABLE `llx_bimp_commande_line` DROP `qty_shipped`;
 ALTER TABLE `llx_bimp_commande_line` ADD `ref_reservations` VARCHAR(128) NOT NULL DEFAULT '' AFTER `remise`;
 ALTER TABLE `llx_bimp_commande_line` ADD `factures` TEXT NOT NULL;
 ALTER TABLE `llx_bimp_commande_line` ADD `shipments` TEXT NOT NULL;
+
+CREATE TABLE IF NOT EXISTS `llx_bimp_commande_fourn_line` (
+															  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	`id_obj` int(10) UNSIGNED NOT NULL DEFAULT '0',
+	`id_line` INT UNSIGNED NOT NULL DEFAULT '0',
+	`type` int(11) NOT NULL DEFAULT '0',
+	`deletable` tinyint(1) NOT NULL DEFAULT '1',
+	`editable` tinyint(1) NOT NULL DEFAULT '1',
+	`remisable` tinyint(1) NOT NULL DEFAULT '1',
+	`linked_id_object` int(10) UNSIGNED NOT NULL DEFAULT '0',
+	`linked_object_name` varchar(256) NOT NULL,
+	`remise` decimal(24,8) NOT NULL DEFAULT '0.00000000',
+	`position` INT NOT NULL DEFAULT '0'
+);
 
 ALTER TABLE `llx_bimp_commande_fourn_line` ADD `id_parent_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_line`;
 ALTER TABLE `llx_bimp_commande_line` ADD `id_parent_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_line`;
@@ -171,7 +187,6 @@ ALTER TABLE `llx_bimp_commande_fourn_line` ADD INDEX(`id_line`);
 ALTER TABLE `llx_bimp_facture_fourn_line` ADD INDEX(`id_obj`);
 ALTER TABLE `llx_bimp_facture_fourn_line` ADD INDEX(`id_line`);
 
-ALTER TABLE `llx_object_line_remise` ADD INDEX( `id_object_line`, `object_type`);
 ALTER TABLE `llx_object_line_equipment` ADD INDEX( `id_object_line`, `object_type`);
 ALTER TABLE `llx_object_line_equipment` ADD INDEX( `id_equipment`);
 

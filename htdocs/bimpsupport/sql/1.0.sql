@@ -82,6 +82,13 @@ ALTER TABLE `llx_bs_sav` ADD `id_discount` INT;
 
 ALTER TABLE `llx_bs_sav` ADD `acompte` FLOAT NOT NULL DEFAULT '0' AFTER `pword_admin`;
 ALTER TABLE `llx_bs_sav` DROP `cover`;
+ALTER TABLE `llx_bs_sav` ADD `id_facture_avoir` int(11) NOT NULL DEFAULT 0 AFTER `id_facture_acompte`;
+
+ALTER TABLE `llx_bs_sav` CHANGE `date_create` `date_create` datetime DEFAULT NULL;
+ALTER TABLE `llx_bs_sav` CHANGE `date_update` `date_update` datetime DEFAULT NULL;
+
+ALTER TABLE `llx_bs_sav` CHANGE `date_create` `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE `llx_bs_sav` CHANGE `date_update` `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 ALTER TABLE `llx_bs_sav_product` ADD `id_reservation` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_product`;
 ALTER TABLE `llx_bs_sav_product` ADD `id_equipment` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_product`;
@@ -129,6 +136,9 @@ ALTER TABLE `llx_bs_sav_pret` CHANGE `id_pret` `id_equipment` INT(10) UNSIGNED N
 
 
 ALTER TABLE `llx_bs_sav_pret` DROP `id_equipment`;
+
+
+ALTER TABLE `llx_bs_sav_pret` RENAME TO llx_bs_pret;
 
 
 ALTER TABLE `llx_bs_sav` CHANGE `system` `system` INT(11) UNSIGNED NOT NULL DEFAULT '0';
@@ -217,7 +227,7 @@ ALTER TABLE `llx_bs_ticket` ADD `sujet` VARCHAR(128) NOT NULL DEFAULT '' AFTER `
 
 
 ALTER TABLE `llx_bs_sav_propal_line` ADD `remisable` BOOLEAN NOT NULL DEFAULT TRUE;
-
+ALTER TABLE `llx_bs_sav_propal_line` ADD `remise_crt_percent` DECIMAL(24,4) NOT NULL DEFAULT '0';
 
 
 ALTER TABLE `llx_bs_inter` ADD `resolution` TEXT NOT NULL DEFAULT '' AFTER `description`;
@@ -259,5 +269,11 @@ CREATE TABLE IF NOT EXISTS `llx_bs_sav_issue` (
 );
 
 
+ALTER TABLE `llx_bs_sav_issue` ADD INDEX `sav` (`id_sav`);
+
+
 
 ALTER TABLE `llx_bimp_gsx_repair` ADD `old_repair_number` VARCHAR(128) NOT NULL DEFAULT '' AFTER `canceled`;
+
+
+ALTER TABLE `llx_bs_sav` ADD INDEX(`id_entrepot`);

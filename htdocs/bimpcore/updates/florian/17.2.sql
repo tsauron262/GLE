@@ -25,7 +25,6 @@ ALTER TABLE `llx_br_reservation` ADD INDEX(`id_equipment`);
 ALTER TABLE `llx_br_reservation` ADD INDEX(`id_commande_client`);
 ALTER TABLE `llx_br_reservation` ADD INDEX(`id_commande_client_line`);
 
-ALTER TABLE `llx_bs_sav` ADD INDEX(`id_entrepot`);
 ALTER TABLE `llx_bs_apple_part` ADD INDEX(`id_sav`);
 
 ALTER TABLE `llx_bs_inter` ADD INDEX(`id_ticket`);

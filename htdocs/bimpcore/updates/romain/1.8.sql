@@ -34,7 +34,6 @@ CREATE TABLE `llx_bl_inventory_2` (
 );
 
 
--- llx_bl_inventory_warehouse
 CREATE TABLE `llx_bl_inventory_warehouse` (
   `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `fk_inventory` int(11) NOT NULL,

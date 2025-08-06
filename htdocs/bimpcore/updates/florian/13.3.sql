@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_list_config` (
   `cols` text NOT NULL,
   `sort_field` varchar(256) NOT NULL DEFAULT 'id',
   `sort_way` varchar(8) NOT NULL DEFAULT 'asc',
-  `nb_items` int(11) NOT NULL DEFAULT 10
+  `nb_items` int(11) NOT NULL DEFAULT 10,
+  `sort_option` VARCHAR(256) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB;
-
-ALTER TABLE `llx_bimpcore_list_config` ADD `sort_option` VARCHAR(256) NOT NULL DEFAULT '' AFTER `sort_way`; 

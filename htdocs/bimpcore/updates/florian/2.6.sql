@@ -16,13 +16,6 @@ CREATE TABLE IF NOT EXISTS `llx_be_logiciel` (
 ) ENGINE=InnoDB;
 
 
-CREATE TABLE IF NOT EXISTS `llx_be_user_account` (
-  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `name` VARCHAR(128) NOT NULL DEFAULT '',
-  `login` varchar(128) NOT NULL DEFAULT '',
-  `pword` varchar(128) NOT NULL DEFAULT '',
-) ENGINE=InnoDB;
-
 CREATE TABLE IF NOT EXISTS `llx_be_connection` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `name` varchar(256) NOT NULL,

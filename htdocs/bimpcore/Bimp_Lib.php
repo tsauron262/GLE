@@ -20,7 +20,9 @@ if (!defined('BIMP_LIB')) {
     global $bimp_start_time;
     $bimp_start_time = round(microtime(1), 4);
 
-    ini_set('display_errors', 0);
+	if(!defined('MOD_DEV_SYN') || !MOD_DEV_SYN) {
+		ini_set('display_errors', 0);
+	}
 
     $dir = __DIR__ . '/classes/';
 
@@ -77,6 +79,9 @@ if (!defined('BIMP_LIB')) {
 	require_once $dir . 'BimpUserMsg.php';
     require_once $dir . 'BimpModuleConf.php';
     require_once $dir . 'BimpLayout.php';
+
+	BimpObject::loadClass('bimpcore', 'Bimp_Log');
+
 	require_once $dir . 'BimpDict.php';
 
 	BimpController::initErrorsHandler();
@@ -87,7 +92,6 @@ if (!defined('BIMP_LIB')) {
     BimpCore::setMaxExecutionTime(600);
     BimpCore::setMemoryLimit(1024);
 
-    BimpObject::loadClass('bimpcore', 'Bimp_Log');
     BimpObject::loadClass('bimpcore', 'BimpNote');
     BimpObject::loadClass('bimpcore', 'BimpObjectLog');
     BimpObject::loadClass('bimpcore', 'Bimp_User');

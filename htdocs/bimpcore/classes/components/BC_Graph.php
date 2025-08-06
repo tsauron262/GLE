@@ -22,6 +22,7 @@ class BC_Graph extends BC_Panel
         $this->params_def['use_k'] = array('data_type' => 'boolean', 'default' => 0);
         $this->params_def['relative'] = array('data_type' => 'boolean', 'default' => -1);
         $this->params_def['filters'] = array('data_type' => 'array', 'json' => true, 'default' => json_decode(BimpTools::getPostFieldValue('param_filters', '[]', 'json_nohtml'), true), 'request' => true);
+		$this->params_def['params_def'] = array('data_type' => 'array', 'json' => true, 'default' => json_decode(BimpTools::getPostFieldValue('params_def', '[]', 'json_nohtml'), true), 'request' => true);
 		$this->params_def['cumul'] = array('data_type' => 'boolean', 'default' => -1);
 //        echo '<pre>';
 //        print_r($_POST);
@@ -142,6 +143,9 @@ class BC_Graph extends BC_Panel
             elseif(isset($datas['value'])){
                 $val = $datas['value'];
             }
+			elseif(BimpTools::getPostFieldValue($input_name, null, 'string') !== null){
+				$val = BimpTools::getPostFieldValue($input_name, null, 'string');
+			}
             $this->formData[$input_name]['value'] = $val;
             $this->userOptions[$input_name] = $val;
 
@@ -166,8 +170,9 @@ class BC_Graph extends BC_Panel
             $formHtml = '<form id="'. $list_id . '_' . $data['idGraph'] . '_chartForm">';
             $formHtml .= '<table class="bimp_list_table">';
             $formHtml .= '<tbody class="headers_col">';
+			$params_def = json_decode(BimpTools::getPostFieldValue('param_params_def', array(), 'json_nohtml'),1);
             foreach($this->formData as $input_name => $optionData){
-                $value = (isset($optionData['value'])? $optionData['value'] : '');
+				$value = (isset($optionData['value']) && $optionData['value'] != null ? $optionData['value'] : (isset($params_def[$input_name])? $params_def[$input_name] : ''));
                 $dataGraphe['params'][$input_name] = $value;
                 $optionsInput = array();
                 if(isset($optionData['values']))

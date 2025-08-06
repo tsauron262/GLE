@@ -74,24 +74,12 @@ class AlertProduit extends BimpObject
         if (!(int) $this->getData('active')) {
             return;
         }
-
         if ($this->isObjectQualified($object)) {
             if ($this->getData('type_notif') == 0) {
 				$objectForMessage = $object;
 				if ($this->getData('msgOnParent')) $objectForMessage = $object->getParentInstance();
-				$envoiOK = true;
-				if ($this->getData('checkIfNoteNonLue')) {	// avant d'envoyer le message, on verifie si il n'y a pas de message non lu contenant le message de notification (bimpcore_note)
-					$notes = $objectForMessage->getNotes();
-					foreach ($notes as $note) {
-						$c = $note->getData('content');
-						if ((stripos($c, $this->getData('message_notif')) !== false) && $note->getData('viewed') == 0) {
-							$envoiOK = false;
-						}
-					}
-				}
-                if ($envoiOK) {
-					$this->sendMessage($objectForMessage, $errors, $warnings);
-				}
+				$this->traitement_variable_substitution($object, $errors, $warnings);
+				$this->sendMessage($objectForMessage, $errors, $warnings);
             } else {
                 $this->sendAlert($errors, $warnings);
             }
@@ -135,23 +123,58 @@ class AlertProduit extends BimpObject
 
     public function sendMessage($object, &$errors = array(), &$warnings = array())
     {
-        BimpObject::loadClass('bimpcore', 'BimpNote');
+		$notes = array();
+		if ($this->getData('checkIfNoteNonLue')) {    // avant d'envoyer le message, on verifie si il n'y a pas de message non lu contenant le message de notification (bimpcore_note)
+			$notes = $object->getNotes();
+		}
 
-        // Création des note user
+		BimpObject::loadClass('bimpcore', 'BimpNote');
+		$id_users = array();
+
+        // Création des notes user
         foreach ($this->getData('notified_user') as $id_user) {
-            $object->addNote($this->getData('message_notif'),
+			$id_users[] = $id_user;
+			if($this->envoiOK($notes, $id_user))
+	            $object->addNote($this->getData('message_notif'),
                              BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
                              BimpNote::BN_DEST_USER, 0, (int) $id_user);
         }
 
-
-
-        // Création des note user
+        // Création des notes Group
         foreach ($this->getData('notified_group') as $id_group) {
-            $object->addNote($this->getData('message_notif'),
+			if($this->envoiOK($notes, $id_group, BimpNote::BN_DEST_GROUP))
+				$object->addNote($this->getData('message_notif'),
                              BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
                              BimpNote::BN_DEST_GROUP, (int) $id_group, 0);
         }
+
+		// msgToCreator: Notifier le créateur de la pièce
+		 // exit();
+		if ($this->getData('msgToCreator')) {
+			$id_user = $object->getData('fk_user_author');
+			if ($id_user && !in_array($id_user, $id_users)) {
+				$id_users[] = $id_user;
+				if($this->envoiOK($notes, $id_user))
+					$object->addNote($this->getData('message_notif'),
+								BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+								BimpNote::BN_DEST_USER, 0, (int) $id_user);
+			}
+		}
+
+		// msgToCommClient: Notifier le commercial client
+		if ($this->getData('msgToCommClient')) {
+			$fk_soc = $object->getData('fk_soc');
+			$soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $fk_soc);
+			$com = $soc->getCommercial(false);
+
+			if ($com->id && !in_array($com->id, $id_users)) {
+				$id_users[] = $com->id;
+				if($this->envoiOK($notes, $com->id))
+					$object->addNote($this->getData('message_notif'),
+								BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+								BimpNote::BN_DEST_USER, 0, (int) $com->id);
+			}
+		}
     }
 
     public function sendAlert(&$errors = array(), &$warnings = array())
@@ -169,4 +192,82 @@ class AlertProduit extends BimpObject
         $errors = BimpTools::merge_array($errors, static::$errors);
         $warnings = BimpTools::merge_array($warnings, static::$warnings);
     }
+
+	private function traitement_variable_substitution($object, &$errors, &$warnings) {
+		$msg = $this->getData('message_notif');
+//		echo '<pre>' . print_r($object->getDataArray(true), true) . '</pre>';
+		if (strstr($msg, '__REF_PRO__') !== false)	{
+			if ($object->module == 'bimpcommercial' && $object->object_name = 'Bimp_Commande')	{
+				$req = $this->db->getRow('commandedet', 'rowid = ' .$object->getData('id_line'), array('fk_product'));
+				if ($idProduct = $req->fk_product)	{
+					$prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $idProduct);
+					if (BimpObject::objectLoaded($prod)) {
+						$msg = str_replace('__REF_PRO__', $prod->getRef(), $msg);
+					}
+				}
+			}
+		}
+		if (strstr($msg, '__QTY_MODIF__') !== false)	{
+			$q = $object->getData('qty_modif');
+			$s = '';
+			if(abs($q)>1)	$s = 's';
+			if ($q < 0)	$replace = abs($q) . ' pièce'.$s.' retirée'.$s;
+			else		$replace = abs($q) . ' pièce'.$s.' ajoutée'.$s;
+			$msg = str_replace('__QTY_MODIF__', $replace, $msg);
+			$msg = str_replace('__QTY_MODIF__', $replace, $msg);
+		}
+
+		$this->set('message_notif', $msg);
+	}
+
+	public function isQuantityModifLogisitiq($object)
+	{
+		$is_qty_modif = $object->getData('qty_modif') != 0;
+		$is_prod_serv = $object->getData('type') == 1;
+
+		if( $is_qty_modif && $is_prod_serv ) {
+			$req = $this->db->getRow('commandedet', 'rowid = ' . $object->getData('id_line'), array('fk_product'));
+			if ($req) {
+				$prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $req->fk_product);
+				if (BimpObject::objectLoaded($prod)) {
+					$fk_product_type = $prod->getData('fk_product_type');
+					if ($fk_product_type == 0) {
+						return true;
+					}
+				}
+			}
+
+		}
+		return false;
+	}
+
+	private function envoiOK($notes, $id_user, $type_dest = BimpNote::BN_DEST_USER) {
+		global $user;
+		if($type_dest == BimpNote::BN_DEST_USER) {
+			if($user->id == $id_user) return false; // Pas de note a l'utilisateur connecté
+			$bimp_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+			if (BimpObject::objectLoaded($bimp_user)) {
+				if (!(int) $bimp_user->getData('statut')) {
+					return false;
+				}
+			}
+		}
+
+		$envoiOK = true;
+		$pattern = explode("\n", $this->getData('message_notif'))[0];
+		foreach ($notes as $note) {
+			$c = $note->getData('content');
+			if($type_dest == BimpNote::BN_DEST_USER) {
+				if ((strstr($c, $pattern) !== false) && $note->getData('viewed') == 0 && $note->getData('fk_user_dest') == $id_user) {
+					$envoiOK = false;
+				}
+			}
+			elseif ($type_dest == BimpNote::BN_DEST_GROUP) {
+				if ((strstr($c, $pattern) !== false) && $note->getData('viewed') == 0 && $note->getData('fk_group_dest') == $id_user) {
+					$envoiOK = false;
+				}
+			}
+		}
+		return $envoiOK;
+	}
 }

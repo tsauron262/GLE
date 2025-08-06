@@ -1,0 +1,1 @@
+- Ajout du forçage du git pull post process en cas de fichier manquant. 

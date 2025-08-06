@@ -458,7 +458,7 @@ class BimpFile extends BimpObject
                     'id_parent'          => $id_object
                         ), null, null, 'id', 'asc', 'array', array('id', 'file_name', 'file_ext'));
         foreach ($rows as $r) {
-            $current_files[(int) $r['id']] = $r['file_name'] . '.' . $r['file_ext'];
+            $current_files[(int) $r['id']] = $r['file_name'] . ($r['file_ext'] ? '.' . $r['file_ext'] : '');
         }
 
         $this->set('parent_module', $module);
@@ -801,6 +801,12 @@ class BimpFile extends BimpObject
 
                     if (!count($errors)) {
                         $errors = parent::create($warnings, $force_create);
+						if (!count($errors) && $this->getData('parent_module') == 'bimpcore' && in_array($this->getData('parent_object_name'), array('Bimp_Societe', 'Bimp_Client'))) {
+							$soc = $this->getParentInstance();
+							if (BimpObject::objectLoaded($soc)) {
+								$soc->setActivity('Ajout ' . $this->getLabel('of_the') . ' {{Fichier:' . $this->id . '}}');
+							}
+						}
                     }
 
                     if (count($errors) && !$this->dontRemove) {

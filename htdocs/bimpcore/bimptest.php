@@ -30,11 +30,13 @@ if (!$user->admin) {
 	exit;
 }
 
-if (file_exists(DOL_DATA_ROOT . '/bimpcore/fatal_errors_logs.json')) {
-	echo 'LOGS<pre>' . print_r(json_decode(file_get_contents(DOL_DATA_ROOT . '/bimpcore/fatal_errors_logs.json'), 1), 1) . '</pre>';
-} else {
-	echo 'FICHIER KO';
-}
+//BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
+//$res = Bimp_Commande::checkLinesEcheances();
+//
+//echo 'RES : <br/>';
+//echo $res;
+
+echo '<br/><br/>';
 
 echo '<br/>FIN';
 echo '</body></html>';

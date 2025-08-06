@@ -114,8 +114,8 @@ class cron extends BimpCron
 		}
 
 		if (count($err) > 0) {
-			$this->output = 'Erreur lors de la mise à jour des données Mirakl : ' . implode(', ', $err);
-			BimpCore::addlog('Erreur lors de la mise a jour Mirakl : ' . implode(', ', $err), 4);
+			$this->output = 'Erreur lors de la mise à jour des données Mirakl :<br>' . implode(', ', $err);
+			BimpCore::addlog('Erreur lors de la mise a jour Mirakl :<br>' . implode(', ', $err), 4);
 			return 1;
 		} else {
 			$verif = $bdd->getRows('societe', 'date_maj_mirakl >= DATE_SUB(NOW(), INTERVAL 1 DAY)', null, 'array', array('rowid'));

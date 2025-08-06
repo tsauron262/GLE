@@ -100,8 +100,13 @@ lists_cols:
              callback: 
                 method: displayClient
                 params: 
-                    - nom
-                            
+                    - nom      
+    date_facture:
+        label: Date facture
+        value:
+            callback: displayDateFacture
+        
+
 lists: 
     default:
         configurable: 1 
@@ -148,7 +153,16 @@ lists:
             amount: 
             id_vente: 
                 display: ref
-            facture_ref: 
+            num_sav:
+                label: Numéro SAV
+                show:
+                    conf: 
+                        module: bimpsupport
+                        name: use_sav
+                value:
+                    callback : displayNumSav
+            facture_ref:
+            date_facture:
             id_paiement: 
                 display: ref
             user_create: 

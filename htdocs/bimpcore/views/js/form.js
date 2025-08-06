@@ -1,7 +1,7 @@
 var inputsEvents = [];
 var bimpSignaturePads = [];
 
-function addInputEvent(form_id, input_name, event, callback) {
+function addInputEvent(form_id, input_name, event, callback, trigger = 1) {
 	for (i in inputsEvents) {
 		if (inputsEvents[i].form_id === form_id &&
 			inputsEvents[i].input_name === input_name &&
@@ -14,8 +14,20 @@ function addInputEvent(form_id, input_name, event, callback) {
 		form_id: form_id,
 		input_name: input_name,
 		event: event,
-		callback: callback
+		callback: callback,
+		trigger: trigger
 	});
+}
+
+function triggerInputEventCallback(form_id, input_name, event = 'change') {
+	for (i in inputsEvents) {
+		if (inputsEvents[i].form_id === form_id &&
+			inputsEvents[i].input_name === input_name &&
+			inputsEvents[i].event === event &&
+			typeof (inputsEvents[i].callback) === 'function') {
+			inputsEvents[i].callback();
+		}
+	}
 }
 
 // Enregistrements ajax des objets:
@@ -1208,6 +1220,9 @@ function getInputValue($inputContainer) {
 		}
 	}
 
+	// console.log('VAL OF ' + field_name);
+	// console.log(value);
+
 	return value;
 }
 
@@ -2085,10 +2100,10 @@ function onChecklistSearchInputChange($input) {
 		if (typeof (val) === 'string' && val !== '') {
 			var mult_vals = val.split(";");
 
-			if (mult_vals.length > 1) {				
-				var nOk= 0;
+			if (mult_vals.length > 1) {
+				var nOk = 0;
 				var unfound = [];
-				
+
 				for (var i in mult_vals) {
 					var selected_items = [];
 					var found = false;
@@ -2104,31 +2119,31 @@ function onChecklistSearchInputChange($input) {
 									} else if (text.replace(/^.+ \((.+)\)$/, '$1') === mult_vals[i]) {
 										found = true;
 									}
-								}								
+								}
 							}
-							
+
 							if (found) {
 								nOk++;
-								$(this).find('input.check_list_item_input').prop('checked', true);	
+								$(this).find('input.check_list_item_input').prop('checked', true);
 							}
-							
-							
+
+
 						}
 					});
-					
+
 					if (!found) {
-						unfound.push(mult_vals[i]);	
-					}					
+						unfound.push(mult_vals[i]);
+					}
 				}
-				
+
 				if (nOk > 0) {
 					bimp_msg(nOk + ' élément(s) trouvé(s)', 'success');
 				}
-				
+
 				if (unfound.length > 0) {
 					bimp_msg(unfound.length + ' élément(s) non trouvé(s) : <br/><br/>' + unfound.join('<br/>'), 'warning');
 				}
-				
+
 				$input.val('');
 			} else {
 				if ($.isOk($container)) {
@@ -2513,9 +2528,9 @@ function toggleInputDisplay($container, $input) {
 			}
 		}
 	} else {
-// Règles pour display_if sur plusieurs inputs: 
-//      - Tous les show_values doivent être vrai pour afficher. 
-//      - Si un seul hide_values vrai : champ masqué. 
+		// Règles pour display_if sur plusieurs inputs: 
+		//      - Tous les show_values doivent être vrai pour afficher. 
+		//      - Si un seul hide_values vrai : champ masqué. 
 
 		var inputs_names = $container.data('inputs_names');
 		if (inputs_names) {
@@ -2937,7 +2952,9 @@ function setFormEvents($form) {
 			var $input = $form.find('[name=' + inputsEvents[i].input_name + ']');
 			if ($input.length && !parseInt($input.data('form_init_input_change'))) {
 				$input.data('form_init_input_change', 1);
-				$input.change();
+				if (inputsEvents[i].trigger) {
+					$input.change();
+				}
 			}
 		}
 	}
@@ -5164,6 +5181,9 @@ function BimpFileUploader() {
 	};
 
 	this.checkFiles = function ($area, new_files) {
+		console.log('FILES');
+		console.log(new_files);
+
 		var $container = $area.findParentByClass('bimp_drop_files_container');
 
 		if (!$.isOk($container)) {
@@ -5239,7 +5259,7 @@ function BimpFileUploader() {
 					}
 
 					if (!file_ok) {
-						bimp_msg('Extension non autorisée pour le fichier "' + new_files[i].name + '"', 'danger', null, true);
+						bimp_msg('Extension "' + ext + '" non autorisée pour le fichier "' + new_files[i].name + '"', 'danger', null, true);
 						ext_check = false;
 					}
 				}
@@ -5291,6 +5311,12 @@ function BimpFileUploader() {
 							if (result.files[i].item) {
 								bimpAjax.$area.find('.drop_files').append(result.files[i].item);
 							}
+						}
+
+						var $form = bimpAjax.$area.findParentByClass('object_form');
+
+						if ($.isOk($form)) {
+							triggerInputEventCallback($form.data('identifier'), field_name);
 						}
 					}
 				}

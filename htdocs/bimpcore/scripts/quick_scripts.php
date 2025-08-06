@@ -68,7 +68,9 @@ if (!$action) {
 		'check_attribut_entity'                     => 'Vérifier les attributs par entité',
 		'test_divers'                               => 'Test divers',
 		'users_bdd'                                 => 'List Users BDD',
-		'correct_propal_remises'                    => 'Correction des remises des propales'
+		'correct_propal_remises'                    => 'Correction des remises des propales',
+//		'purge_doublon_rdc'							=> 'Purger doublon contact rdc',
+		'purge_undefined'							=> 'supprimer les fichiers "undefined" des tickets RDC'
 	);
 
 	$path = pathinfo(__FILE__);
@@ -750,6 +752,140 @@ AND ROUND(pl.remise, 4) != ROUND(pdet.`remise_percent`, 4);";
 				} else {
 					echo '<span class="danger">Une remise existe déjà côté Bimp</span>';
 				}
+			}
+		}
+		break;
+
+	case 'purge_doublon_rdc' :
+
+		if ( ! GETPOSTISSET('run') ) 		exit('&run=1&debug=1');
+		if ( ! GETPOSTISSET('debug') )	exit('&run=1&debug=1') ;
+		$run = GETPOST('run', 'int');
+		$debug = GETPOST('debug', 'int');
+		$rowid = GETPOST('rowid', 'int');
+
+		$sql = "SELECT UNIQUE(s.rowid) FROM llx_societe s INNER JOIN llx_socpeople p WHERE s.shopid AND s.rowid = p.fk_soc";	// AND s.rowid in(33120, 33193)";
+		if ($rowid > 0) $sql .= " AND s.rowid = " . $rowid;
+		$query = $db->query($sql);
+		while ($soc = $db->fetch_object($query)) {
+			$contacts = array();
+			$sql = 'SELECT rowid, lastname, firstname, email, poste FROM llx_socpeople p WHERE p.fk_soc = ' . $soc->rowid;
+			$q_people = $db->query($sql);
+			if ($q_people->num_rows < 2) {
+				continue;
+			}
+			while ($contact = $db->fetch_object($q_people)) {
+//				echo $soc->rowid . ' // ' . $contact->rowid . ' ' . $contact->lastname . ' ' . $contact->firstname . ' ' . $contact->email . ' ' . $contact->poste . '<br>';
+				$contacts[] = $contact;
+			}
+
+			$contactsSains = array(
+				'lastname' => array(),
+				'firstname' => array(),
+				'email' => array(),
+				'poste' => array(),
+			);
+			$contactsSainsControl = array();
+			$contactsDoublon = array();
+
+			foreach ($contacts as $contact) {
+//				echo '<pre>' . print_r($contact, true) . '</pre>';
+				// ce contact est il dans contacts sains
+				if(
+					in_array($contact->lastname, $contactsSains['lastname']) &&
+					in_array($contact->firstname, $contactsSains['firstname']) &&
+					in_array($contact->email, $contactsSains['email']) &&
+					in_array($contact->poste, $contactsSains['poste'])
+				)	{
+					// non, alors il est double, il faut trouver l'id dans les sains qui correspond
+					// pour cela, faire un boucle sur $contactsSainsControl
+					$idSain = 0;
+					foreach ($contactsSainsControl as $id => $control) {
+						if($control['lastname'] == $contact->lastname
+						&& $control['firstname'] == $contact->firstname
+						&& $control['email'] == $contact->email
+						&& $control['poste'] == $contact->poste) $idSain = $id;
+					}
+
+					// puis le mettre dans les Doublon
+					$contactsDoublon[$idSain][] = $contact->rowid;
+//					$contactsDoublon[$idSain]['rowid'][] = $contact->rowid;
+//					$contactsDoublon[$idSain]['lastname'][] = $contact->lastname;
+//					$contactsDoublon[$idSain]['firstname'][] = $contact->firstname;
+//					$contactsDoublon[$idSain]['email'][] = $contact->email;
+//					$contactsDoublon[$idSain]['poste'][] = $contact->poste;
+				}
+				else {
+					$contactsSains['lastname'][$contact->rowid] = $contact->lastname;
+					$contactsSains['firstname'][$contact->rowid] = $contact->firstname;
+					$contactsSains['email'][$contact->rowid] = $contact->email;
+					$contactsSains['poste'][$contact->rowid] = $contact->poste;
+					$contactsSainsControl[$contact->rowid]['lastname'] = $contact->lastname;
+					$contactsSainsControl[$contact->rowid]['firstname'] = $contact->firstname;
+					$contactsSainsControl[$contact->rowid]['email'] = $contact->email;
+					$contactsSainsControl[$contact->rowid]['poste'] = $contact->poste;
+				}
+			}
+			if(count($contactsDoublon) && $run) {
+				echo '<hr>';
+//				echo '<pre>' . print_r($contactsSainsControl, true) . '</pre>';
+//				var_dump(count($contactsDoublon)); 	echo '==><pre>' . print_r($contactsDoublon, true) . '</pre>';
+				foreach ($contactsDoublon as $indexConserve => $item) {
+					foreach ($item as $indexSupp) {
+						echo '<p>Je supp ' .$indexSupp. ' au profit de ' . $indexConserve .'</p>';
+						if (!$indexConserve) continue;
+						// update ActionComm
+						$sql = "UPDATE llx_actioncomm SET fk_contact = " . $indexConserve . " WHERE fk_contact = " . $indexSupp;
+						if ($debug) echo $sql . ';<br>';
+						else $db->query($sql);
+
+						// update llx_c_type_contact
+						$sql = "UPDATE llx_element_contact ec
+									INNER JOIN llx_c_type_contact tc on tc.rowid = ec.fk_c_type_contact AND tc.source = 'external'
+									SET ec.fk_socpeople = " . $indexConserve . "
+									WHERE ec.fk_socpeople = " . $indexSupp;
+						if ($debug) echo $sql . ';<br>';
+						else $db->query($sql);
+
+						// delete socpeople
+						$sql = "DELETE FROM llx_socpeople WHERE rowid = " . $indexSupp;
+						if ($debug) echo $sql . ';<br>';
+						else $db->query($sql);
+					}
+				}
+			}
+			if($debug) exit('fin debug');
+		}
+		break;
+
+	case 'purge_undefined':
+		// lister les tickets
+		$sql = 'SELECT rowid FROM llx_ticket WHERE 1'; // a la fin elever le where
+		$req = $db->query($sql);
+		while ($row = $db->fetch_object($req)) {
+			$rowid = $row->rowid;
+			$bimpT = BimpCache::getBimpObjectInstance('bimpticket', 'Bimp_Ticket', $rowid);
+			$folder = $bimpT->getFilesDir();
+			$scan = scandir($folder);
+			foreach ($scan as $file) {
+				if ($file != '.' && $file != '..' && is_file($folder . $file)) {
+					if ($file === "undefined") {
+						unlink($folder . $file);
+						var_dump($bimpT->getData('ref'), $bimpT->id);
+						echo '<br>';
+					}
+				}
+			}
+		}
+		echo '<hr>============<hr>';
+		$sql = 'SELECT id, file_name, id_parent FROM llx_bimpcore_file WHERE file_name LIKE "undefined%"';
+		$req = $db->query($sql);
+		while ($row = $db->fetch_object($req)) {
+			if($row->file_name == 'undefined' || preg_match('/^undefined_\d+_deleted$/', $row->file_name)) {
+				var_dump($row->id, $row->file_name, $row->id_parent);
+				echo '<br>';
+				$sql = 'DELETE FROM llx_bimpcore_file WHERE id = ' . $row->id;
+				$db->query($sql);
 			}
 		}
 		break;

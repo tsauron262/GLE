@@ -1879,6 +1879,21 @@ class ObjectLine extends BimpObject
 		return $serials;
 	}
 
+	public function getListExtraBulkActions()
+	{
+		$actions = array();
+		if ($this->module == 'bimpcommercial' && $this->object_name == 'Bimp_PropalLine') {
+			$actions[] = array(
+				'label'   => 'Copier ou déplacer vers un autre devis',
+				'icon'    => 'fas_angle-right',
+				'onclick' => $this->getJsBulkActionOnclick('duplicateMoveOtherPropal', array(), array(
+					'form_name'     => 'duplicateMoveOtherPropal'
+				))
+			);
+		}
+
+		return $actions;
+	}
 	// Affichages:
 
 	public function displayLineData($field, $edit = 0, $display_name = 'default', $no_html = false)
@@ -5251,6 +5266,115 @@ class ObjectLine extends BimpObject
 			'errors'   => $errors,
 			'warnings' => $warnings
 		);
+	}
+
+	public function actionDuplicateMoveOtherPropal($data, &$success)
+	{
+		$errors = array();
+		$warnings = array();
+		$success = 'Lignes XXX avec succès';
+
+		if ($data['type_action'] == 0)
+			$errors[] = 'Souhaitez-vous copier ou déplacer les lignes';
+		elseif ($data['devis_cible'] == 0)
+			$errors[] = 'Merci de sélectionner un devis cible';
+
+		if (!$errors)	{
+			$type_action = $data['type_action'];
+			$devis_cible = BimpCache::getBimpObjectInstance($this->module, 'Bimp_Propal', $data['devis_cible']);
+			$devis_source = BimpCache::getBimpObjectInstance($this->module, 'Bimp_Propal', BimpTools::getPostFieldValue('id',0,'int'));
+			if (BimpObject::objectLoaded($devis_cible) && BimpObject::objectLoaded($devis_source)) {
+				foreach ($data['id_objects'] as $id_object) {
+					$propal_line = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_object);
+					if($type_action == 1)	{
+						// copie
+						$success = str_replace('XXX', 'copiées', $success);
+						$propal_line->set('id_obj', $data['devis_cible']);
+						$propal_line->set('id_line', 0);
+						$propal_line->set('position', 0);
+						$err = $propal_line->create($warnings, true);
+						if($err)	$errors[] = implode('<br>', $err);
+					}
+					elseif ($type_action == 2)	{
+						$new_propal_line = clone $propal_line;
+						$new_propal_line->set('id_obj', $data['devis_cible']);
+						$new_propal_line->set('id_line', 0);
+						$new_propal_line->set('position', 0);
+						$err = $new_propal_line->create($warnings, true);
+						if($err)	$errors[] = implode('<br>', $err);
+						$err = $propal_line->delete($warnings, true);
+						if($err)	$errors[] = implode('<br>', $err);
+					}
+				}
+				if(!$errors)	{
+					$successMarge = '';
+					$err = $devis_cible->checkMarge( $successMarge);
+					if($err)	$errors[] = implode('<br>', $err);
+					if ($type_action == 2) {
+						$err = $devis_source->checkMarge($successMarge);
+						if($err)	$errors[] = implode('<br>', $err);
+					}
+					$success .= '<br>' . $successMarge;
+				}
+				if (!$errors)	{
+					$successPDF = "";
+					$err = $devis_cible->actionGeneratePdf(array('no_success_callback' => 1), $successPDF, $errors, $warnings);
+
+					if ($type_action == 2) {
+						$err = $devis_source->actionGeneratePdf(array('no_success_callback' => 1), $successPDF, $errors, $warnings);
+						if($err['errors'])	$errors[] = implode('<br>', $err['errors']);
+					}
+					$success .= '<br>' . $successPDF;
+				}
+			}
+		}
+//		$errors[] = '<pre>' . print_r($data, true) . '</pre>';
+//		$errors[] = '<pre>' . print_r($propal_line, true) . '</pre>';
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
+	public function getDevisCibles()
+	{
+		$options = array();
+
+		$where = 'p.fk_statut = 0';
+		if($thisPropalId = BimpTools::getPostFieldValue('id', 0, 'int'))
+			$where .= ' AND p.rowid != ' . $thisPropalId;
+		$lines = $this->db->getRows('propal p', $where, null, 'object',
+			array('p.rowid', 'p.ref', 'pe.libelle'), 'datec', 'DESC',
+			array(
+				'pe' => array('table'=>'propal_extrafields', 'on'=>'pe.fk_object = p.rowid')
+			)
+		);
+		foreach ($lines as $line) {
+			$options[$line->rowid] = $line->ref . " " . $line->libelle;
+		}
+
+		return $options;
+	}
+
+	public function get_options_type_action()
+	{
+		$id = BimpTools::getPostFieldValue('id', 0, 'int');
+		$array = array();
+		if ($id)	{
+			$array = array(
+				1 => 'Copier'
+			);
+			$propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id);
+			if (BimpObject::objectLoaded($propal)) {
+				if ($propal->getData('fk_statut') == 0)	{
+					$array[0] = '';
+					$array[2] = 'Déplacer';
+				}
+			}
+		}
+		ksort($array);
+		return $array;
 	}
 
 	// Overrides:

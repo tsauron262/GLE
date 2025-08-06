@@ -7,8 +7,8 @@
             <data name="repairType" required="1" values="repair_types" default="CIN">
                 <label>Type de réparation</label>
             </data>
-            <data name="coverageOption" required="0" edit="0"></data>
-            <data name="consumerLaw" required="0" edit="0"></data>
+            <data name="coverageOption" required="0" edit="1"></data>
+            <data name="consumerLaw" required="0" edit="1"></data>
             
             <data name="questions" donotprocess="1"></data>
             

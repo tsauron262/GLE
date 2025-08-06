@@ -38,7 +38,7 @@ class devController extends BimpController
 
 		$html .= '<div class="container-fluid">';
 
-		// ToolsBar:
+		// Tools  Bar:
 		$html .= '<div class="buttonsContainer align-left" style="padding-bottom: 15px; margin-bottom: 15px; border-bottom: 1px solid #000000">';
 //        if (BimpCore::isModuleActive('bimpapple')) {
 //            $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/synopsistools/phantomApple.php" target="_blank">';
@@ -79,6 +79,10 @@ class devController extends BimpController
 		$bimpObject = BimpObject::getInstance('bimpcore', 'BimpObject');
 		$html .= '<span class="btn btn-default" onclick="' . $bimpObject->getJsActionOnclick('eraseCache') . '">';
 		$html .= BimpRender::renderIcon('fas_eraser', 'iconLeft') . 'Vider le cache serveur';
+		$html .= '</span>';
+
+		$html .= '<span class="btn btn-default" onclick="' . $bimpObject->getJsActionOnclick('deleteBlockedFile') . '">';
+		$html .= BimpRender::renderIcon('fas_eraser', 'iconLeft') . 'Supprimer blockage file';
 		$html .= '</span>';
 
 		if (!BimpCore::isModeDev()) {
@@ -429,6 +433,27 @@ class devController extends BimpController
 		} else {
 			$html .= BimpRender::renderAlerts('Quelque chose n\'est pas en place');
 		}
+		return $html;
+	}
+
+	public function renderInjectionsTab()
+	{
+		$html = '';
+
+		if (file_exists(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt')) {
+			$html .= '<div class="buttonsContainer align-right">';
+			$html .= '<span class="btn btn-danger" onclick="BimpAjax(\'deleteInjectionsLogFile\', {}, null, {})">';
+			$html .= BimpRender::renderIcon('fas_trash', 'iconLeft') . 'Supprimer le fichier de log';
+			$html .= '</span>';
+			$html .= '</div>';
+
+			$html .= '<div style="margin-top: 30px">';
+			$html .= file_get_contents(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt');
+			$html .= '</div>';
+		} else {
+			$html .= BimpRender::renderAlerts('Fichier de log absent', 'danger');
+		}
+
 		return $html;
 	}
 
@@ -800,6 +825,26 @@ class devController extends BimpController
 	{
 		$success = '';
 		$errors = BimpCore::afterGitPullProcess(true, $success);
+		return array(
+			'errors'     => $errors,
+			'success'    => $success,
+			'warnings'   => array(),
+			'request_id' => BimpTools::getValue('request_id', 0, 'int')
+		);
+	}
+
+	public function ajaxProcessDeleteInjectionsLogFile()
+	{
+		$success = '';
+
+		if (file_exists(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt')) {
+			if (unlink(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt')) {
+				$success = 'Fichier de log supprimé avec succès';
+			} else {
+				$errors[] = 'Echec de la suppression du fichier';
+			}
+		}
+
 		return array(
 			'errors'     => $errors,
 			'success'    => $success,

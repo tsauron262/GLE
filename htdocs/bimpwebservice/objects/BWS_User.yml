@@ -70,6 +70,19 @@ fields:
         type: bool
         default_value: 1
         
+    check_ip: 
+        label: Vérifier adresse IP
+        type: bool
+        default_value: 0
+        
+    allowed_ip: 
+        label: IP autorisée(s)
+        type: items_list
+        items_data_type: string
+        display_if: 
+            field_name: check_ip
+            show_values: 1
+        
 forms: 
     default: 
         rows: 
@@ -78,6 +91,8 @@ forms:
             - field: profiles
             - field: id_user
             - field: active
+            - field: check_ip
+            - field: allowed_ip
             
     testReq:
         rows_callback: getfields
@@ -150,6 +165,8 @@ fields_tables:
             - field: email
             - field: profiles
             - field: id_user
+            - field: check_ip
+            - field: allowed_ip
             
 views: 
     default: 
@@ -201,6 +218,9 @@ lists:
             email: 
             profiles: 
             id_user: 
-            user_erp_used: 
+            user_erp_used:
+            check_ip:
+                edit: 1
+            allowed_ip: 
             active:
                 edit: 1

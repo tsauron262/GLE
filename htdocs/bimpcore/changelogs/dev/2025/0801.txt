@@ -1,0 +1,1 @@
+isset($dataSecteur[$this->getSecteur()]['fk_bank_account_def'] .... au lieu de isset($dataSecteur[$this->getSecteur()]['id_default_bank_account']) dans la function getDefaultBankAccount()

@@ -121,7 +121,7 @@ fields:
         type: qty
         unsigned: 0
     fk_categorie_maitre:
-        label: Catégorie Maitre
+        label: Catégorie maître
         type: items_list
         values:
             dict: societe_rdc_cat_maitre
@@ -397,15 +397,15 @@ forms:
     
     
     formActionRdc:
-        title: Choisir une action
+        title: Changer le statut d'un marchand
         rows:
             -   custom: 1
-                label: Actions
+                label: Nouveau statut
                 input_name: status
                 input:
                     type: select
                     options:
-                        callback: getListButtons
+                        callback : getSelectStatusArray
             -   field: commentaire_statut_ko
                 display_if:
                     field_name: status
@@ -444,6 +444,7 @@ lists:
     rdc:
         configurable: 1
         checkboxes: 1
+        allow_csv_imports: 1
         title: Liste des Marchands
         filters_panel: default
         bulk_actions:

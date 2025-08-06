@@ -272,6 +272,58 @@ fields:
             help: Les utilisateurs sélectionnés aurons accès à vos messages et à vos tâches
         
 forms:
+    create_user:
+        title: Ajouter l'utilisateur séléctionné
+        rows:
+            employee:
+                field: employee
+                value: 1
+                hidden: 1
+            login:
+                field: login
+                edit: 0
+            lastname:
+                field: lastname
+            firstname: 
+                field: firstname
+            job:
+                field: job
+            office_phone:
+                field: office_phone
+            email:
+                field: email
+            user_mobile:
+                field: user_mobile
+            phone_perso:
+                field: phone_perso
+            mail_sec:
+                field: mail_sec
+            alias:
+                field: alias
+#            synchaction:
+#                field: synchaction
+#            apple_id:
+#                field: apple_id
+#            apple_service:
+#                field: apple_service
+            signature:
+                field: signature
+            
+
+    select_user:
+        rows:
+            selectLdap:
+                label: Choix de l'utilisateur
+                custom: 1
+                input_name: selecteduser
+                data_type: text
+                input:
+                    type: select
+                    options: 
+                        callback: 
+                            method: getUsersLdap
+                            params:
+                                - true
     light: 
         rows:
             - field: lastname

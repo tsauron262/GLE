@@ -225,6 +225,7 @@ class BimpComm extends BimpDolObject
 
 		switch ($field) {
 			case 'replaced_ref':
+			case 'fk_mode_reglement':
 				return 1;
 
 			case 'fk_soc':
@@ -2276,14 +2277,16 @@ class BimpComm extends BimpDolObject
 	// Rendus HTML:
 
 
-	public function renderTotals(){
+	public function renderTotals()
+	{
 		$html = '';
 		$bcFieldsTable = new BC_FieldsTable($this, 'totals');
 		$html .= $bcFieldsTable->renderHtml();
 		return $html;
 	}
 
-	public function getClientFinal(){
+	public function getClientFinal()
+	{
 		if (is_a($this, 'Bimp_Facture') && $this->field_exists('id_client_final') && (int) $this->getData('id_client_final')) {
 			$client = $this->getChildObject('client_final');
 			return $client;
@@ -2829,11 +2832,13 @@ class BimpComm extends BimpDolObject
 							'icon_before' => 'plus-circle',
 							'classes'     => array('btn', 'btn-default'),
 							'attr'        => array(
-								'onclick' => $actioncom->getJsLoadModalForm('add', 'Nouvelle événement', array('fields' => array(
-								    'fk_element' => $this->id,
-									'elementtype' => $this->getEventElement(),
-									'fk_soc'	 => (int) $this->getData('fk_soc'),
-								)))//'window.location = \'' . $href . '\''
+								'onclick' => $actioncom->getJsLoadModalForm('add', 'Nouvelle événement', array(
+									'fields' => array(
+										'fk_element'  => $this->id,
+										'elementtype' => $this->getEventElement(),
+										'fk_soc'      => (int) $this->getData('fk_soc'),
+									)
+								))//'window.location = \'' . $href . '\''
 							)
 						)
 					)
@@ -3271,18 +3276,19 @@ class BimpComm extends BimpDolObject
 			$this->fetch($new_object->id);
 		}
 
-		if(isset($new_data['validate']) && $new_data['validate']){
+		if (isset($new_data['validate']) && $new_data['validate']) {
 			$inut = array();
 			$inut2 = '';
 			$return = $this->actionValidate($inut, $inut2);
 			$warnings = BimpTools::merge_array($warnings, $return['warnings']);
 			$errors = BimpTools::merge_array($errors, $return['errors']);
-			if(!count($errors)){
-				if(isset($new_data['addPaiement']) && $new_data['addPaiement']){
-					if(method_exists($this, 'quickPaiement'))
+			if (!count($errors)) {
+				if (isset($new_data['addPaiement']) && $new_data['addPaiement']) {
+					if (method_exists($this, 'quickPaiement')) {
 						$this->quickPaiement($errors, $warnings);
-					else
+					} else {
 						$errors[] = 'Pas de gestion rapide des paiements';
+					}
 				}
 			}
 		}

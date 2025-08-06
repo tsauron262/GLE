@@ -266,7 +266,8 @@ fields:
         dol_extra_field: 1
         type: int
         values: 
-            array: expertise
+            dict: expertises
+#            array: expertise
             
     rib_client: 
         label: RIB client (pour prélèvements)

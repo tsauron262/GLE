@@ -56,6 +56,10 @@ fields:
                 hide_values: ''
             obj_name: 
                 hide_values: ''
+    log_requests:
+        label: Logguer toutes les requêtes
+        type: bool
+        default_value: 0
                 
 forms: 
     default: 
@@ -70,6 +74,8 @@ forms:
                 field: obj_name
             obj_filters: 
                 field: obj_filters
+            log_requests: 
+                field: log_requests
         
     profile: 
         extends: default
@@ -141,6 +147,8 @@ lists:
             obj_module: 
             obj_name:
             obj_filters:
+            log_requests: 
+                edit: 1
                 
     profile: 
         extends: default

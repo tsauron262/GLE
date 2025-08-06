@@ -86,13 +86,13 @@ class BC_Field extends BimpComponent
 			'field_path_object' => array('default' => '')
 		),
 		'text'           => array(
-			'hashtags'   => array('data_type' => 'bool', 'default' => 0),
-			'field_path' => array('data_type' => 'bool', 'default' => 0),
+			'hashtags'          => array('data_type' => 'bool', 'default' => 0),
+			'field_path'        => array('data_type' => 'bool', 'default' => 0),
 			'field_path_object' => array('default' => '')
 		),
 		'html'           => array(
-			'hashtags'   => array('data_type' => 'bool', 'default' => 0),
-			'field_path' => array('data_type' => 'bool', 'default' => 0),
+			'hashtags'          => array('data_type' => 'bool', 'default' => 0),
+			'field_path'        => array('data_type' => 'bool', 'default' => 0),
 			'field_path_object' => array('default' => '')
 		),
 		'object_filters' => array(
@@ -136,6 +136,7 @@ class BC_Field extends BimpComponent
 		$this->params_def['next_sort_way'] = array('default' => 'asc');
 		$this->params_def['depends_on'] = array('data_type' => 'array', 'compile' => true);
 		$this->params_def['keep_new_value'] = array('data_type' => 'bool', 'default' => 0);
+		$this->params_def['reload_now'] = array('data_type' => 'bool', 'default' => 1);
 		$this->params_def['values'] = array('data_type' => 'array', 'compile' => true);
 		$this->params_def['display_if'] = array('data_type' => 'array', 'compile' => true);
 		$this->params_def['history'] = array('data_type' => 'bool', 'default' => 0);
@@ -704,10 +705,10 @@ class BC_Field extends BimpComponent
 
 	public function renderDependsOnScript($form_identifier, $force_keep_new_value = false)
 	{
-		return self::renderDependsOnScriptStatic($this->object, $form_identifier, $this->name, $this->params['depends_on'], $this->name_prefix, ($force_keep_new_value ? 1 : (int) $this->params['keep_new_value']));
+		return self::renderDependsOnScriptStatic($this->object, $form_identifier, $this->name, $this->params['depends_on'], $this->name_prefix, ($force_keep_new_value ? 1 : (int) $this->params['keep_new_value']), (int) $this->params['reload_now']);
 	}
 
-	public static function renderDependsOnScriptStatic(BimpObject $object, $form_identifier, $field_name, $depends_on, $name_prefix = '', $keep_new_value = 1)
+	public static function renderDependsOnScriptStatic(BimpObject $object, $form_identifier, $field_name, $depends_on, $name_prefix = '', $keep_new_value = 1, $reload_now = 1)
 	{
 		$script = '';
 		if (!is_null($depends_on) && $depends_on) {
@@ -724,12 +725,11 @@ class BC_Field extends BimpComponent
 					$script .= '  var data = {};' . "\n";
 					$script .= '  var $form = $(\'#' . $form_identifier . '\');';
 					foreach ($dependances as $dep) {
-						$script .= '  if ($form.find(\'[name=' . $name_prefix . $dep . ']\').length) {' . "\n";
-						$script .= '      data[\'' . $dep . '\'] = getFieldValue($form, \'' . $name_prefix . $dep . '\');' . "\n";
-						$script .= '  }' . "\n";
+						$script .= 'var dep_val = getFieldValue($form, \'' . $name_prefix . $dep . '\');';
+						$script .= 'if (typeof(dep_val) !== \'undefined\') {data[\'' . $dep . '\'] = dep_val;}';
 					}
 					$script .= '  reloadObjectInput(\'' . $form_identifier . '\', \'' . $name_prefix . $field_name . '\', data, ' . $keep_new_value . ');' . "\n";
-					$script .= '});' . "\n";
+					$script .= '}, ' . (int) $reload_now . ');' . "\n";
 				}
 				$script .= '</script>' . "\n";
 			}
@@ -1379,7 +1379,7 @@ class BC_Field extends BimpComponent
 						break;
 
 					case 'json':
-						$value = BimpRender::renderRecursiveArrayContent($this->value, array('no_html'=>1));
+						$value = BimpRender::renderRecursiveArrayContent($this->value, array('no_html' => 1));
 						break;
 
 					default:

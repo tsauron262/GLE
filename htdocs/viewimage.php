@@ -245,7 +245,53 @@ if ($refname == 'thumbs') {
 
 // Check that file is allowed for view with viewimage.php
 if (!empty($original_file) && !dolIsAllowedForPreview($original_file)) {
-	httponly_accessforbidden('This file extension is not qualified for preview', 403);
+	/*moddrsi (20.2) permettre le téléchargement de fichier office*/
+	$ch = $conf->medias->multidir_output[$entity];
+	$fileList = scandir($ch);
+	$original_file = urlencode($original_file);
+	$trouve = false;
+	foreach ($fileList as $file) {
+		if ($file == '.' || $file == '..') continue;
+		if ($file == $original_file) {
+			$trouve = true;
+		}
+	}
+	if ($trouve) {
+		$original_file = $ch . '/' . $original_file;
+		if (file_exists($original_file)) {
+			$filename = basename($original_file);
+			$mime_types = [
+				'doc'  => 'application/msword',
+				'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+				'xls'  => 'application/vnd.ms-excel',
+				'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+				'ppt'  => 'application/vnd.ms-powerpoint',
+				'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+			];
+			$extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+			$mime_type = isset($mime_types[$extension]) ? $mime_types[$extension] : 'application/octet-stream';
+
+			// Envoie des en-têtes pour le téléchargement
+			header('Content-Description: File Transfer');
+			header('Content-Type: ' . $mime_type);
+			header('Content-Disposition: attachment; filename="' . urldecode($filename) . '"');
+			header('Content-Transfer-Encoding: binary');
+			header('Expires: 0');
+			header('Cache-Control: must-revalidate');
+			header('Pragma: public');
+			header('Content-Length: ' . filesize($original_file));
+
+			// Nettoie la mémoire tampon de sortie
+			ob_clean();
+			flush();
+
+			// Lit et affiche le fichier
+			readfile($original_file);
+			exit;
+		}
+	}
+	else /*fmoddrsi*/
+		httponly_accessforbidden('This file extension is not qualified for preview', 403);
 }
 
 // Security check

@@ -1,398 +1,407 @@
-categories: 
-    pdfs: 
+categories:
+    pdfs:
         label: PDFs
-    relances: 
+    relances:
         label: Relances clients
-    signatures: 
+    signatures:
         label: Signatures
-    rappels: 
+    rappels:
         label: Envoi rappels
-    locations: 
+    locations:
         label: Demandes de location
-        
-params: 
-    use_lock_num: 
+
+params:
+    use_lock_num:
         label: Utiliser le lock pour les références des pièces commerciales
         type: bool
         def: 1
-        
-    date_debut_exercice: 
+    
+    date_debut_exercice:
         label: Date début exercice
         def: 2020-04-01
-        
-    use_tx_marque: 
+    
+    use_tx_marque:
         label: Utiliser taux de marque
         info: 'NON: Taux de marge utilisé'
         type: bool
         def: 1
-        
-    typent_required: 
+    
+    typent_required:
         label: Type du client obligatoire pour la validation des pièces
         type: bool
-        def:  0
+        def: 0
     
-    commande_required_for_factures: 
+    commande_required_for_factures:
         label: Commande obligatoire pour les factures
         type: bool
         def: 0
-                  
-    use_marge_in_parent_bimpcomm: 
+    
+    use_marge_in_parent_bimpcomm:
         label: Enregistrer les marges totales dans les pièces commerciales
         type: bool
         def: 0
         info: Active le champ "marge" pour tous les BimpComm
-        
-    use_statut_export: 
+    
+    use_statut_export:
         label: Enregistrer le statut d'export
         type: bool
         def: 0
         info: Active les champs "statut_export" et "douane_number" pour tous les BimpComm
-        
-    solvabilite_validation_emails: 
+    
+    solvabilite_validation_emails:
         label: Adresse e-mail pour demandes de validation d'une pièce pour les clients non solvables
         help: Laisser vide pour désactiver vérification de la solvabilité des clients lors de la validation des pièces
         def: ''
-        
-    max_rtp_for_classify_paid: 
+    
+    max_rtp_for_classify_paid:
         label: Reste à payer maximum pour classer payées les factures
-        info: Les factures dont le reste à payer est inférieur au montant indiqué seront classées payées. 
+        info: Les factures dont le reste à payer est inférieur au montant indiqué seront classées payées.
         def: 0.01
         help: Indiquer une valeur numérique décimale
-        
+    
     tva_tx_for_acomptes:
         label: Taux de TVA pour les acomptes
         help: En pourcentage
         def: 0
-        
-    user_as_default_commercial: 
+    
+    user_as_default_commercial:
         label: Définir utilisateur connecté comme commercial par défaut des pièces
         warning: Seulement pour les pièces n'ayant aucun commercial attribué
         type: bool
         def: 1
-        
-    contact_facturation_required_for_commandes: 
+    
+    contact_facturation_required_for_commandes:
         label: Contact facturation obligatoire pour les commandes
         type: bool
-        def: 0        
-        
-    use_free_objectline: 
+        def: 0
+    
+    use_free_objectline:
         label: Autoriser les lignes libres dans les pièces
         info: Pour les utilisateurs seulement, les lignes libres peuvent toujours être ajoutées en PHP
         type: bool
         def: 0
-        
-    use_link_achat_fourn_equipment: 
+    
+    use_link_achat_fourn_equipment:
         label: Equipements sélectionnables à la création des commandes fournisseur
         type: bool
         def: 0
-        
-    use_bds_for_receptions: 
+    
+    use_bds_for_receptions:
         label: Utiliser bimpdatasync pour la validation des réceptions
         type: bool
         def: 0
-        
-    use_logistique_periodicity: 
+    
+    use_logistique_periodicity:
         label: Activer les opérations logistiques périodiques
         info: Achat / livraison / facturation périodiques
         type: bool
         def: 1
-        
-    rib_client_required_modes_paiement: 
+    
+    rib_client_required_modes_paiement:
         label: Modes de paiements pour lesquels le RIB client est obligatoire
-        info: Liste d'IDs des modes de paiement séparés par une virgule sans espaces. 
+        info: Liste d'IDs des modes de paiement séparés par une virgule sans espaces.
         def: ''
-        
+    
     entrepots_ld:
         label: Entrepots en livraison direct
         info: Tableau json de type [1,2]
-        
-    id_resp_validation_avoir_commercial: 
+    
+    id_resp_validation_avoir_commercial:
         label: Id du responsable des avoirs commerciaux
         def: 62
-        
-    id_resp_validation_avoir_education: 
+    
+    id_resp_validation_avoir_education:
         label: Id du responsable des avoirs éducation
         def: 201
-        
-    extra_emails_from: 
+    
+    extra_emails_from:
         label: Adresse e-mails supplémentaires pour l'émetteur des envois d'e-mail des pièces commerciales.
-        info: Séparer chaque adresse e-mail par une virgule sans espace. 
+        info: Séparer chaque adresse e-mail par une virgule sans espace.
         def: ''
-        
+    
     check_factures_amounts_modif_rights:
         label: Vérifier les droits de modification des montants des factures
         type: bool
         def: 0
-        
+    
     # PDFs: 
-    pdf_headers_entrepot_address: 
+    pdf_headers_entrepot_address:
         label: Afficher l'adresse de l'entrepôt dans l'en-tête des PDF
         cat: pdfs
         type: bool
         def: 0
-        
-    pdf_add_cgv: 
+    
+    pdf_add_cgv:
         label: Ajouter CGV dans les docs PDF
         cat: pdfs
         type: bool
         def: 0
-    pdf_pu_nb_decimales: 
+    pdf_pu_nb_decimales:
         label: Nombre max de décimales sur les PDF pour les PU
         cat: pdfs
         def: 2
-    pdf_total_nb_decimales: 
+    pdf_total_nb_decimales:
         label: Nombre max de décimales sur les PDF pour les totaux
         cat: pdfs
         def: 2
-    new_bank_account_date: 
+    new_bank_account_date:
         label: Date d'enregistrement du compte bancaire actuel
         cat: pdfs
         info: 'Si renseignée, affiche la mention: <br/> "Attention: NOS COORDONNEES BANCAIRES depuis le [Date]" sur les PDF des pièces'
-    allow_pdf_regeneration_after_validation: 
+    allow_pdf_regeneration_after_validation:
         label: Autoriser la régénération des pdf des pièces après validation
         cat: pdfs
         type: bool
         def: 1
-    propal_pdf_chorus_mention: 
+    propal_pdf_chorus_mention:
         label: Mention Chorus dans le PDF des propales
         cat: pdfs
         type: bool
         def: 0
         info: 'Ajoute la mention "NB : les administrations publiques doivent obligatoirement fournir les informations nécessaires au dépôt de la facture <br/>sur le portail Chorus"'
-    sepa_date_prelevement: 
+    sepa_date_prelevement:
         label: Mention "Date de prélèvement" dans les mandats SEPA
         info: Si plusieurs valeurs possibles, séparer par une virgule
         def: 30 jours net date de facture
     
     # Relances: 
-    use_relances_paiements_clients: 
+    use_relances_paiements_clients:
         label: Relances de paiement activées
         cat: relances
         type: bool
         def: 0
         info: Active les relances et les champs "statut_relance" et "nb_relance" pour les factures
-        sub_params: 
-            - if: 1
-              params: 
-                  email_for_relances_deactivated_notification: 
-                      label: Adresse e-mail pour la notification des relances désactivées
-                  default_relance_paiements_delay_days: 
-                      label: Délai par défaut pour déclencher les relances
-                      help: en nombre de jours
-                      info: Délai à partir de la date d'échéance des factures. 
-                      def: 15
-                  relance_paiements_globale_date_lim: 
-                      label: Date limite pour les relances globales
-                      info: Date des factures à partir de laquelle les relances doivent être effectuées
-                  relance_paiements_id_bank_account: 
-                      label: ID Compte bancaire pour les relances de paiements
-                  relance_paiements_extented_delay_type_ent: 
-                      label: ID des types clients disposant d'un délai supplémentaire pour les relances
-                  relance_paiements_globale_excluded_modes_reglement: 
-                      label: ID modes de réglement exclus des relances globales
-                      info: Si plusieurs, séparer par une virgule
-                  relances_clients_entrepots_speciaux: 
-                      label: ID Entrepôts spéciaux pour les relances
-                      info: Liste des entrepôts à relancer séparément lors des relances globales
-                  nb_relances_mise_en_demeure: 
-                      label: Nombre de relances d'une facture pour la mise au statut "Mise en demeure" du client
-                      info: entier de 1 à 4
-                      def: 4
-                    
-    # Signatures: 
+        sub_params:
+            -   if: 1
+                params:
+                    email_for_relances_deactivated_notification:
+                        label: Adresse e-mail pour la notification des relances désactivées
+                    default_relance_paiements_delay_days:
+                        label: Délai par défaut pour déclencher les relances
+                        help: en nombre de jours
+                        info: Délai à partir de la date d'échéance des factures.
+                        def: 15
+                    relance_paiements_globale_date_lim:
+                        label: Date limite pour les relances globales
+                        info: Date des factures à partir de laquelle les relances doivent être effectuées
+                    relance_paiements_id_bank_account:
+                        label: ID Compte bancaire pour les relances de paiements
+                    relance_paiements_extented_delay_type_ent:
+                        label: ID des types clients disposant d'un délai supplémentaire pour les relances
+                    relance_paiements_globale_excluded_modes_reglement:
+                        label: ID modes de réglement exclus des relances globales
+                        info: Si plusieurs, séparer par une virgule
+                    relances_clients_entrepots_speciaux:
+                        label: ID Entrepôts spéciaux pour les relances
+                        info: Liste des entrepôts à relancer séparément lors des relances globales
+                    nb_relances_mise_en_demeure:
+                        label: Nombre de relances d'une facture pour la mise au statut "Mise en demeure" du client
+                        info: entier de 1 à 4
+                        def: 4
         
-    propal_use_signatures: 
+        # Signatures: 
+    
+    propal_use_signatures:
         label: Activer les signatures pour les propales
         type: bool
         cat: signatures
         def: 0
-        sub_params: 
-            - if: 1
-              params: 
-                  propal_signature_required: 
-                      label: Signature des devis obligatoire
-                      type: bool
-                      def: 0
-                  propal_signature_allow_dist: 
-                      label: Autoriser les signatures électroniques à distance pour les devis
-                      type: bool
-                      def: 0
-                  propal_signature_allow_docusign: 
-                      label: Autoriser les signatures DocuSign pour les devis
-                      type: bool
-                      def: 0
-                  propal_signature_allow_refuse: 
-                      label: Autoriser le refus des signatures pour les devis
-                      type: bool
-                      def: 0
-        
-    devis_fin_use_signatures: 
+        sub_params:
+            -   if: 1
+                params:
+                    propal_signature_required:
+                        label: Signature des devis obligatoire
+                        type: bool
+                        def: 0
+                    propal_signature_allow_dist:
+                        label: Autoriser les signatures électroniques à distance pour les devis
+                        type: bool
+                        def: 0
+                    propal_signature_allow_docusign:
+                        label: Autoriser les signatures DocuSign pour les devis
+                        type: bool
+                        def: 0
+                    propal_signature_allow_refuse:
+                        label: Autoriser le refus des signatures pour les devis
+                        type: bool
+                        def: 0
+    
+    devis_fin_use_signatures:
         label: Activer les signatures pour les devis de location
         type: bool
         cat: signatures
         def: 0
-        sub_params: 
-            - if: 1
-              params: 
-                  devis_fin_signature_allow_dist: 
-                      label: Autoriser les signatures électroniques à distance pour les devis de location
-                      type: bool
-                      def: 0
-                  devis_fin_signature_allow_docusign: 
-                      label: Autoriser les signatures DocuSign pour les devis de location
-                      type: bool
-                      def: 0
-                      sub_params: 
-                          - if: 1
-                            params: 
-                                devis_fin_signature_allow_docusign_phone_auth:
-                                    label: Autoriser l'authentification par téléphone
-                                    type: bool
-                                    def: 0
-                  devis_fin_signature_allow_refuse: 
-                      label: Autoriser le refus des signatures pour les devis de location
-                      type: bool
-                      def: 0
-        
-    contrat_fin_use_signatures: 
+        sub_params:
+            -   if: 1
+                params:
+                    devis_fin_signature_allow_dist:
+                        label: Autoriser les signatures électroniques à distance pour les devis de location
+                        type: bool
+                        def: 0
+                    devis_fin_signature_allow_docusign:
+                        label: Autoriser les signatures DocuSign pour les devis de location
+                        type: bool
+                        def: 0
+                        sub_params:
+                            -   if: 1
+                                params:
+                                    devis_fin_signature_allow_docusign_phone_auth:
+                                        label: Autoriser l'authentification par téléphone
+                                        type: bool
+                                        def: 0
+                    devis_fin_signature_allow_refuse:
+                        label: Autoriser le refus des signatures pour les devis de location
+                        type: bool
+                        def: 0
+    
+    contrat_fin_use_signatures:
         label: Activer les signatures pour les contrats de location
         type: bool
         cat: signatures
         def: 0
-        sub_params: 
-            - if: 1
-              params: 
-                  contrat_fin_signature_allow_dist: 
-                      label: Autoriser les signatures électroniques à distance pour les contrats de location
-                      type: bool
-                      def: 0
-                  contrat_fin_signature_allow_docusign: 
-                      label: Autoriser les signatures DocuSign pour les contrats de location
-                      type: bool
-                      def: 0
-                      sub_params: 
-                          - if: 1
-                            params: 
-                                contrat_fin_signature_allow_docusign_phone_auth:
-                                    label: Autoriser l'authentification par téléphone
-                                    type: bool
-                                    def: 0
-                  contrat_fin_signature_allow_refuse: 
-                      label: Autoriser le refus des signatures pour les contrats de location
-                      type: bool
-                      def: 0
-                  
-    pvr_fin_use_signatures: 
+        sub_params:
+            -   if: 1
+                params:
+                    contrat_fin_signature_allow_dist:
+                        label: Autoriser les signatures électroniques à distance pour les contrats de location
+                        type: bool
+                        def: 0
+                    contrat_fin_signature_allow_docusign:
+                        label: Autoriser les signatures DocuSign pour les contrats de location
+                        type: bool
+                        def: 0
+                        sub_params:
+                            -   if: 1
+                                params:
+                                    contrat_fin_signature_allow_docusign_phone_auth:
+                                        label: Autoriser l'authentification par téléphone
+                                        type: bool
+                                        def: 0
+                    contrat_fin_signature_allow_refuse:
+                        label: Autoriser le refus des signatures pour les contrats de location
+                        type: bool
+                        def: 0
+    
+    pvr_fin_use_signatures:
         label: Activer les signatures pour les PV de réception
         type: bool
         cat: signatures
         def: 0
-        sub_params: 
-            - if: 1
-              params: 
-                  pvr_fin_signature_allow_dist: 
-                      label: Autoriser les signatures électroniques à distance pour les PV de réception
-                      type: bool
-                      def: 0
-                  pvr_fin_signature_allow_docusign: 
-                      label: Autoriser les signatures DocuSign pour les PV de réception
-                      type: bool
-                      def: 0
-                      sub_params: 
-                          - if: 1
-                            params: 
-                                pvr_fin_signature_allow_docusign_phone_auth:
-                                    label: Autoriser l'authentification par téléphone
-                                    type: bool
-                                    def: 0
-                  pvr_fin_signature_allow_refuse: 
-                      label: Autoriser le refus des signatures pour les PV de réception
-                      type: bool
-                      def: 0
-        
+        sub_params:
+            -   if: 1
+                params:
+                    pvr_fin_signature_allow_dist:
+                        label: Autoriser les signatures électroniques à distance pour les PV de réception
+                        type: bool
+                        def: 0
+                    pvr_fin_signature_allow_docusign:
+                        label: Autoriser les signatures DocuSign pour les PV de réception
+                        type: bool
+                        def: 0
+                        sub_params:
+                            -   if: 1
+                                params:
+                                    pvr_fin_signature_allow_docusign_phone_auth:
+                                        label: Autoriser l'authentification par téléphone
+                                        type: bool
+                                        def: 0
+                    pvr_fin_signature_allow_refuse:
+                        label: Autoriser le refus des signatures pour les PV de réception
+                        type: bool
+                        def: 0
+    
     # Rappels: 
-    rappels_commandes_brouillons_delay: 
-        label: Délai pour l\'envoi des rappels pour les commandes brouillons
+    rappels_commandes_brouillons_delay:
+        label: Délai pour l'envoi des rappels pour les commandes brouillons
         cat: rappels
-        info: Laisser 0 pour désactiver l\'envoi des rappels
+        info: Laisser 0 pour désactiver l'envoi des rappels
         def: 0
-        
-    rappels_commandes_echeances_delay: 
-        label: Délai pour l\'envoi des rappels pour les produits arrivant à échéances des commandes
+    
+    rappels_commandes_echeances_delay:
+        label: Délai pour l'envoi des rappels pour les produits arrivant à échéances des commandes
         cat: rappels
-        info: Laisser 0 pour désactiver l\'envoi des rappels
+        info: Laisser 0 pour désactiver l'envoi des rappels
         def: 0
-        
-    rappels_factures_brouillons_delay: 
-        label: Délai pour l\'envoi des rappels pour les factures brouillons
+    
+    rappels_commandes_echeances_mode:
+        label: Mode d'envoi des rappels pour les produits arrivant à échéances des commandes
         cat: rappels
-        info: Laisser 0 pour désactiver l\'envoi des rappels
+        type: select
+        values:
+            email: Par E-mail
+            task: Par Tâche
+        def: email
+    
+    rappels_factures_brouillons_delay:
+        label: Délai pour l'envoi des rappels pour les factures brouillons
+        cat: rappels
+        info: Laisser 0 pour désactiver l'envoi des rappels
         def: 0
-        
-    rappels_factures_marges_negatives_email: 
-        label: Adresse(s) e-mail pour l\'envoi des rappels de factures à marge négative
+    
+    rappels_factures_marges_negatives_email:
+        label: Adresse(s) e-mail pour l'envoi des rappels de factures à marge négative
         cat: rappels
-        info: Laisser vide pour désactiver l\'envoi des rappels
+        info: Laisser vide pour désactiver l'envoi des rappels
         def: ''
-        
-    rappels_factures_financement_impayees_delay: 
-        label: Délai pour l\'envoi des rappels pour les factures en financement impayées
+    
+    rappels_factures_financement_impayees_delay:
+        label: Délai pour l'envoi des rappels pour les factures en financement impayées
         cat: rappels
-        info: Laisser 0 pour désactiver l\'envoi des rappels
+        info: Laisser 0 pour désactiver l'envoi des rappels
         def: 0
-        
+    
     rappels_factures_financement_impayees_emails:
-        label: Adresse(s) e-mail pour l\'envoi des rappels pour les factures en financement impayées
+        label: Adresse(s) e-mail pour l'envoi des rappels pour les factures en financement impayées
         cat: rappels
-        info: Laisser vide pour désactiver l\'envoi des rappels
+        info: Laisser vide pour désactiver l'envoi des rappels
         def: ''
-        
+    
     use_multi_onglet:
         label: Utiliser les multi onglet dans les fiches commercial
         def: 1
         type: bool
-        
+    
     # Locations : 
-    allow_df_from_propal: 
+    allow_df_from_propal:
         label: Activer les demandes de location LDLC Pro Lease depuis les devis
         type: bool
         cat: locations
         def: 0
-        sub_params: 
-            - if: 1
-              params: 
-                  allow_df_from_propal_dev_only: 
-                      label: Activer seulement pour les devs
-                      type: bool
-                      def: 0
-        
-    allow_df_from_commande: 
+        sub_params:
+            -   if: 1
+                params:
+                    allow_df_from_propal_dev_only:
+                        label: Activer seulement pour les devs
+                        type: bool
+                        def: 0
+    
+    allow_df_from_commande:
         label: Activer les demandes de location LDLC Pro Lease depuis les commandes
         type: bool
         cat: locations
         def: 0
-        sub_params: 
-            - if: 1
-              params: 
-                  allow_df_from_commande_dev_only: 
-                      label: Activer seulement pour les devs
-                      type: bool
-                      def: 0
-        
-    id_api_webservice_prolease: 
+        sub_params:
+            -   if: 1
+                params:
+                    allow_df_from_commande_dev_only:
+                        label: Activer seulement pour les devs
+                        type: bool
+                        def: 0
+    
+    id_api_webservice_prolease:
         label: ID API Webservice LDLC PRO LEASE
         cat: locations
         def: 0
-        
-    demande_fin_target_prolease_id_client: 
+    
+    demande_fin_target_prolease_id_client:
         label: ID client LDLC Pro Lease
         cat: locations
         def: 0
-        
+    
     use_light_fourn:
         label: Utiliser le formulaire de création simplifié
         def: 0
-        
+    
     client_sans_signature:
         label: Client n'ayant pas besoin de signer
         info: Tableau json de type [1,2]

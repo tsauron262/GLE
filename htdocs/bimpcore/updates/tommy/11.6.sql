@@ -1,4 +1,4 @@
-CREATE TABLE llx_usergroup_revue (
+CREATE TABLE IF NOT EXISTS llx_usergroup_revue (
 	  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	  `id_group` int(10) UNSIGNED NOT NULL DEFAULT '0',
 	  `fk_user` INT NOT NULL DEFAULT '0',
@@ -6,6 +6,7 @@ CREATE TABLE llx_usergroup_revue (
 	  entity INT default 1
 ) ENGINE=InnoDB;
 
+ALTER table llx_usergroup ADD COLUMN IF NOT EXISTS fk_user int DEFAULT 0;
 
 
 INSERT into llx_usergroup_revue (SELECT null, u.rowid,fk_user, data_revue,1 FROM llx_usergroup u, llx_usergroup_extrafields ue WHERE ue.fk_object = u.rowid);

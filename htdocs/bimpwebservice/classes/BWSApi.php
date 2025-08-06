@@ -9,10 +9,13 @@
 class BWSApi
 {
 
-	protected $request_name = '';
-	protected $ws_user = null;
-	protected $params = array();
-	protected $errors = array();
+	public $request_name = '';
+	public $ws_user = null;
+	public $params = array();
+	public $errors = array();
+	public $log_request = false;
+	public $response_code = 200;
+
 	protected $check_erp_user_rights = true;
 	public static $requests = array(
 		'authenticate'   => array(
@@ -103,6 +106,51 @@ class BWSApi
 //                'town'    => array('label' => 'Ville'),
 //            )
 //        )
+		'createOrder'    => array(
+			'desc'   => 'Création d\'une commande complète',
+			'params' => array(
+				'origine'       => array('label' => 'Origine', 'required' => 1),
+				'client'        => array(
+					'label' => 'Client', 'data_type' => 'array', 'required' => 1, 'sub_params' => array(
+						'nom'                 => array('label' => 'Nom', 'required' => 1),
+						'prenom'              => array('label' => 'Prénom', 'required' => 1),
+						'email'               => array('label' => 'Adresse e-mail', 'required' => 1),
+						'num_tel'             => array('label' => 'Numéro de téléphone'),
+						'date_fin_validite'   => array('label' => 'Date de fin de validité du statut étudiant', 'data_type' => 'date'),
+						'adresse_facturation' => array(
+							'label' => 'Adresse de facturation', 'required' => 1, 'data_type' => 'array', 'sub_params' => array(
+//						'nom'         => array('label' => 'Nom'),
+//						'prenom'      => array('label' => 'Prénom'),
+								'adresse'     => array('label' => 'Adresse', 'required' => 1),
+								'code_postal' => array('label' => 'Code postal', 'required' => 1),
+								'ville'       => array('label' => 'Ville', 'required' => 1),
+//						'pays'        => array('label' => 'Pays', 'default' => 'France')
+							)
+						),
+						'adresse_livraison'   => array(
+							'label' => 'Adresse de livraison', 'data_type' => 'array', 'sub_params' => array(
+								'nom'         => array('label' => 'Nom'),
+								'prenom'      => array('label' => 'Prénom'),
+								'adresse'     => array('label' => 'Adresse', 'required' => 1),
+								'code_postal' => array('label' => 'Code postal', 'required' => 1),
+								'ville'       => array('label' => 'Ville', 'required' => 1),
+//						'pays'        => array('label' => 'Pays', 'default' => 'France')
+							)
+						)
+					),
+				),
+				'lines'         => array(
+					'label' => 'Lignes', 'data_type' => 'array', 'multiple' => 1, 'sub_params' => array(
+						'ref_produit' => array('label' => 'Référence produit', 'required' => 1),
+						'pu_ht'       => array('label' => 'Prix unitaire HT', 'data_type' => 'float', 'required' => 1),
+						'tva_tx'      => array('label' => 'Taux de TVA', 'data_type' => 'float', 'required' => 1),
+						'quantite'    => array('label' => 'Quantité', 'data_type' => 'float', 'required' => 1)
+					)
+				),
+				'total_ttc'     => array('label' => 'Total TTC', 'data_type' => 'float', 'required' => 1),
+				'mode_paiement' => array('label' => 'Mode de paiement', 'required' => 1)
+			)
+		)
 	);
 
 	public static function getInstance($request_name, $params)
@@ -212,10 +260,9 @@ class BWSApi
 							$data['children'] = (is_array($child_data) ? $this->getChildrenData($child, $child_data) : array());
 							$children_data[$child_name] = $data;
 						}
+					} else {
+						$this->addError('INVALID_PARAMETER', 'Pas de relations avec ' . $child_name);
 					}
-                                        else{
-                                            $this->addError('INVALID_PARAMETER', 'Pas de relations avec '.$child_name);
-                                        }
 				}
 			}
 		}
@@ -229,12 +276,14 @@ class BWSApi
 		// check requête:
 		if (!isset(self::$requests[$this->request_name])) {
 			$this->addError('REQUEST_INVALID', 'La requête "' . $this->request_name . '" n\'existe pas');
+			$this->response_code = 400;
 			return false;
 		}
 
 		if (!method_exists($this, 'wsRequest_' . $this->request_name)) {
 			BimpCore::addlog('Méthode absente pour la requête webservice "' . $this->request_name . '"', Bimp_Log::BIMP_LOG_URGENT, 'ws', null, array(), true);
 			$this->addError('INTERNAL_ERROR', 'Erreur interne - opération non disponible actuellement');
+			$this->response_code = 500;
 			return false;
 		}
 
@@ -246,7 +295,16 @@ class BWSApi
 
 		if (!BimpObject::objectLoaded($this->ws_user)) {
 			$this->addError('LOGIN_INVALIDE', 'Identifiant ou mot de passe du compte utilisateur invalide (L: ' . $login . ')');
+			$this->response_code = 401;
 			return false;
+		}
+
+		if ((int) $this->ws_user->getData('check_ip')) {
+			$allowed_ips = $this->ws_user->getData('allowed_ip');
+			if (!in_array($_SERVER['REMOTE_ADDR'], $allowed_ips)) {
+				$this->addError('IP_UNAUTHORIZED', 'Adresse IP non autorisée : ' . $_SERVER['REMOTE_ADDR']);
+				$this->response_code = 401;
+			}
 		}
 
 		if ($this->request_name !== 'authenticate') {
@@ -254,15 +312,19 @@ class BWSApi
 			$err = '';
 			if (!$this->ws_user->checkToken($token, $err)) {
 				$this->addError('TOKEN_INVALIDE', ($err ? $err : 'Token invalide ou arrivé à expiration'));
+				$this->response_code = 401;
 				return false;
 			}
 		}
 
 		// check params:
 		if (isset(self::$requests[$this->request_name]['params'])) {
-			if (!$this->checkParams(self::$requests[$this->request_name]['params'])) {
+			$params_infos = array();
+			if (!$this->checkParams(self::$requests[$this->request_name]['params'], '', $params_infos)) {
+				$this->response_code = 400;
 				return false;
 			}
+//			die(json_encode(array('infos' => $params_infos, 'params' => $this->params), JSON_UNESCAPED_UNICODE));
 		}
 
 		// check droit requête:
@@ -270,8 +332,9 @@ class BWSApi
 			$module = BimpTools::getArrayValueFromPath($this->params, 'module', 'any');
 			$object_name = BimpTools::getArrayValueFromPath($this->params, 'object_name', 'any');
 
-			if (!$this->ws_user->hasRight($this->request_name, $module, $object_name)) {
-				$this->addError('UNAUTHORIZED', 'Opération non permise');
+			if (!$this->ws_user->hasRight($this->request_name, $module, $object_name, $this->log_request)) {
+				$this->addError('FORBIDDEN', 'Opération non permise');
+				$this->response_code = 403;
 				return false;
 			}
 		}
@@ -281,6 +344,7 @@ class BWSApi
 		if (!$id_user) {
 			BimpCore::addlog('Utilisateur ERP associé non défini', Bimp_Log::BIMP_LOG_URGENT, 'ws', $this->ws_user, array(), true);
 			$this->addError('INTERNAL_ERROR', 'Erreur interne - opération non disponible actuellement');
+			$this->response_code = 500;
 			return false;
 		}
 
@@ -294,6 +358,7 @@ class BWSApi
 				'Erreur' => 'L\'utilisateur #' . $id_user . ' n\'existe pas'
 			), true);
 			$this->addError('INTERNAL_ERROR', 'Erreur interne - opération non disponible actuellement');
+			$this->response_code = 500;
 			return false;
 		}
 
@@ -322,13 +387,16 @@ class BWSApi
 		);
 	}
 
-	protected function checkParams($params_def, $path = '')
+	protected function checkParams($params_def, $path = '', &$infos = array())
 	{
+		$infos[] = 'CHECK PARAMS - Path : ' . $path;
 		$check = true;
 		foreach ($params_def as $param_name => $param_def) {
 			$data_type = BimpTools::getArrayValueFromPath($param_def, 'data_type', 'string');
+			$info = 'Check ' . $param_name . ' (' . $data_type . ') : ';
 
 			$missing = false;
+			$param_errors = array();
 
 			$param = BimpTools::getArrayValueFromPath($this->params, $path . $param_name);
 
@@ -336,22 +404,50 @@ class BWSApi
 				$missing = true;
 			} elseif (in_array($data_type, BC_Field::$missing_if_empty_types) && empty($param)) {
 				$missing = true;
-			} else {
-				$param_errors = array();
-				if (!BimpTools::checkValueByType($data_type, $param, $param_errors)) {
-					if (empty($param_errors)) {
-						$param_errors[] = 'Format invalide';
-					}
+			} elseif ($data_type == 'json') {
+				$param = BimpTools::json_decode_array($param, $param_errors);
+				$data_type = 'array';
 
-					$this->addError('INVALID_PARAMETER', BimpTools::getMsgFromArray($param_errors, 'Paramètre "' . BimpTools::getArrayValueFromPath($param_def, 'label', $param_name) . '"', true));
-					$check = false;
-					continue;
-				} else {
-					$this->setParam($path . $param_name, $param);
+				if (empty($param)) {
+					$missing = true;
+					$param = array();
 				}
 			}
 
-			if ($missing) {
+			if (!$missing) {
+				if (!count($param_errors) && !BimpTools::checkValueByType($data_type, $param, $param_errors)) {
+					if (empty($param_errors)) {
+						$param_errors[] = 'Format invalide';
+					}
+				}
+
+				if (count($param_errors)) {
+					$info .= 'Err<pre>' . print_r($param_errors, true) . '</pre>';
+					$this->addError('INVALID_PARAMETER', BimpTools::getMsgFromArray($param_errors, 'Paramètre "' . BimpTools::getArrayValueFromPath($param_def, 'label', $param_name) . '"', true));
+					$check = false;
+				} else {
+					$info .= 'OK';
+					$this->setParam($path . $param_name, $param);
+
+					if (isset($param_def['sub_params'])) {
+						if (isset($param_def['multiple']) && (int) $param_def['multiple']) {
+							if ($check && is_array($param) && count($param)) {
+								foreach ($param as $idx => $item) {
+									if (!$this->checkParams($param_def['sub_params'], $path . $param_name . '/' . $idx . '/', $infos)) {
+										$check = false;
+									}
+								}
+							}
+						} else {
+							if (!$this->checkParams($param_def['sub_params'], $path . $param_name . '/', $infos)) {
+								$check = false;
+							}
+						}
+
+					}
+				}
+			} else {
+				$info .= 'MISSING';
 				$required = false;
 				if (BimpTools::getArrayValueFromPath($param_def, 'required', 0)) {
 					$required = true;
@@ -372,16 +468,13 @@ class BWSApi
 					}
 				}
 				if ($required) {
+					$info .= ' - REQUIRED';
 					$check = false;
 					$this->addError('MISSING_PARAMETER', 'Paramètre obligatoire absent: "' . BimpTools::getArrayValueFromPath($param_def, 'label', $param_name) . '" (' . $path . $param_name . ')');
 				}
 			}
 
-			if (isset($param_def['sub_params'])) {
-				if (!$this->checkParams($param_def['sub_params'], $path . $param_name . '/')) {
-					$check = false;
-				}
-			}
+			$infos[] = $info;
 		}
 
 		return $check;
@@ -516,6 +609,7 @@ class BWSApi
 			case E_ERROR:
 			case E_CORE_ERROR:
 			case E_COMPILE_ERROR:
+				$this->response_code = 500;
 				$txt = '';
 				$txt .= '<strong>ERP:</strong> ' . DOL_URL_ROOT . "\n";
 				$txt .= '<strong>Requête:</strong> ' . $this->request_name . "\n";
@@ -537,7 +631,7 @@ class BWSApi
 				}
 
 				$code = 'webservice_error_fatal';
-                $sujet = 'ERREUR FATALE WEBSERVICE - ' . str_replace('/', '', DOL_URL_ROOT);
+				$sujet = 'ERREUR FATALE WEBSERVICE - ' . str_replace('/', '', DOL_URL_ROOT);
 				BimpUserMsg::envoiMsg($code, $sujet, $txt);
 
 				BimpCore::addlog('ERREUR FATALE WEBSERVICE - ' . $msg, Bimp_Log::BIMP_LOG_URGENT, 'ws', null, array(
@@ -585,6 +679,7 @@ class BWSApi
 
 				if (!$this->ws_user->checkPWord($pword)) {
 					$this->addError('LOGIN_INVALIDE', 'Identifiant ou mot de passe du compte utilisateur invalide - (PW)');
+					$this->response_code = 401;
 					return array();
 				}
 			}
@@ -597,6 +692,7 @@ class BWSApi
 					'Erreurs' => $errors
 				));
 				$this->addError('INTERNAL_ERROR', 'Une erreur est survenue - échec de l\'authentification');
+				$this->response_code = 500;
 			}
 		}
 
@@ -614,7 +710,7 @@ class BWSApi
 				$children = BimpTools::getArrayValueFromPath($this->params, 'children', '');
 				if ($children) {
 					$children = json_decode($children, true);
-					if(!is_array($children)){
+					if (!is_array($children)) {
 						$this->addError('INVALID_PARAMETER', 'Paramètre "children" invalide');
 					}
 				}
@@ -853,6 +949,407 @@ class BWSApi
 				}
 
 				$response = $client_data;
+			}
+		}
+
+		return $response;
+	}
+
+	protected function wsRequest_createOrder()
+	{
+		global $db, $user, $langs;
+		$bdb = new BimpDb($db);
+		$db->begin();
+
+		$response = array();
+		$ref_commande = '';
+		$ref_client = '';
+
+		if (!count($this->errors)) {
+			$errors = array();
+			$warnings = array();
+
+			$origine = $this->getParam('origine');
+			$client_email = $this->getParam('client/email');
+			$nom = $this->getParam('client/nom');
+			$prenom = $this->getParam('client/prenom');
+			$type_educ_fin_validite = '';
+
+			$total_ttc = $this->getParam('total_ttc');
+			$mode_paiement = $this->getParam('mode_paiement');
+
+			$id_mode_paiement = (int) $bdb->getValue('c_paiement', 'id', 'code = \'' . $mode_paiement . '\'');
+
+			if (!(int) $id_mode_paiement) {
+				$this->addError('INVALID_PARAMETER', 'Mode de paiement invalide : ' . $mode_paiement);
+			}
+
+			$paiement_amount = $total_ttc;
+			$id_bank_account = 0;
+
+			$client_data = array(
+				'nom'     => ucfirst($prenom) . ' ' . strtoupper($nom),
+				'email'   => $client_email,
+				'phone'   => $this->getParam('client/num_tel', ''),
+				'client'  => 1,
+				'address' => $this->getParam('client/adresse_facturation/adresse'),
+				'zip'     => $this->getParam('client/adresse_facturation/code_postal'),
+				'town'    => $this->getParam('client/adresse_facturation/ville'),
+			);
+
+			$commande_data = array();
+
+			switch ($origine) {
+				case 'site_educ':
+					$client_data['fk_typent'] = 8; // Particulier
+					$client_data['type_educ'] = 'E4'; // Étudiant
+
+					$commande_data = array(
+						'libelle'           => 'Commande en ligne',
+						'entrepot'          => 164, // LD
+						'ef_type'           => 'E',
+						'fk_cond_reglement' => 20, // A la commande
+						'fk_mode_reglement' => $id_mode_paiement,
+						'fk_input_reason'   => 0
+					);
+
+					$dataSecteur = BimpCache::getSecteursData();
+					$id_bank_account = (int) (isset($dataSecteur['E']['id_default_bank_account']) ? $dataSecteur['E']['id_default_bank_account'] : BimpCore::getConf('id_default_bank_account', (!empty($conf->global->FACTURE_RIB_NUMBER) ? $conf->global->FACTURE_RIB_NUMBER : 0)));
+					break;
+
+				default:
+					$errors[] = 'Origine invalide';
+					break;
+			}
+
+			// vérif des lignes.
+			$lines = $this->getParam('lines', array());
+			$commande_lines = array();
+
+			if (empty($lines)) {
+				$errors[] = 'Aucune ligne de commande spécifiée';
+			} else {
+				$i = 0;
+				foreach ($lines as $idx => $line) {
+					$i++;
+
+					/** @var Bimp_Product $prod */
+					$prod = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+						'ref' => $line['ref_produit']
+					));
+
+					if (!BimpObject::objectLoaded($prod)) {
+						$errors[] = 'Ligne n°' . $i . ' : aucun produit trouvé pour la référence "' . $line['ref_produit'] . '"';
+					} else {
+						$lines[$idx]['id_product'] = $prod->id;
+					}
+				}
+			}
+
+			if (!count($errors) && !count($this->errors)) {
+				$client = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Client', array(
+					'email' => $client_email
+				), true, false);
+
+				if (!BimpObject::objectLoaded($client)) {
+					$client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
+				}
+
+				$client_errors = $client->validateArray($client_data);
+
+				if ($client->field_exists('type_educ_fin_validite')) {
+					$type_educ_fin_validite = $this->getParam('client/date_fin_validite', '');
+					$cur_type_educ_fin_validite = $client->getData('type_educ_fin_validite');
+					$dt_tomorrow = new DateTime();
+					$dt_tomorrow->add(new DateInterval('P1D'));
+					$tomorrow = $dt_tomorrow->format('Y-m-d');
+					if (!$cur_type_educ_fin_validite || ($type_educ_fin_validite && $type_educ_fin_validite > $cur_type_educ_fin_validite) || (!$type_educ_fin_validite && $cur_type_educ_fin_validite < $tomorrow)) {
+						if (!$type_educ_fin_validite) {
+							$type_educ_fin_validite = $tomorrow;
+						}
+						$client->set('type_educ_fin_validite', $type_educ_fin_validite);
+					}
+				}
+
+				if (!count($client_errors)) {
+					if (BimpObject::objectLoaded($client)) {
+						$client_errors = $client->update($warnings, true);
+					} else {
+						$client_errors = $client->create($warnings, true);
+					}
+				}
+
+				if (count($client_errors)) {
+					$errors[] = BimpTools::getMsgFromArray($client_errors, 'Erreurs client', true);
+				} else {
+					$client->fetch($client->id);
+					$ref_client = $client->getRef();
+					$contact_liv = null;
+					$address_liv = $this->getParam('client/adresse_livraison');
+					if (!empty($address_liv)) {
+						$contact_data = array(
+							'fk_soc'    => $client->id,
+							'firstname' => (!empty($address_liv['prenom']) ? $address_liv['prenom'] : $prenom),
+							'lastname'  => (!empty($address_liv['nom']) ? $address_liv['nom'] : $nom),
+							'address'   => (!empty($address_liv['adresse']) ? $address_liv['adresse'] : $client_data['address']),
+							'zip'       => (!empty($address_liv['code_postal']) ? $address_liv['code_postal'] : $client_data['zip']),
+							'town'      => (!empty($address_liv['ville']) ? $address_liv['ville'] : $client_data['town']),
+							'email'     => $client_data['email']
+						);
+						$contact_liv = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Contact', $contact_data);
+
+						if (!BimpObject::objectLoaded($contact_liv)) {
+							$contact_liv = BimpObject::getInstance('bimpcore', 'Bimp_Contact');
+							$contact_liv->validateArray($contact_data);
+							$contact_errors = $contact_liv->create($warnings, true);
+
+							if (count($contact_errors)) {
+								$errors[] = BimpTools::getMsgFromArray($contact_errors, 'Echec de l\'enregistrement de l\'adresse de livraison', true);
+							}
+						}
+					}
+
+					if (!count($errors)) {
+						$commande_data['fk_soc'] = $client->id;
+						$commande_data['date_commande'] = date('Y-m-d');
+						$commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+						$commande->validateArray($commande_data);
+
+						$commande_errors = $commande->create($warnings, true);
+
+						if (count($commande_errors)) {
+							$errors[] = BimpTools::getMsgFromArray($commande_errors, 'Echec de création de la commande', true);
+						} else {
+							if (BimpObject::objectLoaded($contact_liv)) {
+								if ($commande->dol_object->add_contact($contact_liv->id, 'SHIPPING', 'external') <= 0) {
+									$errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($commande->dol_object), 'Echec de l\'enregistrement de l\'adresse de livraison dans la commande');
+								}
+							}
+							// Ajout des lignes :
+							$i = 0;
+							$total_lines_ttc = 0;
+							foreach ($lines as $line) {
+								$i++;
+
+								/** @var Bimp_Product $product */
+								$product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line['id_product']);
+
+								$new_line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+								$new_line->set('id_obj', $commande->id);
+								$new_line->pu_ht = $line['pu_ht'];
+								$new_line->tva_tx = $line['tva_tx'];
+								$new_line->qty = $line['quantite'];
+								$new_line->id_product = $product->id;
+								$new_line->pa_ht = $product->getCurrentPaHt();
+
+								$crt_ra = $product->getRemiseArriere('crt');
+								if (BimpObject::objectLoaded($crt_ra)) {
+									$new_line->set('remise_crt', 1);
+								}
+
+								$line_errors = $new_line->create($warnings, true);
+
+								if (count($line_errors)) {
+									$errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne n° ' . $i . ' à la commande (Produit ' . $product->getRef() . ')', true);
+								}
+
+								$total_lines_ttc += ($new_line->pu_ht * $new_line->qty * (1 + ($new_line->tva_tx / 100)));
+							}
+
+							$diff = $total_lines_ttc - $total_ttc;
+							if (abs($diff) > 0) {
+								if (abs($diff) > 1) {
+									$errors[] = 'Le total TTC calculé (' . $total_lines_ttc . ') ne correspond pas au montant du paiement (' . $paiement_amount . ')';
+								} else {
+									$warnings[] = 'ATTENTION : il y a un écart de ' . $diff . ' euros entre le montant payé (' . $paiement_amount . ') et le total ttc calculé (' . $total_lines_ttc . ').';
+								}
+							}
+
+
+							if (!count($errors)) {
+								$fac_errors = array();
+
+								// Créa fac accompte paiement
+								$fac_acompte = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
+									'fk_soc'            => $client->id,
+									'type'              => 3,
+									'datef'             => dol_now(),
+									'entrepot'          => $commande->getData('entrepot'),
+									'ef_type'           => $commande->getData('ef_type'),
+									'fk_cond_reglement' => $commande->getData('fk_cond_reglement'),
+									'fk_mode_reglement' => $id_mode_paiement
+								), true, $fac_errors);
+
+								if (count($fac_errors)) {
+									$errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture d\'acompte pour le paiement', true);
+								} else {
+									addElementElement('commande', 'facture', $commande->id, $fac_acompte->id);
+
+									$fac_acompte_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+									$fac_acompte_line->set('id_obj', $fac_acompte->id);
+									$fac_acompte_line->set('type', 3);
+									$fac_acompte_line->desc = 'Acompte';
+									$fac_acompte_line->pu_ht = $paiement_amount / 1.2;
+									$fac_acompte_line->pa_ht = $paiement_amount / 1.2;
+									$fac_acompte_line->tva_tx = 20;
+									$line_errors = $fac_acompte_line->create($warnings, true);
+
+									if (count($line_errors)) {
+										$errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne à la facture d\'acompte pour le paiement', true);
+									} elseif ($fac_acompte->dol_object->validate($user) <= 0) {
+										$errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($fac_acompte->dol_object), 'Echec de la validation de la facture d\'acompte');
+									} else {
+										// Création du paiement:
+										BimpTools::loadDolClass('compta/paiement', 'paiement');
+										$payement = new Paiement($db);
+										$payement->amounts = array($fac_acompte->id => $paiement_amount);
+										$payement->datepaye = dol_now();
+										$payement->paiementid = (int) $id_mode_paiement;
+										if ($payement->create($user) <= 0) {
+											$errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
+										} else {
+											// Ajout du paiement au compte bancaire:
+											if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_bank_account, '', '') <= 0) {
+												$warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout de l\'acompte au compte bancaire #' . $id_bank_account);
+											}
+
+											$fac_acompte->dol_object->set_paid($user);
+										}
+
+										// Création de la remise client:
+										BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+										$discount = new DiscountAbsolute($db);
+										$discount->description = "Acompte";
+										$discount->socid = $client->id;
+										$discount->fk_facture_source = $fac_acompte->id;
+										$discount->amount_ht = $paiement_amount / 1.2;
+										$discount->amount_ttc = $paiement_amount;
+										$discount->amount_tva = $paiement_amount - ($paiement_amount / 1.2);
+										$discount->tva_tx = 20;
+										if ($discount->create($user) <= 0) {
+											$warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Des erreurs sont survenues lors de la création de la remise sur acompte');
+										} else {
+											$line_errors = $commande->insertDiscount((int) $discount->id);
+
+											if (count($line_errors)) {
+												$warnings[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de l\'ajout de l\'acompte à la commande');
+											}
+										}
+									}
+								}
+							}
+
+							if (!count($errors)) {
+								// Validation auto commande :
+								BimpTools::cleanDolEventsMsgs();
+								$result = $commande->dol_object->valid($user);
+
+								$comm_errors = BimpTools::getDolEventsMsgs(array('errors'));
+								$warnings = array_merge($warnings, BimpTools::getDolEventsMsgs(array('warnings')));
+
+								if (count($comm_errors)) {
+									$warnings[] = BimpTools::getMsgFromArray($comm_errors, 'Echec de la validation de la commande');
+								} else {
+									$commande->dol_object->generateDocument($commande->getModelPdf(), $langs);
+								}
+
+								$msg = 'Nouvelle commande depuis le site e-commerce éducaton';
+
+								if (count($warnings)) {
+									$msg .= '<br/>Attention, des erreurs sont survenues lors de la création de la commande. Veuillez vérifier la commande et effectuer les corrections manuelles si nécessaire. <br/>';
+									$msg .= BimpTools::getMsgFromArray($warnings);
+								}
+
+								$id_dest_group = 180; // Groupe "Education"
+								$commande->addNote($msg, null, 0, 1, '', 1, BimpNote::BN_DEST_GROUP, $id_dest_group);
+
+								// Mail confirmation :
+								$commande->fetch($commande->id);
+								$ref_commande = $commande->getRef();
+								$primary = BimpCore::getParam('public_email/primary');
+
+								$subject = 'Confirmation de commande';
+								$message = 'Bonjour, <br/><br/>';
+								$message .= 'Merci pour votre commande...<br/><br/>';
+								$message .= 'Récapitulatif : <br/>';
+								$message .= '<table style="width: 100%" cellspacing="0">';
+								$message .= '<thead>';
+								$message .= '<tr>';
+								$message .= '<th style="padding: 5px; background-color: ' . $primary . '; text-align: left; color: #ffffff">Produit</th>';
+								$message .= '<th style="padding: 5px; background-color: ' . $primary . '; text-align: left; color: #ffffff">Prix unitaire HT</th>';
+								$message .= '<th style="padding: 5px; background-color: ' . $primary . '; text-align: left; color: #ffffff">TVA</th>';
+								$message .= '<th style="padding: 5px; background-color: ' . $primary . '; text-align: left; color: #ffffff">Qté</th>';
+								$message .= '<th style="padding: 5px; background-color: ' . $primary . '; text-align: left; color: #ffffff">Total TTC</th>';
+								$message .= '</tr>';
+								$message .= '</thead>';
+								$message .= '<tbody>';
+
+								foreach ($lines as $line) {
+									$product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line['id_product']);
+
+									$message .= '<tr>';
+
+									$message .= '<td style="padding: 5px; border-bottom: 1px solid #999999;">';
+									$message .= '<b>' . $product->getRef() . '</b><br/>';
+									$message .= $product->getName();
+									$message .= '</td>';
+
+									$message .= '<td style="padding: 5px; border-bottom: 1px solid #999999;">';
+									$message .= BimpTools::displayMoneyValue($line['pu_ht']);
+									$message .= '</td>';
+
+									$message .= '<td style="padding: 5px; border-bottom: 1px solid #999999;">';
+									$message .= BimpTools::displayFloatValue($line['tva_tx'], 2, ',', 0, 0, 0, 0, 1, 1) . ' %';
+									$message .= '</td>';
+
+									$message .= '<td style="padding: 5px; border-bottom: 1px solid #999999;">';
+									$message .= BimpTools::displayFloatValue($line['quantite'], 4, ',', 0, 0, 0, 0, 1, 1);
+									$message .= '</td>';
+
+									$message .= '<td style="padding: 5px; border-bottom: 1px solid #999999;">';
+									$message .= BimpTools::displayMoneyValue((float) $line['pu_ht'] * (1 + ((float) $line['tva_tx'] / 100)) * (float) $line['quantite']);
+									$message .= '</td>';
+
+									$message .= '</tr>';
+								}
+
+								$message .= '</tbody>';
+								$message .= '</table>';
+
+								$mail = new BimpMail($commande, $subject, $client_email, '', $message);
+								$mail_errors = array();
+								if (!$mail->send($mail_errors)) {
+									$warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de confirmation au client');
+								}
+							}
+						}
+					}
+				}
+			}
+
+			$response = array(
+				'success'      => 0,
+				'ref_commande' => '',
+				'ref_client'   => '',
+				'warnings'     => $warnings
+			);
+
+			if (count($errors)) {
+				$db->rollback();
+				$this->addError('CREATION_FAIL', BimpTools::getMsgFromArray($errors, '', true));
+				$this->response_code = 400;
+
+				BimpCore::addlog('Echec de la création d\'une commande depuis le site e-commerce éducation', 4, 'bimpcomm', null, array(
+					'Erreurs'             => $errors,
+					'Warnings'            => $warnings,
+					'Paramètres requêtes' => $this->params
+				));
+			} else {
+				$response['success'] = 1;
+				$response['ref_commande'] = $ref_commande;
+				$response['ref_client'] = $ref_client;
+
+				$db->commitAll();
 			}
 		}
 

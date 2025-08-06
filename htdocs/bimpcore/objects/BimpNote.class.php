@@ -82,7 +82,8 @@ class BimpNote extends BimpObject
 		switch ($action) {
 			case 'setAsViewed':
 				if ($this->isLoaded()) {
-					if ($this->getData('user_create') == $user->id && $this->getData('type_author') == self::BN_AUTHOR_USER) {
+					if ($this->getData('user_create') == $user->id && $this->getData('type_author') == self::BN_AUTHOR_USER &&
+						($this->getData('type_dest') != self::BN_DEST_USER || (int) $this->getData('fk_user_dest') != $user->id)) {
 						return 0;
 					}
 
@@ -1150,6 +1151,7 @@ class BimpNote extends BimpObject
 		$email_cc = '';
 		$email_from = '';
 
+
 		$type_dest = $this->getData('type_dest');
 		if ($type_dest == self::BN_DEST_SOC) {
 			$this->set('visiblity', self::BN_ALL);
@@ -1199,6 +1201,9 @@ class BimpNote extends BimpObject
 					$html .= 'Réponse à votre message : <br/>';
 				}
 
+				if($this->getData('obj_name') == 'Bimp_Ticket') {
+					$content = str_replace(DOL_URL_ROOT, DOL_MAIN_URL_ROOT, $content);
+				}
 				$html .= $content;
 //                if ($this->getData('id_parent_note') > 0) {
 //                    $oldNote = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $this->getData('id_parent_note'));

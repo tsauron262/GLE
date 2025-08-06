@@ -3463,7 +3463,9 @@ class BCT_ContratLine extends BimpObject
 			$html .= '<tbody>';
 
 			$secteurs = BimpCache::getSecteursArray(false);
-			$expertises = BimpDolObject::$expertise;
+//			$expertises = BimpDolObject::$expertise;
+			$expertises = BimpDict::getValuesArray('expertises', false, true, '');
+
 			$modes_reglement = BimpCache::getModeReglements();
 			$conds_reglement = BimpCache::getCondReglementsArray(false);
 			$primary_color = BimpCore::getParam('colors/primary');

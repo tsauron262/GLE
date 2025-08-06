@@ -1,0 +1,2 @@
+dans BimpNote.class.php : Remplacement de DOL_URL_ROOT par DOL_MAIN_URL_ROOT pour l'envoi de mail via les tickets RDC (si Bimp_Ticket)
+dans viewimage.php : ajout du téléchargement auto des fichiers non pris en charge par la visu dans le navigateur

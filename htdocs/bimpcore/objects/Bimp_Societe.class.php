@@ -1891,7 +1891,9 @@ class Bimp_Societe extends BimpDolObject
 //					var_dump($field, isset($allowFields[$field]), $allowFields[$field], isset($allowFields[$field]) && !$allowFields[$field]);
 //					echo '<br>';
 //				}
-				if (isset($allowFields[$field]) && !$allowFields[$field]) continue;
+				if (isset($allowFields[$field]) && !$allowFields[$field]) {
+					continue;
+				}
 				if ($this->getData($field)) {
 					$value = $this->getData($field);
 					if ($field === 'email') {
@@ -2789,12 +2791,14 @@ class Bimp_Societe extends BimpDolObject
 			$api->getCompany(BimpTools::getPostFieldValue('search_name'), BimpTools::getPostFieldValue('search_siret'));
 			$result = $api->getSocSiren();
 		}
-		if(count($result) > 1)
+		if (count($result) > 1) {
 			$result[0] = '';
+		}
 		asort($result);
 		session_write_close();
 		return $result;
 	}
+
 	public function getApiResultSiret()
 	{
 		if (BimpTools::getPostFieldValue('result_siren') != '' && BimpTools::getPostFieldValue('result_siren') != 0) {
@@ -2806,18 +2810,19 @@ class Bimp_Societe extends BimpDolObject
 		return array();
 	}
 
-	public function actionCreat_auto($data, &$success = array()){
+	public function actionCreat_auto($data, &$success = array())
+	{
 		$success = array();
 		$errors = array();
 
 		require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 		$api = BimpAPI::getApiInstance('Inpi');
 		$result = $api->getSiret($data['result_siret']);
-$onSuccess = $this->getJsLoadModalForm('default', null, array('fields'=>$result));
+		$onSuccess = $this->getJsLoadModalForm('default', null, array('fields' => $result));
 //		$errors[] = $data.'<pre>'.print_r($dataR, true).'</pre>';
 
-		return array('errors' => $errors, 'success' => $success, 'success_callback' => 'setTimeout(function(){'.html_entity_decode($onSuccess).'},500);');
-				}
+		return array('errors' => $errors, 'success' => $success, 'success_callback' => 'setTimeout(function(){' . html_entity_decode($onSuccess) . '},500);');
+	}
 
 	public function checkSiren($field, $value, &$data = array(), &$warnings = array())
 	{
@@ -2826,14 +2831,14 @@ $onSuccess = $this->getJsLoadModalForm('default', null, array('fields'=>$result)
 		$api->getCompany('', $value);
 		$data = $api->getSiret($value);
 		return array();
-		}
+	}
 
 
 //		public function checkSirenOLDOLD($field, $value, &$data = array(), &$warnings = array())
 //	{
 //        if ($value == "356000000")
 //            return array('Siren de la Poste, trop de résultats');
-					//
+	//
 //        $errors = array();
 //
 //        $siret = '';
@@ -3538,6 +3543,12 @@ $onSuccess = $this->getJsLoadModalForm('default', null, array('fields'=>$result)
 		return $errors;
 	}
 
+	public function afterCreateNote($note)
+	{
+		$id = $note->id;
+		$this->setActivity('Creation ' . $note->getLabel('of_the') . '{{Notes:' . $id . '}}');
+	}
+
 	// Actions:
 
 	public function actionAddCommercial($data, &$success)
@@ -4098,7 +4109,7 @@ $onSuccess = $this->getJsLoadModalForm('default', null, array('fields'=>$result)
 			if ($this->isSirenRequired()) {
 				$siret = $this->getData('siret');
 				if (!$siret) {
-					$errors[] = 'Numéro SIRET absent pour le client d\'id ' . $this->id;
+					$errors[] = 'Numéro SIRET absent' . ($this->isLoaded() ? ' pour le client #' . $this->id : '');
 				} elseif (!$this->Luhn($siret, 14)) {
 					$errors[] = 'Numéro SIRET invalide';
 				} else {
@@ -4120,7 +4131,7 @@ $onSuccess = $this->getJsLoadModalForm('default', null, array('fields'=>$result)
 
 			$have_already_code_comptable = (BimpTools::getValue('has_already_code_comptable_client', 0, 'int') == 1) ? true : false;
 			if ($have_already_code_comptable && empty(BimpTools::getValue('code_compta', '', 'alphanohtml'))) {
-				$errors[] = "Vous devez rensseigner un code comptable client";
+				$errors[] = "Vous devez renseigner un code comptable client";
 			}
 
 			if (!count($errors) && $have_already_code_comptable) {
@@ -4219,51 +4230,60 @@ $onSuccess = $this->getJsLoadModalForm('default', null, array('fields'=>$result)
 			$count_errors = array();
 
 			// Vérifs clients:
-			$nb = $this->db->getCount('propal', 'fk_soc = ' . (int) $this->id, 'rowid');
-			if ($nb) {
-				$count_errors[] = $nb . ' proposition(s) commerciale(s) créée(s)';
+			if (BimpCore::isModuleActive('bimpcommercial')) {
+				$nb = $this->db->getCount('propal', 'fk_soc = ' . (int) $this->id, 'rowid');
+				if ($nb) {
+					$count_errors[] = $nb . ' proposition(s) commerciale(s) créée(s)';
+				}
+
+				$nb = $this->db->getCount('commande', 'fk_soc = ' . (int) $this->id . ' OR id_client_facture = ' . $this->id, 'rowid');
+				if ($nb) {
+					$count_errors[] = $nb . ' commande(s) créée(s)';
+				}
+
+				$nb = $this->db->getCount('facture', 'fk_soc = ' . (int) $this->id, 'rowid');
+				if ($nb) {
+					$count_errors[] = $nb . ' facture(s) créée(s)';
+				}
+
+				// Vérifs Fournisseurs:
+				$nb = $this->db->getCount('commande_fournisseur', 'fk_soc = ' . (int) $this->id, 'rowid');
+				if ($nb) {
+					$count_errors[] = $nb . ' commande(s) fournisseur(s) créée(s)';
+				}
+
+				$nb = $this->db->getCount('facture_fourn', 'fk_soc = ' . (int) $this->id, 'rowid');
+				if ($nb) {
+					$count_errors[] = $nb . ' facture(s) fournisseur(s) créée(s)';
+				}
 			}
 
-			$nb = $this->db->getCount('commande', 'fk_soc = ' . (int) $this->id . ' OR id_client_facture = ' . $this->id, 'rowid');
-			if ($nb) {
-				$count_errors[] = $nb . ' commande(s) créée(s)';
+			if (BimpCore::isModuleActive('bimpcontrat') || BimpCore::isModuleActive('bimpcontract')) {
+				$nb = $this->db->getCount('contrat', 'fk_soc = ' . (int) $this->id, 'rowid');
+				if ($nb) {
+					$count_errors[] = $nb . ' contrat(s) créé(s)';
+				}
 			}
 
-			$nb = $this->db->getCount('facture', 'fk_soc = ' . (int) $this->id, 'rowid');
-			if ($nb) {
-				$count_errors[] = $nb . ' facture(s) créée(s)';
+			if (BimpCore::isModuleActive('bimpsupport')) {
+				$nb = $this->db->getCount('bs_sav', 'id_client = ' . (int) $this->id, 'id');
+				if ($nb) {
+					$count_errors[] = $nb . ' sav(s) créé(s)';
+				}
+
+				$nb = $this->db->getCount('bs_ticket', 'id_client = ' . (int) $this->id, 'id');
+				if ($nb) {
+					$count_errors[] = $nb . ' ticket(s) hotline créé(s)';
+				}
 			}
 
-			$nb = $this->db->getCount('contrat', 'fk_soc = ' . (int) $this->id, 'rowid');
-			if ($nb) {
-				$count_errors[] = $nb . ' contrat(s) créé(s)';
+			if (BimpCore::isModuleActive('bimptechnique')) {
+				$nb = $this->db->getCount('fichinter', 'fk_soc = ' . (int) $this->id, 'rowid');
+				if ($nb) {
+					$count_errors[] = $nb . ' fiche(s) d\'intervention créée(s)';
+				}
 			}
 
-			$nb = $this->db->getCount('bs_sav', 'id_client = ' . (int) $this->id, 'id');
-			if ($nb) {
-				$count_errors[] = $nb . ' sav(s) créé(s)';
-			}
-
-			$nb = $this->db->getCount('bs_ticket', 'id_client = ' . (int) $this->id, 'id');
-			if ($nb) {
-				$count_errors[] = $nb . ' ticket(s) hotline créé(s)';
-			}
-
-			$nb = $this->db->getCount('fichinter', 'fk_soc = ' . (int) $this->id, 'rowid');
-			if ($nb) {
-				$count_errors[] = $nb . ' fiche(s) d\'intervention créée(s)';
-			}
-
-			// Vérifs Fournisseurs:
-			$nb = $this->db->getCount('commande_fournisseur', 'fk_soc = ' . (int) $this->id, 'rowid');
-			if ($nb) {
-				$count_errors[] = $nb . ' commande(s) fournisseur(s) créée(s)';
-			}
-
-			$nb = $this->db->getCount('facture_fourn', 'fk_soc = ' . (int) $this->id, 'rowid');
-			if ($nb) {
-				$count_errors[] = $nb . ' facture(s) fournisseur(s) créée(s)';
-			}
 
 			if (count($count_errors)) {
 				$errors[] = BimpTools::getMsgFromArray($count_errors, 'Impossible de supprimer ce tiers');

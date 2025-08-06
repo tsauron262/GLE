@@ -443,7 +443,7 @@ class BimpCore
 	public static function checkSqlUpdates($execute = false)
 	{
 		global $no_erp_updates;
-		if ($no_erp_updates) {
+		if ($no_erp_updates || defined('NO_ERP_UPDATES') && NO_ERP_UPDATES) {
 			return;
 		}
 
@@ -767,6 +767,8 @@ class BimpCore
 					if ($debug_mode) {
 						die('Pull non terminé');
 					}
+
+					http_response_code(503);
 					die('ERP EN COURS DE MISE A JOUR. MERCI DE PATIENTER QUELQUES INSTANTS AVANT D\'ACTUALISER CETTE PAGE.');
 				}
 
@@ -795,11 +797,12 @@ class BimpCore
 						echo 'OK <br/>';
 						echo $post_process_infos;
 						echo '<br/><br/>';
-					} else {
-						BimpCore::addlog('GIT PULL POST PROCESS OK', 1, 'maj', null, array(
-							'Infos' => $post_process_infos
-						));;
 					}
+//					else {
+//						BimpCore::addlog('GIT PULL POST PROCESS OK', 1, 'maj', null, array(
+//							'Infos' => $post_process_infos
+//						));
+//					}
 				}
 			}
 			$errors = array();
@@ -1306,6 +1309,7 @@ class BimpCore
 					$updates_infos = json_decode((string) $bdb->getValue('bimpcore_conf', 'value', 'name = \'erp_updates_infos\' AND module = \'bimpcore\' AND entity = 0'), 1);
 
 					if ($n > 20) {
+						http_response_code(503);
 						die('ERP EN COURS DE MISE A JOUR. MERCI DE PATIENTER QUELQUES INSTANTS AVANT D\'ACTUALISER CETTE PAGE.');
 					}
 				}
@@ -2049,29 +2053,32 @@ class BimpCore
 			}
 
 			if ($check) {
+				$bdb = BimpCache::getBdb(true);
+
 				// On vérifie qu'on n'a pas déjà un log similaire:
-//                $id_current_log = BimpCache::bimpLogExists($type, $level, $msg, $extra_data);
-				$id_current_log = 0;
-
-				$mod = '';
-				$obj = '';
-				$id = 0;
-
-				if (is_a($object, 'BimpObject')) {
-					$mod = $object->module;
-					$obj = $object->object_name;
-					$id = (int) $object->id;
-				}
-
-				$data = array(
-					'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
-					'obj_module' => $mod,
-					'obj_name'   => $obj,
-					'id_object'  => $id,
-					'backtrace'  => BimpTools::getBacktraceArray(debug_backtrace(null, 15))
-				);
+				$hash = BimpTools::getHash($msg . json_encode($extra_data), 'medium');
+				$id_current_log = $bdb->getValue('bimpcore_log', 'id', 'hash = \'' . $hash . '\'');
 
 				if (!$id_current_log) {
+					$mod = '';
+					$obj = '';
+					$id = 0;
+
+					if (is_a($object, 'BimpObject')) {
+						$mod = $object->module;
+						$obj = $object->object_name;
+						$id = (int) $object->id;
+					}
+
+					$data = array(
+						'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
+						'obj_module' => $mod,
+						'obj_name'   => $obj,
+						'id_object'  => $id,
+						'backtrace'  => BimpTools::getBacktraceArray(debug_backtrace(null, 15)),
+						'hash'       => $hash
+					);
+
 					if (defined('ID_ERP')) {
 						$extra_data['ID ERP'] = ID_ERP;
 					}
@@ -2132,6 +2139,13 @@ class BimpCore
 						$data['GET'] = BimpTools::htmlentities_array($_GET);
 						$data['POST'] = BimpTools::htmlentities_array($_POST);
 						$log->addNote('<pre>' . print_r($data, 1) . '</pre>');
+					}
+
+					if ((int) BimpCore::getConf('save_similar_logs_datetimes')) {
+						$bdb->insert('bimpcore_log_datetime', array(
+							'id_log' => $id_current_log,
+							'datetime' => date('Y-m-d H:i:s'),
+						));
 					}
 				}
 			}

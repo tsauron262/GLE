@@ -1,37 +1,37 @@
 labels:
     name: A redefinir
 objects:
-#   Dol objets: 
+    #   Dol objets: 
     entrepot:
         relation: hasOne
         delete: 0
-        instance: 
-            dol_object: 
+        instance:
+            dol_object:
                 module: product/stock
                 file: entrepot
             id_object:
                 field_value: id_entrepot
-                
-    bimp_entrepot: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_Entrepot
-            id_object: 
-                field_value: id_entrepot
-                
-    account: 
+    
+    bimp_entrepot:
         relation: hasOne
         delete: 0
         instance:
-            dol_object: 
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Entrepot
+            id_object:
+                field_value: id_entrepot
+    
+    account:
+        relation: hasOne
+        delete: 0
+        instance:
+            dol_object:
                 module: compta/bank
                 file: account
-            id_object: 
+            id_object:
                 field_value: id_account
-                
+    
     contrat:
         relation: hasOne
         delete: 0
@@ -39,400 +39,400 @@ objects:
             dol_object: contrat
             id_object:
                 field_value: id_contrat
-                
-#    Bimpcore objects:
+    
+    #    Bimpcore objects:
     
     user:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: Bimp_User
             id_object:
-                field_value: id_user   
-                
-    group: 
+                field_value: id_user
+    
+    group:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: Bimp_UserGroup
-            id_object: 
+            id_object:
                 field_value: id_group
-                
+    
     societe:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: Bimp_Societe
-            id_object: 
+            id_object:
                 field_value: id_societe
-                
+    
     client:
         relation: hasOne
         delete: 0
         has_files: 1
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: Bimp_Client
-            id_object: 
+            id_object:
                 field_value: id_client
-                
+    
     fournisseur:
         relation: hasOne
         delete: 0
         has_files: 1
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: Bimp_Fournisseur
-            id_object: 
+            id_object:
                 field_value: id_fournisseur
-                
-    contact: 
+    
+    contact:
         relation: hasOne
         delete: 0
-        instance: 
+        instance:
             bimp_object:
                 module: bimpcore
                 name: Bimp_Contact
-            id_object: 
+            id_object:
                 field_value: id_contact
-                
-    product: 
+    
+    product:
         relation: hasOne
         delete: 0
         has_files: 1
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: Bimp_Product
-            id_object: 
+            id_object:
                 field_value: id_product
-                
+    
     fourn_price:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: Bimp_ProductFournisseurPrice
-            id_object: 
+            id_object:
                 field_value: id_fourn_price
-                
-    signature: 
+    
+    signature:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: BimpSignature
-            id_object: 
+            id_object:
                 field_value: id_signature
-        
-#    BimpComm objects: 
     
-    paiement: 
+    #    BimpComm objects: 
+    
+    paiement:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcommercial
                 name: Bimp_Paiement
-            id_object: 
+            id_object:
                 field_value: id_paiement
-                
-    facture: 
+    
+    facture:
         relation: hasOne
         delete: 0
         has_files: 1
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcommercial
                 name: Bimp_Facture
-            id_object: 
+            id_object:
                 field_value: id_facture
-                
-    propal: 
+    
+    propal:
         relation: hasOne
         delete: 0
         has_files: 1
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcommercial
                 name: Bimp_Propal
-            id_object: 
+            id_object:
                 field_value: id_propal
-                
+    
     commande:
         relation: hasOne
         delete: 0
         has_files: 1
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcommercial
                 name: Bimp_Commande
-            id_object: 
+            id_object:
                 field_value: id_commande
-                
+    
     facture_fourn:
         relation: hasOne
         delete: 0
         has_files: 1
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcommercial
                 name: Bimp_FactureFourn
-            id_object: 
+            id_object:
                 field_value: id_facture_fourn
-                
+    
     commande_fourn:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcommercial
                 name: Bimp_CommandeFourn
-            id_object: 
+            id_object:
                 field_value: id_commande_fourn
     
-#    bimpsupport objects:
+    #    bimpsupport objects:
     
-    sav: 
+    sav:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpsupport
                 name: BS_SAV
-            id_object: 
+            id_object:
                 field_value: id_sav
-                
-    sav_propal: 
+    
+    sav_propal:
         relation: hasOne
         delete: 0
         has_files: 1
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpsupport
                 name: BS_SavPropal
-            id_object: 
+            id_object:
                 field_value: id_propal
-                
-    ticket: 
+    
+    ticket:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpsupport
                 name: BS_Ticket
-            id_object: 
+            id_object:
                 field_value: id_ticket
     
-#    bimpcaisse objects:
-    caisse: 
+    #    bimpcaisse objects:
+    caisse:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcaisse
                 name: BC_Caisse
             id_object:
                 field_value: id_caisse
-                
-    caisse_session: 
+    
+    caisse_session:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcaisse
                 name: BC_CaisseSession
-            id_object: 
+            id_object:
                 field_value: id_caisse_session
-                
-    vente: 
+    
+    vente:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcaisse
                 name: BC_Vente
-            id_object: 
+            id_object:
                 field_value: id_vente
-                
-#    Bimp Equipment objects: 
-    equipment: 
+    
+    #    Bimp Equipment objects: 
+    equipment:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpequipment
                 name: Equipment
-            id_object: 
+            id_object:
                 field_value: id_equipment
-                
-    package: 
+    
+    package:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpequipment
                 name: BE_Package
-            id_object: 
+            id_object:
                 field_value: id_package
-                
-#    Bimp Reservation objects: 
-    reservation: 
+    
+    #    Bimp Reservation objects: 
+    reservation:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpreservation
                 name: BR_Reservation
-            id_object: 
+            id_object:
                 field_value: id_reservation
-                
-#   Fichier
-    file: 
+    
+    #   Fichier
+    file:
         relation: none
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: BimpFile
-                
-#    BimpFinanc
-    commission: 
+    
+    #    BimpFinanc
+    commission:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpfinanc
                 name: BimpCommission
-            id_object: 
+            id_object:
                 field_value: id_commission
-           
-    revalorisation: 
+    
+    revalorisation:
         relation: hasOne
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpfinanc
                 name: BimpRevalorisation
-            id_object: 
+            id_object:
                 field_value: id_revalorisation
-                
-#    Objets enfants communs: 
-    notes: 
+    
+    #    Objets enfants communs: 
+    notes:
         relation: hasMany
         delete: 0
-        instance: 
-            bimp_object: 
+        instance:
+            bimp_object:
                 module: bimpcore
                 name: BimpNote
-        list: 
-            filters: 
+        list:
+            filters:
                 obj_type: bimp_object
-                obj_module: 
+                obj_module:
                     prop: module
-                obj_name: 
+                obj_name:
                     prop: object_name
-                
-                
-associations: 
-    files: 
+
+
+associations:
+    files:
         label: Fichiers associés
         object: file
-                
-forms:               
-    move_file: 
+
+forms:
+    move_file:
         title: Déplacer un fichier
         icon: fas_file-export
-        rows: 
-            - custom: 1
-              hidden: 1
-              data_type: int
-              input_name: id_file
-              input: 
-                  type: hidden
-            - custom: 1
-              label: Type de destinataire
-              input_name: move_to_object_name
-              input: 
-                  type: select
-                  options: 
-                      callback: 
-                          method: getFilesParentsArray
-                          params: 
-                              - 1
-            - custom: 1
-              label: Destinataire
-              input_name: move_to_id_object
-              content: 
-                  callback: 
-                      method: renderSearchObjectInput
-                      params:
-                          - move_to_id_object
-                          - request_field: move_to_object_name
-              display_if: 
-                  field_name: move_to_object_name
-                  hide_values: ''
-              depends_on: move_to_object_name
-            - custom: 1
-              label: Conserver une copie du fichier
-              data_type: bool
-              input_name: keep_copy
-              input: 
-                  type: toggle
-            - custom: 1
-              label: Créer un lien vers le nouveau fichier
-              data_type: bool
-              input_name: create_link
-              input: 
-                  type: toggle
-              display_if: 
-                  field_name: keep_copy
-                  show_values: 0
-             
-    list_csv: 
+        rows:
+            -   custom: 1
+                hidden: 1
+                data_type: int
+                input_name: id_file
+                input:
+                    type: hidden
+            -   custom: 1
+                label: Type de destinataire
+                input_name: move_to_object_name
+                input:
+                    type: select
+                    options:
+                        callback:
+                            method: getFilesParentsArray
+                            params:
+                                - 1
+            -   custom: 1
+                label: Destinataire
+                input_name: move_to_id_object
+                content:
+                    callback:
+                        method: renderSearchObjectInput
+                        params:
+                            - move_to_id_object
+                            -   request_field: move_to_object_name
+                display_if:
+                    field_name: move_to_object_name
+                    hide_values: ''
+                depends_on: move_to_object_name
+            -   custom: 1
+                label: Conserver une copie du fichier
+                data_type: bool
+                input_name: keep_copy
+                input:
+                    type: toggle
+            -   custom: 1
+                label: Créer un lien vers le nouveau fichier
+                data_type: bool
+                input_name: create_link
+                input:
+                    type: toggle
+                display_if:
+                    field_name: keep_copy
+                    show_values: 0
+    
+    list_csv:
         title: Générer CSV
         icon: fas_file-excel
-        rows: 
-            list_name: 
+        rows:
+            list_name:
                 custom: 1
                 hidden: 1
                 label: Nom de la liste
                 input_name: list_name
-                input: 
+                input:
                     type: hidden
-            config_id: 
+            config_id:
                 custom: 1
                 label: Config de liste
                 input_name: config_id
-                input: 
+                input:
                     type: select
                 values:
                     callback: getListConfigs
                 value:
                     callback: getListConfig
                 depends_on: list_name
-            file_name: 
+            file_name:
                 custom: 1
                 label: Nom du fichier
                 input_name: file_name
-                input: 
+                input:
                     type: text
                     help: Caractères aplhanumériques et tirets seulement
-            separator: 
+            separator:
                 custom: 1
                 label: Séparateur
                 input_name: separator
-                input: 
+                input:
                     type: text
                 value: ;
             header:
@@ -440,7 +440,7 @@ forms:
                 label: En-têtes
                 input_name: headers
                 data_type: bool
-                input: 
+                input:
                     type: toggle
                 value: 1
             light_export:
@@ -451,46 +451,120 @@ forms:
                 value: 1
                 show:
                     callback: isLight_exportActif
-                input: 
+                input:
                     type: toggle
                     help: Plus rapide mais certaines colonnes peuvent ne pas être disponibles si cette option est activée
             col_options:
                 custom: 1
                 label: Options des colonnes
                 input_name: cols_options
-                content: 
+                content:
                     callback: renderListCsvColsOptions
                 depends_on: light_export,list_name,config_id
-                    
-    generate_pdf: 
+    
+    generate_pdf:
         title: Générer un document PDF
         icon: fas_sync
-        rows: 
-            modele: 
+        rows:
+            modele:
                 custom: 1
                 label: Modèle
                 input_name: model
-                input: 
+                input:
                     type: select
-                    options: 
+                    options:
                         array: modelsPdf
-                  
-                      
-    bulk_edit_field: 
+    
+    
+    bulk_edit_field:
         title: Edition en série
         icon: fas_pen
-        rows: 
-            - field: 
-                  request_field: field_name
-                  
-    add_files: 
+        rows:
+            -   field:
+                    request_field: field_name
+    
+    add_files:
         title: Ajouter des fichiers
         icon: fas_folder-plus
-        rows: 
-            - custom: 1
-              label: Fichiers
-              input_name: files
-              input: 
-                  type: drop_files
+        rows:
+            -   custom: 1
+                label: Fichiers
+                input_name: files
+                input:
+                    type: drop_files
+    
+    import_csv:
+        title: Importer depuis un fichier csv
+        icon: fas_file-export
+        msgs: 
+            - type: info
+              content: Le fichier doit être au format CSV.<br/>Une première ligne d'en-tête comportant le nom des champs doit obligatoirement être incluse dans le fichier
+        rows:
+#            -   custom: 1
+#                label: Obj module
+#                input_name: obj_module
+#                hidden: 1
+#                input:
+#                    type: hidden
+#                required: 1
+#            -   custom: 1
+#                label: Obj name
+#                input_name: obj_name
+#                hidden: 1
+#                input:
+#                    type: hidden
+#                required: 1
+            -   custom: 1
+                label: Fichier
+                input_name: csv_file
+                input:
+                    type: drop_files
+                    max_items: 1
+                    allowed_ext: csv
+                required: 1
+            -   custom: 1
+                label: Modèle
+                input_name: id_csv_model
+                input:
+                    type: select
+                    options:
+                        array: importCsvModels
+            -   custom: 1
+                label: Enregistrer le nouveau modèle
+                input_name: save_new_model
+                data_type: bool
+                input:
+                    type: toggle
+                value: 1
+                display_if:
+                    field_name: id_csv_model
+                    show_values: 0
+            -   custom: 1
+                label: Nom du modèle
+                input_name: new_model_name
+                input: 
+                    type: text
+                display_if: 
+                    fields_names: id_csv_model,save_new_model
+                    id_csv_model: 
+                        show_values: 0
+                    save_new_model:
+                        show_values: 1
+            -   custom: 1
+                label: Séparateur
+                input_name: separator
+                input: 
+                    type: text
+                value: 
+                    callback: getCsvImportSeparator
+                depends_on: id_csv_model
+            -   custom: 1
+                label: Paramètres de l'import
+                input_name: import_params
+                content: 
+                    callback: renderCsvImportMatchesInputs
+                depends_on: csv_file,id_csv_model,separator
+                    
             
-        
+                
+                  

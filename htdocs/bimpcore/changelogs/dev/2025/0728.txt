@@ -1,0 +1,1 @@
+- Ajout action : création d'un dictionnaire à partir des valeurs prédifinies d'un champ objet

@@ -359,6 +359,11 @@ class Bimp_Product extends BimpObject
                 if (!$this->isLoaded($errors)) {
                     return 0;
                 }
+				$parentCombinaison = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_ProductCombination', array('fk_product_child' => $this->id));
+				if ($parentCombinaison && $parentCombinaison->isLoaded()) {
+					$errors[] = 'Deja une combinaison';
+					return 0;
+				}
                 return 1;
 
             case 'duplicate':
@@ -378,6 +383,11 @@ class Bimp_Product extends BimpObject
                     $errors[] = 'Produit non validé';
                     return 0;
                 }
+				$parentCombinaison = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_ProductCombination', array('fk_product_child' => $this->id));
+				if ($parentCombinaison && $parentCombinaison->isLoaded()) {
+					$errors[] = 'Deja une combinaison';
+					return 0;
+				}
                 return 1;
 
             case 'addForfaitLocation':

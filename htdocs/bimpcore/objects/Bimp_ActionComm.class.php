@@ -149,6 +149,14 @@ class Bimp_ActionComm extends BimpObject
 	}
 
 	// Getters params:
+	public function getIdWithCodeType($code){
+		$rows = $this->db->getRows('c_actioncomm', 'code = "'.$code.'"', null, 'array', array('id'), 'position', 'asc');
+		foreach($rows as $r) {
+			if (isset($r['id']) && (int) $r['id']) {
+				return (int) $r['id'];
+			}
+		}
+	}
 
 	public function getRight($code)
 	{

@@ -2025,8 +2025,26 @@ class BC_Vente extends BimpObject
 
         $equipements = array();
 
+		$frenchAccents = [
+			'à', 'â', 'ä', 'á', 'ã', 'å', 'æ', // Lowercase
+			'À', 'Â', 'Ä', 'Á', 'Ã', 'Å', 'Æ', // Uppercase
+			'ç', 'Ç',                           // C cedilla
+			'è', 'é', 'ê', 'ë',                 // Lowercase E
+			'È', 'É', 'Ê', 'Ë',                 // Uppercase E
+			'ì', 'í', 'î', 'ï',                 // Lowercase I
+			'Ì', 'Í', 'Î', 'Ï',                 // Uppercase I
+			'ñ', 'Ñ',                           // N tilde
+			'ò', 'ó', 'ô', 'ö', 'õ', 'ø',       // Lowercase O
+			'Ò', 'Ó', 'Ô', 'Ö', 'Õ', 'Ø',       // Uppercase O
+			'ù', 'ú', 'û', 'ü',                 // Lowercase U
+			'Ù', 'Ú', 'Û', 'Ü',                 // Uppercase U
+			'ý', 'ÿ',                           // Lowercase Y
+			'Ý'                                 // Uppercase Y
+		];
+
         // Recherche d'équipement via n° de série:
-		$search = str_replace("\"", "\\\"", $search);
+		$search = str_replace($frenchAccents, "%", $search);
+		$search = str_replace("\"", "%", $search);
         $rows = $this->db->getValues('be_equipment', 'id', 'serial = "' . $search . '" || concat("S", serial) = "' . $search . '"');
         if (!is_null($rows)) {
             foreach ($rows as $id_eq) {

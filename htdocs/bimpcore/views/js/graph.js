@@ -18,10 +18,14 @@ function refreshGraph(graph){
             extra_data['idGraph'] = graph.data('name');
             if($option_conteneur.find('form').length > 0){
                 extra_data['form']= $option_conteneur.find('form').serialize();
-         }
-        if (graph.find('input[name=param_filters]').length) {
-            extra_data['param_filters'] = graph.find('input[name=param_filters]').val();
-        }
+         	}
+			
+			if (graph.find('input[name=param_filters]').length) {
+				extra_data['param_filters'] = graph.find('input[name=param_filters]').val();
+			}
+			if (graph.find('input[name=param_params_def]').length) {
+				extra_data['param_params_def'] = graph.find('input[name=param_params_def]').val();
+			}
          
             setObjectAction(null, {
                 module: graph.data('module'),

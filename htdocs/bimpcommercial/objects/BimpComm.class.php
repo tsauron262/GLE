@@ -225,6 +225,7 @@ class BimpComm extends BimpDolObject
 
 		switch ($field) {
 			case 'replaced_ref':
+			case 'fk_mode_reglement':
 				return 1;
 
 			case 'fk_soc':

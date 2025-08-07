@@ -1236,7 +1236,7 @@ class gsxController extends BimpController
             $data = $this->gsx_v2->serialEligibility($serial);
 			global $user;
 			if ($user->login == 'f.lauby')	{
-				echo '<pre>' . print_r($data, true) . '</pre>';
+				echo '<pre>'. print_r($data, true) . '</pre>';
 				exit();
 			}
             if (isset($data['eligibilityDetails']['outcome']) && is_array($data['eligibilityDetails']['outcome'])) {

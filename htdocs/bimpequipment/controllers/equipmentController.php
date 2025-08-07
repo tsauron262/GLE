@@ -49,9 +49,9 @@ class equipmentController extends BimpController
 
         return $list->renderHtml();
     }
-    
-    
-    
+
+
+
     public function renderHotlineList(){
         if (!BimpTools::isSubmit('id')) {
             return BimpRender::renderAlerts('ID de l\'équipement absent');
@@ -71,7 +71,7 @@ class equipmentController extends BimpController
 
         return $list->renderHtml();
     }
-    
+
     public function renderAchats(){
         $html = '';
         $id_equipment = (int) BimpTools::getValue('id', 0, 'int');
@@ -80,7 +80,7 @@ class equipmentController extends BimpController
             $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn'), 'default', 1, null, 'Commande Fournisseur', 'wrench');
             $list->addObjectAssociationFilter($equipment, $id_equipment, 'achatsCommFourn_Equipments');
             $html .= $list->renderHtml();
-            
+
             $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn'), 'default', 1, null, 'Facture Fournisseur', 'wrench');
             $list->addObjectAssociationFilter($equipment, $id_equipment, 'achatsFactFourn_Equipments');
             $html .= $list->renderHtml();
@@ -92,14 +92,14 @@ class equipmentController extends BimpController
     {
         $errors = array();
         $data = array();
-        
+
         if(!BimpObject::useApple())
             die(json_encode(array(
                 'errors'     => $errors,
                 'data'       => $data,
                 'request_id' => BimpTools::getValue('request_id', 0, 'int')
             )));
-            
+
 
         $serial = (string) BimpTools::getValue('serial', '', 'alphanohtml');
 
@@ -110,7 +110,7 @@ class equipmentController extends BimpController
 
             if (!count($errors)) {
                 $data = $equipment->gsxLookup($serial, $errors);
-                
+
                 if(isset($data['warning']) && $data['warning'] != "")
                     $data['warning'] = BimpRender::renderAlerts($data['warning'], 'danger');
             }
@@ -123,14 +123,14 @@ class equipmentController extends BimpController
             'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
-    
-    
+
+
     public function displayHead()
     {
         require_once(DOL_DOCUMENT_ROOT."/bimpapple/classes/GSX_v2.php");
         echo GSX_v2::renderJsVars();
     }
-    
+
     protected function ajaxProcessGetEquipmentGsxInfos()
     {
         $errors = array();
@@ -143,7 +143,11 @@ class equipmentController extends BimpController
             if (BimpObject::objectLoaded($equipment)) {
 
                 $data = $equipment->gsxLookup($equipment->getData('serial'), $errors);
-
+				global $user;
+			if ($user->login == 'f.lauby')	{
+				echo '<pre>'. print_r($data, true) . '</pre>';
+				exit();
+			}
                 if (isset($data['warning']) && $data['warning']) {
                     $html .= BimpRender::renderAlerts($data['warning'], 'danger');
                 }
@@ -171,30 +175,30 @@ class equipmentController extends BimpController
             'request_id' => BimpTools::getValue('request_id', 0, 'int')
         )));
     }
-    
+
     public function renderInventory()
     {
         if (!BimpTools::isSubmit('id')) {
             return BimpRender::renderAlerts('ID de l\'équipement absent');
         }
         $html = '';
-        
+
         $inventory_line = BimpObject::getInstance('bimplogistique', 'InventoryLine2');
 
         $list = new BC_ListTable($inventory_line, 'equipment', 1, null, "Lignes d'inventaire contenant l'équipement");
         $list->addFieldFilterValue('a.fk_equipment', BimpTools::getValue('id', 0, 'int'));
         $list->addJoin('bl_inventory_2', 'a.fk_inventory = i.id', 'i');
         $html .= $list->renderHtml();
-        
-        
-        
+
+
+
         $inventory_line = BimpObject::getInstance('bimplogistique', 'InventoryLine');
 
         $list = new BC_ListTable($inventory_line, 'equipment', 1, null, "Lignes dancien inventaire contenant l'équipement");
         $list->addFieldFilterValue('a.fk_equipment', BimpTools::getValue('id', 0, 'int'));
         $list->addJoin('bl_inventory', 'a.fk_inventory = i.id', 'i');
         $html .=  $list->renderHtml();
-        
+
         return $html;
     }
 

@@ -147,6 +147,9 @@ ALTER TABLE `llx_bimp_commande_fourn_line` ADD `qty_to_receive` INT NOT NULL DEF
 ALTER TABLE `llx_bimp_revalorisation` ADD `id_entrepot_commission` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_facture_line`;
 ALTER TABLE `llx_bimp_revalorisation` ADD `id_user_commission` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_facture_line`;
 
+ALTER TABLE `llx_bimp_revalorisation` ADD INDEX(`id_user_commission`);
+ALTER TABLE `llx_bimp_revalorisation` ADD INDEX(`id_entrepot_commission`);
+
 ALTER TABLE `llx_facture` ADD `id_entrepot_commission` INT NOT NULL DEFAULT '0';
 ALTER TABLE `llx_facture` ADD `id_user_commission` INT NOT NULL DEFAULT '0';
 

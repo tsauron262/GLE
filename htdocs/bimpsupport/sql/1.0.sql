@@ -232,6 +232,12 @@ ALTER TABLE `llx_bs_sav_propal_line` ADD `remise_crt_percent` DECIMAL(24,4) NOT 
 
 ALTER TABLE `llx_bs_inter` ADD `resolution` TEXT NOT NULL DEFAULT '' AFTER `description`;
 
+
+ALTER TABLE `llx_bs_inter` ADD INDEX(`id_ticket`);
+ALTER TABLE `llx_bs_inter` ADD INDEX(`id_ticket`);
+ALTER TABLE `llx_bs_note` ADD INDEX(`id_ticket`);
+ALTER TABLE `llx_bs_note` ADD INDEX(`id_inter`);
+
 ALTER TABLE `llx_bs_apple_part` ADD `id_issue` int(11) NOT NULL DEFAULT 0;
 ALTER TABLE `llx_bs_apple_part` ADD `is_tier` int(1) NOT NULL DEFAULT 0;
 ALTER TABLE `llx_bs_apple_part` ADD `not_invoiced` int(1) NOT NULL DEFAULT 0;

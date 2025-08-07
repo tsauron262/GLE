@@ -25,10 +25,6 @@ ALTER TABLE `llx_br_reservation` ADD INDEX(`id_equipment`);
 ALTER TABLE `llx_br_reservation` ADD INDEX(`id_commande_client`);
 ALTER TABLE `llx_br_reservation` ADD INDEX(`id_commande_client_line`);
 
-ALTER TABLE `llx_bs_inter` ADD INDEX(`id_ticket`);
-ALTER TABLE `llx_bs_inter` ADD INDEX(`id_ticket`);
-ALTER TABLE `llx_bs_note` ADD INDEX(`id_ticket`);
-ALTER TABLE `llx_bs_note` ADD INDEX(`id_inter`);
 
 ALTER TABLE `llx_bc_caisse_mvt` ADD INDEX(`id_entrepot`);
 ALTER TABLE `llx_bc_caisse_mvt` ADD INDEX(`id_caisse`);
@@ -41,8 +37,6 @@ ALTER TABLE `llx_bc_vente_return` ADD INDEX(`id_vente`);
 
 ALTER TABLE `llx_bimp_revalorisation` ADD INDEX(`id_facture`);
 ALTER TABLE `llx_bimp_revalorisation` ADD INDEX(`id_facture_line`);
-ALTER TABLE `llx_bimp_revalorisation` ADD INDEX(`id_user_commission`);
-ALTER TABLE `llx_bimp_revalorisation` ADD INDEX(`id_entrepot_commission`);
 
 ALTER TABLE `llx_bimpcore_correctif` ADD INDEX( `obj_type`, `obj_module`, `obj_name`, `id_obj`);
 ALTER TABLE `llx_bimpcore_file` ADD INDEX( `parent_module`, `parent_object_name`, `id_parent`);

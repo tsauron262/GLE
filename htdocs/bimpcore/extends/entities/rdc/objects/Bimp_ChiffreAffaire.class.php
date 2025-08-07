@@ -201,7 +201,7 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 			if ($idC > 0) {
 				$filters[$field] = $idC;
 				$fields[$idC] = array(
-					"title"   => $categories[$idC]['label'],
+					"title"   => $categories[$idC],
 					'field'   => 'ca',
 					'calc'    => 'SUM',
 					'filters' => $filters

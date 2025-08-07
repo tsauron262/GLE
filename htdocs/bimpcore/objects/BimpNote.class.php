@@ -1201,9 +1201,9 @@ class BimpNote extends BimpObject
 					$html .= 'Réponse à votre message : <br/>';
 				}
 
-				if($this->getData('obj_name') == 'Bimp_Ticket') {
-					$content = str_replace(DOL_URL_ROOT, DOL_MAIN_URL_ROOT, $content);
-				}
+//				if($this->getData('obj_name') == 'Bimp_Ticket') {
+//					$content = str_replace(DOL_URL_ROOT, DOL_MAIN_URL_ROOT, $content);
+//				}
 				$html .= $content;
 //                if ($this->getData('id_parent_note') > 0) {
 //                    $oldNote = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $this->getData('id_parent_note'));

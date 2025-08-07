@@ -732,6 +732,7 @@ class Bimp_User extends BimpObject
 				))
 			)
 		);
+		global $dolibarr_main_authentication;
 		$buttons[] = array(
 			'classes'     => array('btn', 'btn-default'),
 			'label'       => 'Ajouter un utilisateur',
@@ -739,7 +740,7 @@ class Bimp_User extends BimpObject
 			'attr'        => array(
 				'type'    => 'button',
 //				'onclick' => "document.location.replace('" . DOL_URL_ROOT . "/user/card.php?leftmenu=users&action=create');"
-				'onclick' => $this->getJsActionOnclick('selectUser', array(), array('form_name' => 'select_user'))
+				'onclick' => $this->getJsActionOnclick('selectUser', array(), array('form_name' => ((preg_match('/ldapppp/', $dolibarr_main_authentication))) ? 'select_user' : 'default'))
 			)
 		);
 

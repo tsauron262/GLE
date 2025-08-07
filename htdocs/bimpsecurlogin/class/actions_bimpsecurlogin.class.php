@@ -210,7 +210,12 @@ class securLogSms
     {
         global $user;
         $this->user->oldcopy = clone($this->user);
-        if ($this->user->array_options['options_code_sms'] == $code && $code != '') {
+		if ((time() - strtotime($this->user->array_options['options_heure_sms'])) > (60 * 5) ) {
+			$this->message[] = "Le Code n'est plus valable";
+			return false;
+		}
+
+		if ($this->user->array_options['options_code_sms'] == $code && $code != '') {
             $this->user->array_options['options_echec_auth'] = 0;
             $this->user->array_options['options_code_sms'] = '';
             $this->user->update($user);

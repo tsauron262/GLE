@@ -1,15 +1,3 @@
--- llx_bl_inventory_warehouse
-CREATE TABLE `llx_bl_inventory_warehouse` (
-  `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  `fk_inventory` int(11) NOT NULL,
-  `fk_warehouse` int(11) NOT NULL,
-  `type` int(11) NOT NULL,
-  `is_main` int(11) DEFAULT NULL COMMENT 'Couple par default pour cet inventaire',
-  `user_create` int(11) NOT NULL,
-  `user_update` int(11) NOT NULL,
-  `date_create` datetime NOT NULL DEFAULT current_timestamp,
-  `date_update` datetime NOT NULL DEFAULT current_timestamp);
-
 
 
 CREATE TABLE `llx_bl_inventory_expected` (

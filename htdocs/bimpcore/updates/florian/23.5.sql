@@ -1,5 +1,3 @@
-ALTER TABLE `llx_bimpcore_conf` ADD `module` VARCHAR(30) NOT NULL DEFAULT 'bimpcore' AFTER `id`;
-
 UPDATE `llx_bimpcore_conf` SET `name` = 'id_default_bank_account', `module` = 'bimpcore' WHERE `name` = 'bimpcaisse_id_default_account' AND `module` = 'bimpcore';
 UPDATE `llx_bimpcore_conf` SET `name` = 'id_default_tva_tx', `module` = 'bimpcore' WHERE `name` = 'tva_default' AND `module` = 'bimpcore';
 UPDATE `llx_bimpcore_conf` SET `name` = 'use_products_cur_pa_history', `module` = 'bimpcore' WHERE `name` = 'use_new_cur_pa_method' AND `module` = 'bimpcore';

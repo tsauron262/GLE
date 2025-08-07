@@ -63,6 +63,10 @@ ALTER TABLE `llx_contratdet` ADD `serials` LONGTEXT NULL DEFAULT NULL;
 ALTER TABLE `llx_societe_rib` ADD `exported` INT(11) NOT NULL DEFAULT '0';
 
 ALTER TABLE llx_contrat ADD tmp_correct INT(1) NOT NULL DEFAULT '0';
+
+ALTER TABLE `llx_bimpcore_conf` ADD `module` VARCHAR(30) NOT NULL DEFAULT 'bimpcore' AFTER `id`;
+
+
 UPDATE `llx_bimpcore_conf` SET `name` = 'vente_dee_fr', `module` = 'bimptocegid' WHERE `name` = 'BIMPTOCEGID_vente_dee_fr' AND `module` = 'bimpcore';
 UPDATE `llx_bimpcore_conf` SET `name` = 'vente_dee_ue', `module` = 'bimptocegid' WHERE `name` = 'BIMPTOCEGID_vente_dee_ue' AND `module` = 'bimpcore';
 UPDATE `llx_bimpcore_conf` SET `name` = 'achat_dee_fr', `module` = 'bimptocegid' WHERE `name` = 'BIMPTOCEGID_achat_dee_fr' AND `module` = 'bimpcore';

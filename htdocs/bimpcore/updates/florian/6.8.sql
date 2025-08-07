@@ -1,5 +1,3 @@
-ALTER TABLE `llx_bc_vente` ADD `id_avoir` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_facture`;
-
 
 CREATE TABLE IF NOT EXISTS `llx_bc_vente_return` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,

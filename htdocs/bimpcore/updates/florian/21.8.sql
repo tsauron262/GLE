@@ -1,13 +1,6 @@
 ALTER TABLE `llx_bimpcore_log` ADD INDEX `obj_data` (`obj_module`, `obj_name`, `id_object`);
 
 
-ALTER TABLE `llx_bds_process_cron` ADD INDEX `process` (`id_process`);
-ALTER TABLE `llx_bds_process_cron` ADD INDEX `cron` (`id_cronjob`);
-ALTER TABLE `llx_bds_process_cron` ADD INDEX `operation` (`id_operation`);
-
-ALTER TABLE `llx_bds_process_cron_option` ADD INDEX `cron` (`id_cron`);
-ALTER TABLE `llx_bds_process_cron_option` ADD INDEX `option` (`id_option`);
-
 ALTER TABLE `llx_bds_process_match` ADD INDEX `process` (`id_process`);
 ALTER TABLE `llx_bds_process_match_custom_values` ADD INDEX `match` (`id_match`);
 

@@ -1222,6 +1222,11 @@ class gsxController extends BimpController
 
         if ($serial) {
             $data2 = $this->gsx_v2->productDetailsBySerial($serial);
+			global $user;
+			if ($user->login == 'f.lauby')	{
+				echo '<pre>' . print_r($data2, true) . '</pre>';
+				  exit();
+			}
             if (isset($data2['device']['productDescription']) && !empty($data2['device']['productDescription'])) {
 
                 $html .= '<div style="margin-top: 15px; padding: 10px; border: 1px solid #DCDCDC">';

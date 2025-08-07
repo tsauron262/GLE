@@ -15,6 +15,6 @@ ALTER TABLE `llx_br_reservation` ADD `id_commande_fournisseur` INT UNSIGNED NOT 
 ALTER TABLE `llx_br_reservation` ADD `id_commande_client_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_product`;
 ALTER TABLE `llx_br_reservation` ADD `id_commande_client` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_product`;
 
-DROP TABLE llx_be_logiciel
+DROP TABLE llx_be_logiciel;
 
 ALTER TABLE `llx_be_equipment_logiciel` CHANGE `id_logiciel` `id_product` INT(10) UNSIGNED NOT NULL DEFAULT '0';

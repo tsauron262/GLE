@@ -58,7 +58,6 @@ ALTER TABLE `llx_bc_paiement` CHANGE `date_create` `date_create` datetime DEFAUL
 ALTER TABLE `llx_bc_paiement` CHANGE `date_update` `date_update` datetime DEFAULT NULL;
 
 
-ALTER TABLE `llx_bimp_history` CHANGE `date` `date` datetime DEFAULT NULL;
 ALTER TABLE `llx_be_equipment_place` CHANGE `date` `date` datetime DEFAULT NULL;
 ALTER TABLE `llx_bc_caisse_session` CHANGE `date_open` `date_open` datetime DEFAULT NULL;
 

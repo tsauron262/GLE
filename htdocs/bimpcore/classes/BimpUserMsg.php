@@ -894,10 +894,12 @@ class BimpUserMsg
 									$module = 'bimpcore';
 								}
 
-								$email = BimpCore::getConf($conf_name, '', $module);
+								$email = BimpCore::getConf($conf_name, null, $module);
 								if ($email && !in_array($email, $to_emails)) {
 									$to_emails[] = $email;
 								}
+								echo '<pre>' . print_r($to_emails, true) . '</pre>';
+								 // exit();
 							} else {
 								$errors[] = 'Paramètre conf invalide : ' . $e;
 							}

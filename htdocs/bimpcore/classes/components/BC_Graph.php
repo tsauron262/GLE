@@ -170,7 +170,7 @@ class BC_Graph extends BC_Panel
             $formHtml = '<form id="'. $list_id . '_' . $data['idGraph'] . '_chartForm">';
             $formHtml .= '<table class="bimp_list_table">';
             $formHtml .= '<tbody class="headers_col">';
-			$params_def = json_decode(BimpTools::getPostFieldValue('param_params_def', array(), 'json_nohtml'),1);
+			$params_def = json_decode(BimpTools::getPostFieldValue('param_params_def', '[]', 'json_nohtml'),1);
             foreach($this->formData as $input_name => $optionData){
 				$value = (isset($optionData['value']) && $optionData['value'] != null ? $optionData['value'] : (isset($params_def[$input_name])? $params_def[$input_name] : ''));
                 $dataGraphe['params'][$input_name] = $value;

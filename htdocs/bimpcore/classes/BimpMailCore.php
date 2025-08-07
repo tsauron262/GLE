@@ -218,7 +218,7 @@ class BimpMailCore
 		$cc = BimpTools::cleanEmailsStr($this->cc);
 		$bcc = BimpTools::cleanEmailsStr($this->bcc);
 		$replyTo = BimpTools::cleanEmailsStr($this->reply_to);
-		if ($to == 'f.lauby@ldlc.com') {echo '<pre>'; var_dump($html); echo '</pre>'; exit;}
+		if ($to == 'f.lauby@ldlc.com') {$html = var_export($html, true);}
 
 		$cmail = new CMailFile($this->subject, $to, $from, $html, $filename_list, $mimetype_list, $mimefilename_list, $cc, $bcc, $this->deliveryreceipt, 1, $this->errors_to, '', $this->getTrackId(), $this->getMoreinheader(), $this->send_context, $replyTo);
 		$result = $cmail->sendfile();

@@ -1221,7 +1221,6 @@ class BimpNote extends BimpObject
 				}
 
 				$email_errors = array();
-				if ($email_to == 'f.lauby@ldlc.com') {echo '<pre>'; var_dump($content); echo '</pre>';}
 				$bimpMail = new BimpMail($this->getParentInstance(), $subject, $email_to, ($email_from ? $email_from : $this->getMailFrom()), $html, '', $email_cc, '', 0, '', $messageId);
 				if (!$bimpMail->send($email_errors)) {
 					$errors[] = BimpTools::getMsgFromArray($email_errors, 'Echec de l\'envoi de l\'e-mail');

@@ -1222,11 +1222,6 @@ class gsxController extends BimpController
 
         if ($serial) {
             $data2 = $this->gsx_v2->productDetailsBySerial($serial);
-			global $user;
-			if ($user->login == 'f.lauby')	{
-				echo '<pre>' . print_r($data2, true) . '</pre>';
-				  exit();
-			}
             if (isset($data2['device']['productDescription']) && !empty($data2['device']['productDescription'])) {
 
                 $html .= '<div style="margin-top: 15px; padding: 10px; border: 1px solid #DCDCDC">';
@@ -1239,7 +1234,11 @@ class gsxController extends BimpController
                 $html .= '<div class="blink big">' . BimpRender::renderAlerts('Attention un SAV existe déja pour ce serial' . $instance->getLink()) . '</div>';
 
             $data = $this->gsx_v2->serialEligibility($serial);
-
+			global $user;
+			if ($user->login == 'f.lauby')	{
+				echo '<pre>' . print_r($data, true) . '</pre>';
+				exit();
+			}
             if (isset($data['eligibilityDetails']['outcome']) && is_array($data['eligibilityDetails']['outcome'])) {
                 foreach ($data['eligibilityDetails']['outcome'] as $out) {
                     if ($out['action'] == 'WARNING') {

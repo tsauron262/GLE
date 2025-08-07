@@ -715,6 +715,19 @@ class Bimp_User extends BimpObject
 		return 'light';
 	}
 
+
+
+	public function create(&$warnings = array(), $force_create = false)
+	{
+		global $user, $dolibarr_main_authentication;
+		$return = parent::create($warnings, $force_create);
+		if(preg_match('/dolibarr/', $dolibarr_main_authentication)) {
+			$pass = $this->dol_object->setPassword($user, '');
+			$warnings[] = 'Mot de passe : ' . $pass;
+		}
+		return $return;
+	}
+
 	public function getDefaultListHeaderButton()
 	{
 		$buttons = array();
@@ -740,7 +753,7 @@ class Bimp_User extends BimpObject
 			'attr'        => array(
 				'type'    => 'button',
 //				'onclick' => "document.location.replace('" . DOL_URL_ROOT . "/user/card.php?leftmenu=users&action=create');"
-				'onclick' => $this->getJsActionOnclick('selectUser', array(), array('form_name' => ((preg_match('/ldapppp/', $dolibarr_main_authentication))) ? 'select_user' : 'default'))
+				'onclick' => (preg_match('/ldap/', $dolibarr_main_authentication)) ? $this->getJsActionOnclick('create', array(), array('form_name' => 'select_user')) : $this->getJsLoadModalForm('default')
 			)
 		);
 

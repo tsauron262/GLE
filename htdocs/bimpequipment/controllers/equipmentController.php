@@ -143,11 +143,7 @@ class equipmentController extends BimpController
             if (BimpObject::objectLoaded($equipment)) {
 
                 $data = $equipment->gsxLookup($equipment->getData('serial'), $errors);
-				global $user;
-			if ($user->login == 'f.lauby')	{
-				echo '<pre>'. print_r($data, true) . '</pre>';
-				exit();
-			}
+
                 if (isset($data['warning']) && $data['warning']) {
                     $html .= BimpRender::renderAlerts($data['warning'], 'danger');
                 }

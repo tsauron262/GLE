@@ -1239,11 +1239,7 @@ class gsxController extends BimpController
                 $html .= '<div class="blink big">' . BimpRender::renderAlerts('Attention un SAV existe déja pour ce serial' . $instance->getLink()) . '</div>';
 
             $data = $this->gsx_v2->serialEligibility($serial);
-//			global $user;
-			if ($user->login == 'f.lauby')	{
-				echo '<pre>'. print_r($data, true) . '</pre>';
-				exit();
-			}
+
             if (isset($data['eligibilityDetails']['outcome']) && is_array($data['eligibilityDetails']['outcome'])) {
                 foreach ($data['eligibilityDetails']['outcome'] as $out) {
                     if ($out['action'] == 'WARNING') {

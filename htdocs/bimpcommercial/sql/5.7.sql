@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `llx_object_line_remise_arriere` (
   `label` varchar(255) NOT NULL DEFAULT '',
   `value` DECIMAL(24,6) NOT NULL DEFAULT 0,
   KEY `id_object_line` (`id_object_line`,`object_type`)
-)
+);
 
 ALTER TABLE `llx_object_line_remise` CHANGE `percent` `percent` FLOAT(24,8) NOT NULL DEFAULT '0';
 

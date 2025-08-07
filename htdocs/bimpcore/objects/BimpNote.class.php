@@ -1202,7 +1202,7 @@ class BimpNote extends BimpObject
 				}
 
 				if($this->getData('obj_name') == 'Bimp_Ticket') {
-					$content = str_replace(DOL_URL_ROOT, DOL_MAIN_URL_ROOT, $content);
+					$content = str_replace('href="/rdc', 'href="erp.bimp.fr/rdc', $content);
 				}
 				$html .= $content;
 //                if ($this->getData('id_parent_note') > 0) {

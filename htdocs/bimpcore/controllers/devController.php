@@ -46,6 +46,16 @@ class devController extends BimpController
 //            $html .= '</a>';
 //        }
 
+		if(BimpTools::getPostFieldValue('ajLock', false)){
+			file_put_contents(DOL_DATA_ROOT.'/install.lock', 'Ajouté le '.date('Y-m-d H:i:s'));
+		}
+
+		if(!file_exists(DOL_DATA_ROOT.'/install.lock')){
+			$html .= '<a class="btn btn-danger" href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=dev&ajLock=true">';
+			$html .= 'Aj Install.lock' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+			$html .= '</a>';
+		}
+
 		$html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=test" target="_blank">';
 		$html .= 'PAGE TESTS' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
 		$html .= '</a>';

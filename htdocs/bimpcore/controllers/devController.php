@@ -56,6 +56,13 @@ class devController extends BimpController
 			$html .= '</a>';
 		}
 
+		global $dolibarr_main_prod;
+		if(!$dolibarr_main_prod){
+			$html .= '<a class="btn btn-danger" href="#">';
+			$html .= '$dolibarr_main_prod = 0' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+			$html .= '</a>';
+		}
+
 		$html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=test" target="_blank">';
 		$html .= 'PAGE TESTS' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
 		$html .= '</a>';

@@ -996,6 +996,7 @@ class Bimp_Product extends BimpObject
 //        return false;
     }
 
+	/*obsolete*/
     public function getCodeComptableVenteTva($zone_vente = 1)
     {
         if ($zone_vente == 1)

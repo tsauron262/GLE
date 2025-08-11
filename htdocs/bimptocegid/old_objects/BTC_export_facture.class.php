@@ -8,6 +8,7 @@ class BTC_export_facture extends BTC_export
 
     public function export($id_facture, $forced, $confFile,  &$export = Array())
     {
+		BimpCore::addlog('use export de BTC_export_facture', LOG_ERR);
         $suivi = [];
         $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
         $suivi['obj'] = $facture;
@@ -48,7 +49,7 @@ class BTC_export_facture extends BTC_export
         $compte_general_tva_null = $this->convertion_to_interco_code(BimpCore::getConf('vente_tva_null', null, "bimptocegid"), $compte_general_411);
         $compte_refact_ht = $this->convertion_to_interco_code(BimpCore::getConf('refacturation_ht', null, "bimptocegid"), $compte_general_411);
         $compte_refact_ttc = $this->convertion_to_interco_code(BimpCore::getConf('refacturation_ttc', null, "bimptocegid"), $compte_general_411);
-        
+
         switch ($facture->getData('zone_vente')) {
             case 1:
                 $compte_general_produit = $this->convertion_to_interco_code(BimpCore::getConf('vente_produit_fr', null, "bimptocegid"), $compte_general_411);
@@ -105,19 +106,19 @@ class BTC_export_facture extends BTC_export
             $code_auxiliaire = $entrepot->compte_aux;
             $label = strtoupper("vente ticket " . $code_auxiliaire);
         }
-        
+
         if($facture->getData('type') == 2 && $facture->getData('fk_facture_source') > 0) {
             $ref_ext = $this->db->getValue('facture', 'ref', 'rowid = ' . $facture->getData('fk_facture_source'));
         } else {
             $ref_ext = $facture->getData('ref');
         }
-        
+
         $ref_libre = $facture->id;
         if($facture->getData('libelle')) {
             $ref_libre = strtoupper($this->suppr_accents($facture->getData('libelle')));
         }
         $code_journal = $this->getCodeJournal($facture->getData('ef_type'), "V", $is_client_interco);
-        
+
         $structure = [
             'journal'           => [$code_journal, 3],
             'date'              => [$date_facture->format('dmY'), 8],
@@ -243,7 +244,7 @@ class BTC_export_facture extends BTC_export
                                 $use_compte_general = ($have_service_in_facture) ? $compte_general_service : $compte_general_produit;
                                 break;
                         }
-//                            
+//
 //                            $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
 //                            $total_lignes += round($line->multicurrency_total_ht, 2);
 //                        }
@@ -265,15 +266,15 @@ class BTC_export_facture extends BTC_export
                         if ($produit->getData('ref') == "GEN-AUTOFACT") {
                             $use_compte_general = "70704000";
                         }
-                        
+
                         if($produit->getData('ref') == "GEN-AUTOREFACT") {
                             $use_compte_general = "70704000";
                         }
-                        
+
                         if($produit->getData('ref') == 'GEN-AVOIR') {
                             $use_compte_general = "70700000";
                         }
-                        
+
                         if($produit->getData('ref') == "GEN-AVOIR-PRESTATIONS") {
                             $use_compte_general = "70600000";
                         }
@@ -310,7 +311,7 @@ class BTC_export_facture extends BTC_export
                                     $total_lignes += $line->multicurrency_total_ht;
                                 }
                             }
-                            
+
                             if ($use_tva && $line->tva_tx != 0) {
                                 $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
                                 $total_lignes += $line->multicurrency_total_tva;
@@ -373,18 +374,18 @@ class BTC_export_facture extends BTC_export
 
             $structure['contre_partie'] = [$compte_general_411, 17];
             $structure['vide'] = [$code_auxiliaire, 606];
-            
+
             if(!is_array($plusGrand) || $testMontant > $testMontantPlusGrand){
                 $plusGrand = $structure;
                 $testMontantPlusGrand  = $testMontant;
             }
-                
+
             //if(!is_array($plusGrand) || intval($structure['montant']) > intval($plusGrand['montant']))
-                
+
             $ecritures .= $this->struct($structure);
         }
-        
-        
+
+
         if(round($reste,2 ) != 0){
             if(is_array($plusGrand)){
                 $plusGrand['montant'] = [abs(round($reste, 2)), 20, true];
@@ -393,17 +394,17 @@ class BTC_export_facture extends BTC_export
                 $ecritures .= $this->struct($plusGrand);
             }
         }
-        
+
         $write = $this->write_tra($ecritures, $file);
-        
+
         if($facture->getData('fk_mode_reglement') == 3) {
 
             if($facture->getData('rib_client')) {
                 $file_rib = $this->create_daily_file('rib', $facture->getData('datef'));
                 $file_mandat = $this->create_daily_file('mandat', $facture->getData('datef'));
-                
+
                 $ribANDmandat = BimpCache::getBimpObjectInstance('bimptocegid', "BTC_exportRibAndMandat");
-                
+
                 $ecriture_rib = $ribANDmandat->export_rib($facture, $societe);
                 $ecriture_mdt = $ribANDmandat->export_mandat($facture, $societe);
                 if(!empty($ecriture_mdt) && !empty($ecriture_rib)) {
@@ -411,8 +412,8 @@ class BTC_export_facture extends BTC_export
                     $this->write_tra($ecriture_mdt, $file_mandat);
                     $ribANDmandat->passTo_exported($facture);
                 }
-                
-                
+
+
             }  else {
                 $subject = "EXPORT COMPTA - RIB MANQUANT";
                 $msg = "La facture " . $facture->getNomUrl() . " a été exportée avec comme mode de règlement mandat de prélèvement SEPA mais n'a pas de RIB";
@@ -420,7 +421,7 @@ class BTC_export_facture extends BTC_export
                 $mail->send();
             }
         }
-        
+
         if($write) {
             $suivi['ecriture'] = true;
             $suivi['file'] = $file;
@@ -428,13 +429,14 @@ class BTC_export_facture extends BTC_export
             $suivi['ecriture'] = false;
         }
         $export[$facture->getData('ref')] = $suivi;
-        
+
         return $write;
     }
 
     public function export_v2($id_facture, $forced, $confFile)
     {
 
+		BimpCore::addlog('use export_v2 de BTC_export_facture', LOG_ERR);
         $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
         $societe = $this->getInstance('bimpcore', 'Bimp_Societe', $facture->getData('fk_soc'));
 
@@ -464,6 +466,7 @@ class BTC_export_facture extends BTC_export
     public function export_v3($id_facture, $forced, $confFile)
     {
 
+		BimpCore::addlog('use export_v3 de BTC_export_facture', LOG_ERR);
         $errors = [];
         // Définition du nom du fichier
         if (!empty($confFile['name']) && !empty($confFile['dir'])) {
@@ -522,7 +525,7 @@ class BTC_export_facture extends BTC_export
             if ($bc_vente->getData('id_client') == 0) {
                 $is_vente_ticket = true;
             }
-            $id_entrepot = $bc_vente->getData('id_entrepot'); // Id de l'entrepot est égale à l'id de l'entrepot de la vente 
+            $id_entrepot = $bc_vente->getData('id_entrepot'); // Id de l'entrepot est égale à l'id de l'entrepot de la vente
         } else {
             $id_entrepot = $facture->getData('entrepot');
             //$id_entrepot = BimpCore::getConf('default_entrepot'); // Sinon on met l'id de l'entrepot par défaut de la conf du module
@@ -760,7 +763,7 @@ class BTC_export_facture extends BTC_export
         if (count($errors)) {
             mailSyn2("Erreur EXPORT CEGID", BimpCore::getConf('devs_email'), null, "Facture :" . $facture->getNomUrl() . print_r($errors, 1));
         } else {
-            
+
         }
     }
 }

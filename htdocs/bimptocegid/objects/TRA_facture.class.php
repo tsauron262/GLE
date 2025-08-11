@@ -149,6 +149,7 @@
                 $compte_le_plus_grand = '';
                 $montant_le_plus_grand = 0;
 				$tabLine = array();
+				$tabTva = array();
 
                 foreach($facture->dol_object->lines as $line) {
 
@@ -188,6 +189,7 @@
                         $debug['CHOIX_COMPTE_' . $line->id] = $line->id . ' => ' . $this->compte_general;
                         $debug['ID_PRODUCT_' . $line->id] = $line->id . ' => ' . $line->fk_product;
 
+						$tabTva[$this->getCodeComptableVenteTva($facture->getData('zone_vente'), $line->total_tva/$current_montant*100)] += $line->total_tva;
 						if(!$this->groupeLine) {
 							$structure['SENS'] = sizing($this->getSens($line->total_ht), 1, true);
 							$structure['COMPTE_GENERAL'] = sizing(sizing(interco_code($this->compte_general, $this->compte_general_client), 8, false, true), 17);
@@ -244,20 +246,40 @@
                 }
 
 				/* gestion tva */
-                if($facture->getData('zone_vente') == 1 || $facture->getData('zone_vente') == 2) {
-                    if($product->isLoaded())
-                        $this->compte_general = $product->getCodeComptableVenteTva($facture->getData('zone_vente'));
-                    else
-                        $this->compte_general = '44571000';
-                    $structure['COMPTE_GENERAL']        = sizing($this->compte_general , 17);
-                    $structure['SENS']                  = sizing($this->getSens($total_tva),1);
-                    $structure['MONTANT']               = sizing(abs(round($facture->getData('total_tva'), 2)), 20, true);
-                    if(Bimpcore::getConf('mode_detail', null, 'bimptocegid')){
-                        $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
-                        $structure['REF_LIBRE']             = sizing("TVA",35);
-                    }
-                    $ecriture .= implode('', $structure) . "\n";
-                }
+				$verif = 0;
+				foreach($tabTva as $code_tva => $montant_tva) {
+					if($montant_tva == 0)
+						continue;
+					$verifs += $montant_tva;
+					$structure['COMPTE_GENERAL']        = sizing($code_tva , 17);
+					$structure['SENS']                  = sizing($this->getSens($montant_tva),1);
+					$structure['MONTANT']               = sizing(abs(round($montant_tva, 2)), 20, true);
+					if(Bimpcore::getConf('mode_detail', null, 'bimptocegid')){
+						$structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
+						$structure['REF_LIBRE']             = sizing("TVA",35);
+					}
+					$ecriture .= implode('', $structure) . "\n";
+				}
+				if($verifs != $total_tva) {
+					BimpCore::addlog('probléme tva pour la facture ' . $facture->getRef() . ' : ' . $verifs . ' != ' . $total_tva, 'bimptocegid', LOG_ERR);
+					die('soucis TVA');
+				}
+
+				/*obsolte*/
+//                if($facture->getData('zone_vente') == 1 || $facture->getData('zone_vente') == 2) {
+//                    if($product->isLoaded())
+//                        $this->compte_general = $product->getCodeComptableVenteTva($facture->getData('zone_vente'));
+//                    else
+//                        $this->compte_general = '44571000';
+//                    $structure['COMPTE_GENERAL']        = sizing($this->compte_general , 17);
+//                    $structure['SENS']                  = sizing($this->getSens($total_tva),1);
+//                    $structure['MONTANT']               = sizing(abs(round($facture->getData('total_tva'), 2)), 20, true);
+//                    if(Bimpcore::getConf('mode_detail', null, 'bimptocegid')){
+//                        $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
+//                        $structure['REF_LIBRE']             = sizing("TVA",35);
+//                    }
+//                    $ecriture .= implode('', $structure) . "\n";
+//                }
 
 
                 $total_mis_en_ligne =  (round($total_deee,2) + round($total_tva, 2) + round($total_ht, 2));
@@ -290,6 +312,23 @@
             return $return;
 
         }
+		public function getCodeComptableVenteTva($zone_vente = 1, $taux = 20)
+		{
+			$sql = $this->db->db->query("SELECT accountancy_code_sell FROM `llx_c_tva` WHERE active = 1 AND taux = '".$taux."' ORDER BY fk_pays;");
+			while($ln = $this->db->db->fetch_object($sql)) {
+				$code = $ln->accountancy_code_sell;
+				if($code){
+					return $code;
+				}
+			}
+
+
+			if ($zone_vente == 1)
+				return BimpCore::getConf('vente_tva_fr', null, "bimptocegid");
+			elseif ($zone_vente == 2 || $zone_vente == 4)
+				return BimpCore::getConf('vente_tva_ue', null, "bimptocegid");
+			return '44571000';
+		}
 
         private function getSens($montant) {
 

@@ -1187,7 +1187,7 @@ class BimpUserMsg
 							}
 						}
 					} else {
-						BimpCore::addlog('Message utilisateur "' . $code . '" non envoyé (aucun destinataire)'.print_r($dests), 2, 'email', (is_a($obj, 'BimpObject') ? $obj : ''));
+						BimpCore::addlog('Message utilisateur "' . $code . '" non envoyé (aucun destinataire)', 2, 'email', (is_a($obj, 'BimpObject') ? $obj : ''));
 					}
 				}
 			} elseif ($params['canal_diffusion'] == 'msgerp') {

@@ -898,7 +898,7 @@ class BimpUserMsg
 								if ($email && !in_array($email, $to_emails)) {
 									$to_emails[] = $email;
 								}
-								echo '<pre>' . print_r($to_emails, true) . '</pre>';
+								//echo '<pre>' . print_r($to_emails, true) . '</pre>';
 								 // exit();
 							} else {
 								$errors[] = 'Paramètre conf invalide : ' . $e;

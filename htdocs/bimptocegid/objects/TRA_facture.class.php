@@ -262,7 +262,7 @@
 				}
 				if($verifs != $total_tva) {
 					BimpCore::addlog('probléme tva pour la facture ' . $facture->getRef() . ' : ' . $verifs . ' != ' . $total_tva, 'bimptocegid', LOG_ERR);
-					die('soucis TVA');
+					die('soucis TVA pour la facture ' . $facture->getRef() . ' : ' . $verifs . ' != ' . $total_tva);
 				}
 
 				/*obsolte*/

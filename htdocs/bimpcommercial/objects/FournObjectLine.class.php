@@ -21,7 +21,7 @@ class FournObjectLine extends ObjectLine
         'ref_supplier'   => array('label' => 'Référence fournisseur', 'type' => 'string', 'required' => 0, 'default' => '')
     );
 
-    // Getters - overrides ObjectLine: 
+    // Getters - overrides ObjectLine:
 
     public function getProductFournisseursPricesArray($include_empty = true, $empty_label = '')
     {
@@ -78,7 +78,7 @@ class FournObjectLine extends ObjectLine
         return parent::getValueByProduct($field);
     }
 
-    // Overrides ObjectLine: 
+    // Overrides ObjectLine:
 
     public function displayLineData($field, $edit = 0, $display_name = 'default', $no_html = false)
     {
@@ -124,9 +124,9 @@ class FournObjectLine extends ObjectLine
         }
 
         $html = '';
-        
-        
-        
+
+
+
         if (BimpTools::isSubmit('new_values/' . $this->id . '/' . $field)) {
             $value = BimpTools::getValue('new_values/' . $this->id . '/' . $field, null, $data_check);
         } elseif ($field === 'id_product') {
@@ -149,7 +149,7 @@ class FournObjectLine extends ObjectLine
 
         switch ($field) {
             case 'tva_tx':
-                // ATTENTION $value contient la TVA du produit si celui-ci est sélectionné. 
+                // ATTENTION $value contient la TVA du produit si celui-ci est sélectionné.
                 if (is_null($value) && !$this->isLoaded()) {
                     $id_product = (int) $this->getIdProductFromPost();
                     if($id_product){
@@ -168,7 +168,7 @@ class FournObjectLine extends ObjectLine
                 if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {
                     $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
                     $html .= ' <span class="inputInfo warning">Non applicable</span>';
-                } elseif (!$this->isEditable($force_edit) || $attribute_equipment || !$this->canEditPrixVente()) {
+                } elseif (!$this->isEditable($force_edit) || $attribute_equipment || !$this->canEditPrixAchat()) {
                     $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
                     $html .= $value . ' %';
                     if (!$this->isEditable()) {
@@ -272,6 +272,30 @@ class FournObjectLine extends ObjectLine
         return false;
     }
 
+
+	public function canEditPrixVente()
+	{
+		global $user;
+
+		if ((float) $this->qty < 0) {
+			return 1;
+		}
+
+		if (isset($user->rights->bimpcommercial->priceAchat) && (int) $user->rights->bimpcommercial->priceAchat == 1) {
+			return 1;
+		}
+
+		$product = $this->getProduct();
+
+		if (BimpObject::objectLoaded($product)) {
+			if ($product->getData("price") == 1 || $product->getData("price") == 0 || !$product->hasFixePu()) {
+				return 1;
+			}
+		}
+
+		return 0;
+	}
+
     public function validatePost()
     {
         $errors = parent::validatePost();
@@ -300,7 +324,7 @@ class FournObjectLine extends ObjectLine
                 case self::LINE_FREE:
                     if (BimpTools::isSubmit('pa_except')) {
                         $this->pu_ht = BimpTools::getValue('pa_except', $this->pu_ht, 'float');
-                        
+
                         if (!is_null($this->pu_ht)) {
                             $this->pu_ht = (float) $this->pu_ht;
                         }
@@ -436,7 +460,7 @@ class FournObjectLine extends ObjectLine
                         }
                     }
 
-                    // Pas de TVA si vente hors UE: 
+                    // Pas de TVA si vente hors UE:
                     $parent = $this->getParentInstance();
                     if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {
                         $this->tva_tx = 0;

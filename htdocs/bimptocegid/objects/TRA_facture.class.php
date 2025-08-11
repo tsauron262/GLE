@@ -260,7 +260,7 @@
 					}
 					$ecriture .= implode('', $structure) . "\n";
 				}
-				if($verifs != $total_tva) {
+				if(abs($verifs - $total_tva) > 0.01) {
 					BimpCore::addlog('probléme tva pour la facture ' . $facture->getRef() . ' : ' . $verifs . ' != ' . $total_tva, 'bimptocegid', LOG_ERR);
 					die('soucis TVA pour la facture ' . $facture->getRef() . ' : ' . $verifs . ' != ' . $total_tva);
 				}

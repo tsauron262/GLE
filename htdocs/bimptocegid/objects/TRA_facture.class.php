@@ -189,7 +189,7 @@
                         $debug['CHOIX_COMPTE_' . $line->id] = $line->id . ' => ' . $this->compte_general;
                         $debug['ID_PRODUCT_' . $line->id] = $line->id . ' => ' . $line->fk_product;
 
-						$tabTva[$this->getCodeComptableVenteTva($facture->getData('zone_vente'), $line->total_tva/$current_montant*100)] += $line->total_tva;
+						$tabTva[$this->getCodeComptableVenteTva($facture->getData('zone_vente'), round($line->total_tva/$current_montant*100),2)] += $line->total_tva;
 						if(!$this->groupeLine) {
 							$structure['SENS'] = sizing($this->getSens($line->total_ht), 1, true);
 							$structure['COMPTE_GENERAL'] = sizing(sizing(interco_code($this->compte_general, $this->compte_general_client), 8, false, true), 17);

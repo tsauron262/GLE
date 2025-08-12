@@ -276,7 +276,7 @@ www.opmconseil.com
 			$return = $this->execCurl('updateclaim', $params, $errors);
 
 			if ($this->removeOldRequest && ((isset($return['ResponseErrorMessage']) && $return['ResponseErrorMessage'] == 'Invalid claim') || (isset($return['Message']) && stripos($return['Message'], 'No HTTP resource was found that matches the request URI') !== false)) && isset($ecologicData['RequestId'])) {
-				$this->addlog('(Simulation) Suppression des info de remboursmeent ' . $sav->id . ' old ClaimId : ' . $ecologicData['ClaimId']);
+				BimpCore::addlog('(Simulation) Suppression des info de remboursmeent ' . $sav->id . ' old ClaimId : ' . $ecologicData['ClaimId']);
 			}
 
 			/*

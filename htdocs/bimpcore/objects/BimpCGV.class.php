@@ -7,7 +7,7 @@ class BimpCGV extends BimpObject
 	public function canCreate()
 	{
 		global $user;
-		if ($user->admin) {
+		if (1/*$user->admin*/) {
 			return 1;
 		} else {
 			return 0;

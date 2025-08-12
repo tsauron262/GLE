@@ -373,7 +373,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 //
 //                }
             //QR suivie
-            $qr_dir = $dir . "temp";
+            $qr_dir = $dir;// . "temp";
             $data = $sav->getPublicLink();
 //            $data = DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $sav->getChildObject("equipment")->getData("serial")."&id_sav=" . $sav->id . "&user_name=" . substr($client->name, 0, 3);
             $this->getQrCode($data, $qr_dir, "suivie.png");

@@ -20,6 +20,7 @@ www.opmconseil.com
 
 
 	public static $asUser = false;
+	public $removeOldRequest = true;
 	public static $name = 'ecologic';
 	public static $include_debug_json = false;
 	public static $urls_bases = array(
@@ -180,7 +181,7 @@ www.opmconseil.com
 			} /*
              * pre demande trop vieille on efface les infos
              */
-			elseif (((isset($return['ResponseErrorMessage']) && $return['ResponseErrorMessage'] == 'Invalid claim') || (isset($return['Message']) && stripos($return['Message'], 'No HTTP resource was found that matches the request URI') !== false)) && isset($ecologicData['RequestId'])) {
+			elseif ($this->removeOldRequest && ((isset($return['ResponseErrorMessage']) && $return['ResponseErrorMessage'] == 'Invalid claim') || (isset($return['Message']) && stripos($return['Message'], 'No HTTP resource was found that matches the request URI') !== false)) && isset($ecologicData['RequestId'])) {
 				$errors = array();
 				BimpCore::addlog('Suppression des info demande de remboursmeent ' . $sav->id . ' old requestId : ' . $ecologicData['RequestId']);
 				unset($ecologicData['RequestId']);
@@ -197,7 +198,7 @@ www.opmconseil.com
 			$this->options['log_errors'] = false;
 			$return = $this->execCurl('createclaim', $params, $errors);
 			$this->options['log_errors'] = true;
-			if (((isset($return['ResponseErrorMessage']) && $return['ResponseErrorMessage'] == 'Invalid claim') || (isset($return['Message']) && stripos($return['Message'], 'No HTTP resource was found that matches the request URI') !== false)) && isset($ecologicData['RequestId'])) {
+			if ($this->removeOldRequest && ((isset($return['ResponseErrorMessage']) && $return['ResponseErrorMessage'] == 'Invalid claim') || (isset($return['Message']) && stripos($return['Message'], 'No HTTP resource was found that matches the request URI') !== false)) && isset($ecologicData['RequestId'])) {
 				$errors = array();
 				BimpCore::addlog('Suppression des info demande de remboursmeent ' . $sav->id . ' old requestId : ' . $ecologicData['RequestId']);
 				unset($ecologicData['RequestId']);

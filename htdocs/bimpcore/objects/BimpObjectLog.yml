@@ -1,6 +1,7 @@
 table: bimpcore_object_log
 common_fields: 0
 icon: fas_history
+no_transaction_db: 1
 
 labels:
     name: historique

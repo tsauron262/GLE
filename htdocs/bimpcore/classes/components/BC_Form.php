@@ -622,7 +622,7 @@ class BC_Form extends BC_Panel
 				$keep_new_value = (isset($this->params['values']['fields'][$params['input_name']]) ? 1 : 0);
 			}
 
-			$html .= BC_Field::renderDependsOnScriptStatic($this->object, $this->identifier, $params['input_name'], $params['depends_on'], $this->fields_prefix, $keep_new_value, (int) $this->params['reload_now']);
+			$html .= BC_Field::renderDependsOnScriptStatic($this->object, $this->identifier, $params['input_name'], $params['depends_on'], $this->fields_prefix, $keep_new_value/*TODO bug pas de reload a l'initialiation du form ex : deplacer paiement bimpcommercial/index.php?fc=factures&tab=paiements, (int) $this->params['reload_now']*/);
 		}
 
 		$current_bc = $prev_bc;

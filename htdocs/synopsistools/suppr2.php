@@ -36,12 +36,14 @@ require_once('../main.inc.php');
 //if (isset($_REQUEST['connect']))
 //    echo "<script>$(window).on('load', function() {initSynchServ(idActionMax);});</script>";
 llxHeader();
-echo 'ff
+echo 'ff';
+
+?>
 <script>
 
 jQuery("document").ready(function(){
-        if (1) {
-            window.location="https://erp.bimp.fr/bimp8/bimpcore/url_light.php?"++window.location.search.replace("?", "")+"&compatible=true";
+        if ((navigator.userAgent.toLowerCase().indexOf('safari/') > 0) & (navigator.userAgent.toLowerCase().indexOf('chrome/') == -1)) {
+            window.location="https://erp.bimp.fr/bimp8/bimpcore/url_light.php?"+window.location.search.replace("?", "")+"&compatible=true";
         } else {
             var iframe = document.createElement("iframe");
             iframe.src = "https://erp.bimp.fr/b/"+window.location.search.replace("?", "");
@@ -58,5 +60,3 @@ jQuery("document").ready(function(){
 </script>
 <div class="div_iframe"></iframe></div>';
 
-//llxFooter();
-?>

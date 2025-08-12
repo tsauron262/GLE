@@ -275,6 +275,10 @@ www.opmconseil.com
 			$params['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'RepairEndDate' => $dateClose, 'ConsumerInvoiceNumber' => $facRef, 'repairSiteId' => $siteId, 'quoteNumber' => $ref, 'Submit' => 'true');
 			$return = $this->execCurl('updateclaim', $params, $errors);
 
+			if ($this->removeOldRequest && ((isset($return['ResponseErrorMessage']) && $return['ResponseErrorMessage'] == 'Invalid claim') || (isset($return['Message']) && stripos($return['Message'], 'No HTTP resource was found that matches the request URI') !== false)) && isset($ecologicData['RequestId'])) {
+				$this->addlog('(Simulation) Suppression des info de remboursmeent ' . $sav->id . ' old ClaimId : ' . $ecologicData['ClaimId']);
+			}
+
 			/*
 			 * Tout est
 			 */

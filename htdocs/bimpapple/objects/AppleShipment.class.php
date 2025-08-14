@@ -803,7 +803,7 @@ class AppleShipment extends BimpObject
 		$html = '';
 		if (!$this->verifPresenceImage() && $this->getData('status') == 4)	{
 			$html .= '<div style="padding-top: 1em;">';
-			$html .= '<span class="warning" style="font-size: 15px">La photo du colis semble etre absente.</span>';
+			$html .= '<span class="warning" style="font-size: 15px">La photo du colis semble être absente.</span>';
 			$html .= '</div>';
 		}
 		return $html;

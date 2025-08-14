@@ -248,7 +248,8 @@ class AppleShipment extends BimpObject
                 $buttons[] = array(
                     'label'   => 'Expédié',
                     'icon'    => 'fas_check',
-                    'onclick' => $this->getJsNewStatusOnclick(4, array(), array(
+                    'onclick' => $this->getJsActionOnclick('passage_expedie', array(), array(
+//                    'onclick' => $this->getJsNewStatusOnclick(4, array(), array(
                         'confirm_msg' => 'Veuillez confirmer'
                     ))
                 );
@@ -580,6 +581,30 @@ class AppleShipment extends BimpObject
         return array();
     }
 
+	public function verifPresenceImage()
+	{
+		$filter = array(
+			'parent_module'      => $this->module,
+			'parent_object_name' => $this->object_name,
+			'id_parent'          => $this->id,
+			'file_ext'           => array('not_in' => array('pdf')),
+			'deleted'			=> 0,
+			'file_name'			=> array(
+				'part' => 'Etiquette_ups_retour_groupe',
+				'not' => 1,
+				'part_type' => 'beginning'
+			),
+		);
+		$files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', $filter);
+		$haveImage = false;
+		foreach ($files as $key => $file) {
+			if (in_array(strtolower($file->getData('file_ext')), ['heic', 'png', 'jpg', 'jpeg'])) {
+				$haveImage = true;
+			}
+		}
+		return $haveImage;
+	}
+
     // Rendus HTML:
 
     public function renderPartsPendingList($shipTo = null)
@@ -772,6 +797,17 @@ class AppleShipment extends BimpObject
 
         return $html;
     }
+
+	public function renderHeaderExtraLeft()
+	{
+		$html = '';
+		if (!$this->verifPresenceImage() && $this->getData('status') == 4)	{
+			$html .= '<div style="padding-top: 1em;">';
+			$html .= '<span class="warning" style="font-size: 15px">La photo du colis semble etre absente.</span>';
+			$html .= '</div>';
+		}
+		return $html;
+	}
 
     // Traitements:
 
@@ -1456,6 +1492,27 @@ class AppleShipment extends BimpObject
             'warnings' => $warnings
         );
     }
+
+	public function actionPassage_expedie($data, &$success)
+	{
+		$errors = array();
+		$warnings = array();
+		$success = 'Status modifié avec succes';
+
+
+
+		if(!$this->verifPresenceImage()) {
+			$warnings[] = 'Attention, vous sembler avoir oublier la photo du colis';
+		}
+
+		$this->updateField('status', 4);
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
 
     // Overrides:
 

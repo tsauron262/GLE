@@ -1173,15 +1173,44 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
     {
         if (BimpCore::getExtendsEntity() === 'bimp') {
             $url_cgv = 'https://www.bimp.fr/wp-content/uploads/2024/08/20240807_CGV-BIMP-PRO.pdf';
+			$url_dynamique = false;
 
+			$arr_type_piece = array(
+				'Bimp_Propal' => 'devis',
+				'BS_SavPropal' => 'devis',
+				'Bimp_Facture' => 'facture',
+			);
+			$date = ($this->bimpCommObject->getData('date_valid')?$this->bimpCommObject->getData('date_valid'):$this->bimpCommObject->getData('datec'));
+			$filtre = array(
+				'types_pieces' => array('in_braces' => $arr_type_piece[$this->bimpCommObject->object_name]),
+				'secteurs' => array('in_braces' => $this->bimpCommObject->getData('ef_type')),
+				'date_start' => array('custom' => 'a.date_start <= \'' . $date . '\''),
+			);
+//			unset($this->langs, $this->db, $this->pdf, $this->object->db, $this->object->array_options, $this->object->fields, $this->object->linkedObjectsIds, $this->object->linkedObjects, $this->object->thirdparty);
+//			echo '<pre>' . print_r($this->bimpCommObject, true) . '</pre>';
+//			 // exit();
+			if ($this->bimpCommObject->getData('ef_type') == 'S') {
+				$code_centre = $this->bimpCommObject->getData('centre');
+				$centres = BimpCache::getCentresData();
+				if (isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
+					$filtre['id_centre'] = $centres[$code_centre]['id'];
+				}
+			}
+
+			$obj_cgv = BimpCache::findBimpObjectInstance('bimpcore', 'BimpCGV', $filtre, true, false, false, 'date_start', 'DESC');
+			if (BimpObject::objectLoaded($obj_cgv)) {
+				$url_cgv = 'https://' . $_SERVER['HTTP_HOST'] . DOL_URL_ROOT . '/viewimage.php?modulepart=bimpcore&entity=1&file=bimpcore/BimpCGV/' . $obj_cgv->id.'/CGV_file.pdf' ;
+				$url_dynamique = true;
+			}
+//			exit($url_cgv);
             $this->pdf->addVMargin(2);
             $html = '';
 
             $html .= '<p style="font-size: 6px; font-style: italic">';
             if ($this->totals['RPCP'] > 0) {
                 $html .= '<span style="font-weight: bold;">Rémunération Copie Privée : ' . price($this->totals['RPCP']) . ' € HT</span>
-<br/>Notice officielle d\'information sur la copie privée à : http://www.copieprivee.culture.gouv.fr.
-  Remboursement/exonération de la rémunération pour usage professionnel : http://www.copiefrance.fr<br/>';
+				<br/>Notice officielle d\'information sur la copie privée à : http://www.copieprivee.culture.gouv.fr.
+				  Remboursement/exonération de la rémunération pour usage professionnel : http://www.copiefrance.fr<br/>';
             }
 
 //        $html .= '<p style="font-size: 6px; font-weight: bold; font-style: italic">RÉSERVES DE PROPRIÉTÉ : applicables selon la loi n°80.335 du 12 mai';
@@ -1193,14 +1222,24 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                 if (is_a($this, 'PropalSavPDF') || is_a($this, 'InvoiceSavPDF')) {
                     $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et en boutique pour les particuliers.';
                 } elseif ($this->pdf->addCgvPages) {
-                    $html .= 'Le présent devis est soumis aux conditions générales de ventes annexées et consultables sur le site (<a href="' . $url_cgv . '">' . str_replace('https://', '', $url_cgv) . '</a>) et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)';
+                    $html .= 'Le présent devis est soumis aux conditions générales de ventes annexées et consultables sur ';
+					if ($url_dynamique)
+						$html .= '<a href="' . $url_cgv . '">notre site</a>)';
+					else
+						$html .= 'le site (<a href="' . $url_cgv . '">' . str_replace('https://', '', $url_cgv) . '</a>)';
+					$html .= ' et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)';
                 } else {
-                    $html .= 'Le présent devis est soumis aux conditions générales de ventes (<a href="' . $url_cgv . '">' . str_replace('https://', '', $url_cgv) . '</a>) et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)';
+                    $html .= 'Le présent devis est soumis ';
+					if ($url_dynamique)
+	                    $html .= '<a href="' . $url_cgv . '">aux conditions générales de ventes</a>';
+					else
+						$html .= 'aux conditions générales de ventes (<a href="' . $url_cgv . '">' . str_replace('https://', '', $url_cgv) . '</a>)';
+                    $html .= ' et/ou aux conditions générales de service (<a href="https://www.bimp-pro.fr/contrats/">www.bimp-pro.fr/contrats/</a>)';
                 }
 
                 $html .= "</span>";
                 $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.
-   En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40€ (article L.441-6 du code de commerce).';
+   						En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40€ (article L.441-6 du code de commerce).';
                 $html .= 'La Société ' . $this->fromCompany->name . ' ne peut être tenue pour responsable de la perte éventuelles de données informatiques. ';
                 $html .= ' Il appartient au client d’effectuer des sauvegardes régulières de ses informations. En aucun cas les soucis systèmes, logiciels, paramétrages internet';
                 $html .= ' et périphériques et les déplacements ne rentrent dans le cadre de la garantie constructeur.';

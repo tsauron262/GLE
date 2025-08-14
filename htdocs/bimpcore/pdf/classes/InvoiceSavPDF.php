@@ -48,7 +48,33 @@ class InvoiceSavPDF extends InvoicePDF
                     if (!$code_centre) {
                         $code_centre = 'L'; // Par précaution sinon aucune CGV ne peut être intégrée.
                     }
-                    $cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_boutiques/cgv_' . $code_centre . '.pdf';
+					$centres = BimpCache::getCentresData();
+					if (isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
+						$centre = $centres[$code_centre];
+						$bimpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $this->sav->getData('id_facture'));
+						if (BimpObject::objectLoaded($bimpFacture)) {
+							$date = ($bimpFacture->getData('date_valid') ? '\'' . $bimpFacture->getData('date_valid') . '\'' : '\'' . $bimpFacture->getData('datec') . '\'');
+						}
+						else $date = 'CURRENT_DATE';
+						$filter = array(
+							'types_pieces' => array('in_braces' => 'facture'),
+							'date_start'   => array('custom' => 'a.date_start <= ' . $date),
+							'secteurs' => array('in_braces' => 'S'),
+							'id_centre'    => $centre['id'],
+						);
+						// echo '<pre>' . print_r($filter, true) . '</pre>';
+						// exit();
+						$obj_cgv = BimpCache::findBimpObjectInstance('bimpcore', 'BimpCGV', $filter, true, false, false, 'date_start', 'DESC');
+
+						if (BimpObject::objectLoaded($obj_cgv)) {
+							$cgv_file = $obj_cgv->getFilesDir();
+							$cgv_file .= 'CGV_file.pdf';
+						}
+					}
+					if (!$cgv_file) {
+						$cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_boutiques/cgv_' . $code_centre . '.pdf';
+					}
+					// exit($cgv_file);
                     break;
 
                 case 'actimac':

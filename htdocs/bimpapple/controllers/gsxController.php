@@ -1297,8 +1297,8 @@ class gsxController extends BimpController
 				$data = $this->gsx_v2->partsSummaryBySerial($serial);
 				echo '<pre>partsSummaryBySerial :' . print_r($data, true) . '</pre>';
 
-				$data = $this->gsx_v2->partsSummaryBySerialAndIssue($serial);
-				echo '<pre>partsSummaryBySerialAndIssue :' . print_r($data, true) . '</pre>';
+				$data = $this->gsx_v2->repairSummaryByIdentifier($serial, 'serial');
+				echo '<pre>repairSummaryByIdentifier :' . print_r($data, true) . '</pre>';
 				exit;
 			}
         }

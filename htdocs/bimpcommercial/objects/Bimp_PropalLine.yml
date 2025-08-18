@@ -99,6 +99,10 @@ fields:
             type: custom
             content: 
                 callback: renderLinkedContratLineInput
+    
+    extradata: 
+        label: extra data
+        type: json
             
 forms: 
     default: 

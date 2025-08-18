@@ -588,7 +588,6 @@ forms:
         msgs:
             - type: info
               content: L'option "Déplacer" n'est disponible que si le devis actuel est en brouillon
-#                  callback: displayAlertDuplicateNoProv
         rows:
             - custom: 1
               label: Action souhaité
@@ -606,6 +605,69 @@ forms:
                   type: select
                   options:
                       callback: getDevisCibles
+    garantie:
+        rows:
+            -   custom: 1
+                label: Numéro de série du produit défectueux
+                input_name: numSerie
+                input:
+                    type: select
+                    options:
+                        callback: getSerialsFromClient
+            -   custom: 1
+                label: Date de vente initial
+                input_name: date_vente
+                depends_on: numSerie
+                required: 1
+                content:
+                    callback:
+                        method: renderLineInput
+                        params:
+                            - date_vente
+            -   custom: 1
+                label: Achat LDLC
+                input_name: achat_ldlc
+                data_type: bool
+                input:
+                    type: toggle
+                depends_on: numSerie
+                value:
+                    callback:
+                        method: getElementsFormGarantie
+                        params:
+                            - achat_ldlc
+            -   custom: 1
+                label: Prix de vente remisé
+                input_name: pvr
+                input:
+                    type: text
+                data_type: money
+                depends_on: numSerie
+                value:
+                    callback:
+                        method: getElementsFormGarantie
+                        params:
+                            - pvr
+                min: 0
+                required: 1
+            -   custom: 1
+                label: Choix CGV
+                input_name: choix_cgv
+                input:
+                    type: select
+                    options:
+                        array: arrayCgv
+            -   custom: 1
+                label: Mise au rebus
+                input_name: miseRebus
+                input:
+                    type: toggle
+                depends_on: numSerie,pvr
+                value:
+                    callback:
+                        method: getElementsFormGarantie
+                        params:
+                            - miseRebus
 
 filters: 
     id_commercial: 

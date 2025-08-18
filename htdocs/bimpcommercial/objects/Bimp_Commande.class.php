@@ -3981,6 +3981,29 @@ class Bimp_Commande extends Bimp_CommandeTemp
 			$infos[] = BimpTools::getMsgFromArray($comm_infos);
 		}
 
+		if (!$errors) {
+			$lines = $this->getLines();
+			foreach ($lines as $line) {
+				if ($extraData = $line->getData('extradata')) {
+					foreach ($extraData as $key => $extra) {
+						if ($key == 'mise_rebut' && isset($extra['equipement'])) {
+							$id_entrepot_rebut = 156;
+							$equipement = $extra['equipement'];
+							$place = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Place');
+							$place->set('id_equipment', $equipement);
+							$place->set('type', 2);
+							$place->set('id_entrepot', $id_entrepot_rebut);
+							$place->set('infos', 'Mise au rebus le ' . date('d/m/Y') . ' dans le cadre de la garantie 3 ans');
+							$place->set('origin', 'commande');
+							$place->set('id_origin', $this->id);
+							$place->set('date', date('Y-m-d H:i:s'));
+							$errors = $place->create($warnings, true);
+						}
+					}
+				}
+			}
+		}
+
 		return array(
 			'errors'           => $errors,
 			'warnings'         => $warnings,

@@ -50,6 +50,13 @@ class ObjectLine extends BimpObject
 		'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => '', 'check' => 'restricthtml'),
 		'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null, 'check' => 'int')
 	);
+	const TAUX_CGV_100 = 100;
+	const TAUX_CGV_70 = 70;
+	public static $arrayCgv = array(
+		self::TAUX_CGV_70 => array('label' => '70% du prix de vente'),
+		self::TAUX_CGV_100 => array('label' => '100% du prix de vente'),
+	);
+
 	protected $product = null;
 	protected $post_id_product = null;
 	protected $post_equipment = null;
@@ -124,6 +131,15 @@ class ObjectLine extends BimpObject
 		return 0;
 	}
 
+	public function canSetAction($action)
+	{
+		switch ($action) {
+			case 'allowGarantie3ans':
+				return 1;
+		}
+
+		return parent::canSetAction($action);
+	}
 	// Getters booléens:
 
 	public function isCreatable($force_create = false, &$errors = array())
@@ -268,6 +284,24 @@ class ObjectLine extends BimpObject
 		if (in_array($action, array('attributeEquipment')) && !$this->isLoaded()) {
 			$errors[] = '(111) ID ' . $this->getLabel('of_the') . ' absent';
 			return 0;
+		}
+
+		switch ($action) {
+			case 'allowGarantie3ans':
+				if (BimpCore::getConf('use_garantie3ans', null, 'bimpcommercial') && strstr($this->parent->getData('ref'), '(PROV') !== false) {
+					if (($this->parent->object_name == 'Bimp_Propal' && BimpCore::getConf('use_garantie3ans_propal', null, 'bimpcommercial'))
+						||
+						($this->parent->object_name == 'BS_SavPropal' && BimpCore::getConf('use_garantie3ans_sav', null, 'bimpcommercial'))) {
+						foreach ($this->parent->dol_object->lines as $line) {
+							if ($line->id != $this->getData('id_line')) {
+								continue;
+							}
+							$total_tva = (float) $line->total_tva;
+							return $total_tva > 0.0;
+						}
+					}
+				}
+				return 0;
 		}
 
 		return (int) parent::isActionAllowed($action, $errors);
@@ -729,6 +763,16 @@ class ObjectLine extends BimpObject
 					'icon'    => 'fas_plus-circle',
 					'onclick' => $onclick
 				);
+			}
+
+			if ((int) $this->id_product) {
+				if ($this->isActionAllowed('allowGarantie3ans') && $this->canSetAction('allowGarantie3ans')) {
+					$buttons[] = array(
+						'label'   => 'Garantie 3 ans',
+						'icon'    => 'fas_shield-alt',
+						'onclick' => $this->getJsActionOnclick('appliqueGarantie', array(), array('form_name' => 'garantie'))
+					);
+				}
 			}
 		}
 
@@ -1877,6 +1921,67 @@ class ObjectLine extends BimpObject
 		}
 
 		return $serials;
+	}
+
+	public function getSerialsFromClient()
+	{
+		$equipments_ids = array(0 => '');
+
+		global $db;
+		$bdd = new BimpDb($db);
+		$idClient = $this->parent->getData('fk_soc');
+		$rows = $bdd->getRows(
+			'be_equipment_place AS ep',
+			'ep.type = 1 AND ep.id_client = ' . $idClient,
+			null, 'object', array('UNIQUE ep.id_equipment, e.serial'), 'e.serial', 'ASC',
+			array('e' => array('table' => 'be_equipment', 'on' => 'e.id = ep.id_equipment'))
+		);
+		foreach ($rows as $row) {
+			$equipments_ids[$row->id_equipment] = $row->serial;
+		}
+
+		return $equipments_ids;
+	}
+
+	public function getElementsFormGarantie($fields)
+	{
+		global $db;
+		$sn = BimpTools::getPostFieldValue('numSerie', 0);
+		switch ($fields) {
+			case 'pvr':
+				if ($sn > 0) {
+					$equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int)$sn);
+					return $equipment->getData('prix_vente') ?: null;
+				}
+				else return '';
+			case 'achat_ldlc':
+				if($sn > 0){
+					$bdd = new BimpDb($db);
+					$fksoc_fourn = $bdd->getRows(
+						'bimp_commande_fourn_line AS cfl',
+						'cfl.linked_object_name = \'commande_line\' AND linked_id_object = ' . (string)$this->id,
+						null, 'object', array('cf.fk_soc'), null, null,
+						array('cf' => array(
+							'table' => 'commande_fournisseur',
+							'on' => 'cf.rowid = cfl.id_obj'
+						))
+					)[0]->fk_soc;
+					return in_array((int)$fksoc_fourn, json_decode(BimpCore::getConf('ldlcIdFourn', array(), 'bimpcommercial'), true));
+				}
+				else return false;
+			case 'miseRebus':
+				if ($sn > 0){
+					$bdd = new BimpDb($db);// exit();
+					$newProduct = $bdd->getRow('propaldet', 'rowid = ' . $this->getData('id_line'), array('total_ttc'));
+					$pvr = BimpTools::getPostFieldValue('pvr', '');
+					if ($pvr == '') {
+						$pvr = $this->getElementsFormGarantie('pvr');
+					}
+					return (float)$newProduct->total_ttc > 0.8 * $pvr;
+				}
+				else return false;
+		}
+		return false;
 	}
 
 	public function getListExtraBulkActions()
@@ -4786,6 +4891,28 @@ class ObjectLine extends BimpObject
 						$html .= '<span class="danger">NON</span>';
 						$html .= '<input type="hidden" value="0" name="' . $prefixe . 'hide_in_pdf' . '"/>';
 					}
+				}
+				break;
+
+			case 'date_vente':
+				$sn = bimpTools::getPostFieldValue('numSerie', 0);
+				if($sn == 0) $html .= BimpInput::renderInput('date', $prefixe . $field);
+				else	{
+					$equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int)$sn);
+//					$html .= '<pre>' . print_r($equipment->getData('date_vente'), true) . gettype($equipment->getData('date_vente')) .  '</pre>';
+					if ($equipment->getData('date_vente')) {
+						$date_vente = new DateTime($equipment->getData('date_vente'));
+						$diff = $date_vente->diff(new DateTime());
+						if ($diff->format('%y') > 2) {
+							if ($diff->format('%y') > 3)
+								$html .= '<span class="danger">ATTENTION, date d\'achat hors garantie</span>';
+							else $html .= '<span class="success">Avez-vous vérifier la garantie constructeur ?</span>';
+						}
+					}
+					else {
+						$html .= '<span class="info">Date d\'achat inconnue, merci de la préciser ici :</span>';
+					}
+					$html .= BimpInput::renderInput('date', $prefixe . $field, substr((string)$equipment->getData('date_vente'), 0, 10));
 				}
 				break;
 		}

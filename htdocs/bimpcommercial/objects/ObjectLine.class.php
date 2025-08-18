@@ -5464,6 +5464,98 @@ class ObjectLine extends BimpObject
 		);
 	}
 
+	public function actionAppliqueGarantie($data, &$success)
+	{
+		global $db;
+		$errors = array();
+		$warnings = array();
+		$success = 'Ligne de garantie ajoutée';
+
+		if (isset($data['date_vente'])) {
+			$date_vente = new DateTime($data['date_vente']);
+			$diff = $date_vente->diff(new DateTime());
+			if ($diff->format('%y') > 3) {
+				$errors[] = 'Délai de garantie dépassé !';
+			}
+		}
+
+		$bdd = new BimpDb($db);
+
+		if (!$errors) {
+			$count = $bdd->getCount($this->getTable(), 'linked_object_name = \'garantie\' AND linked_id_object = ' . $this->getData('id'));
+			if ($count) {
+				$errors[] = 'Une garantie a déjà été ajoutée pour cette ligne';
+			}
+		}
+
+		if (!$errors) {
+			$montantGarantie = (float) $data['pvr'] * (float) $data['choix_cgv'] / 100;
+			$ttc = $this->getTotalTTC(true);
+			if ($montantGarantie > (float) $ttc) {
+				$montantGarantie = (float) $ttc;
+			}
+			if ($montantGarantie > BimpCore::getConf('max_remb_garantie3ans', 3000.0, 'bimpcommercial')) {
+				BimpCore::getConf('max_remb_garantie3ans', 3000.0, 'bimpcommercial');
+			}
+			$montantGarantie *= -1;
+			$arrIdsProdGarantie3ans = array(
+				0 => BimpCore::getConf('id_prod_garantie_3ans_ext', 0, 'bimpcommercial'),
+				1 => BimpCore::getConf('id_prod_garantie_3ans_ldlc', 0, 'bimpcommercial')
+			);
+			$idProdGarantie = $arrIdsProdGarantie3ans[(int) $data['achat_ldlc']];
+			if ($idProdGarantie == 0) {
+				$errors[] = 'probleme de configuration des produits de garantie';
+			}
+			if (!$errors) {
+				$productGarantie = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $idProdGarantie);
+				$montantGarantie_ht = $montantGarantie / (1 + $productGarantie->getData('tva_tx') / 100);
+				$data_json = array();
+				if ((int) $data['miseRebus'] > 0) {
+					$data_json = array(
+						'mise_rebut' => array(
+							'equipement' => $data['numSerie'],
+						)
+					);
+				} else {
+					$data_json = array(
+						'reparation' => array(
+							'equipement' => $data['numSerie'],
+						)
+					);
+				}
+
+				$newLine = BimpObject::getInstance($this->module, $this->object_name);
+				$newLine->id_product = $idProdGarantie;
+				$newLine->product_type = $productGarantie->getData('fk_product_type');
+				$newLine->desc = $productGarantie->getData('label');
+				$newLine->qty = 1;
+				$newLine->pu_ht = $montantGarantie_ht;
+				$newLine->tva_tx = $productGarantie->getData('tva_tx');
+				$newLine->pa_ht = ($data['achat_ldlc'] ? $montantGarantie_ht : 0.0);
+
+				$newLine_errors = $newLine->validateArray(array(
+					'id_obj'             => $this->getData('id_obj'),
+					'type'               => 1,
+					'extradata'          => $data_json,
+					'linked_object_name' => 'garantie',
+					'linked_id_object'   => $this->getData('id')
+				));
+
+				if (!count($newLine_errors)) {
+					$newLine_errors = $newLine->create($warnings, true);
+				}
+				if (count($newLine_errors)) {
+					$errors[] = BimpTools::getMsgFromArray($newLine_errors, 'Echec de l\'ajout de la ligne au devis ');
+				}
+			}
+		}
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
 	public function getDevisCibles()
 	{
 		$options = array();

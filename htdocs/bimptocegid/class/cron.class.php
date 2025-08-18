@@ -192,7 +192,7 @@
                         if(count($controle->balance) > 0) {
                             if(!in_array($fileName, $this->filesNotFtp)) $this->filesNotFtp[] = $fileName;
                             $error++;
-                            $message .= 'Erreur de balance: <br />';
+                            $message .= 'Erreur de balance: <br />'.print_r($controle->balance, 1);
                             foreach($controle->balance as $facture => $i) {
                                 if((int)$i['LINE'] > 0) {
                                     $ecart = (float) $i['TTC'] - (float) $i['CONTROLE'];

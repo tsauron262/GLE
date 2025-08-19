@@ -125,7 +125,21 @@ forms:
     default: 
         rows: 
             shipto: 
-                field: ship_to
+                custom: 1
+                label: N° ShipTo
+                required: 1
+                input_name: shipto
+                data_type: string
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                            method: getShiptosArray
+                            params :
+                                - false
+                                - true
+                value:
+                    callback: getUserCentre
                 show: 
                     callback: isNotLoaded
             carrier: 

@@ -1966,7 +1966,7 @@ class ObjectLine extends BimpObject
 							'on' => 'cf.rowid = cfl.id_obj'
 						))
 					)[0]->fk_soc;
-					return in_array((int)$fksoc_fourn, json_decode(BimpCore::getConf('ldlcIdFourn', array(), 'bimpcommercial'), true));
+					return in_array((int)$fksoc_fourn, json_decode(BimpCore::getConf('ldlcIdFourn', '[]', 'bimpcommercial'), true));
 				}
 				else return false;
 			case 'miseRebus':

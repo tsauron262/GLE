@@ -17,7 +17,7 @@ class BDS_ConvertProcess extends BDSProcess
         'ReceptionsToConvert'      => 'Conversion des lignes de réception',
         'abosToConvert'            => 'Conversion des Abonnements',
         'abosPropalLinesToConvert' => 'Conversion des données abo dans propales',
-//		'anonymize_dev'				=> 'Anonymisation des données sur les instances de dev' // https://erp.bimp.fr/bimp8/bimpdatasync/index.php?fc=process&id=56
+		'anonymize_dev'				=> 'Anonymisation des données sur les instances de dev' // https://erp.bimp.fr/bimp8/bimpdatasync/index.php?fc=process&id=56
     );
     public static $default_public_title = 'Scripts de conversions des données';
 
@@ -1487,7 +1487,7 @@ class BDS_ConvertProcess extends BDSProcess
 
 	public function findAnonymize_dev(&$errors = array())
 	{
-		// si necessaire : ALTER TABLE llx_societe ADD COLUMN `anonym_dev` INTEGER default 0
+		$this->db->db->query('ALTER TABLE llx_societe ADD COLUMN IF NOT EXISTS `anonym_dev` INTEGER default 0');
 		$sql = "SELECT rowid FROM llx_societe WHERE is_anonymized = 0 AND anonym_dev = 0";
 		$rows = $this->db->executeS($sql, 'array');
 		if (is_array($rows)) {
@@ -1505,6 +1505,7 @@ class BDS_ConvertProcess extends BDSProcess
 	{
 		global $db;
 
+		$success = array();
 		foreach ($this->references as $socid) {
 			$requete = array();
 			$this->incProcessed();
@@ -1562,8 +1563,9 @@ class BDS_ConvertProcess extends BDSProcess
 				$requete[] = $sql;
 				$db->query($sql);
 			}
-			$this->Success('OK : Anonymisation de ' . json_encode($soc) . '<br>'.json_encode($requete));
+			$success[] = 'OK : Anonymisation de ' . json_encode($soc) . '<br>'.json_encode($requete);
 		}
+		$this->Success(implode('<br>', $success));
 	}
 
 

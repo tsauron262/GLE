@@ -4627,6 +4627,21 @@ class Bimp_Facture extends BimpComm
 				$client->setActivity('Validation ' . $this->getLabel('of_the') . ' {{Facture:' . $this->id . '}}');
 			}
 
+
+			$id_contact = $this->getIdContact('external', 'CLIFINAL');
+			if ($id_contact > 0) {
+				$id_client = (int) $this->db->getValue('socpeople', 'fk_soc', 'rowid = ' . $id_contact);
+				if ($id_client && $id_client !== (int) $this->getData('fk_soc')) {
+					$this->updateField('id_client_final', $id_client);
+					$this->addObjectLog('Ajout du client final via le contact '.$id_contact);
+				}
+				else{
+					$this->addObjectLog('Impossible d\'ajouter le client final via le contact '.$id_contact);
+				}
+			}
+
+
+
 			$id_client_final = (int) $this->getData('id_client_final');
 			if ($id_client_final && $id_client_final !== $client->id) {
 				$client_final = $this->getChildObject('client_final');
@@ -6911,14 +6926,6 @@ class Bimp_Facture extends BimpComm
 		if (!count($errors)) {
 			if ($this->field_exists('expertise') && !(int) $this->getData('expertise') && $this->getData('ef_type') == 'S') {
 				$this->set('expertise', 90);
-			}
-		}
-
-		$id_contact = $this->getIdContact('external', 'CLIFINAL');
-		if ($id_contact > 0) {
-			$id_client = (int) $this->db->getValue('socpeople', 'fk_soc', 'rowid = ' . $id_contact);
-			if ($id_client && $id_client !== (int) $this->getData('fk_soc')) {
-				$this->updateField('id_client_final', $id_client);
 			}
 		}
 

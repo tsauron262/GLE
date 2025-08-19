@@ -3537,7 +3537,7 @@ class Bimp_Societe extends BimpDolObject
 			if (!strtotime($cur_date) || $cur_date < $date) {
 				global $user;
 				$bimpUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $user->id);
-				$origin .= '<br>(par ' . $bimpUser->getFullname() . ' le ' . date('d/m/Y') . ')';
+				$origin .= ' (par ' . $bimpUser->getFullname() . ' le ' . date('d/m/Y') . ')';
 
 				$this->updateField('date_last_activity', $date);
 				$this->updateField('last_activity_origin', $origin);

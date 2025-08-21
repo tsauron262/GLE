@@ -133,9 +133,13 @@ class ObjectLine extends BimpObject
 
 	public function canSetAction($action)
 	{
+		global $user;
 		switch ($action) {
 			case 'allowGarantie3ans':
 				return 1;
+
+			case 'modifAcompte':
+				return $user->rights->BimpSupport->sav_admin;
 		}
 
 		return parent::canSetAction($action);
@@ -287,6 +291,9 @@ class ObjectLine extends BimpObject
 		}
 
 		switch ($action) {
+			case 'modifAcompte':
+				return $this->object_name == 'BS_SavPropalLine'
+					&& $this->getData('linked_id_object') && $this->getData('linked_object_name') == 'sav_discount';
 			case 'allowGarantie3ans':
 				if (BimpCore::getConf('use_garantie3ans', null, 'bimpcommercial') && strstr($this->parent->getData('ref'), '(PROV') !== false) {
 					if (($this->parent->object_name == 'Bimp_Propal' && BimpCore::getConf('use_garantie3ans_propal', null, 'bimpcommercial'))
@@ -771,6 +778,17 @@ class ObjectLine extends BimpObject
 						'label'   => 'Garantie 3 ans',
 						'icon'    => 'fas_shield-alt',
 						'onclick' => $this->getJsActionOnclick('appliqueGarantie', array(), array('form_name' => 'garantie'))
+					);
+				}
+			}
+
+			if ($this->isActionAllowed('modifAcompte') && $this->canSetAction('modifAcompte'))	{
+				$propal = $this->db->getRow('propal', 'rowid = ' .$this->getData('id_obj') );
+				if (strpos($propal->ref, '(PROV') !== false) {
+					$buttons[] = array(
+						'label'   => 'Modif Acompte',
+						'icon'    => 'fas_undo-alt',
+						'onclick' => $this->getJsActionOnclick('modifAcompte', array(), array('form_name' => 'modifAcompte'))
 					);
 				}
 			}
@@ -5553,6 +5571,98 @@ class ObjectLine extends BimpObject
 		return array(
 			'errors'   => $errors,
 			'warnings' => $warnings
+		);
+	}
+
+	public function actionModifAcompte($data, $success)
+	{
+		$errors = array();
+		$warnings = array();
+		$success = '';
+		$success_callback = '';
+
+		$id_sav = BimpTools::getPostFieldValue('id');
+		$sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
+		$id_facture_acompte = $sav->getData('id_facture_acompte');
+		if (in_array($data['typeModifAcompte'], array('delier', 'remb'))) {
+			$success = 'Accompte délié avec succes';
+			// partie commune au 2 cas (delier et remb)
+			$sav->updateField('id_facture_acompte', 0);
+			$sav->updateField('acompte', 0);
+
+			$err_delete = $this->deleteLine();
+			if($err_delete)	{
+				$errors[] = $err_delete;
+			}
+		}
+
+		if ($data['typeModifAcompte'] == 'remb') {
+			$success = 'Accompte remboursé avec succes';
+			// partie spécicfique au remboursement
+			$facture = BimpObject::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
+			$facture->set('ef_type', 'S');
+			$facture->set('datef', date('Y-m-d'));
+			$facture->set('fk_soc', $sav->getData('id_client'));
+			$err_fac = $facture->create();
+			if ($err_fac) {
+				$errors[] = $err_fac;
+			}
+			else {
+				$success_callback = 'window.open(\'' . $facture->getUrl() . '\')';
+				$discount = new DiscountAbsolute($this->db->db);
+				$discount->fetch($this->getData('linked_id_object'));
+				$line_errors = $facture->insertDiscount((int) $discount->id);
+				if (count($line_errors)) {
+					$errors[] = BimpTools::getMsgFromArray($line_errors);
+				}
+
+				/*
+				// ai-je un bc_paiement avec $id_facture_acompte
+				$bdd = new BimpDb($this->db->db);
+				$rows = $bdd->getRows('bc_paiement bcp', 'bcp.id_facture = ' . $id_facture_acompte, 1, 'object',
+					array('bcp.id_caisse', 'dolp.ref', 'dolp.amount', 'bank.fk_account'), null, null,
+					array(
+						'dolp' => array('table' => 'paiement', 'on' => 'bcp.id_paiement = dolp.rowid'),
+						'bank' => array('table' => 'bank', 'on' => 'dolp.fk_bank = bank.rowid'),
+					)
+				);
+				if (count($rows))	{ // oui, il faut rajouter une ligne pour compenser
+					BimpTools::loadDolClass('compta/paiement', 'paiement');
+					foreach ($rows as $row)	{
+						// $errors[] = '<pre>' .$id_facture_acompte. print_r($row, true) . '</pre>';
+						$payement = new Paiement($this->db->db);
+						$amount = -1 * (float)$row->amount;
+						$payement->amounts = array($facture->id => $amount);
+						$payement->ref = 'RMB_'.$row->ref;
+						$payement->datepaye = dol_now();
+						$id_mode_paiement = 4; // /admin/dict.php?id=13 (LIQ)
+						$payement->paiementid = (int) $id_mode_paiement; // ? A mettre dans le form
+						global $user;
+						if ($payement->create($user) <= 0)	{
+							$errors[] = 'Echec de l\'enregistrement du remboursement en caise';
+						}
+						else {
+							if ($row->fk_account)	{
+								if ($res = $payement->addPaymentToBank($user, 'payement', '(CustomerInvoicePaymentBack)', $row->fk_account, '', '') <= 0)	{
+									$errors[] = 'Echec du retrait du compte bancaire (' . var_export($res, true) . ')';
+								}
+								else {
+									if($row->id_caisse) {
+										$caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $row->id_caisse);
+										$errors = BimpTools::merge_array($errors, $caisse->addPaiement($payement, $facture->id));
+									}
+								}
+							}
+						}
+					}
+				}
+				*/
+			}
+		}
+		return array(
+			'errors' => $errors,
+			'warnings' => $warnings,
+			'success_callback' => $success_callback
 		);
 	}
 

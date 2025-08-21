@@ -44,7 +44,7 @@
 						$db->query($sql);
 
 						foreach ($users as $u) {
-							$sql = "INSERT INTO" . MAIN_DB_PREFIX . "user_rights (entity, fk_user, fk_right) VALUES (" . $entity . ", " . $u['rowid'] . ", " . $right[0] . ")";
+							$sql = "INSERT INTO " . MAIN_DB_PREFIX . "user_rights (entity, fk_user, fk_right) VALUES (" . $entity . ", " . $u['rowid'] . ", " . $right[0] . ")";
 							$db->query($sql);
 						}
 					}

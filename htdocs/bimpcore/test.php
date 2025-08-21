@@ -16,7 +16,7 @@ if ($req->num_rows) {
 	while ($u = $db->fetch_array ($req)) {
 		foreach ($e as $entity) {
 			$sql = 'INSERT INTO '.MAIN_DB_PREFIX.'user_rights (entity, fk_user, fk_id) VALUES(' .$entity. ', '.$u['rowid'].', 754392)';
-			echo $sql . '<br>';
+			$db->query($sql);
 		}
 	}
 }

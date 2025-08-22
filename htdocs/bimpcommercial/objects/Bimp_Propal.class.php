@@ -345,7 +345,9 @@ class Bimp_Propal extends Bimp_PropalTemp
 				return 0;
 
 			case 'close':
-				if ($status !== Propal::STATUS_VALIDATED) {
+				$signature = $this->getChildObject('signature');
+
+				if ($status !== Propal::STATUS_VALIDATED && !($status === 2 && BimpObject::objectLoaded($signature) && (int) $signature->getData('status') < 0)) {
 					$errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
 					return 0;
 				}
@@ -3567,6 +3569,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 				}
 			}
 
+			$client = $this->getChildObject('client');
 			if (BimpObject::objectLoaded($client)) {
 				$client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Devis:' . $this->id . '}}');
 			}
@@ -3772,6 +3775,8 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 	public function onSignatureRefused($bimpSignature)
 	{
+		$errors = array();
+
 		if ((int) $this->getData('fk_statut') === Propal::STATUS_VALIDATED) {
 			$errors = $this->updateField('fk_statut', Propal::STATUS_NOTSIGNED);
 		}

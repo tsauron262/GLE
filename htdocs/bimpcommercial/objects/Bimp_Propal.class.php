@@ -3571,10 +3571,10 @@ class Bimp_Propal extends Bimp_PropalTemp
 				}
 			}
 
-//			$client = $this->getChildObject('client');
-//			if (BimpObject::objectLoaded($client)) {
-//				$client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Devis:' . $this->id . '}}');
-//			}
+			$client = $this->getChildObject('client');
+			if (BimpObject::objectLoaded($client)) {
+				$client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Devis:' . $this->id . '}}');
+			}
 		}
 
 		return $errors;
@@ -3779,7 +3779,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 	{
 		$errors = array();
 
-		if (in_array(int) $this->getData('fk_statut'), array(Propal::STATUS_VALIDATED)) {
+		if (in_array((int) $this->getData('fk_statut'), array(Propal::STATUS_VALIDATED))) {
 			$errors = $this->updateField('fk_statut', Propal::STATUS_NOTSIGNED);
 		}
 

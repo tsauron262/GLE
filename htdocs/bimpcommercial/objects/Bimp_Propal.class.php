@@ -987,7 +987,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 						}
 					}
 
-					if (!$accepted) {
+					if (!$accepted || $signature_cancelled) {
 						// Refuser
 						if ($this->isNewStatusAllowed(3)) {
 							if ($this->canSetAction('close')) {

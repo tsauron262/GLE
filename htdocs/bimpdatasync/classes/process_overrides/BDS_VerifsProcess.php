@@ -1636,9 +1636,9 @@ class BDS_VerifsProcess extends BDSProcess
 						$this->Success('Maj statut commandes - New : ' . $new_status . ' - old : ' . $cur_status, $propal);
 					}
 
-					$cur_status = (int) $propal->getData('contrat_status');
+					$cur_status = (int) $propal->getData('contrats_status');
 					$err = $propal->checkContratsStatus(null);
-					$new_status = (int) $propal->getData('contrat_status');
+					$new_status = (int) $propal->getData('contrats_status');
 
 					if (!empty($err)) {
 						$this->Error($err, $propal);

@@ -1993,12 +1993,6 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 	public function checkContratsStatus($cur_status = null)
 	{
-		$debug = false;
-		global $user;
-		if ($user->login == 'f.martinez') {
-			$debug = true;
-		}
-
 		$errors = array();
 
 		if (!$this->isLoaded($errors)) {
@@ -2028,9 +2022,6 @@ class Bimp_Propal extends Bimp_PropalTemp
 					$lines = $this->getAbonnementsLinesIds(true, true);
 
 					if (!empty($lines)) {
-						if ($debug) {
-							echo 'Prop abo lines : <pre>' . print_r($lines, 1) . '</pre>';
-						}
 						$commandes_ids = array();
 
 						// Vérif lignes de commandes existantes pour chaque produit :
@@ -2040,32 +2031,17 @@ class Bimp_Propal extends Bimp_PropalTemp
 							}
 						}
 
-						if ($debug) {
-							echo 'Commandes : <pre>' . print_r($commandes_ids, 1) . '</pre>';
-						}
-
 						foreach ($lines as $id_line => $id_product) {
 							if (!(int) $id_product) {
 								continue;
 							}
 							foreach ($commandes_ids as $id_commande) {
 								if ((int) $this->db->getCount('commandedet', 'fk_commande = ' . $id_commande . ' AND fk_product = ' . $id_product, 'rowid')) {
-									if ($debug) {
-										echo 'Ligne ' . $id_line . ' (prod ' . $id_product . ') trouvée dans commande #' . $id_commande . '<br/>';
-									}
 									unset($lines[$id_line]);
 									break;
-								} else {
-									if ($debug) {
-										echo 'Ligne ' . $id_line . ' (prod ' . $id_product . ') non trouvée dans commande #' . $id_commande . '<br/>';
-									}
 								}
 							}
 						}
-					}
-
-					if ($debug) {
-						echo 'Final lines : <pre>' . print_r($lines, 1) . '</pre>';
 					}
 
 					if (!empty($lines)) {

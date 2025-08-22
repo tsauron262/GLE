@@ -1586,7 +1586,7 @@ class BDS_VerifsProcess extends BDSProcess
 
 	public function initCheckPropalsCommandeStatus(&$data, &$errors = array())
 	{
-		$rows = $this->db->getRows('propal', 'contrats_status = 1', null, 'array', array('rowid'));
+		$rows = $this->db->getRows('propal', 'contrats_status = 1 OR commande_status = 1', null, 'array', array('rowid'));
 
 		if (is_array($rows)) {
 			foreach ($rows as $r) {
@@ -1623,16 +1623,33 @@ class BDS_VerifsProcess extends BDSProcess
 						continue;
 					}
 
+					$up = false;
+
 					$cur_status = (int) $propal->getData('commande_status');
 					$err = $propal->checkCommandeStatus(null);
 					$new_status = (int) $propal->getData('commande_status');
 
-					$this->Info('New : ' . $new_status . ' - old : ' . $cur_status, $propal);
+					$this->Info('Statut commande - New : ' . $new_status . ' - old : ' . $cur_status, $propal);
 
 					if (!empty($err)) {
 						$this->Error($err, $propal);
-						$this->incIgnored();
 					} elseif ($cur_status !== $new_status) {
+						$up = true;
+					}
+
+					$cur_status = (int) $propal->getData('contrat_status');
+					$err = $propal->checkContratsStatus(null);
+					$new_status = (int) $propal->getData('contrat_status');
+
+					$this->Info('Statut contrats - New : ' . $new_status . ' - old : ' . $cur_status, $propal);
+
+					if (!empty($err)) {
+						$this->Error($err, $propal);
+					} elseif ($cur_status !== $new_status) {
+						$up = true;
+					}
+
+					if ($up) {
 						$this->incUpdated();
 					}
 				}

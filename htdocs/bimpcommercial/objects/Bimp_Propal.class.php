@@ -2023,11 +2023,15 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 					if (!empty($lines)) {
 						$commandes_ids = array();
+						$contrats_ids = array();
 
 						// Vérif lignes de commandes existantes pour chaque produit :
-						foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('commande')) as $item) {
-							if (!in_array((int) $item['id_object'], $commandes_ids)) {
+						foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('commande', 'contrat')) as $item) {
+							if ($item['type'] == 'commande' && !in_array((int) $item['id_object'], $commandes_ids)) {
 								$commandes_ids[] = (int) $item['id_object'];
+							}
+							if ($item['type'] == 'contrat' && !in_array((int) $item['id_object'], $contrats_ids)) {
+								$contrats_ids[] = (int) $item['id_object'];
 							}
 						}
 
@@ -2035,8 +2039,16 @@ class Bimp_Propal extends Bimp_PropalTemp
 							if (!(int) $id_product) {
 								continue;
 							}
+
 							foreach ($commandes_ids as $id_commande) {
 								if ((int) $this->db->getCount('commandedet', 'fk_commande = ' . $id_commande . ' AND fk_product = ' . $id_product, 'rowid')) {
+									unset($lines[$id_line]);
+									continue 2;
+								}
+							}
+
+							foreach ($contrats_ids as $id_contrat) {
+								if ((int) $this->db->getCount('contratdet', 'fk_contrat = ' . $id_contrat . ' AND fk_product = ' . $id_product, 'rowid')) {
 									unset($lines[$id_line]);
 									break;
 								}

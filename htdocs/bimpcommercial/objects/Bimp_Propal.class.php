@@ -1290,6 +1290,8 @@ class Bimp_Propal extends Bimp_PropalTemp
 	public function getAbonnementsLinesIds($not_added_to_contrat = false, $return_id_product = false)
 	{
 		$lines = array();
+		$lines_ids = array();
+
 		if ($this->isLoaded()) {
 			BimpObject::loadClass('bimpcore', 'Bimp_Product');
 			$where = 'pdet.fk_propal = ' . $this->id . ' AND pef.type2 IN(' . implode(',', Bimp_Product::$abonnements_sous_types) . ')';
@@ -1316,12 +1318,23 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 			if (is_array($rows)) {
 				foreach ($rows as $r) {
-					$lines[$r['id']] = $r['id'];
+					$lines_ids[] = $r['id'];
+
+					if ($return_id_product) {
+						$lines[$r['id']] = $r['fk_product'];
+					} else {
+						$lines[$r['id']] = $r['id'];
+					}
 				}
 			}
 
 			if (!empty($lines)) {
-				$rows = $this->db->getRows('bimp_propal_line a', 'id_parent_line IN (' . implode(',', $lines) . ') AND linked_object_name IN (\'bundleCorrect\',\'bundle\')', null, 'array', array('DISTINCT a.id'), null, null, array());
+				$rows = $this->db->getRows('bimp_propal_line a', 'id_parent_line IN (' . implode(',', $lines_ids) . ') AND linked_object_name IN (\'bundleCorrect\',\'bundle\')', null, 'array', array('DISTINCT a.id', 'pdet.fk_product'), 'position', 'asc', array(
+					'pdet' => array(
+						'table' => 'propaldet',
+						'on'    => 'pdet.rowid = a.id_line'
+					)
+				));
 				if (is_array($rows)) {
 					foreach ($rows as $r) {
 						if (!array_key_exists($r['id'], $lines)) {

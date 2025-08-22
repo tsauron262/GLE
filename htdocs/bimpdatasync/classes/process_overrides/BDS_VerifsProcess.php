@@ -1629,12 +1629,11 @@ class BDS_VerifsProcess extends BDSProcess
 					$err = $propal->checkCommandeStatus(null);
 					$new_status = (int) $propal->getData('commande_status');
 
-					$this->Info('Statut commande - New : ' . $new_status . ' - old : ' . $cur_status, $propal);
-
 					if (!empty($err)) {
 						$this->Error($err, $propal);
 					} elseif ($cur_status !== $new_status) {
 						$up = true;
+						$this->Success('Maj statut commandes - New : ' . $new_status . ' - old : ' . $cur_status, $propal);
 					}
 
 					$cur_status = (int) $propal->getData('contrat_status');
@@ -1647,6 +1646,7 @@ class BDS_VerifsProcess extends BDSProcess
 						$this->Error($err, $propal);
 					} elseif ($cur_status !== $new_status) {
 						$up = true;
+						$this->Success('Maj statut contrats - New : ' . $new_status . ' - old : ' . $cur_status, $propal);
 					}
 
 					if ($up) {

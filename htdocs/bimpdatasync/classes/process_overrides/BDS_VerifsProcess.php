@@ -1640,8 +1640,6 @@ class BDS_VerifsProcess extends BDSProcess
 					$err = $propal->checkContratsStatus(null);
 					$new_status = (int) $propal->getData('contrat_status');
 
-					$this->Info('Statut contrats - New : ' . $new_status . ' - old : ' . $cur_status, $propal);
-
 					if (!empty($err)) {
 						$this->Error($err, $propal);
 					} elseif ($cur_status !== $new_status) {

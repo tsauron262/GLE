@@ -152,7 +152,7 @@ class BimpModuleConf
                 }
             }
         }
-        
+
         $path .= $param_name;
 
         return $this->config->getCompiledParams($path);
@@ -241,6 +241,14 @@ class BimpModuleConf
         $html .= '</div>';
         $html .= '</div>';
 
+//		$html .= '<div style="display: inline-block; width: 100%; background-color: lightgrey;margin:3em 0;">';
+		$html .= '<div class="buttonsContainer align-left" style="padding-bottom: 15px; margin-bottom: 15px; border-bottom: 1px solid #000000">';
+		$html .= '<h4 class="danger">Actualisation des droits (' . $this->module . ')</h4>';
+		$html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/maj_right.php?module='.$this->module.'">';
+		$html .= 'MAJ Rights' . BimpRender::renderIcon('fas_cogs', 'iconRight');
+		$html .= '</a>';
+		$html .= '</div>';
+
         if (!BimpCore::isModuleActive($this->module)) {
             $html .= BimpRender::renderAlerts('Ce module n\'est pas installé');
         } else {
@@ -305,7 +313,7 @@ class BimpModuleConf
         return $html;
     }
 
-    // Méthodes statiques: 
+    // Méthodes statiques:
 
     public static function renderParamsTable($module, $params, &$n_errors = 0, $entity_type = 'all', $parent_path = '')
     {

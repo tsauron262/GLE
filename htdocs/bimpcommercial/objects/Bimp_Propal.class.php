@@ -911,6 +911,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 		$buttons = array();
 		$signature_buttons = array();
+		$signature = $this->getChildObject('signature');
 
 		if ($this->isLoaded()) {
 			$buttons[] = array(
@@ -955,7 +956,6 @@ class Bimp_Propal extends Bimp_PropalTemp
 						);
 					}
 				} else {
-					$signature = $this->getChildObject('signature');
 					$no_signature = false;
 					$signature_cancelled = false;
 					$accepted = in_array($status, array(2, 4));
@@ -966,7 +966,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 						if ($signature->isSigned()) {
 							$signed = true;
-						} elseif ((int) $signature->getData('status') === BimpSignature::STATUS_CANCELLED) {
+						} elseif ((int) $signature->getData('status') < 0) {
 							$signature_cancelled = true;
 						}
 					} else {
@@ -989,18 +989,20 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 					if (!$accepted) {
 						// Refuser
-						if ($this->isActionAllowed('close')) {
+						if ($this->isNewStatusAllowed(3)) {
 							if ($this->canSetAction('close')) {
-								$clientFact = $this->getClientFacture();
-								$buttons[] = array(
-									'label'   => 'Devis Refusé',
-									'icon'    => 'times',
-									'onclick' => $this->getJsActionOnclick('close', array(
-										'new_status' => 3
-									), array(
-										'form_name' => 'close'
-									))
-								);
+								if ($status == 1 || ($status == 2 && $signature_cancelled)) {
+									$clientFact = $this->getClientFacture();
+									$buttons[] = array(
+										'label'   => 'Devis Refusé',
+										'icon'    => 'times',
+										'onclick' => $this->getJsActionOnclick('close', array(
+											'new_status' => 3
+										), array(
+											'form_name' => 'close'
+										))
+									);
+								}
 							}
 						}
 

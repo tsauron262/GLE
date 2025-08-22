@@ -5866,10 +5866,10 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 	public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false, $no_triggers = false)
 	{
-		BimpLog::actionStart('bimpobject_update_field', 'Mise à jour du champ "' . $field . '"', $this);
-		BimpLog::actionData($value);
+//		BimpLog::actionStart('bimpobject_update_field', 'Mise à jour du champ "' . $field . '"', $this);
+//		BimpLog::actionData($value);
 
-		if (is_null($id_object) || !$id_object) {
+		if (!$id_object) {
 			if ($this->isLoaded()) {
 				$id_object = (int) $this->id;
 			}
@@ -5877,7 +5877,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
 		$errors = array();
 
-		if (is_null($id_object) || !$id_object) {
+		if (!$id_object) {
 			$errors[] = 'Impossible de mettre à jour le champ "' . $field . '" - ID ' . $this->getLabel('of_the') . ' absent';
 		} elseif ($this->field_exists($field)) {
 			if (!$force_update) {
@@ -5991,7 +5991,14 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			$errors[] = 'Le champ "' . $field . '" n\'existe pas';
 		}
 
-		BimpLog::actionEnd('bimpobject_update_field', $errors);
+//		BimpLog::actionEnd('bimpobject_update_field', $errors);
+
+		if (count($errors)) {
+			BimpCore::addlog('Erreur sur updateField()', 3, 'bimpcore', $this, array(
+				'Champ'   => $field,
+				'Erreurs' => $errors
+			));
+		}
 
 		return $errors;
 	}

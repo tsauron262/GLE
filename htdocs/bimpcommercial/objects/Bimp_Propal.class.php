@@ -3779,7 +3779,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 	{
 		$errors = array();
 
-		if (in_array(int) $this->getData('fk_statut'), array(2, 4)) {
+		if (in_array(int) $this->getData('fk_statut'), array(Propal::STATUS_VALIDATED)) {
 			$errors = $this->updateField('fk_statut', Propal::STATUS_NOTSIGNED);
 		}
 

@@ -1586,7 +1586,7 @@ class BDS_VerifsProcess extends BDSProcess
 
 	public function initCheckPropalsCommandeStatus(&$data, &$errors = array())
 	{
-		$rows = $this->db->getRows('propal', 'commande_status = 1', null, 'array', array('rowid'));
+		$rows = $this->db->getRows('propal', 'contrats_status = 1', null, 'array', array('rowid'));
 
 		if (is_array($rows)) {
 			foreach ($rows as $r) {
@@ -1595,8 +1595,6 @@ class BDS_VerifsProcess extends BDSProcess
 				foreach ($rows as $r) {
 					$elements[] = (int) $r['rowid'];
 				}
-
-//                die('N : ' . count($elements));
 
 				$data['steps']['process'] = array(
 					'label'                  => 'Vérifs des statuts commande',

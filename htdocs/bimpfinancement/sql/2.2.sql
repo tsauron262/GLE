@@ -1,1 +1,1 @@
-ALTER TABLE dkfjhfdkjd ADD ldfjghd TEXT;
+-- ALTER TABLE dkfjhfdkjd ADD ldfjghd TEXT;

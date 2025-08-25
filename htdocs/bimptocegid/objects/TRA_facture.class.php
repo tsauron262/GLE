@@ -240,8 +240,7 @@
                         $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
                         $structure['REF_LIBRE']             = sizing("DEEE",35);
                     }
-                    $ecriture .= implode('', $structure);
-                    if(abs($total_tva) > 0) $ecriture .= "\n";
+                    $ecriture .= implode('', $structure) . "\n";
 
                 }
 

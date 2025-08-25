@@ -669,6 +669,18 @@ forms:
                         params:
                             - miseRebus
 
+    modifAcompte:
+        rows:
+            - custom: 1
+              label: Action a réaliser
+              input_name: typeModifAcompte
+              required: 1
+              input:
+                  type: select
+                  options:
+                      delier: Délier
+                      remb: Rembourser
+
 filters: 
     id_commercial: 
         label: Commercial

@@ -17,7 +17,7 @@ class BDS_ConvertProcess extends BDSProcess
         'ReceptionsToConvert'      => 'Conversion des lignes de réception',
         'abosToConvert'            => 'Conversion des Abonnements',
         'abosPropalLinesToConvert' => 'Conversion des données abo dans propales',
-		'anonymize_dev'				=> 'Anonymisation des données sur les instances de dev' // https://erp.bimp.fr/bimp8/bimpdatasync/index.php?fc=process&id=56
+		'anonymize_dev'				=> 'Anonymisation des données sur les instances de dev'
     );
     public static $default_public_title = 'Scripts de conversions des données';
 
@@ -1487,15 +1487,21 @@ class BDS_ConvertProcess extends BDSProcess
 
 	public function findAnonymize_dev(&$errors = array())
 	{
-		$this->db->db->query('ALTER TABLE llx_societe ADD COLUMN IF NOT EXISTS `anonym_dev` INTEGER default 0');
-		$sql = "SELECT rowid FROM llx_societe WHERE is_anonymized = 0 AND anonym_dev = 0";
-		$rows = $this->db->executeS($sql, 'array');
-		if (is_array($rows)) {
-			foreach ($rows as $r) {
-				$elems[] = (int) $r['rowid'];
+		$isDatabaseDev = BimpCore::getConf('isDatabaseDev', null, 'bimpdatasync');
+		if (!$isDatabaseDev) {
+			$errors[] = 'Opération annulée car ce n\'est pas une base de dev. Pour continuer Utilisez le paramètre de conf "isDatabaseDev"';
+		}
+		else {
+			$this->db->db->query('ALTER TABLE llx_societe ADD COLUMN IF NOT EXISTS `anonym_dev` INTEGER default 0');
+			$sql = "SELECT rowid FROM llx_societe WHERE is_anonymized = 0 AND anonym_dev = 0";
+			$rows = $this->db->executeS($sql, 'array');
+			if (is_array($rows)) {
+				foreach ($rows as $r) {
+					$elems[] = (int) $r['rowid'];
+				}
+			} else {
+				$errors[] = $this->db->err();
 			}
-		} else {
-			$errors[] = $this->db->err();
 		}
 
 		return $elems;

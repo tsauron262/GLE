@@ -89,5 +89,6 @@ lists:
     shipment: 
         extends: default
         before_list_callback: renderQuickAddFormHtml
+        total_row: 1
         cols: 
             shipment_id: unset

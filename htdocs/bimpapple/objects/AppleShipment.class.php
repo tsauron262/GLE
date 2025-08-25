@@ -525,7 +525,9 @@ class AppleShipment extends BimpObject
 					),
 					'Phone'         => array(
 						'Number' => $centre['tel']
-					)
+					),
+					'id_group' => $centre['id_group'],
+					'active' => $centre['active'],
 				);
 			}
         }
@@ -542,7 +544,7 @@ class AppleShipment extends BimpObject
 
     // Getters array:
 
-    public static function getShiptosArray($include_empty = false)
+    public static function getShiptosArray($include_empty = false, $activeOnly = false)
     {
         $cache_key = 'apple_shipment_shiptos_array';
 
@@ -551,6 +553,7 @@ class AppleShipment extends BimpObject
 
             $shiptos = self::getShiptosData();
             foreach ($shiptos as $shipto => $data) {
+				if ($activeOnly && !$data['active']) continue;
                 self::$cache[$cache_key][$shipto] = $shipto . ': ' . $data['Name'] . ' - ' . $data['Address']['PostalCode'] . ' ' . $data['Address']['City'];
             }
         }
@@ -603,6 +606,28 @@ class AppleShipment extends BimpObject
 			}
 		}
 		return $haveImage;
+	}
+
+	public function getUserCentre()
+	{
+		$user_codesCentre = array_keys(BimpCache::getUserCentresArray());
+		$lesCentres = BimpCache::getCentresData();
+		$apple_centre = '';
+		foreach ($user_codesCentre as $centre) {
+			$dataCentre = $lesCentres[$centre];
+			if ($dataCentre['active']) {
+				$apple_centre = $centre;
+				break;
+			}
+		}
+
+		if ($apple_centre) {
+			$centre = BS_CentreSav::getCentreSav($apple_centre);
+			if (BimpObject::objectLoaded($centre)) {
+				return $centre->getData('shipTo');
+			}
+		}
+		return null;
 	}
 
     // Rendus HTML:

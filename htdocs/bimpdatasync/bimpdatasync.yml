@@ -6,3 +6,9 @@ params:
         label: ID Tâche cron pour le nettoyage des rapports
         def: 0
         warning: Déterminé automatiquement à l'install du module
+
+    isDatabaseDev:
+        label: Base de donnée de dev.
+        warning: Peut etre anonymiser.
+        type: bool
+        def: 0

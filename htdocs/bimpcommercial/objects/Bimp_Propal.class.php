@@ -345,7 +345,9 @@ class Bimp_Propal extends Bimp_PropalTemp
 				return 0;
 
 			case 'close':
-				if ($status !== Propal::STATUS_VALIDATED) {
+				$signature = $this->getChildObject('signature');
+
+				if ($status !== Propal::STATUS_VALIDATED && !($status === 2 && BimpObject::objectLoaded($signature) && (int) $signature->getData('status') < 0)) {
 					$errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
 					return 0;
 				}
@@ -909,6 +911,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 		$buttons = array();
 		$signature_buttons = array();
+		$signature = $this->getChildObject('signature');
 
 		if ($this->isLoaded()) {
 			$buttons[] = array(
@@ -953,7 +956,6 @@ class Bimp_Propal extends Bimp_PropalTemp
 						);
 					}
 				} else {
-					$signature = $this->getChildObject('signature');
 					$no_signature = false;
 					$signature_cancelled = false;
 					$accepted = in_array($status, array(2, 4));
@@ -964,7 +966,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 						if ($signature->isSigned()) {
 							$signed = true;
-						} elseif ((int) $signature->getData('status') === BimpSignature::STATUS_CANCELLED) {
+						} elseif ((int) $signature->getData('status') < 0) {
 							$signature_cancelled = true;
 						}
 					} else {
@@ -985,20 +987,22 @@ class Bimp_Propal extends Bimp_PropalTemp
 						}
 					}
 
-					if (!$accepted) {
+					if (!$accepted || $signature_cancelled) {
 						// Refuser
-						if ($this->isActionAllowed('close')) {
+						if ($this->isNewStatusAllowed(3)) {
 							if ($this->canSetAction('close')) {
-								$clientFact = $this->getClientFacture();
-								$buttons[] = array(
-									'label'   => 'Devis Refusé',
-									'icon'    => 'times',
-									'onclick' => $this->getJsActionOnclick('close', array(
-										'new_status' => 3
-									), array(
-										'form_name' => 'close'
-									))
-								);
+								if ($status == 1 || ($status == 2 && $signature_cancelled)) {
+									$clientFact = $this->getClientFacture();
+									$buttons[] = array(
+										'label'   => 'Devis Refusé',
+										'icon'    => 'times',
+										'onclick' => $this->getJsActionOnclick('close', array(
+											'new_status' => 3
+										), array(
+											'form_name' => 'close'
+										))
+									);
+								}
 							}
 						}
 
@@ -1290,6 +1294,8 @@ class Bimp_Propal extends Bimp_PropalTemp
 	public function getAbonnementsLinesIds($not_added_to_contrat = false, $return_id_product = false)
 	{
 		$lines = array();
+		$lines_ids = array();
+
 		if ($this->isLoaded()) {
 			BimpObject::loadClass('bimpcore', 'Bimp_Product');
 			$where = 'pdet.fk_propal = ' . $this->id . ' AND pef.type2 IN(' . implode(',', Bimp_Product::$abonnements_sous_types) . ')';
@@ -1316,12 +1322,23 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 			if (is_array($rows)) {
 				foreach ($rows as $r) {
-					$lines[$r['id']] = $r['id'];
+					$lines_ids[] = $r['id'];
+
+					if ($return_id_product) {
+						$lines[$r['id']] = $r['fk_product'];
+					} else {
+						$lines[$r['id']] = $r['id'];
+					}
 				}
 			}
 
 			if (!empty($lines)) {
-				$rows = $this->db->getRows('bimp_propal_line a', 'id_parent_line IN (' . implode(',', $lines) . ') AND linked_object_name IN (\'bundleCorrect\',\'bundle\')', null, 'array', array('DISTINCT a.id'), null, null, array());
+				$rows = $this->db->getRows('bimp_propal_line a', 'id_parent_line IN (' . implode(',', $lines_ids) . ') AND linked_object_name IN (\'bundleCorrect\',\'bundle\')', null, 'array', array('DISTINCT a.id', 'pdet.fk_product'), 'position', 'asc', array(
+					'pdet' => array(
+						'table' => 'propaldet',
+						'on'    => 'pdet.rowid = a.id_line'
+					)
+				));
 				if (is_array($rows)) {
 					foreach ($rows as $r) {
 						if (!array_key_exists($r['id'], $lines)) {
@@ -2010,11 +2027,15 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 					if (!empty($lines)) {
 						$commandes_ids = array();
+						$contrats_ids = array();
 
 						// Vérif lignes de commandes existantes pour chaque produit :
-						foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('commande')) as $item) {
-							if (!in_array((int) $item['id_object'], $commandes_ids)) {
+						foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db, array('commande', 'contrat')) as $item) {
+							if ($item['type'] == 'commande' && !in_array((int) $item['id_object'], $commandes_ids)) {
 								$commandes_ids[] = (int) $item['id_object'];
+							}
+							if ($item['type'] == 'contrat' && !in_array((int) $item['id_object'], $contrats_ids)) {
+								$contrats_ids[] = (int) $item['id_object'];
 							}
 						}
 
@@ -2022,8 +2043,16 @@ class Bimp_Propal extends Bimp_PropalTemp
 							if (!(int) $id_product) {
 								continue;
 							}
+
 							foreach ($commandes_ids as $id_commande) {
 								if ((int) $this->db->getCount('commandedet', 'fk_commande = ' . $id_commande . ' AND fk_product = ' . $id_product, 'rowid')) {
+									unset($lines[$id_line]);
+									continue 2;
+								}
+							}
+
+							foreach ($contrats_ids as $id_contrat) {
+								if ((int) $this->db->getCount('contratdet', 'fk_contrat = ' . $id_contrat . ' AND fk_product = ' . $id_product, 'rowid')) {
 									unset($lines[$id_line]);
 									break;
 								}
@@ -3542,6 +3571,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 				}
 			}
 
+			$client = $this->getChildObject('client');
 			if (BimpObject::objectLoaded($client)) {
 				$client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Devis:' . $this->id . '}}');
 			}
@@ -3747,6 +3777,8 @@ class Bimp_Propal extends Bimp_PropalTemp
 
 	public function onSignatureRefused($bimpSignature)
 	{
+		$errors = array();
+
 		if ((int) $this->getData('fk_statut') === Propal::STATUS_VALIDATED) {
 			$errors = $this->updateField('fk_statut', Propal::STATUS_NOTSIGNED);
 		}

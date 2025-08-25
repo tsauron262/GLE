@@ -2862,7 +2862,7 @@ class gsxController extends BimpController
                             'type'     => 'secondary',
                             'foldable' => true
                 ));
-                if (BimpCore::isEntity('bimp') && BimpObject::objectLoaded($sav) && (int) BimpTools::getValue('gsx_params/withpdf', 0, 'int')) {
+                if (/*BimpCore::isEntity('bimp') && */BimpObject::objectLoaded($sav) && (int) BimpTools::getValue('gsx_params/withpdf', 0, 'int')) {
                     $sav_dir = $sav->getFilesDir();
                     if (!file_exists($sav_dir . 'infos_materiel.pdf')) {
                         require_once DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/InfosMateriel.php';

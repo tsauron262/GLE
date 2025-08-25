@@ -1,1 +1,0 @@
--- ALTER TABLE dkfjhfdkjd ADD ldfjghd TEXT;

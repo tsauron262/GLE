@@ -64,7 +64,7 @@ class securLogSms
 
                 $secondeRestante = (int) $this->user->array_options['options_heure_sms'] - $dateFinBloquage;
 
-				if ((time() - $this->user->array_options['options_heure_sms']) > (60 * 5) ) {
+				if ($this->user->array_options['options_code_sms'] != '' && (time() - $this->user->array_options['options_heure_sms']) > (60 * 5) ) {
 					$this->message[] = "Le Code n'est plus valable";
 					$code = '';
 				}

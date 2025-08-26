@@ -30,11 +30,19 @@ if (!$user->admin) {
 	exit;
 }
 
-//BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
-//$res = Bimp_Commande::checkLinesEcheances();
-//
-//echo 'RES : <br/>';
-//echo $res;
+if (is_dir(DOL_DOCUMENT_ROOT . '/bimpressources')) {
+	$hfile = fopen(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt', 'a');
+	if ($hfile) {
+		fwrite($hfile, '------------------------------------' . "\n" . date('d / m / Y H:i') . "TEST\n\n");
+		fclose($hfile);
+
+		echo 'AJ OK';
+	} else {
+		echo 'FAIL';
+	}
+} else {
+	echo 'NO DIR';
+}
 
 echo '<br/><br/>';
 

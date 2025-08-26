@@ -372,6 +372,7 @@ class BS_SAV_ExtVersion extends BS_SAV
 			"IRISDefault"        => "",
 			"IRISRepair"         => "",
 			"FailureDescription" => $this->getData('symptomes'),
+			"Symptome" => $this->getData('symptomes'),
 			"DefectCode"         => ""
 		);
 

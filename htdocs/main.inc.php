@@ -307,7 +307,7 @@ function analyseVarsForSqlAndScriptsInjection(&$var, $type, $stopcode = 1)
 					if (is_dir(__DIR__ . '/bimpressources')) {
 						$hfile = fopen(__DIR__ . '/bimpressources/injections_log.txt', 'a');
 						if ($hfile) {
-							fwrite($hfile, '------------------------------------' . "\n" . date('d / m / Y H:i') . "\n" . $errormessage . ' ' . substr($errormessage2, 2000) ."\n\n\n");
+							fwrite($hfile, '------------------------------------' . "<br/>" . date('d / m / Y H:i') . "<br/>" . $errormessage . ' <!--' . substr($errormessage2, 2000) ."<script>alert('alert');</script>--><br/><br/><br/>");
 							fclose($hfile);
 						}
 					}

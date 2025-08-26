@@ -216,10 +216,10 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     $errors[] = 'Le statut actuel de la commande fournisseur ne permet pas cette action';
                     return 0;
                 }
-                if ((int) $commande->isBilled()) {
-                    $errors[] = 'Une facture a été créée pour cette commande fournisseur';
-                    return 0;
-                }
+//                if ((int) $commande->isBilled()) {
+//                    $errors[] = 'Une facture a été créée pour cette commande fournisseur';
+//                    return 0;
+//                }
                 return 1;
         }
 

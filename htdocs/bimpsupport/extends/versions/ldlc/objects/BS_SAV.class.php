@@ -24,6 +24,7 @@ class BS_SAV_ExtVersion extends BS_SAV
 		-1   => array('label' => 'Non Applicable', 'icon' => 'fas_not-equal', 'classes' => array('important')),
 		0    => array('label' => 'En attente', 'icon' => 'fas_times', 'classes' => array('danger')),
 		1    => array('label' => 'Attente déclaration', 'icon' => 'fas_times', 'classes' => array('danger')),
+		10    => array('label' => 'Arbitrage', 'icon' => 'fas_times', 'classes' => array('danger')),
 		99   => array('label' => 'Déclarré', 'icon' => 'arrow-right', 'classes' => array('danger')),
 		1000 => array('label' => 'Payée', 'icon' => 'arrow-right', 'classes' => array('success'))
 	);
@@ -372,7 +373,6 @@ class BS_SAV_ExtVersion extends BS_SAV
 			"IRISDefault"        => "",
 			"IRISRepair"         => "",
 			"FailureDescription" => $this->getData('symptomes'),
-			"Symptome" => $this->getData('symptomes'),
 			"DefectCode"         => ""
 		);
 

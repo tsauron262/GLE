@@ -1354,7 +1354,7 @@ class savFormController extends BimpPublicController
 			}else {
 				$html .= '<div style="text-align: center; padding: 15px">';
 				global $conf;
-				$html .= '<span class="info">Ce centre ne prend pas de réservations</span><br/><br/>';
+				$html .= '<span class="info">Ce centre ne prend pas de réservation</span><br/><br/>';
 				$html .= '<p>Vous pouvez valider ce formulaire et déposer votre matériel quand vous le souhaitez sans rendez-vous</p>';
 				$html .= '</div>';
 

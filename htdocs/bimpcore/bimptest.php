@@ -30,6 +30,20 @@ if (!$user->admin) {
 	exit;
 }
 
+if (is_dir(DOL_DOCUMENT_ROOT . '/bimpressources')) {
+	$hfile = fopen(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt', 'a');
+	if ($hfile) {
+		fwrite($hfile, '------------------------------------' . "br" . date('d / m / Y H:i') . " - TEST.<br/><br/>");
+		fclose($hfile);
+
+		echo 'AJ OK';
+	} else {
+		echo 'FAIL';
+	}
+} else {
+	echo 'NO DIR';
+}
+
 echo '<br/><br/>';
 
 echo '<br/>FIN';

@@ -101,3 +101,4 @@ phpstan_custom.neon
 /htdocs/bimpcore/site.html
 /htdocs/bimpflo/
 /htdocs/bimpressources/pull_infos.json
+/htdocs/bimpressources/injections_log.txt

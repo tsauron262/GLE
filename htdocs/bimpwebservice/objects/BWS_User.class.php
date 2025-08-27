@@ -574,6 +574,11 @@ class BWS_User extends BimpObject
 						return true;
 					}
 					$error = 'Token invalide';
+					BimpCore::AddLog('BWS : Token invalide', 3, 'ws', $this, array(
+						'attendu' => $cur_token,
+						'fourni' => $token,
+						'fourni hash' => hash('sha256', $token)
+					));
 					return false;
 				}
 				$error = 'Token expiré - Veuillez reconnecter votre compte';

@@ -308,6 +308,11 @@ function analyseVarsForSqlAndScriptsInjection(&$var, $type, $stopcode = 1)
 						$hfile = fopen(__DIR__ . '/bimpressources/injections_log.txt', 'a');
 						if ($hfile) {
 							fwrite($hfile, '------------------------------------' . "<br/>" . date('d / m / Y H:i') . "<br/>" . $errormessage . ' <!--<code>' . $errormessage2 ."</code>--><br/><br/><br/>");
+
+							if ($key == 'signature') {
+								fwrite($hfile, 'GET<pre>'.print_r($_GET, 1).'</pre>');
+								fwrite($hfile, '<br/>POST<pre>'.print_r($_POST, 1).'</pre>');
+							}
 							fclose($hfile);
 						}
 					}

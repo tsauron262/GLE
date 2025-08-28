@@ -30,18 +30,18 @@ if (!$user->admin) {
 	exit;
 }
 
-if (is_dir(DOL_DOCUMENT_ROOT . '/bimpressources')) {
-	$hfile = fopen(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt', 'a');
-	if ($hfile) {
-		fwrite($hfile, '------------------------------------' . "<br/>" . date('d / m / Y H:i') . " - TEST.<br/><br/>");
-		fclose($hfile);
+$rows = $bdb->getRows('bws_user', '1', null, 'array', array('id', 'token', 'token_expire'));
 
-		echo 'AJ OK';
-	} else {
-		echo 'FAIL';
+foreach ($rows as $r) {
+	echo 'Aj token user #' . $r['id'] . ' - ';
+	if ($bdb->insert('bws_user_token', array(
+			'id_ws_user'   => $r['id'],
+			'token'        => $r['token'],
+			'token_expire' => $r['token_expire']
+		)) <= 0) {
+		echo 'FAIL - ' . $bdb->err();
 	}
-} else {
-	echo 'NO DIR';
+	echo 'OK <br/>';
 }
 
 echo '<br/><br/>';

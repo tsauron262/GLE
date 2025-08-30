@@ -28,6 +28,14 @@ objects:
                 module: bimpwebservice
                 name: BWS_Profile
         
+    tokens: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpwebservice
+                name: BWS_UserToken
+                
 fields: 
     name: 
         label: Nom
@@ -41,13 +49,13 @@ fields:
         label: Mot de passe
         type: password
         
-    token: 
-        label: Token
-        type: password
-        
-    token_expire: 
-        label: Expiration du token
-        type: datetime
+#    token: 
+#        label: Token
+#        type: password
+#        
+#    token_expire: 
+#        label: Expiration du token
+#        type: datetime
         
     profiles: 
         label: Profiles
@@ -184,6 +192,11 @@ views:
                   col_md: 6
                   custom: 
                       callback: renderUserErpUsedPanel
+            - cols: 
+                  - type: list
+                    list: 
+                        name: ws_user
+                        children: tokens
             - cols: 
                 - type: custom
                   custom: 

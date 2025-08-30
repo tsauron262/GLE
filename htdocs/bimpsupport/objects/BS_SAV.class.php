@@ -1824,7 +1824,7 @@ class BS_SAV extends BimpObject
 		global $conf;
 
 		$tel = '';
-		$centre = $this->getCentreData();
+		$centre = $this->getCentreData(true);
 		if (isset($centre['tel'])) {
 			$tel = $centre['tel'];
 		}
@@ -4380,7 +4380,7 @@ ORDER BY a.val_max DESC");
 				$propal->dol_object->closeProposal($user, 2, "Auto via SAV");
 				$this->createReservations();
 
-				$centre = $this->getCentreData();
+				$centre = $this->getCentreData(true);
 
 				if (isset($centre['mail']) && $centre['mail']) {
 					$msg = 'Bonjour,<br/><br/>';
@@ -4422,7 +4422,7 @@ ORDER BY a.val_max DESC");
 			return array($error_msg . ' (ID du client absent)');
 		}
 
-		$centre = $this->getCentreData();
+		$centre = $this->getCentreData(true);
 		if (is_null($centre)) {
 			return array($error_msg . ' - Centre absent');
 		}
@@ -4902,7 +4902,7 @@ ORDER BY a.val_max DESC");
 		if (!$to) {
 			$errors[] = 'Aucune adresse e-mail enregistrée pour le client';
 		} else {
-			$centre = $this->getCentreData();
+			$centre = $this->getCentreData(true);
 			$from = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
 
 			$to = BimpTools::cleanEmailsStr($to);
@@ -8922,7 +8922,7 @@ ORDER BY a.val_max DESC");
 
 	public function getOnSignedNotificationEmail($doc_type, &$use_as_from = false)
 	{
-		$centre = $this->getCentreData();
+		$centre = $this->getCentreData(true);
 
 		if (isset($centre['mail'])) {
 			$use_as_from = true;

@@ -304,10 +304,15 @@ function analyseVarsForSqlAndScriptsInjection(&$var, $type, $stopcode = 1)
 
 					/*moddrsi (20.2)*/
 					// Pour débug :
-					if (is_dir(DOL_DOCUMENT_ROOT . '/bimpressources')) {
-						$hfile = fopen(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt', 'a');
+					if (is_dir(__DIR__ . '/bimpressources')) {
+						$hfile = fopen(__DIR__ . '/bimpressources/injections_log.txt', 'a');
 						if ($hfile) {
-							fwrite($hfile, '------------------------------------' . "\n" . date('d / m / Y H:i') . "\n" . $errormessage . ' ' . substr($errormessage2, 2000) ."\n\n\n");
+							fwrite($hfile, '------------------------------------' . "<br/>" . date('d / m / Y H:i') . "<br/>" . $errormessage . ' <!--<code>' . $errormessage2 ."</code>--><br/><br/><br/>");
+
+							if ($key == 'signature') {
+								fwrite($hfile, 'GET<pre>'.print_r($_GET, 1).'</pre>');
+								fwrite($hfile, '<br/>POST<pre>'.print_r($_POST, 1).'</pre>');
+							}
 							fclose($hfile);
 						}
 					}

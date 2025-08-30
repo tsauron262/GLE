@@ -30,11 +30,19 @@ if (!$user->admin) {
 	exit;
 }
 
-//BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
-//$res = Bimp_Commande::checkLinesEcheances();
-//
-//echo 'RES : <br/>';
-//echo $res;
+$rows = $bdb->getRows('bws_user', '1', null, 'array', array('id', 'token', 'token_expire'));
+
+foreach ($rows as $r) {
+	echo 'Aj token user #' . $r['id'] . ' - ';
+	if ($bdb->insert('bws_user_token', array(
+			'id_ws_user'   => $r['id'],
+			'token'        => $r['token'],
+			'token_expire' => $r['token_expire']
+		)) <= 0) {
+		echo 'FAIL - ' . $bdb->err();
+	}
+	echo 'OK <br/>';
+}
 
 echo '<br/><br/>';
 

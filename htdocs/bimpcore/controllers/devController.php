@@ -853,6 +853,7 @@ class devController extends BimpController
 	public function ajaxProcessDeleteInjectionsLogFile()
 	{
 		$success = '';
+		$errors = array();
 
 		if (file_exists(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt')) {
 			if (unlink(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt')) {

@@ -3865,6 +3865,12 @@ class Societe extends CommonObject
 	 */
 	public function id_prof_exists($idprof, $value, $socid = 0)
 	{
+		/*moddrsi (20.2)*/
+		if ($value === '*****') {
+			return false;
+		}
+		/*fmoddrsi*/
+
 		// phpcs:enable
 		$field = $idprof;
 
@@ -5396,7 +5402,7 @@ class Societe extends CommonObject
 
 		if (!$error) {
 			$this->db->begin();
-                        
+
                         /* moddrsi (20.2)*/
                         $sql = $this->db->query('SELECT Count(*) as nb, `ref_fourn`, `fk_product` FROM `'.MAIN_DB_PREFIX.'product_fournisseur_price` WHERE `fk_soc` IN ('.$soc_origin_id.', '.$this->id.') GROUP BY `ref_fourn`, `fk_product` HAVING nb > 1');
                         while($ln = $this->db->fetch_object($sql)){

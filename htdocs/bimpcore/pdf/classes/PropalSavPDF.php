@@ -134,7 +134,7 @@ class PropalSavPDF extends PropalPDF
 				}
 			}
 
-			$infoCentre = $this->sav->getCentreData();
+			$infoCentre = $this->sav->getCentreData(true);
 			global $mysoc;
 			$mysoc->email = $infoCentre['mail'];
 			$mysoc->phone = $infoCentre['tel'];

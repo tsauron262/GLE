@@ -10467,6 +10467,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 			$url .= 'e=' . $enseigne . '&';
 		}
 
+		global $conf;
+		if ($conf->entity > 1) {
+			$url .= 'entity=' . $conf->entity . '&';
+		}
+
 		return $url;
 	}
 

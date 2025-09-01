@@ -207,12 +207,12 @@ class Bimp_Societe extends BimpDolObject
 				return $this->canEdit();
 
 			case 'relancePaiement':
-			case 'setActivity':
 				return 1;
 
 			case 'anonymize':
 			case 'revertAnonymization':
 			case 'listClientsToExcludeForCreditLimits':
+			case 'setActivity':
 				return (int) $user->admin;
 		}
 
@@ -3535,18 +3535,16 @@ class Bimp_Societe extends BimpDolObject
 			$cur_date = (string) $this->getData('date_last_activity');
 
 			if (!strtotime($cur_date) || $cur_date < $date) {
+				global $user;
+				$bimpUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $user->id);
+				$origin .= ' (par ' . $bimpUser->getFullname() . ' le ' . date('d/m/Y') . ')';
+
 				$this->updateField('date_last_activity', $date);
 				$this->updateField('last_activity_origin', $origin);
 			}
 		}
 
 		return $errors;
-	}
-
-	public function afterCreateNote($note)
-	{
-		$id = $note->id;
-		$this->setActivity('Creation ' . $note->getLabel('of_the') . '{{Notes:' . $id . '}}');
 	}
 
 	// Actions:
@@ -3889,10 +3887,7 @@ class Bimp_Societe extends BimpDolObject
 			$cur_date = (string) $this->getData('date_last_activity');
 
 			if (!strtotime($cur_date) || $date > $cur_date) {
-				$this->set('date_last_activity', $date);
-				$this->set('last_activity_origin', $origin);
-
-				$errors = $this->update($warnings, true);
+				$this->setActivity($origin, $date);
 			} else {
 				$errors[] = 'La date indiquée est antérieure à la date de dernière activité actuellement enregistrée';
 			}

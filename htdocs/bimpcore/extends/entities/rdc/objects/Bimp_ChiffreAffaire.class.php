@@ -176,7 +176,7 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 			$field = 'fk_category'.$type;
 		$sql = $this->db->db->query('SELECT DISTINCT('.$field.') as fk_category FROM ' . MAIN_DB_PREFIX . 'ca_rdc WHERE id_obj = '.$filters['id_obj'].' AND type_obj = "'.$filters['type_obj'].'"');
 		while($ln = $this->db->db->fetch_object($sql)){
-			$result[$ln->fk_category] = $categories[$ln->fk_category]['label'];
+			$result[$ln->fk_category] = $categories[$ln->fk_category];
 		}
 		return $result;
 	}
@@ -201,7 +201,7 @@ class Bimp_ChiffreAffaire_ExtEntity extends BimpObject
 			if ($idC > 0) {
 				$filters[$field] = $idC;
 				$fields[$idC] = array(
-					"title"   => $categories[$idC]['label'],
+					"title"   => $categories[$idC],
 					'field'   => 'ca',
 					'calc'    => 'SUM',
 					'filters' => $filters

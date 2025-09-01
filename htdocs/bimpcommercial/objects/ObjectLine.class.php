@@ -50,6 +50,13 @@ class ObjectLine extends BimpObject
 		'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => '', 'check' => 'restricthtml'),
 		'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null, 'check' => 'int')
 	);
+	const TAUX_CGV_100 = 100;
+	const TAUX_CGV_70 = 70;
+	public static $arrayCgv = array(
+		self::TAUX_CGV_70 => array('label' => '70% du prix de vente'),
+		self::TAUX_CGV_100 => array('label' => '100% du prix de vente'),
+	);
+
 	protected $product = null;
 	protected $post_id_product = null;
 	protected $post_equipment = null;
@@ -124,6 +131,19 @@ class ObjectLine extends BimpObject
 		return 0;
 	}
 
+	public function canSetAction($action)
+	{
+		global $user;
+		switch ($action) {
+			case 'allowGarantie3ans':
+				return 1;
+
+			case 'modifAcompte':
+				return $user->rights->BimpSupport->sav_admin;
+		}
+
+		return parent::canSetAction($action);
+	}
 	// Getters booléens:
 
 	public function isCreatable($force_create = false, &$errors = array())
@@ -268,6 +288,27 @@ class ObjectLine extends BimpObject
 		if (in_array($action, array('attributeEquipment')) && !$this->isLoaded()) {
 			$errors[] = '(111) ID ' . $this->getLabel('of_the') . ' absent';
 			return 0;
+		}
+
+		switch ($action) {
+			case 'modifAcompte':
+				return $this->object_name == 'BS_SavPropalLine'
+					&& $this->getData('linked_id_object') && $this->getData('linked_object_name') == 'sav_discount';
+			case 'allowGarantie3ans':
+				if (BimpCore::getConf('use_garantie3ans', null, 'bimpcommercial') && strstr($this->parent->getData('ref'), '(PROV') !== false) {
+					if (($this->parent->object_name == 'Bimp_Propal' && BimpCore::getConf('use_garantie3ans_propal', null, 'bimpcommercial'))
+						||
+						($this->parent->object_name == 'BS_SavPropal' && BimpCore::getConf('use_garantie3ans_sav', null, 'bimpcommercial'))) {
+						foreach ($this->parent->dol_object->lines as $line) {
+							if ($line->id != $this->getData('id_line')) {
+								continue;
+							}
+							$total_tva = (float) $line->total_tva;
+							return $total_tva > 0.0;
+						}
+					}
+				}
+				return 0;
 		}
 
 		return (int) parent::isActionAllowed($action, $errors);
@@ -729,6 +770,27 @@ class ObjectLine extends BimpObject
 					'icon'    => 'fas_plus-circle',
 					'onclick' => $onclick
 				);
+			}
+
+			if ((int) $this->id_product) {
+				if ($this->isActionAllowed('allowGarantie3ans') && $this->canSetAction('allowGarantie3ans')) {
+					$buttons[] = array(
+						'label'   => 'Garantie 3 ans',
+						'icon'    => 'fas_shield-alt',
+						'onclick' => $this->getJsActionOnclick('appliqueGarantie', array(), array('form_name' => 'garantie'))
+					);
+				}
+			}
+
+			if ($this->isActionAllowed('modifAcompte') && $this->canSetAction('modifAcompte'))	{
+				$propal = $this->db->getRow('propal', 'rowid = ' .$this->getData('id_obj') );
+				if (strpos($propal->ref, '(PROV') !== false) {
+					$buttons[] = array(
+						'label'   => 'Modif Acompte',
+						'icon'    => 'fas_undo-alt',
+						'onclick' => $this->getJsActionOnclick('modifAcompte', array(), array('form_name' => 'modifAcompte'))
+					);
+				}
 			}
 		}
 
@@ -1877,6 +1939,67 @@ class ObjectLine extends BimpObject
 		}
 
 		return $serials;
+	}
+
+	public function getSerialsFromClient()
+	{
+		$equipments_ids = array(0 => '');
+
+		global $db;
+		$bdd = new BimpDb($db);
+		$idClient = $this->parent->getData('fk_soc');
+		$rows = $bdd->getRows(
+			'be_equipment_place AS ep',
+			'ep.type = 1 AND ep.id_client = ' . $idClient,
+			null, 'object', array('UNIQUE ep.id_equipment, e.serial'), 'e.serial', 'ASC',
+			array('e' => array('table' => 'be_equipment', 'on' => 'e.id = ep.id_equipment'))
+		);
+		foreach ($rows as $row) {
+			$equipments_ids[$row->id_equipment] = $row->serial;
+		}
+
+		return $equipments_ids;
+	}
+
+	public function getElementsFormGarantie($fields)
+	{
+		global $db;
+		$sn = BimpTools::getPostFieldValue('numSerie', 0);
+		switch ($fields) {
+			case 'pvr':
+				if ($sn > 0) {
+					$equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int)$sn);
+					return $equipment->getData('prix_vente') ?: null;
+				}
+				else return '';
+			case 'achat_ldlc':
+				if($sn > 0){
+					$bdd = new BimpDb($db);
+					$fksoc_fourn = $bdd->getRows(
+						'bimp_commande_fourn_line AS cfl',
+						'cfl.linked_object_name = \'commande_line\' AND linked_id_object = ' . (string)$this->id,
+						null, 'object', array('cf.fk_soc'), null, null,
+						array('cf' => array(
+							'table' => 'commande_fournisseur',
+							'on' => 'cf.rowid = cfl.id_obj'
+						))
+					)[0]->fk_soc;
+					return in_array((int)$fksoc_fourn, json_decode(BimpCore::getConf('ldlcIdFourn', '[]', 'bimpcommercial'), true));
+				}
+				else return false;
+			case 'miseRebus':
+				if ($sn > 0){
+					$bdd = new BimpDb($db);// exit();
+					$newProduct = $bdd->getRow('propaldet', 'rowid = ' . $this->getData('id_line'), array('total_ttc'));
+					$pvr = BimpTools::getPostFieldValue('pvr', '');
+					if ($pvr == '') {
+						$pvr = $this->getElementsFormGarantie('pvr');
+					}
+					return (float)$newProduct->total_ttc > 0.8 * $pvr;
+				}
+				else return false;
+		}
+		return false;
 	}
 
 	public function getListExtraBulkActions()
@@ -4788,6 +4911,28 @@ class ObjectLine extends BimpObject
 					}
 				}
 				break;
+
+			case 'date_vente':
+				$sn = bimpTools::getPostFieldValue('numSerie', 0);
+				if($sn == 0) $html .= BimpInput::renderInput('date', $prefixe . $field);
+				else	{
+					$equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int)$sn);
+//					$html .= '<pre>' . print_r($equipment->getData('date_vente'), true) . gettype($equipment->getData('date_vente')) .  '</pre>';
+					if ($equipment->getData('date_vente')) {
+						$date_vente = new DateTime($equipment->getData('date_vente'));
+						$diff = $date_vente->diff(new DateTime());
+						if ($diff->format('%y') > 2) {
+							if ($diff->format('%y') > 3)
+								$html .= '<span class="danger">ATTENTION, date d\'achat hors garantie</span>';
+							else $html .= '<span class="success">Avez-vous vérifier la garantie constructeur ?</span>';
+						}
+					}
+					else {
+						$html .= '<span class="info">Date d\'achat inconnue, merci de la préciser ici :</span>';
+					}
+					$html .= BimpInput::renderInput('date', $prefixe . $field, substr((string)$equipment->getData('date_vente'), 0, 10));
+				}
+				break;
 		}
 
 		return $html;
@@ -5334,6 +5479,190 @@ class ObjectLine extends BimpObject
 		return array(
 			'errors'   => $errors,
 			'warnings' => $warnings
+		);
+	}
+
+	public function actionAppliqueGarantie($data, &$success)
+	{
+		global $db;
+		$errors = array();
+		$warnings = array();
+		$success = 'Ligne de garantie ajoutée';
+
+		if (isset($data['date_vente'])) {
+			$date_vente = new DateTime($data['date_vente']);
+			$diff = $date_vente->diff(new DateTime());
+			if ($diff->format('%y') > 3) {
+				$errors[] = 'Délai de garantie dépassé !';
+			}
+		}
+
+		$bdd = new BimpDb($db);
+
+		if (!$errors) {
+			$count = $bdd->getCount($this->getTable(), 'linked_object_name = \'garantie\' AND linked_id_object = ' . $this->getData('id'));
+			if ($count) {
+				$errors[] = 'Une garantie a déjà été ajoutée pour cette ligne';
+			}
+		}
+
+		if (!$errors) {
+			$montantGarantie = (float) $data['pvr'] * (float) $data['choix_cgv'] / 100;
+			$ttc = $this->getTotalTTC(true);
+			if ($montantGarantie > (float) $ttc) {
+				$montantGarantie = (float) $ttc;
+			}
+			if ($montantGarantie > BimpCore::getConf('max_remb_garantie3ans', 3000.0, 'bimpcommercial')) {
+				BimpCore::getConf('max_remb_garantie3ans', 3000.0, 'bimpcommercial');
+			}
+			$montantGarantie *= -1;
+			$arrIdsProdGarantie3ans = array(
+				0 => BimpCore::getConf('id_prod_garantie_3ans_ext', 0, 'bimpcommercial'),
+				1 => BimpCore::getConf('id_prod_garantie_3ans_ldlc', 0, 'bimpcommercial')
+			);
+			$idProdGarantie = $arrIdsProdGarantie3ans[(int) $data['achat_ldlc']];
+			if ($idProdGarantie == 0) {
+				$errors[] = 'probleme de configuration des produits de garantie';
+			}
+			if (!$errors) {
+				$productGarantie = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $idProdGarantie);
+				$montantGarantie_ht = $montantGarantie / (1 + $productGarantie->getData('tva_tx') / 100);
+				$data_json = array();
+				if ((int) $data['miseRebus'] > 0) {
+					$data_json = array(
+						'mise_rebut' => array(
+							'equipement' => $data['numSerie'],
+						)
+					);
+				} else {
+					$data_json = array(
+						'reparation' => array(
+							'equipement' => $data['numSerie'],
+						)
+					);
+				}
+
+				$newLine = BimpObject::getInstance($this->module, $this->object_name);
+				$newLine->id_product = $idProdGarantie;
+				$newLine->product_type = $productGarantie->getData('fk_product_type');
+				$newLine->desc = $productGarantie->getData('label');
+				$newLine->qty = 1;
+				$newLine->pu_ht = $montantGarantie_ht;
+				$newLine->tva_tx = $productGarantie->getData('tva_tx');
+				$newLine->pa_ht = ($data['achat_ldlc'] ? $montantGarantie_ht : 0.0);
+
+				$newLine_errors = $newLine->validateArray(array(
+					'id_obj'             => $this->getData('id_obj'),
+					'type'               => 1,
+					'extradata'          => $data_json,
+					'linked_object_name' => 'garantie',
+					'linked_id_object'   => $this->getData('id')
+				));
+
+				if (!count($newLine_errors)) {
+					$newLine_errors = $newLine->create($warnings, true);
+				}
+				if (count($newLine_errors)) {
+					$errors[] = BimpTools::getMsgFromArray($newLine_errors, 'Echec de l\'ajout de la ligne au devis ');
+				}
+			}
+		}
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
+	public function actionModifAcompte($data, $success)
+	{
+		$errors = array();
+		$warnings = array();
+		$success = '';
+		$success_callback = '';
+
+		$id_sav = BimpTools::getPostFieldValue('id');
+		$sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
+		$id_facture_acompte = $sav->getData('id_facture_acompte');
+		if (in_array($data['typeModifAcompte'], array('delier', 'remb'))) {
+			$success = 'Accompte délié avec succes';
+			// partie commune au 2 cas (delier et remb)
+			$sav->updateField('id_facture_acompte', 0);
+			$sav->updateField('acompte', 0);
+
+			$err_delete = $this->deleteLine();
+			if($err_delete)	{
+				$errors[] = $err_delete;
+			}
+		}
+
+		if ($data['typeModifAcompte'] == 'remb') {
+			$success = 'Accompte remboursé avec succes';
+			// partie spécicfique au remboursement
+			$facture = BimpObject::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
+			$facture->set('ef_type', 'S');
+			$facture->set('datef', date('Y-m-d'));
+			$facture->set('fk_soc', $sav->getData('id_client'));
+			$err_fac = $facture->create();
+			if ($err_fac) {
+				$errors[] = $err_fac;
+			}
+			else {
+				$success_callback = 'window.open(\'' . $facture->getUrl() . '\')';
+				$discount = new DiscountAbsolute($this->db->db);
+				$discount->fetch($this->getData('linked_id_object'));
+				$line_errors = $facture->insertDiscount((int) $discount->id);
+				if (count($line_errors)) {
+					$errors[] = BimpTools::getMsgFromArray($line_errors);
+				}
+
+				/*
+				// ai-je un bc_paiement avec $id_facture_acompte
+				$bdd = new BimpDb($this->db->db);
+				$rows = $bdd->getRows('bc_paiement bcp', 'bcp.id_facture = ' . $id_facture_acompte, 1, 'object',
+					array('bcp.id_caisse', 'dolp.ref', 'dolp.amount', 'bank.fk_account'), null, null,
+					array(
+						'dolp' => array('table' => 'paiement', 'on' => 'bcp.id_paiement = dolp.rowid'),
+						'bank' => array('table' => 'bank', 'on' => 'dolp.fk_bank = bank.rowid'),
+					)
+				);
+				if (count($rows))	{ // oui, il faut rajouter une ligne pour compenser
+					BimpTools::loadDolClass('compta/paiement', 'paiement');
+					foreach ($rows as $row)	{
+						// $errors[] = '<pre>' .$id_facture_acompte. print_r($row, true) . '</pre>';
+						$payement = new Paiement($this->db->db);
+						$amount = -1 * (float)$row->amount;
+						$payement->amounts = array($facture->id => $amount);
+						$payement->ref = 'RMB_'.$row->ref;
+						$payement->datepaye = dol_now();
+						$id_mode_paiement = 4; // /admin/dict.php?id=13 (LIQ)
+						$payement->paiementid = (int) $id_mode_paiement; // ? A mettre dans le form
+						global $user;
+						if ($payement->create($user) <= 0)	{
+							$errors[] = 'Echec de l\'enregistrement du remboursement en caise';
+						}
+						else {
+							if ($row->fk_account)	{
+								if ($res = $payement->addPaymentToBank($user, 'payement', '(CustomerInvoicePaymentBack)', $row->fk_account, '', '') <= 0)	{
+									$errors[] = 'Echec du retrait du compte bancaire (' . var_export($res, true) . ')';
+								}
+								else {
+									if($row->id_caisse) {
+										$caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $row->id_caisse);
+										$errors = BimpTools::merge_array($errors, $caisse->addPaiement($payement, $facture->id));
+									}
+								}
+							}
+						}
+					}
+				}
+				*/
+			}
+		}
+		return array(
+			'errors' => $errors,
+			'warnings' => $warnings,
+			'success_callback' => $success_callback
 		);
 	}
 

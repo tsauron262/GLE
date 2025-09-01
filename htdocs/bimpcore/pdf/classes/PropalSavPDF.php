@@ -64,9 +64,22 @@ class PropalSavPDF extends PropalPDF
 								$this->fromCompany->town = $centre['town'];
 								$this->fromCompany->phone = $centre['tel'];
 								$this->fromCompany->email = $centre['mail'];
+
+								$obj_cgv = BimpCache::findBimpObjectInstance('bimpcore', 'BimpCGV', array(
+									'types_pieces' => array('in_braces' => 'devis'),
+									'date_start' => array('custom' => 'a.date_start <= \'' . ($this->bimpCommObject->getData('date_valid')?$this->bimpCommObject->getData('date_valid'):$this->bimpCommObject->getData('datec')) . '\''),
+									'secteurs' => array('in_braces' => 'S'),
+									'id_centre' => $centre['id'],
+								), true, false, false, 'date_start', 'DESC');
+
+								if (BimpObject::objectLoaded($obj_cgv)) {
+									$cgv_file = $obj_cgv->getFilesDir();
+									$cgv_file .= 'CGV_file.pdf';
+								}
 							}
 
-							$cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_boutiques/cgv_' . $code_centre . '.pdf';
+							if(!$cgv_file)
+								$cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_boutiques/cgv_' . $code_centre . '.pdf';
 						}
 					} else {
 						$this->errors[] = 'Aucun SAV associé à ' . $this->bimpCommObject->getLabel('this');
@@ -121,7 +134,7 @@ class PropalSavPDF extends PropalPDF
 				}
 			}
 
-			$infoCentre = $this->sav->getCentreData();
+			$infoCentre = $this->sav->getCentreData(true);
 			global $mysoc;
 			$mysoc->email = $infoCentre['mail'];
 			$mysoc->phone = $infoCentre['tel'];

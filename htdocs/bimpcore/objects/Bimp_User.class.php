@@ -753,7 +753,7 @@ class Bimp_User extends BimpObject
 			'attr'        => array(
 				'type'    => 'button',
 //				'onclick' => "document.location.replace('" . DOL_URL_ROOT . "/user/card.php?leftmenu=users&action=create');"
-				'onclick' => (preg_match('/ldap/', $dolibarr_main_authentication)) ? $this->getJsActionOnclick('create', array(), array('form_name' => 'select_user')) : $this->getJsLoadModalForm('default')
+				'onclick' => (preg_match('/ldap/', $dolibarr_main_authentication)) ? $this->getJsActionOnclick('selectUser', array(), array('form_name' => 'select_user')) : $this->getJsLoadModalForm('default')
 			)
 		);
 

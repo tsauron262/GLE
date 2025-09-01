@@ -76,7 +76,7 @@ class modBimpsupport extends DolibarrModules {
         // If file is in theme/yourtheme/img directory under name object_pictovalue.png, use this->picto='pictovalue'
         // If file is in module/img directory under name object_pictovalue.png, use this->picto='pictovalue@module'
         $this->picto = 'generic';
-        
+
         $this->module_parts = array(
             'hooks' => array('printTopRightMenu', 'toprightmenu', "searchform"),  // Set here all hooks context you want to support)
             "models"=>1
@@ -173,22 +173,28 @@ class modBimpsupport extends DolibarrModules {
         $this->rights[$r][4] = 'read';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
         $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
         $r++;
-        
+
         $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
         $this->rights[$r][1] = 'Supprimer les SAV'; // Permission label
         $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
         $this->rights[$r][4] = 'delete';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
         $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2
         $r++;
-        
+
         $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
         $this->rights[$r][1] = 'Gérer les non-restitutions'; // Permission label
         $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
         $this->rights[$r][4] = 'not_restituted';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
         $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2
         $r++;
-        
-        
+
+        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+        $this->rights[$r][1] = 'Administration des SAV'; // Permission label
+        $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
+        $this->rights[$r][4] = 'sav_admin';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+        $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2
+        $r++;
+
         // Main menu entries
         $this->menu = array();   // List of menus to add
 //        $r = 1;
@@ -232,7 +238,7 @@ class modBimpsupport extends DolibarrModules {
         $r++;
 
 
-        
+
         $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=bimpsupport,fk_leftmenu=bimpsupport',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
                                 'type'=>'left',			// This is a Left menu entry
                                 'titre'=>'Retour groupés',
@@ -308,15 +314,15 @@ class modBimpsupport extends DolibarrModules {
     public function init($options = '') {
         $sql = array();
 
-        
-        
+
+
         require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
         $name = 'module_version_'.strtolower($this->name);
         if(BimpCore::getConf($name) == "") {
             BimpCore::setConf($name, floatval($this->version));
             $this->_load_tables('/bimpsupport/sql/');
         }
-        
+
 //        $this->_load_tables('/bimpgroupmanager/sql/');
         // Add restrictions to all categories son of root
         // Create extrafields
@@ -327,7 +333,7 @@ class modBimpsupport extends DolibarrModules {
         global $conf;
         $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpdevissav', ".$conf->entity.", 'propal', 'Devis SAV', NULL);";
         $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpinvoicesav', ".$conf->entity.", 'invoice', 'Facture SAV', NULL);";
-        
+
 //        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'prodetiquette1', 1, 'product', 'Etiquette Stock', NULL);";
 //        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'prodetiquette2', 1, 'product', 'Etiquette Client', NULL);";
 
@@ -344,14 +350,14 @@ class modBimpsupport extends DolibarrModules {
      */
     public function remove($options = '') {
         global $conf;
-        
+
         $sql = array();
         $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpdevissav' AND entity = ".$conf->entity.";";
         $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpinvoicesav' AND entity = ".$conf->entity.";";
-        
+
 //        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'prodetiquette1';";
 //        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'prodetiquette2';";
-                
+
         return $this->_remove($sql, $options);
     }
 

@@ -178,7 +178,7 @@ if (!defined('NOSESSION')) {
 			//'domain' => '.mywebsite.com', // the dot at the beginning allows compatibility with subdomains
 			'secure' => ((empty($dolibarr_main_force_https) && isHTTPS() === false) ? false : true),
 			'httponly' => true,
-			'samesite' => 'Lax'	// None || Lax  || Strict
+			'samesite' => 'Strict'	// None || Lax  || Strict
 		);
 		session_set_cookie_params($sessioncookieparams);
 	}

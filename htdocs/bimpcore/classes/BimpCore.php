@@ -1118,12 +1118,12 @@ class BimpCore
 							}
 						}
 
+						$global_infos['end'] = date('Y-m-d H:i:s');
+						upUpdatesInfos($bdb, $errors, $global_infos);
+
 						if (count($global_updates_errors)) {
 							$errors[] = BimpTools::getMsgFromArray($global_updates_errors, 'Erreurs lors de la mise à jour globale');
 						} else {
-							$global_infos['end'] = date('Y-m-d H:i:s');
-							upUpdatesInfos($bdb, $errors, $global_infos);
-
 							BimpCore::addLog('Maj globale effectuée avec succès', 1, 'maj', null, array(
 								'infos' => $global_infos
 							), true);
@@ -1192,12 +1192,12 @@ class BimpCore
 							}
 						}
 
+						$version_infos['end'] = date('Y-m-d H:i:s');
+						upUpdatesInfos($bdb, $errors, $version_infos, 'version', $ext_version);
+
 						if (count($version_updates_errors)) {
 							$errors[] = BimpTools::getMsgFromArray($version_updates_errors, 'Erreurs lors de la mise à jour de la version "' . $ext_version . '"');
 						} else {
-							$version_infos['end'] = date('Y-m-d H:i:s');
-							upUpdatesInfos($bdb, $errors, $version_infos, 'version', $ext_version);
-
 							BimpCore::addLog('Maj version effectuée avec succès', 1, 'maj', null, array(
 								'infos' => $version_infos
 							), true);
@@ -1267,12 +1267,12 @@ class BimpCore
 							}
 						}
 
+						$entity_infos['end'] = date('Y-m-d H:i:s');
+						upUpdatesInfos($bdb, $errors, $entity_infos, 'entity', $ext_entity);
+
 						if (count($entity_updates_errors)) {
 							$errors[] = BimpTools::getMsgFromArray($entity_updates_errors, 'Erreurs lors de la mise à jour de l\'entité "' . $ext_entity . '"');
 						} else {
-							$entity_infos['end'] = date('Y-m-d H:i:s');
-							upUpdatesInfos($bdb, $errors, $entity_infos, 'entity', $ext_entity);
-
 							BimpCore::addLog('Maj entité effectuée avec succès', 1, 'maj', null, array(
 								'infos' => $entity_infos
 							), true);
@@ -1306,7 +1306,18 @@ class BimpCore
 					($ext_entity && isset($entity_infos['end']) && empty($entity_infos['end']))) {
 					$n++;
 					sleep(3);
-					$updates_infos = json_decode((string) $bdb->getValue('bimpcore_conf', 'value', 'name = \'erp_updates_infos\' AND module = \'bimpcore\' AND entity = 0'), 1);
+
+					if (isset($global_infos['end']) && empty($global_infos['end'])) {
+						$global_infos = loadUpdatesInfos($bdb);
+					}
+
+					if ($ext_version && isset($version_infos['end']) && empty($version_infos['end'])) {
+						$version_infos = loadUpdatesInfos($bdb, 'version', $ext_version);
+					}
+
+					if ($ext_entity && isset($entity_infos['end']) && empty($entity_infos['end'])) {
+						$entity_infos = loadUpdatesInfos($bdb, 'entity', $ext_entity);
+					}
 
 					if ($n > 20) {
 						http_response_code(503);

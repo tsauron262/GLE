@@ -560,6 +560,7 @@ class BimpPublicController extends BimpController
                             ), true);
 
             if (!BimpObject::objectLoaded($userClient)) {
+				BimpTools::secuAddEchec('Recupération mdp espace client : ' . $email);
                 $errors[] = 'Il n\'y a aucun compte client enregistré pour cette adresse e-mail';
             } else {
                 $warnings = array();

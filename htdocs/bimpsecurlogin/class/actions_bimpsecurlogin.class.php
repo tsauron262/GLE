@@ -64,6 +64,10 @@ class securLogSms
 
                 $secondeRestante = (int) $this->user->array_options['options_heure_sms'] - $dateFinBloquage;
 
+				if ($this->user->array_options['options_code_sms'] != '' && (time() - $this->user->array_options['options_heure_sms']) > (60 * 5) ) {
+					$this->message[] = "Le Code n'est plus valable";
+					$code = '';
+				}
 
                 if ((empty($code) && $secondeRestante < 0) || $this->user->array_options['options_code_sms'] == '')
                     $this->createSendCode();
@@ -210,7 +214,8 @@ class securLogSms
     {
         global $user;
         $this->user->oldcopy = clone($this->user);
-        if ($this->user->array_options['options_code_sms'] == $code && $code != '') {
+
+		if ($this->user->array_options['options_code_sms'] == $code && $code != '') {
             $this->user->array_options['options_echec_auth'] = 0;
             $this->user->array_options['options_code_sms'] = '';
             $this->user->update($user);

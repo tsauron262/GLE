@@ -9,6 +9,8 @@ categories:
         label: Envoi rappels
     locations:
         label: Demandes de location
+    garantie:
+        label: Garantie 3 ans
 
 params:
     use_lock_num:
@@ -406,3 +408,37 @@ params:
         label: Client n'ayant pas besoin de signer
         info: Tableau json de type [1,2]
         
+    use_garantie3ans:
+        label: Activation de la garantie 3 ans
+        type: bool
+        def: 0
+        cat: garantie
+        sub_params:
+            - if: 1
+              params:
+                  use_garantie3ans_propal:
+                      label: Appliquer au devis
+                      type: bool
+                      def: 0
+                      warning: Cocher au moins une de ces 2 options
+                  use_garantie3ans_sav:
+                      label: Appliquer au SAV
+                      type: bool
+                      def: 0
+                      warning: Cocher au moins une de ces 2 options
+    
+    id_entrepot_rebut:
+        label: entrepot pour mise au rebut
+        cat: garantie
+        
+    id_prod_garantie_3ans_ext:
+        label: Produit pour achat NON LDLC
+        cat: garantie
+    
+    id_prod_garantie_3ans_ldlc:
+        label: Produit pour LDLC
+        cat: garantie
+    
+    ldlcIdFourn:
+        label: liste des Fournisseurs LDLC
+        cat: garantie

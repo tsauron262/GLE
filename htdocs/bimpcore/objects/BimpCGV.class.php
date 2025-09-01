@@ -7,7 +7,7 @@ class BimpCGV extends BimpObject
 	public function canCreate()
 	{
 		global $user;
-		if ($user->admin) {
+		if (1/*$user->admin*/) {
 			return 1;
 		} else {
 			return 0;
@@ -17,6 +17,26 @@ class BimpCGV extends BimpObject
 	public function canDelete()
 	{
 		return $this->canCreate();
+	}
+
+	public function actionTestPdf($data, &$success)
+	{
+		$errors = array();
+		$warnings = array();
+		$success = 'Ok,  <a href="' . $this->getFileUrl('testPdf.pdf') . '" target="_blank">lien</a>';
+
+		require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
+		$pdf = new BimpConcatPdf();
+		copy($this->getFilesDir().'/CGV_file.pdf', $this->getFilesDir().'/testPdf.pdf');
+		$pdf->addFiles($this->getFilesDir().'/testPdf.pdf', array(
+			$this->getFilesDir().'CGV_file.pdf',
+			$this->getFilesDir().'CGV_file.pdf'
+		), 'F');
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
 	}
 
 	public function canSetAction($action)
@@ -53,6 +73,11 @@ class BimpCGV extends BimpObject
 				))
 			);
 		}
+		$buttons[] = array(
+			'label'   => 'Tester PDF',
+			'icon'    => 'far_file-pdf',
+			'onclick' => $this->getJsActionOnclick('testPdf', array(), array())
+		);
 
 		return $buttons;
 	}

@@ -2863,13 +2863,12 @@ class BimpComm extends BimpDolObject
 				break;
 		}
 
-		if ($this->getData($statutField) > 0) {
-			require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/viewEcriture.class.php';
-			viewEcriture::setCurrentObject($this);
-			$html .= viewEcriture::display();
-		} else {
+		if ($this->getData($statutField) == 0) {
 			$html .= BimpRender::renderAlerts($this->getRef() . ' n\'est pas validé' . (($this->isLabelFemale()) ? 'e' : ''), 'info', false);
 		}
+		require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/viewEcriture.class.php';
+		viewEcriture::setCurrentObject($this);
+		$html .= viewEcriture::display();
 
 		return $html;
 	}

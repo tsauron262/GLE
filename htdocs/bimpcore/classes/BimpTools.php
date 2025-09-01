@@ -248,7 +248,7 @@ class BimpTools
 			$tmp_dir_for_url = str_replace('/' . $entity . '/', '', $tmp_dir_for_url);
 		}
 
-		if ($make_dir && !is_dir($file_infos['dir'])) {
+		if ($make_dir && !is_dir($tmp_dir)) {
 			$dir_err = BimpTools::makeDirectories($tmp_dir);
 
 			if ($dir_err) {
@@ -4560,7 +4560,7 @@ class BimpTools
 
 	public static function secuTestIp()
 	{
-		if (static::secuGetNbEchec() > 20) {
+		if (static::secuGetNbEchec() > 10) {
 			BimpCore::addlog('Activité anormal : ' . static::getUserIp(), 3);
 			$msg = 'Une activité anormale a étais détecté sur votre connexion...';
 			$html = BimpRender::renderAlerts($msg);

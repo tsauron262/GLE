@@ -57,83 +57,6 @@ class BWS_User extends BimpObject
 		return $buttons;
 	}
 
-	public function actionTestReq($data, &$success)
-	{
-		$errors = $warnings = array();
-
-		$params = array();
-		$req = BimpTools::getPostFieldValue('req', '', 'aZ09');
-
-		$headers = array();
-		$headers['BWS-LOGIN'] = base64_encode($this->getData('email'));
-		if ($req == 'authenticate') {
-			$params['pword'] = $this->getData('pword');
-		} else {
-			$headers['BWS-TOKEN'] = base64_encode($this->getData('token'));
-
-//            print_r($_POST['extra_data']);
-			$params['module'] = BimpTools::getPostFieldValue('module_name', '', 'aZ09');
-			$params['object_name'] = BimpTools::getPostFieldValue('obj_name', '', 'aZ09');
-			foreach ($_POST['extra_data'] as $name => $value) {
-				if (stripos($name, 'show_') === false && stripos($name, 'add_') !== 0 && $name != 'module_name' && $name != 'obj_name' && $name != 'url' && $name != 'certif') {
-					$params[$name] = BimpTools::getPostFieldValue($name, '', 'alphanohtml');
-				}
-			}
-//            $params['filters'] = BimpTools::getPostFieldValue('filters');
-//            $filter1 = json_decode(BimpTools::getPostFieldValue('panel_filters'),1);
-//            $filter2 = json_decode(BimpTools::getPostFieldValue('panel_filters2'),1);
-//            $params['panel_filters'] = json_encode(BimpTools::merge_array($filter1, $filter2, true));
-		}
-
-		$url = $data['url'] . '?req=' . $req;
-//        $url = 'https://erpi.bimp.fr/bimp8/bimpwebservice/request.php?req='.$req;
-
-
-		$curl_str = 'curl -s -X POST ';
-		foreach ($headers as $param => $value) {
-			$curl_str .= ' -H "' . $param . ': ' . addslashes($value) . '"';
-		}
-		$curl_str .= ' \'' . $url . '\'';
-		foreach ($params as $param => $value) {
-			if ($value != '' && $value != 'any') {
-				$curl_str .= ' -F ' . $param . '="' . addslashes($value) . '"';
-			}
-		}
-
-
-		$headers_str = array();
-		foreach ($headers as $header_name => $header_value) {
-			$headers_str[] = $header_name . ': ' . $header_value;
-		}
-		$ch = curl_init('');
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers_str);
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-		if (!$data['certif']) {
-			$curl_str .= ' -k';
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-			curl_setopt($ch, CURLOPT_PROXY_SSL_VERIFYPEER, 0);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-		}
-//        curl_setopt($ch, CURLOPT_HEADER, 0);
-
-		$response = curl_exec($ch);
-
-		if (BimpTools::getPostFieldValue('panel_filters', '') != '') {
-			$errors[] = 'Filtres JSON  : <textarea style="min-width: 1000px;min-height: 100px;">' . BimpTools::getPostFieldValue('panel_filters') . '</textarea>';
-		}
-		$errors[] = 'Resultat : <textarea style="min-width: 1000px;min-height: 100px;">' . $response . '</textarea>';
-		$errors[] = 'Req Curl : <textarea style="min-width: 1000px;min-height: 100px;">' . str_replace(";", ",", $curl_str) . '</textarea>';
-
-		return array(
-			'errors'   => $errors,
-			'warnings' => $warnings
-		);
-	}
-
 	// Getters booléens:
 
 	public function hasRight($request_name, $module = 'any', $object_name = 'any', &$log_request = false)
@@ -379,6 +302,21 @@ class BWS_User extends BimpObject
 		return (int) BimpCore::getConf('id_default_user', null, 'bimpwebservice');
 	}
 
+	public function getToken()
+	{
+		if ($this->isLoaded($errors)) {
+			$token = BimpCache::findBimpObjectInstance('bimpwebservice', 'BWS_UserToken', array(
+				'id_ws_user' => $this->id
+			), true, false, false, 'token_expire', 'DESC');
+
+			if (BimpObject::objectLoaded($token)) {
+				return $token->getData('token');
+			}
+		}
+
+		return '';
+	}
+
 	// Affichages:
 
 	public function displayUserErpUsed($display = 'nom_url', $with_origine = true)
@@ -564,22 +502,29 @@ class BWS_User extends BimpObject
 	public function checkToken($token, &$error = '')
 	{
 		if ($this->isLoaded()) {
-			$cur_token = $this->getData('token');
-
-			if ($cur_token) {
-				$expire = $this->getData('token_expire');
-
-				if ($expire > date('Y-m-d H:i:s')) {
+			$now = date('Y-m-d H:i:s');
+			foreach ($this->getChildrenObjects('tokens') as $token_obj) {
+				$cur_token = $token_obj->getData('token');
+				$expire = $token_obj->getData('token_expire');
+				if ($cur_token) {
 					if ($token === $cur_token || hash('sha256', $token) === $cur_token) {
-						return true;
+						if ($expire < $now) {
+							$error = 'Token expiré - Veuillez reconnecter votre compte';
+						} else {
+							return true;
+						}
 					}
-					$error = 'Token invalide';
-					return false;
+
+					if ($expire < $now) {
+						$w = array();
+						$token_obj->delete($w, true);
+					}
 				}
-				$error = 'Token expiré - Veuillez reconnecter votre compte';
-				return false;
 			}
-			$error = 'Token absent';
+		}
+
+		if (!$error) {
+			$error = 'Token invalide';
 		}
 		return false;
 	}
@@ -620,17 +565,19 @@ class BWS_User extends BimpObject
 			}
 
 			$token = BimpTools::randomPassword(24);
-			$this->set('token', hash('sha256', $token));
-
 			$dt = new DateTime();
 			$dt->add(new DateInterval('PT' . $delay_minutes . 'M'));
 			$expire = $dt->format('Y-m-d H:i:s');
-			$this->set('token_expire', $expire);
 
-			$up_errors = $this->update($warnings, true);
+			$token_errors = array();
+			BimpObject::createBimpObject('bimpwebservice', 'BWS_UserToken', array(
+				'id_ws_user'   => $this->id,
+				'token'        => hash('sha256', $token),
+				'token_expire' => $expire
+			), true, $token_errors);
 
-			if (count($up_errors)) {
-				$errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du token');
+			if (count($token_errors)) {
+				$errors[] = BimpTools::getMsgFromArray($token_errors, 'Echec de la création du token');
 			} else {
 				return array(
 					'token'  => $token,
@@ -656,6 +603,83 @@ class BWS_User extends BimpObject
 		if (!count($errors)) {
 			$warnings[] = '<b>Nouveau mot de passe:</b> ' . $pw;
 		}
+
+		return array(
+			'errors'   => $errors,
+			'warnings' => $warnings
+		);
+	}
+
+	public function actionTestReq($data, &$success)
+	{
+		$errors = $warnings = array();
+
+		$params = array();
+		$req = BimpTools::getPostFieldValue('req', '', 'aZ09');
+
+		$headers = array();
+		$headers['BWS-LOGIN'] = base64_encode($this->getData('email'));
+		if ($req == 'authenticate') {
+			$params['pword'] = $this->getData('pword');
+		} else {
+			$headers['BWS-TOKEN'] = base64_encode($this->getToken());
+
+//            print_r($_POST['extra_data']);
+			$params['module'] = BimpTools::getPostFieldValue('module_name', '', 'aZ09');
+			$params['object_name'] = BimpTools::getPostFieldValue('obj_name', '', 'aZ09');
+			foreach ($_POST['extra_data'] as $name => $value) {
+				if (stripos($name, 'show_') === false && stripos($name, 'add_') !== 0 && $name != 'module_name' && $name != 'obj_name' && $name != 'url' && $name != 'certif') {
+					$params[$name] = BimpTools::getPostFieldValue($name, '', 'alphanohtml');
+				}
+			}
+//            $params['filters'] = BimpTools::getPostFieldValue('filters');
+//            $filter1 = json_decode(BimpTools::getPostFieldValue('panel_filters'),1);
+//            $filter2 = json_decode(BimpTools::getPostFieldValue('panel_filters2'),1);
+//            $params['panel_filters'] = json_encode(BimpTools::merge_array($filter1, $filter2, true));
+		}
+
+		$url = $data['url'] . '?req=' . $req;
+//        $url = 'https://erpi.bimp.fr/bimp8/bimpwebservice/request.php?req='.$req;
+
+
+		$curl_str = 'curl -s -X POST ';
+		foreach ($headers as $param => $value) {
+			$curl_str .= ' -H "' . $param . ': ' . addslashes($value) . '"';
+		}
+		$curl_str .= ' \'' . $url . '\'';
+		foreach ($params as $param => $value) {
+			if ($value != '' && $value != 'any') {
+				$curl_str .= ' -F ' . $param . '="' . addslashes($value) . '"';
+			}
+		}
+
+
+		$headers_str = array();
+		foreach ($headers as $header_name => $header_value) {
+			$headers_str[] = $header_name . ': ' . $header_value;
+		}
+		$ch = curl_init('');
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers_str);
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+		if (!$data['certif']) {
+			$curl_str .= ' -k';
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+			curl_setopt($ch, CURLOPT_PROXY_SSL_VERIFYPEER, 0);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+		}
+//        curl_setopt($ch, CURLOPT_HEADER, 0);
+
+		$response = curl_exec($ch);
+
+		if (BimpTools::getPostFieldValue('panel_filters', '') != '') {
+			$errors[] = 'Filtres JSON  : <textarea style="min-width: 1000px;min-height: 100px;">' . BimpTools::getPostFieldValue('panel_filters') . '</textarea>';
+		}
+		$errors[] = 'Resultat : <textarea style="min-width: 1000px;min-height: 100px;">' . $response . '</textarea>';
+		$errors[] = 'Req Curl : <textarea style="min-width: 1000px;min-height: 100px;">' . str_replace(";", ",", $curl_str) . '</textarea>';
 
 		return array(
 			'errors'   => $errors,

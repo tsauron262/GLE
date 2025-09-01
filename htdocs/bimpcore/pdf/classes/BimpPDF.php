@@ -164,15 +164,45 @@ class BimpConcatPdf extends Fpdi
             $tplidx = $this->importPage($i + 1, '/MediaBox');
             $this->useTemplate($tplidx);
         }
-        $file = DOL_DATA_ROOT . "/bimpcore/pdf/cgv" . $type . ".pdf";
-        if (!is_file($file)) {
-            $file = DOL_DATA_ROOT . "/bimpcore/pdf/cgv.pdf";
-            if (!is_file($file)) {
-                $file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv" . $type . ".pdf";
-                if (!is_file($file))
-                    $file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv.pdf";
-            }
-        }
+		$tabT = explode("/", $fileOrig);
+		$ref = str_replace('.pdf', '', $tabT[count($tabT) - 1]);
+		$module = '';
+		foreach ($tabT as $t) {
+			if ($t == "propale") {
+				$module = $t;
+			}
+		}
+		switch ($module) {
+			case 'propale':
+				$bimpPropal = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Propal', array('ref' => $ref));
+				$date = ($bimpPropal->getData('date_valid')?:$bimpPropal->getData('datec'));
+				$obj_cgv = BimpCache::findBimpObjectInstance('bimpcore', 'BimpCGV', array(
+					'types_pieces' => array('in_braces' => 'devis'),
+					'date_start'   => array('custom' => 'a.date_start <= \'' . $date . '\''),
+					'secteurs' => array('in_braces' => $type),
+				), true, false, false, 'date_start', 'DESC');
+
+				if (BimpObject::objectLoaded($obj_cgv)) {
+					$cgv_file = $obj_cgv->getFilesDir();
+					$cgv_file .= 'CGV_file.pdf';
+				}
+			break;
+		}
+		if(!is_null($cgv_file) && $cgv_file) {
+			$file = $cgv_file;
+		}
+		else {
+			$file = DOL_DATA_ROOT . "/bimpcore/pdf/cgv" . $type . ".pdf";
+			if (!is_file($file)) {
+				$file = DOL_DATA_ROOT . "/bimpcore/pdf/cgv.pdf";
+				if (!is_file($file)) {
+					$file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv" . $type . ".pdf";
+					if (!is_file($file)) {
+						$file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv.pdf";
+					}
+				}
+			}
+		}
         $pagecount = $this->setSourceFile($file);
         for ($i = 0; $i < $pagecount; $i++) {
             $this->AddPage();

@@ -304,10 +304,15 @@ function analyseVarsForSqlAndScriptsInjection(&$var, $type, $stopcode = 1)
 
 					/*moddrsi (20.2)*/
 					// Pour débug :
-					if (is_dir(DOL_DOCUMENT_ROOT . '/bimpressources')) {
-						$hfile = fopen(DOL_DOCUMENT_ROOT . '/bimpressources/injections_log.txt', 'a');
+					if (is_dir(__DIR__ . '/bimpressources')) {
+						$hfile = fopen(__DIR__ . '/bimpressources/injections_log.txt', 'a');
 						if ($hfile) {
-							fwrite($hfile, '------------------------------------' . "\n" . date('d / m / Y H:i') . "\n" . $errormessage . ' ' . substr($errormessage2, 2000) ."\n\n\n");
+							fwrite($hfile, '------------------------------------' . "<br/>" . date('d / m / Y H:i') . "<br/>" . $errormessage . ' <!--<code>' . $errormessage2 ."</code>--><br/><br/><br/>");
+
+							if ($key == 'signature') {
+								fwrite($hfile, 'GET<pre>'.print_r($_GET, 1).'</pre>');
+								fwrite($hfile, '<br/>POST<pre>'.print_r($_POST, 1).'</pre>');
+							}
 							fclose($hfile);
 						}
 					}
@@ -732,7 +737,7 @@ if ((!defined('NOCSRFCHECK') && empty($dolibarr_nocsrfcheck) && getDolGlobalInt(
 		if (!defined('NOTOKENRENEWAL')) {
 			// If the page is not a page that disable the token renewal, we report a warning message to explain token has epired.
 			setEventMessages('SecurityTokenHasExpiredSoActionHasBeenCanceledPleaseRetry', null, 'warnings', '', 1);
-			mailSyn2('SecurityTokenHasExpiredSoActionHasBeenCanceledPleaseRetry', 'tommy@bimp.fr', null, "--- Access to ".(empty($_SERVER["REQUEST_METHOD"]) ? '' : $_SERVER["REQUEST_METHOD"].' ').$_SERVER["PHP_SELF"]." refused by CSRF protection (invalid token), so we disable POST and some GET parameters - referrer=".(empty($_SERVER['HTTP_REFERER']) ? '' : $_SERVER['HTTP_REFERER']).", action=".GETPOST('action', 'aZ09').", _GET|POST['token']=".GETPOST('token', 'alpha'));
+//			mailSyn2('SecurityTokenHasExpiredSoActionHasBeenCanceledPleaseRetry', 'tommy@bimp.fr', null, "--- Access to ".(empty($_SERVER["REQUEST_METHOD"]) ? '' : $_SERVER["REQUEST_METHOD"].' ').$_SERVER["PHP_SELF"]." refused by CSRF protection (invalid token), so we disable POST and some GET parameters - referrer=".(empty($_SERVER['HTTP_REFERER']) ? '' : $_SERVER['HTTP_REFERER']).", action=".GETPOST('action', 'aZ09').", _GET|POST['token']=".GETPOST('token', 'alpha'));
 		}
 		$savid = null;
 		if (isset($_POST['id'])) {

@@ -1,0 +1,50 @@
+table: bws_user_token
+icon: fas_key
+common_fields: 0
+
+parent_module: bimpwebservice
+parent_object: BWS_User
+parent_id_property: id_ws_user
+
+labels: 
+    name: token
+    
+fields: 
+    id_ws_user: 
+        label: Utilisateur webservice
+        type: id_parent
+        required: 1
+        
+    token: 
+        label: Token
+        type: password
+        required: 1
+        
+    token_expire:
+        label: Expiration du token
+        type: datetime
+
+lists: 
+    default:
+        configurable: 0
+        checkboxes: 1
+        n: 10
+        edit_btn: 0
+        delete_btn: 1
+        single_cell:
+            filters:
+                line_type: 1
+            col: desc
+        bulk_actions:
+            -   label: Supprimer les tokens sélectionnés
+                icon: fas_trash-alt
+                onclick: deleteSelectedObjects('list_id', $(this))
+        cols:
+            id_ws_user:
+            token: 
+            token_expire:
+                
+    ws_user: 
+        extends: default
+        cols:
+            id_ws_user: unset

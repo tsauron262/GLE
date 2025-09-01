@@ -839,6 +839,7 @@ L’équipe " . $soc_name;
 
                 $to = BimpTools::cleanEmailsStr($email_client);
 
+
                 $this->debug_content .= 'Envoi e-mail client à ' . $to . ': ';
 
                 $bimpMail = new BimpMail((is_object($client) ? $client : 'none'), "Votre rendez-vous SAV " . $soc_name, $to, $from, str_replace("\n", "<br/>", $messageClient));

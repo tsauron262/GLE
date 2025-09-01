@@ -1255,7 +1255,7 @@ class savFormController extends BimpPublicController
             $use_gsx_v2 = (int) BimpCore::getConf('use_gsx_v2_for_reservations', null, 'bimpapple');
             $correlationId = '';
 
-            if (isset($centres[$code_centre])) {
+            if (isset($centres[$code_centre]) && $centres[$code_centre]['shipTo'] > 100) {
                 $request_errors = array();
                 $result = GSX_Reservation::fetchAvailableSlots(1442050, $centres[$code_centre]['shipTo'], $code_product, $request_errors);
 
@@ -1342,16 +1342,25 @@ class savFormController extends BimpPublicController
                 $html .= '</script>';
 
                 $html .= '</div>';
-            } else {
-                $html .= '<div style="text-align: center; padding: 15px">';
-                global $conf;
-                $html .= '<span class="info">Il n\'y a aucun créneau horaire disponible dans les 7 prochains jours pour ce centre ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . '</span><br/><br/>';
-                $html .= '<p>Vous pouvez toutefois valider ce formulaire et déposer votre matériel quand vous le souhaitez sans rendez-vous</p>';
-                $html .= '</div>';
+			} elseif($centres[$code_centre]['shipTo'] > 100) {
+				$html .= '<div style="text-align: center; padding: 15px">';
+				global $conf;
+				$html .= '<span class="info">Il n\'y a aucun créneau horaire disponible dans les 7 prochains jours pour ce centre ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . '</span><br/><br/>';
+				$html .= '<p>Vous pouvez toutefois valider ce formulaire et déposer votre matériel quand vous le souhaitez sans rendez-vous</p>';
+				$html .= '</div>';
 
-                $validate_enable = true;
-                $force_validation = 1;
-            }
+				$validate_enable = true;
+				$force_validation = 1;
+			}else {
+				$html .= '<div style="text-align: center; padding: 15px">';
+				global $conf;
+				$html .= '<span class="info">Ce centre ne prend pas de réservation</span><br/><br/>';
+				$html .= '<p>Vous pouvez valider ce formulaire et déposer votre matériel quand vous le souhaitez sans rendez-vous</p>';
+				$html .= '</div>';
+
+				$validate_enable = true;
+				$force_validation = 1;
+			}
 
             if (isset($centres[$code_centre]['id_entrepot']) && (int) $centres[$code_centre]['id_entrepot']) {
                 $entrepot = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', (int) $centres[$code_centre]['id_entrepot']);

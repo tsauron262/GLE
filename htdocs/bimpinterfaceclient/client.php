@@ -43,6 +43,15 @@ if (isset($_REQUEST['nav_not_compatible'])) {
 //}
 
 require_once '../bimpcore/main.php';
+
+global $conf;
+echo 'iii'.$conf->entity.'xxx';
+if(isset($_REQUEST['entity']) && (int) $_REQUEST['entity'] > 0){
+	$conf->entity = $_REQUEST['entity'];
+}
+echo 'iii2'.$conf->entity.'xxx';
+
+
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 //if (!isset($_COOKIE[$sessionname])) {
@@ -51,12 +60,6 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 BimpCore::setContext("public");
 
-global $conf;
-echo 'iii'.$conf->entity.'xxx';
-if(isset($_REQUEST['entity']) && (int) $_REQUEST['entity'] > 0){
-	$conf->entity = $_REQUEST['entity'];
-}
-echo 'iii2'.$conf->entity.'xxx';
 
 if ($fc !== 'doc') {
     if (!isset($_REQUEST['ajax'])) {

@@ -93,6 +93,10 @@ $hookmanager->initHooks(array('cli'));
 // current date
 $now = dol_now();
 
+echo 'ok';
+die('fin');
+
+
 @set_time_limit(0);
 print "***** ".$script_file." (".$version.") pid=".dol_getmypid()." - userlogin=".$userlogin." - ".dol_print_date($now, 'dayhourrfc', 'gmt')." - ".gethostname()." *****\n";
 

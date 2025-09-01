@@ -47,10 +47,7 @@ require_once '../bimpcore/main.php';
 global $conf;
 echo 'iii'.$conf->entity.'xxx';
 if(isset($_REQUEST['entity']) && (int) $_REQUEST['entity'] > 0){
-	$conf->entity = $_REQUEST['entity'];
-	$_SESSION['dol_entity'] = $_REQUEST['entity'];
-//	global $mc;
-//	$ret = $mc->switchEntity($_REQUEST['entity']);
+	BimpCache::switchEntity((int) $_REQUEST['entity']);
 	echo '2iii'.$conf->entity.'xxx';
 }
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env php
 <?php
+
+die('fin debut');
 /*
  * Copyright (C) 2012 Nicolas Villa aka Boyquotes http://informetic.fr
  * Copyright (C) 2013 Florian Henry <forian.henry@open-concept.pro

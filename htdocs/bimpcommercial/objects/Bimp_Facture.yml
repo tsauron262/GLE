@@ -596,7 +596,6 @@ forms:
                   auto_expand: 1
                   
     duplicate:
-        force_edit: 1
         rows:
             - custom: 1
               label: Date

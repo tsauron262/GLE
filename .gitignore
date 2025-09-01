@@ -1,7 +1,4 @@
-# Ignore itself
-.gitignore
 htdocs/conf/conf.php
-htdocs/conf/config-srv.inc.php
 htdocs/conf/conf.php.old
 htdocs/conf/conf.php.sav
 htdocs/conf/conf.php.back
@@ -92,12 +89,3 @@ phpstan_custom.neon
 /.php-cs-fixer.cache
 /.php_cs.cache
 /.cache
-
-
-/htdocs/bimpcore/views/.sass-cache/
-/htdocs/bimpcore/diff_from.html
-/htdocs/bimpcore/diff_to.html
-!/htdocs/synopsiscaldav/caldav/vendor/
-/htdocs/bimpcore/site.html
-/htdocs/bimpflo/
-/htdocs/bimpressources/pull_infos.json

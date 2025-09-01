@@ -2990,6 +2990,15 @@ class BimpCache
 		return self::$cache[$cache_key];
 	}
 
+	public static function switchEntity($id, $eraseCache = true){
+		global $conf;
+		$conf->entity = $id;
+		$_SESSION['dol_entity'] = $id;
+		if($eraseCache){
+			self::$cache = array();
+		}
+	}
+
 	public static function getCentresArray($activ_only = false, $label_key = 'label', $include_empty = true, $rdv_allowed_only = false)
 	{
 		$cache_key = 'centres_sav_array';

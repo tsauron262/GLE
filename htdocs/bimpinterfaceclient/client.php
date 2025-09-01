@@ -51,11 +51,12 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 BimpCore::setContext("public");
 
+global $conf;
+echo 'iii'.$conf->entity.'xxx';
 if(isset($_REQUEST['entity']) && (int) $_REQUEST['entity'] > 0){
-	global $conf;
 	$conf->entity = $_REQUEST['entity'];
 }
-echo 'iii'.$conf->entity.'xxx';
+echo 'iii2'.$conf->entity.'xxx';
 
 if ($fc !== 'doc') {
     if (!isset($_REQUEST['ajax'])) {

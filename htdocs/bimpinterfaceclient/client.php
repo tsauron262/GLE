@@ -50,8 +50,8 @@ if(isset($_REQUEST['entity']) && (int) $_REQUEST['entity'] > 0){
 //	$conf->entity = $_REQUEST['entity'];
 	global $mc;
 	$ret = $mc->switchEntity($_REQUEST['entity']);
+	echo '2iii'.$conf->entity.'xxx';
 }
-echo 'iii2'.$conf->entity.'xxx';
 
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';

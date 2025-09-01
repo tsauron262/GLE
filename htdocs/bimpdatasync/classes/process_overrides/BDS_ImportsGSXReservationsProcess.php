@@ -839,7 +839,6 @@ L’équipe " . $soc_name;
 
                 $to = BimpTools::cleanEmailsStr($email_client);
 
-				$to = 't.sauron@bimp.fr';
 
                 $this->debug_content .= 'Envoi e-mail client à ' . $to . ': ';
 

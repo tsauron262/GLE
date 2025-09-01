@@ -1,7 +1,7 @@
 table: bs_centre_sav
 icon: fas_store
 controller: centre
-in_cache_serveur: 0
+in_cache_serveur: 1
 entity_name: entrepot
 
 nom_url:

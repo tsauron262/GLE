@@ -55,6 +55,7 @@ if(isset($_REQUEST['entity']) && (int) $_REQUEST['entity'] > 0){
 	global $conf;
 	$conf->entity = $_REQUEST['entity'];
 }
+echo 'iii'.$conf->entity.'xxx';
 
 if ($fc !== 'doc') {
     if (!isset($_REQUEST['ajax'])) {

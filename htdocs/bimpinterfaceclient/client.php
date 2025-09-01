@@ -47,7 +47,7 @@ require_once '../bimpcore/main.php';
 global $conf;
 echo 'iii'.$conf->entity.'xxx';
 if(isset($_REQUEST['entity']) && (int) $_REQUEST['entity'] > 0){
-	$conf->entity = $_REQUEST['entity'];
+//	$conf->entity = $_REQUEST['entity'];
 }
 echo 'iii2'.$conf->entity.'xxx';
 

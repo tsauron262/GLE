@@ -50,7 +50,7 @@ if(isset($_REQUEST['entity']) && (int) $_REQUEST['entity'] > 0){
 //	$conf->entity = $_REQUEST['entity'];
 	global $mc;
 	$ret = $mc->switchEntity($_REQUEST['entity']);
-	echo '2iii'.$conf->entity.'xxx';
+	echo '2iii'.$conf->entity.'xxx'.$ret;
 }
 
 

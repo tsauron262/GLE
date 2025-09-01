@@ -44,11 +44,9 @@ if (isset($_REQUEST['nav_not_compatible'])) {
 
 require_once '../bimpcore/main.php';
 
-global $conf;
-echo 'iii'.$conf->entity.'xxx';
+
 if(isset($_REQUEST['entity']) && (int) $_REQUEST['entity'] > 0){
 	BimpCache::switchEntity((int) $_REQUEST['entity']);
-	echo '2iii'.$conf->entity.'xxx';
 }
 
 

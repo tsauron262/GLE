@@ -40,7 +40,7 @@ class ammortissement extends BimpObject
 			$buttons[] = array(
 				'label'   => 'Créer facture',
 				'icon'    => 'fas_check',
-				'onclick' => $this->getJsActionOnclick('createFact', array(), array(
+				'onclick' => $this->getJsActionOnclick('createFact', array('date' => $this->getData('Date_ECHEANCE')), array(
 					'form_name' => 'createFact'
 				))
 			);

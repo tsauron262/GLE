@@ -14,6 +14,11 @@ objects:
     emprunt:
         instance:
             bimp_object: emprunt
+    action:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_ActionComm
 sections:
     - type: tabs
       tabs: 
@@ -25,6 +30,17 @@ sections:
                       callback: 
                           method: renderStat
                           object: bimpcoopmvt
+                - type: list
+                  list: 
+                      panel: 1
+                      object: action
+                      filters: 
+                          fk_action: 
+                              callback:
+                                  method: getIdWithCodeType
+                                  object: action
+                                  params:
+                                      - COMPTA
                 - type: graph
                   graph:
                       object: bimpcoopmvt

@@ -140,9 +140,16 @@ graph:
         title: Evolution Tréso
         xDateConfig:
             field: date
+            params:
+                - day
+                - month
             date1: 1
             date2: 2
             def: 1year
+        options:
+            notDev:
+                name: Not dév
+                type: toggle
         y: €
         use_k: 1
         x: date
@@ -154,6 +161,10 @@ graph:
             date1: 1
             date2: 2
             def: 1year
+        options:
+            notRmbAnt:
+                name: Not RMB Ant
+                type: toggle
         y: €
         use_k: 1
         round: 2
@@ -166,6 +177,16 @@ graph:
             date1: 1
             date2: 2
             def: 1year
+            params:
+                - day
+                - month
+        options:
+            notRmbAnt:
+                name: Not RMB Ant
+                type: toggle
+            notDev:
+                name: Not dév
+                type: toggle
         y: €
         use_k: 0
         round: 2

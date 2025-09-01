@@ -78,6 +78,7 @@ lists:
             id_prelev:
             Date_ECHEANCE:
             MONTANT_ECHEANCE:
+            CAPITAL_AMORTI:
             CAPITAL_RESTANT_DU:
             id_fact:
             date_paiement_reel:

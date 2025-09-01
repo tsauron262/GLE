@@ -123,6 +123,7 @@ LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a_product_ef ON a_product_ef.fk_
 WHERE f.type IN ("0","1","2") AND f.remain_to_pay != f.total_ttc'.
 			(BimpTools::getPostFieldValue('dateD', null)? ' AND f.datef >= "'.BimpTools::getPostFieldValue('dateD').'" ':'').
 			(BimpTools::getPostFieldValue('dateF', null)? ' AND f.datef < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+			(BimpTools::getPostFieldValue('notDev', 0)? ' AND categorie != 6' : '').
 			' GROUP BY categorie
 ORDER BY a.rowid DESC;');
 		while($ln = $db->fetch_object($sql)){
@@ -153,7 +154,8 @@ WHERE f.type IN ("0","1","2") AND paye=0 AND remain_to_pay < total_ttc'.
 FROM '.MAIN_DB_PREFIX.'bimp_coop_nonrep a
 WHERE value > 0 AND date IS NOT NULL '.
                 (BimpTools::getPostFieldValue('dateD', null)? ' AND date >= "'.BimpTools::getPostFieldValue('dateD').'" ':'').
-                (BimpTools::getPostFieldValue('dateF', null)? ' AND date < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+			(BimpTools::getPostFieldValue('dateF', null)? ' AND date < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+			(BimpTools::getPostFieldValue('notDev', 0)? ' AND categorie != 6' : '').
 ' GROUP BY categorie;');
         while($ln = $db->fetch_object($sql)){
             if($ln->tot != 0){
@@ -185,6 +187,7 @@ LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a_product_ef ON a_product_ef.fk_
 WHERE 1'.
                 (BimpTools::getPostFieldValue('dateD', null)? ' AND f.datef >= "'.BimpTools::getPostFieldValue('dateD').'" ':'').
                 (BimpTools::getPostFieldValue('dateF', null)? ' AND f.datef < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+			(BimpTools::getPostFieldValue('notDev', 0)? ' AND categorie != 6' : '').
 '
 GROUP BY categorie;');
         while($ln = $db->fetch_object($sql)){
@@ -201,6 +204,7 @@ FROM '.MAIN_DB_PREFIX.'bimp_coop_nonrep a
 WHERE value < 0 AND date IS NOT NULL '.
                 (BimpTools::getPostFieldValue('dateD', null)? ' AND date >= "'.BimpTools::getPostFieldValue('dateD').'" ':'').
                 (BimpTools::getPostFieldValue('dateF', null)? ' AND date < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
+			(BimpTools::getPostFieldValue('notDev', 0)? ' AND categorie != 6' : '').
 ' GROUP BY categorie;');
         while($ln = $db->fetch_object($sql)){
             if($ln->tot != 0){
@@ -255,10 +259,9 @@ WHERE date IS NULL '.
 
 
 
-
-
         $sql = $db->query('SELECT SUM(amount)as solde, fk_account FROM '.MAIN_DB_PREFIX.'bank'
                 . ' WHERE 1 '.
+				 $this->getWhereCategPaiement() .
                 (BimpTools::getPostFieldValue('dateF', null)? ' AND datev < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
                  ' GROUP BY fk_account');
         $tot = 0;
@@ -330,13 +333,33 @@ WHERE date IS NULL '.
 
 
 
-        $panels['Compta']['Paramétres'] = array('content'=>'<form method="POST">Simuler un prelevement d\'emprunt dans les soldes : '.BimpInput::renderInput('toggle', 'ajPret', BimpTools::getPostFieldValue('ajPret')).'<br/>Du'.BimpInput::renderInput('date', 'dateD', BimpTools::getPostFieldValue('dateD')).'<br/>Au'.BimpInput::renderInput('date', 'dateF', BimpTools::getPostFieldValue('dateF')).'<input type="submit" value="Valider" /></form><br/>'.BimpRender::renderAlerts(BimpCore::getConf('b_comment', '', 'bimpcoop'), 'warning'), 'xs'=>12,'sm'=>12,'md'=>12);
+        $panels['Compta']['Paramétres'] = array('content'=>'<form method="POST">'.
+			'Simuler un prelevement d\'emprunt dans les soldes : '.BimpInput::renderInput('toggle', 'ajPret', BimpTools::getPostFieldValue('ajPret')).
+			'<br/>Ne pas tenir compte des frais de remboursmeent anticipée : '.BimpInput::renderInput('toggle', 'notRmbAnt', BimpTools::getPostFieldValue('notRmbAnt')).
+			'<br/>Ne pas tenir compte des entrée de dév : '.BimpInput::renderInput('toggle', 'notDev', BimpTools::getPostFieldValue('notDev')).
+			'<br/>Du'.BimpInput::renderInput('date', 'dateD', BimpTools::getPostFieldValue('dateD')).
+			'<br/>Au'.BimpInput::renderInput('date', 'dateF', BimpTools::getPostFieldValue('dateF')).
+			'<input type="submit" value="Valider" /></form><br/>'.
+			BimpRender::renderAlerts(BimpCore::getConf('b_comment', '', 'bimpcoop'), 'warning'), 'xs'=>12,'sm'=>12,'md'=>12);
+
+
+		$_POST['params_def'] = json_encode(array(
+			'dateD' => BimpTools::getPostFieldValue('dateD', null),
+			'dateF' => BimpTools::getPostFieldValue('dateD', null),
+			'notRmbAnt' => BimpTools::getPostFieldValue('notRmbAnt', null),
+			'ajPret' => BimpTools::getPostFieldValue('ajPret', null),
+			'notDev' => BimpTools::getPostFieldValue('notDev', null),
+
+		));
+
+
         $panels['Compta']['Soldes'] = $contentSolde;
 
         if(BimpTools::getPostFieldValue('dateD', null)){//mouvement sur comptes
             $tabInfoSolde = array();
              $sql = $db->query('SELECT SUM(amount)as solde, fk_account FROM '.MAIN_DB_PREFIX.'bank'
                     . ' WHERE 1 '.
+				 	$this->getWhereCategPaiement() .
                     (BimpTools::getPostFieldValue('dateD', null)? ' AND datev >= "'.BimpTools::getPostFieldValue('dateD').'" ':'').
                     (BimpTools::getPostFieldValue('dateF', null)? ' AND datev < "'.BimpTools::getPostFieldValue('dateF').'" ':'').
                      ' GROUP BY fk_account');
@@ -394,36 +417,49 @@ WHERE date IS NULL '.
         return '<div style="display: inline-block;">'.$this->renderPanels($panels).'</div>';
     }
 
-	public function getTabSoldes($dateMini, $dateMax, $onlyTotal = false){
+	public function getTabSoldes($dateMini, $dateMax, $onlyTotal = false, $groupMonth = false){
 		$dataByDate = array();
 		$dataByDate[0][0] = 0;
 		$memoire = array();
+		$and = $this->getWhereCategPaiement();
+		$and2 = '';
 		if(isset($dateMini) && $dateMini != ''){
-			$and = ' AND datev >= "'.$dateMini.'"';
-			$and2 = ' AND date >= "'.$dateMini.'"';
-			$sql = $this->db->db->query("SELECT SUM(amount) as amount, fk_account FROM lou_bank WHERE datev < '".$dateMini."' GROUP BY fk_account;");
+			$sql = $this->db->db->query("SELECT SUM(amount) as amount, fk_account FROM lou_bank WHERE datev < '".$dateMini."'" .$and." GROUP BY fk_account;");
 			while($ln = $this->db->db->fetch_object($sql)){
 				$dataByDate[0][$ln->fk_account] = $ln->amount;
 				$memoire[$ln->fk_account] = $ln->amount;
 			}
-			$sql = $this->db->db->query("SELECT SUM(value) as amount FROM lou_bimp_coop_nonrep WHERE date > 0 AND date < '".$dateMini."'");
+			$sql = $this->db->db->query("SELECT SUM(value) as amount FROM lou_bimp_coop_nonrep WHERE date > 0 AND date < '".$dateMini."'".$and2);
 			while($ln = $this->db->db->fetch_object($sql)){
 				$dataByDate[0][999] = $ln->amount;
 				$memoire[999] = $ln->amount;
 			}
+			$and .= ' AND datev >= "'.$dateMini.'"';
+			$and2 .= ' AND date >= "'.$dateMini.'"';
 		}
 
 		if(isset($dateMax) && $dateMax != '') {
 			$and .= ' AND datev <= "' . $dateMax . '"';
 			$and2 .= ' AND date <= "' . $dateMax . '"';
 		}
-		$sql = $this->db->db->query("SELECT SUM(amount) as amount, datev, fk_account FROM lou_bank WHERE 1 ".$and."  GROUP BY datev, fk_account;");
+		$filedDate = "datev";
+		if($groupMonth)
+			$filedDate = "DATE_FORMAT(".$filedDate.", '%Y-%m-01')";
+
+		$sql = $this->db->db->query("SELECT SUM(amount) as amount, ".$filedDate." as datev, fk_account FROM lou_bank WHERE 1 ".$and."  GROUP BY ".$filedDate.", fk_account;");
+
 
 		while($ln = $this->db->db->fetch_object($sql)){
 			$memoire[$ln->fk_account] += $ln->amount;
 			$dataByDate[strtotime($ln->datev)][$ln->fk_account] = $memoire[$ln->fk_account];
 		}
-		$sql = $this->db->db->query("SELECT SUM(value) as amount, date as datev FROM lou_bimp_coop_nonrep WHERE date > 0 ".$and2."  GROUP BY date ORDER BY date;");
+
+
+		$filedDate = "date";
+		if($groupMonth)
+			$filedDate = "DATE_FORMAT(".$filedDate.", '%Y-%m-01')";
+
+		$sql = $this->db->db->query("SELECT SUM(value) as amount, ".$filedDate." as datev FROM lou_bimp_coop_nonrep WHERE date > 0 ".$and2."  GROUP BY ".$filedDate." ORDER BY date;");
 		while($ln = $this->db->db->fetch_object($sql)){
 			$memoire[999] += $ln->amount;
 			$dataByDate[strtotime($ln->datev)][999] = $memoire[999];
@@ -468,7 +504,9 @@ WHERE date IS NULL '.
 				$dataByDate[0][$ln->ID_EMPRUNT] = $ln->amount;
 			$dataByDate[strtotime($ln->datev)][$ln->ID_EMPRUNT] = $ln->amount;
 
-			if($emprunt->getData('pourcentage_frais')){
+
+			$paramsDefGraph = json_decode(BimpTools::getPostFieldValue('extra_data/param_params_def', null),1);
+			if($emprunt->getData('pourcentage_frais') && !BimpTools::getPostFieldValue('notRmbAnt', 0) && (!isset($paramsDefGraph['notRmbAnt']) || $paramsDefGraph['notRmbAnt'] != 1)){
 				if($dataByDate[0][$ln->ID_EMPRUNT+10] == 0)
 					$dataByDate[0][$ln->ID_EMPRUNT+10] = $ln->amount * $emprunt->getData('pourcentage_frais') / 100; // frais de resiliation
 				$dataByDate[strtotime($ln->datev)][$ln->ID_EMPRUNT+10] = $ln->amount * $emprunt->getData('pourcentage_frais') / 100; // frais de resiliation
@@ -533,7 +571,8 @@ WHERE date IS NULL '.
 			$sql = $this->db->db->query("SELECT CAPITAL_RESTANT_DU as mt FROM `lou_ammortissement` WHERE `Date_ECHEANCE` <= '".$dateMax."' AND ID_EMPRUNT = ".$emprunt->id." ORDER BY Date_ECHEANCE DESC LIMIT 0,1;");
 			$ln = $this->db->db->fetch_object($sql);
 			$dette += $ln->mt;
-			if($emprunt->getData('pourcentage_frais')){
+			$paramsDefGraph = json_decode(BimpTools::getPostFieldValue('extra_data/param_params_def', null),1);
+			if($emprunt->getData('pourcentage_frais') && !BimpTools::getPostFieldValue('notRmbAnt', 0) && (!isset($paramsDefGraph['notRmbAnt']) || $paramsDefGraph['notRmbAnt'] != 1)){
 				$dette += $ln->mt *$emprunt->getData('pourcentage_frais')  / 100;
 			}
 		}
@@ -555,7 +594,8 @@ WHERE date IS NULL '.
 		while($ln = $this->db->db->fetch_object($sql)){
 			$tabBank[$ln->rowid] = $ln->label;
 		}
-		$dataByDate = $this->getTabSoldes($userOption['date1'], $userOption['date2']);
+
+		$dataByDate = $this->getTabSoldes($userOption['date1'], $userOption['date2'], false, $userOption['xDateConfig'] == 'month');
 		$dataByAccount = $this->dataByDateToDataPoint($dataByDate);
 		foreach($dataByAccount as $idBank => $datasT){
 			$dataPoint = array();
@@ -638,9 +678,9 @@ WHERE date IS NULL '.
 			$tabBank[$ln->rowid+1000] = $ln->label;
 		}
 
-		$dataByDate = $this->getTabSoldes($userOption['date1'], $userOption['date2']);
+		$dataByDate = $this->getTabSoldes($userOption['date1'], $userOption['date2'], false, $userOption['xDateConfig'] == 'month');
 //		$dataByAccount1 = $this->dataByDateToDataPoint($dataByDate);
-		$dataByDate2 = $this->getTabDettes($userOption['date1'], $userOption['date2']);
+		$dataByDate2 = $this->getTabDettes($userOption['date1'], $userOption['date2'], false, $userOption['xDateConfig'] == 'month');
 		$dataByAccount = $this->dataByDateToDataPoint($this->compileDataSerie($dataByDate2, $dataByDate, true), true);
 //		echo '<pre>';print_r($dataByDate);echo '</pre>';
 //		echo '<pre>';print_r($dataByDate2);echo '</pre>';
@@ -708,6 +748,7 @@ WHERE date IS NULL '.
 
     public function traiteTab($tab){
         $tot = 0;
+		arsort($tab);
         foreach($tab as $nom => $val){
             $tot += $val;
         }
@@ -884,6 +925,15 @@ WHERE date IS NULL '.
 			);
 		}
 		return $fields;
+	}
+
+	public function getWhereCategPaiement(){
+		$whereCateg = '';
+		$paramsDefGraph = json_decode(BimpTools::getPostFieldValue('extra_data/param_params_def', null),1);
+		if(BimpTools::getPostFieldValue('notDev', 0) || (isset($paramsDefGraph['notDev']) && $paramsDefGraph['notDev'])) {
+			$whereCateg .= ' AND rowid NOT IN (SELECT lineid FROM ' . MAIN_DB_PREFIX . 'bank_class WHERE fk_categ = 1) ';
+		}
+		return $whereCateg;
 	}
 }
 

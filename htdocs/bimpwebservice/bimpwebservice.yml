@@ -15,7 +15,7 @@ params:
         
     default_tokens_expire_delay: 
         label: Délai d'expiration par défaut des tokens
-        def: 720
+        def: 120
         
     # Requêtes autorisées: 
     getObjectData_allowed: 

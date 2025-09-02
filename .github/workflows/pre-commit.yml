@@ -39,7 +39,7 @@ jobs:
             **.php
 
       # Checkout git sources to analyze
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       # Action setup-python needs a requirements.txt or pyproject.toml
       # This ensures one of them exists.
       - name: Create requirements.txt if no requirements.txt or pyproject.toml
